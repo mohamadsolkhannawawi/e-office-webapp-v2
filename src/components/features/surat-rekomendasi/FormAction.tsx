@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface ActionProps {
   currentStep: number;
@@ -8,6 +9,17 @@ interface ActionProps {
 }
 
 export function FormAction({ currentStep, onNext, onBack }: ActionProps) {
+  const router = useRouter();
+
+  const handleAjukanSurat = () => {
+    if (currentStep === 4) {
+      // Redirect ke halaman detail surat
+      router.push("/detail");
+    } else {
+      onNext();
+    }
+  };
+
   return (
     <div className="flex flex-col-reverse sm:flex-row justify-between gap-4 mt-8 pt-6 border-t border-gray-200">
       
@@ -28,7 +40,7 @@ export function FormAction({ currentStep, onNext, onBack }: ActionProps) {
         
         {/* Tombol LANJUT / AJUKAN */}
         <Button 
-          onClick={onNext} 
+          onClick={handleAjukanSurat} 
           className="bg-[#007bff] hover:bg-blue-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
         >
           {currentStep === 4 ? "Ajukan Surat" : "Lanjut"}

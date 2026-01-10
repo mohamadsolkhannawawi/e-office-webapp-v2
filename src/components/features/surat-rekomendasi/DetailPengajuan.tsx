@@ -22,16 +22,11 @@ export function DetailPengajuan() {
             
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-gray-700">Jenis Surat</Label>
-              <Select>
-                <SelectTrigger className="h-11 bg-white border-gray-300">
-                  <SelectValue placeholder="Pilih Jenis Surat" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="rekomendasi">Surat Rekomendasi Beasiswa</SelectItem>
-                  <SelectItem value="keterangan">Surat Keterangan Aktif Kuliah</SelectItem>
-                  <SelectItem value="izin">Surat Izin PKL</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+              value="Surat Rekomendasi Mahasiswa"
+              readOnly
+              className="h-11 bg-gray-100 text-gray-500 border-gray-200"
+              />
             </div>
 
             <div className="space-y-2">

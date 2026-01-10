@@ -1,4 +1,11 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
+
+import type { FormDataType } from "@/types/form";
+
+interface InfoPengajuanProps {
+    data: FormDataType;
+    setData: Dispatch<SetStateAction<FormDataType>>;
+}
 import { BsCalendar } from "react-icons/bs";
 
 // Import komponen Shadcn
@@ -50,10 +57,10 @@ function FormField({
     );
 }
 
-export function InfoPengajuan() {
+export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
+    // TODO: gunakan data dan setData untuk binding input
     return (
         <section aria-label="Informasi Identitas">
-
             <Card className="border-none shadow-sm bg-white">
                 <CardContent className="p-8">
                     <form className="grid grid-cols-1 md:grid-cols-2 gap-6">

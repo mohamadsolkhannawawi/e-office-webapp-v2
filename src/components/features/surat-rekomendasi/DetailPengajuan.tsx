@@ -15,21 +15,11 @@ import {
 export function DetailPengajuan() {
   return (
     <section aria-label="Detail Pengajuan">
-      
-      {/* Header Bagian */}
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Detail Pengajuan</h2>
-        <p className="text-gray-500 text-sm mt-1">
-          Lengkapi detail utama dari surat yang akan diajukan.
-        </p>
-      </div>
 
-      {/* Kartu Form */}
       <Card className="border-none shadow-sm bg-white">
         <CardContent className="p-8">
           <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            {/* Input 1: Dropdown Jenis Surat */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-gray-700">Jenis Surat</Label>
               <Select>
@@ -44,7 +34,6 @@ export function DetailPengajuan() {
               </Select>
             </div>
 
-            {/* Input 2: Nama Beasiswa */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-gray-700">Nama Beasiswa</Label>
               <Input 
@@ -53,9 +42,6 @@ export function DetailPengajuan() {
               />
             </div>
 
-            {/* Input Tambahan (Opsional/Placeholder layout) */}
-            {/* Kalau nanti ada input tambahan, taruh di sini */}
-            
           </form>
         </CardContent>
       </Card>

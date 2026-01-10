@@ -52,7 +52,6 @@ function FormField({
     );
 }
 
-// --- KOMPONEN UTAMA ---
 export function InfoPengajuan() {
     return (
         <section aria-label="Informasi Identitas">
@@ -71,7 +70,6 @@ export function InfoPengajuan() {
             <Card className="border-none shadow-sm bg-white">
                 <CardContent className="p-8">
                     <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* --- BARIS 1 (Otomatis) --- */}
                         {/* --- BARIS 1 (Editable) --- */}
                         <FormField
                             label="Nama Lengkap"
@@ -82,7 +80,6 @@ export function InfoPengajuan() {
                             placeholder="Contoh: Mahasiswa"
                         />
 
-                        {/* --- BARIS 2 (Otomatis) --- */}
                         {/* --- BARIS 2 (Editable) --- */}
                         <FormField
                             label="NIM"
@@ -93,7 +90,6 @@ export function InfoPengajuan() {
                             placeholder="Contoh: ahmadsyaifullah@students.undip.ac.id"
                         />
 
-                        {/* --- BARIS 3 (Otomatis) --- */}
                         {/* --- BARIS 3 (Editable) --- */}
                         <FormField
                             label="Departemen"
@@ -104,7 +100,6 @@ export function InfoPengajuan() {
                             placeholder="Contoh: S1 - Informatika"
                         />
 
-                        {/* --- BARIS 4 (Otomatis + Icon) --- */}
                         {/* --- BARIS 4 (Editable + Icon) --- */}
                         <FormField
                             label="Tempat Lahir"

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+    // No redirects needed: only /surat-rekomendasi-beasiswa route exists now
 };
 
 export default nextConfig;

@@ -72,47 +72,47 @@ export function InfoPengajuan() {
                 <CardContent className="p-8">
                     <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* --- BARIS 1 (Otomatis) --- */}
+                        {/* --- BARIS 1 (Editable) --- */}
                         <FormField
                             label="Nama Lengkap"
-                            value="Ahmad Syaifullah"
-                            readOnly
+                            placeholder="Contoh: Ahmad Syaifullah"
                         />
-                        <FormField label="Role" value="Mahasiswa" readOnly />
+                        <FormField
+                            label="Role"
+                            placeholder="Contoh: Mahasiswa"
+                        />
 
                         {/* --- BARIS 2 (Otomatis) --- */}
+                        {/* --- BARIS 2 (Editable) --- */}
                         <FormField
                             label="NIM"
-                            value="24060121130089"
-                            readOnly
+                            placeholder="Contoh: 24060121130089"
                         />
                         <FormField
                             label="Email"
-                            value="ahmadsyaifullah@students.undip.ac.id"
-                            readOnly
+                            placeholder="Contoh: ahmadsyaifullah@students.undip.ac.id"
                         />
 
                         {/* --- BARIS 3 (Otomatis) --- */}
+                        {/* --- BARIS 3 (Editable) --- */}
                         <FormField
                             label="Departemen"
-                            value="Informatika"
-                            readOnly
+                            placeholder="Contoh: Informatika"
                         />
                         <FormField
                             label="Program Studi"
-                            value="S1 - Informatika"
-                            readOnly
+                            placeholder="Contoh: S1 - Informatika"
                         />
 
                         {/* --- BARIS 4 (Otomatis + Icon) --- */}
+                        {/* --- BARIS 4 (Editable + Icon) --- */}
                         <FormField
                             label="Tempat Lahir"
-                            value="Blora"
-                            readOnly
+                            placeholder="Contoh: Blora"
                         />
                         <FormField
                             label="Tanggal Lahir"
-                            value="03/18/2006"
-                            readOnly
+                            placeholder="Contoh: 03/18/2006"
                             icon={<BsCalendar />}
                         />
 

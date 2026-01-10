@@ -57,7 +57,7 @@ export function Stepper({ currentStep }: StepperProps) {
                 {/* --- GARIS PENGHUBUNG (SEPARATOR) --- */}
                 {/* Hanya render garis jika ini bukan step terakhir */}
                 {!isLastStep && (
-                  <div className="flex-1 h-[2px] mx-2 bg-gray-200 relative">
+                  <div className="flex-1 h-0.5 mx-2 bg-gray-200 relative">
                     {/* Garis Progress Berwarna (Overlay) */}
                     <div 
                       className={`absolute top-0 left-0 h-full bg-blue-600 transition-all duration-500 ease-in-out

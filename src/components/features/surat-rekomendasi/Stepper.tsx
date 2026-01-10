@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check } from 'lucide-react'; // Opsional: Untuk ikon centang jika selesai
+import { Check } from 'lucide-react';
 
 interface StepperProps {
   currentStep: number;

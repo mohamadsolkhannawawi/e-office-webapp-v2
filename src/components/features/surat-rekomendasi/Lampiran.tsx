@@ -21,6 +21,8 @@ import { BsFileEarmarkArrowUp } from "react-icons/bs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -47,6 +49,19 @@ export function Lampiran({ data, setData }: LampiranProps) {
     const [dragActiveTambahan, setDragActiveTambahan] = useState(false);
     const [uploadingMain, setUploadingMain] = useState(false);
     const [uploadingTambahan, setUploadingTambahan] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    // File validation functions
+    const isValidFormat = (file: File): boolean => {
+        const allowedFormats = [".pdf", ".jpg", ".png"];
+        const fileName = file.name.toLowerCase();
+        return allowedFormats.some((format) => fileName.endsWith(format));
+    };
+
+    const isValidSize = (file: File): boolean => {
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        return file.size <= maxSize;
+    };
 
     const inferCategory = (file: File) => {
         const t = (file.type || "").toLowerCase();
@@ -75,6 +90,33 @@ export function Lampiran({ data, setData }: LampiranProps) {
     const addMainFiles = async (files: File[] | FileList) => {
         if (!files) return;
 
+        const arr: File[] =
+            files instanceof FileList ? Array.from(files) : files;
+
+        // Check max file limit first
+        const existing = Array.isArray(data.lampiranUtama)
+            ? data.lampiranUtama
+            : [];
+        if (existing.length >= 5) {
+            setErrorMessage("Maksimal 5 file");
+            return;
+        }
+
+        // Validate all files first
+        for (const file of arr) {
+            if (!isValidFormat(file)) {
+                setErrorMessage("Format file tidak didukung");
+                return;
+            }
+            if (!isValidSize(file)) {
+                setErrorMessage("Ukuran file maksimal 5MB");
+                return;
+            }
+        }
+
+        // Clear any previous error
+        setErrorMessage(null);
+
         // ensure we have a concrete string letterId to use
         let letterId: string | undefined = data.letterInstanceId;
         if (!letterId) {
@@ -87,7 +129,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                 setData((prev) => ({ ...prev, letterInstanceId: created.id }));
             } catch (err) {
                 console.error("Auto-create application failed:", err);
-                alert(
+                setErrorMessage(
                     "Gagal membuat aplikasi otomatis. Silakan submit pada langkah sebelumnya atau coba lagi."
                 );
                 return;
@@ -98,22 +140,11 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
         setUploadingMain(true);
         try {
-            const arr: File[] =
-                files instanceof FileList ? Array.from(files) : files;
-            const existing = Array.isArray(data.lampiranUtama)
-                ? data.lampiranUtama
-                : [];
             const maxRemain = Math.max(0, 5 - existing.length);
 
             let uploaded = 0;
             for (const file of arr) {
                 if (uploaded >= maxRemain) break;
-                if (file.size > 5 * 1024 * 1024) {
-                    alert(
-                        `${file.name} terlalu besar (max 5MB). File diabaikan.`
-                    );
-                    continue;
-                }
 
                 try {
                     const res = await uploadAttachment(letterId, file, "Utama");
@@ -163,6 +194,33 @@ export function Lampiran({ data, setData }: LampiranProps) {
     const addTambahanFiles = async (files: File[] | FileList) => {
         if (!files) return;
 
+        const arr: File[] =
+            files instanceof FileList ? Array.from(files) : files;
+
+        // Check max file limit first
+        const existing = Array.isArray(data.lampiranTambahan)
+            ? data.lampiranTambahan
+            : [];
+        if (existing.length >= 3) {
+            setErrorMessage("Maksimal 3 file");
+            return;
+        }
+
+        // Validate all files first
+        for (const file of arr) {
+            if (!isValidFormat(file)) {
+                setErrorMessage("Format file tidak didukung");
+                return;
+            }
+            if (!isValidSize(file)) {
+                setErrorMessage("Ukuran file maksimal 5MB");
+                return;
+            }
+        }
+
+        // Clear any previous error
+        setErrorMessage(null);
+
         let letterId: string | undefined = data.letterInstanceId;
         if (!letterId) {
             try {
@@ -174,7 +232,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                 setData((prev) => ({ ...prev, letterInstanceId: created.id }));
             } catch (err) {
                 console.error("Auto-create application failed:", err);
-                alert(
+                setErrorMessage(
                     "Gagal membuat aplikasi otomatis. Silakan submit pada langkah sebelumnya atau coba lagi."
                 );
                 return;
@@ -185,22 +243,11 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
         setUploadingTambahan(true);
         try {
-            const arr: File[] =
-                files instanceof FileList ? Array.from(files) : files;
-            const existing = Array.isArray(data.lampiranTambahan)
-                ? data.lampiranTambahan
-                : [];
             const maxRemain = Math.max(0, 3 - existing.length);
 
             let uploaded = 0;
             for (const file of arr) {
                 if (uploaded >= maxRemain) break;
-                if (file.size > 5 * 1024 * 1024) {
-                    alert(
-                        `${file.name} terlalu besar (max 5MB). File diabaikan.`
-                    );
-                    continue;
-                }
 
                 try {
                     const res = await uploadAttachment(
@@ -229,7 +276,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                     }
                 } catch (err) {
                     console.error("Upload error:", err);
-                    alert(
+                    setErrorMessage(
                         `Gagal upload ${file.name}: ${
                             err instanceof Error ? err.message : String(err)
                         }`
@@ -252,7 +299,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                 await deleteAttachment(file.id);
             } catch (err) {
                 console.error("Delete error:", err);
-                alert(
+                setErrorMessage(
                     `Gagal hapus file: ${
                         err instanceof Error ? err.message : String(err)
                     }`
@@ -343,6 +390,14 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
     return (
         <section aria-label="Upload Lampiran">
+            {errorMessage && (
+                <Alert variant="destructive" className="mb-6">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
+            )}
+            
             <Card className="border-none shadow-sm bg-white">
                 <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">

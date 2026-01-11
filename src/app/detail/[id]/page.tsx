@@ -116,7 +116,7 @@ export default function DetailSuratPage() {
         tanggalLahir: formatDate(application.formData.tanggalLahir),
         noHp: application.formData.noHp,
         ipk: application.formData.ipk,
-        sks: application.formData.ips, // Using IPS as SKS for now
+        ips: application.formData.ips,
     };
 
     const detailSuratData = {

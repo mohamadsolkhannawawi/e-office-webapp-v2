@@ -239,9 +239,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
     };
 
     const handleDelete = async (which: "utama" | "tambahan", idx: number) => {
-        const confirmMsg = "Yakin ingin menghapus file ini?";
-        if (!window.confirm(confirmMsg)) return;
-
+        // Open confirmation modal instead of immediate deletion
         const list =
             which === "utama" ? data.lampiranUtama : data.lampiranTambahan;
         const file = Array.isArray(list) ? list[idx] : null;
@@ -251,10 +249,34 @@ export function Lampiran({ data, setData }: LampiranProps) {
             return;
         }
 
+        setConfirmDelete({ open: true, which, idx });
+    };
+
+    // Confirmation modal state and actions
+    const [confirmDelete, setConfirmDelete] = useState<{
+        open: boolean;
+        which: "utama" | "tambahan" | null;
+        idx: number | null;
+    }>({ open: false, which: null, idx: null });
+
+    const confirmDeleteCancel = () => {
+        setConfirmDelete({ open: false, which: null, idx: null });
+    };
+
+    const confirmDeleteProceed = async () => {
+        const { which, idx } = confirmDelete;
+        if (!which || idx === null) return confirmDeleteCancel();
+
+        const list = which === "utama" ? data.lampiranUtama : data.lampiranTambahan;
+        const file = Array.isArray(list) ? list[idx] : null;
+        if (!file || !file.id) {
+            alert("File tidak ditemukan");
+            return confirmDeleteCancel();
+        }
+
         try {
             await deleteAttachment(file.id);
 
-            // Remove dari state
             if (which === "utama") {
                 setData((prev) => {
                     const list = Array.isArray(prev.lampiranUtama)
@@ -279,6 +301,8 @@ export function Lampiran({ data, setData }: LampiranProps) {
                     error instanceof Error ? error.message : "Unknown error"
                 }`
             );
+        } finally {
+            confirmDeleteCancel();
         }
     };
 
@@ -676,6 +700,23 @@ export function Lampiran({ data, setData }: LampiranProps) {
             </Card>
 
             {/* Preview modal */}
+            {confirmDelete.open && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                    <div className="bg-white rounded-lg overflow-hidden w-[90%] max-w-md p-4">
+                        <div className="text-sm font-medium text-gray-800 mb-4">
+                            Yakin ingin menghapus file ini?
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <Button variant="ghost" onClick={confirmDeleteCancel} className="h-9">
+                                Batal
+                            </Button>
+                            <Button variant="destructive" onClick={confirmDeleteProceed} className="h-9">
+                                Hapus
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {previewUrl && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                     <div className="bg-white rounded-lg overflow-hidden w-[90%] max-w-3xl">

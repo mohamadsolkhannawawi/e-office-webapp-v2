@@ -9,7 +9,13 @@ import { FileText } from "lucide-react";
 import { FaCheckCircle } from "react-icons/fa";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
+function SummaryRow({
+    label,
+    value,
+}: {
+    label: string;
+    value: React.ReactNode;
+}) {
     return (
         <div className="flex flex-row items-start py-3 border-b border-gray-100 last:border-0 gap-48">
             <span className="text-sm text-gray-500 font-medium w-40 sm:w-52 shrink-0">
@@ -40,7 +46,32 @@ function FileItem({ name, size }: { name: string; size: string }) {
 }
 
 export function Review({ data }: ReviewProps) {
-    // TODO: gunakan data untuk menampilkan ringkasan
+    // compute completeness
+    const isDataComplete = () =>
+        [
+            "namaLengkap",
+            "role",
+            "nim",
+            "email",
+            "departemen",
+            "programStudi",
+            "tempatLahir",
+            "tanggalLahir",
+            "noHp",
+            "ipk",
+            "ips",
+        ].every((k) => !!data[k]);
+
+    const hasMainAttachments =
+        Array.isArray(data.lampiranUtama) && data.lampiranUtama.length > 0;
+
+    const formatSize = (size?: number) => {
+        if (!size && size !== 0) return "-";
+        if (size < 1024) return `${size} B`;
+        if (size < 1024 * 1024)
+            return `${(size / 1024).toFixed(1).replace(/\.0$/, "")} KB`;
+        return `${(size / (1024 * 1024)).toFixed(1).replace(/\.0$/, "")} MB`;
+    };
     return (
         <section aria-label="Review dan Ajukan" className="space-y-6">
             <Card className="border-none shadow-sm bg-white">
@@ -53,20 +84,29 @@ export function Review({ data }: ReviewProps) {
                     <div className="flex flex-col">
                         <SummaryRow
                             label="Nama Lengkap"
-                            value="Ahmad Syaifullah"
+                            value={data.namaLengkap || "-"}
                         />
-                        <SummaryRow label="NIM/NIP" value="24060121120001" />
+                        <SummaryRow label="NIM/NIP" value={data.nim || "-"} />
+                        <SummaryRow label="Email" value={data.email || "-"} />
                         <SummaryRow
-                            label="Email"
-                            value="ahmadsyaifullah@students.undip.ac.id"
+                            label="Departement"
+                            value={data.departemen || "-"}
                         />
-                        <SummaryRow label="Departement" value="Informatika" />
-                        <SummaryRow label="Program Studi" value="Informatika" />
-                        <SummaryRow label="Tempat Lahir" value="Blora" />
-                        <SummaryRow label="Tanggal Lahir" value="03/18/2006" />
-                        <SummaryRow label="No HP" value="089123141241412412" />
-                        <SummaryRow label="IPK" value="3.9" />
-                        <SummaryRow label="IPS" value="3.7" />
+                        <SummaryRow
+                            label="Program Studi"
+                            value={data.programStudi || "-"}
+                        />
+                        <SummaryRow
+                            label="Tempat Lahir"
+                            value={data.tempatLahir || "-"}
+                        />
+                        <SummaryRow
+                            label="Tanggal Lahir"
+                            value={data.tanggalLahir || "-"}
+                        />
+                        <SummaryRow label="No HP" value={data.noHp || "-"} />
+                        <SummaryRow label="IPK" value={data.ipk || "-"} />
+                        <SummaryRow label="IPS" value={data.ips || "-"} />
                     </div>
                 </CardContent>
             </Card>
@@ -85,7 +125,7 @@ export function Review({ data }: ReviewProps) {
                         />
                         <SummaryRow
                             label="Nama Beasiswa"
-                            value="Beasiswa Djarum Foundation"
+                            value={data.namaBeasiswa || "-"}
                         />
                     </div>
                 </CardContent>
@@ -101,17 +141,29 @@ export function Review({ data }: ReviewProps) {
                     <div className="flex flex-col">
                         <div className="flex flex-row items-start py-3 gap-48">
                             <span className="text-sm text-green-700 font-medium w-40 sm:w-52 shrink-0">
-                                <FaCheckCircle className="inline w-4 h-4 mr-2 text-green-600" />
+                                {isDataComplete() ? (
+                                    <FaCheckCircle className="inline w-4 h-4 mr-2 text-green-600" />
+                                ) : (
+                                    <span className="inline-block w-4 h-4 mr-2 rounded-full bg-gray-200" />
+                                )}
                                 Data ini lengkap
                             </span>
-                            <span className="text-sm font-semibold text-green-700 text-left flex-1"></span>
+                            <span className="text-sm font-semibold text-green-700 text-left flex-1">
+                                {isDataComplete() ? "Complete" : "Incomplete"}
+                            </span>
                         </div>
                         <div className="flex flex-row items-start py-3 gap-48">
                             <span className="text-sm text-green-700 font-medium w-40 sm:w-52 shrink-0">
-                                <FaCheckCircle className="inline w-4 h-4 mr-2 text-green-600" />
+                                {hasMainAttachments ? (
+                                    <FaCheckCircle className="inline w-4 h-4 mr-2 text-green-600" />
+                                ) : (
+                                    <span className="inline-block w-4 h-4 mr-2 rounded-full bg-gray-200" />
+                                )}
                                 Lampiran utama ada
                             </span>
-                            <span className="text-sm font-semibold text-green-700 text-left flex-1"></span>
+                            <span className="text-sm font-semibold text-green-700 text-left flex-1">
+                                {hasMainAttachments ? "Present" : "Missing"}
+                            </span>
                         </div>
                     </div>
                 </CardContent>
@@ -125,9 +177,30 @@ export function Review({ data }: ReviewProps) {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <FileItem name="Transkrip_Nilai.pdf" size="245 KB" />
-                        <FileItem name="KTM_Scan.jpg" size="1.2 MB" />
-                        <FileItem name="Sertifikat_Lomba.pdf" size="850 KB" />
+                        {Array.isArray(data.lampiranUtama) &&
+                        data.lampiranUtama.length > 0 ? (
+                            data.lampiranUtama.map((f, i) => (
+                                <FileItem
+                                    key={`main-${i}`}
+                                    name={(f as any).name || "Unknown"}
+                                    size={formatSize((f as any).size as number)}
+                                />
+                            ))
+                        ) : (
+                            <div className="text-sm text-gray-500">
+                                No main attachments
+                            </div>
+                        )}
+
+                        {Array.isArray(data.lampiranTambahan) &&
+                            data.lampiranTambahan.length > 0 &&
+                            data.lampiranTambahan.map((f, i) => (
+                                <FileItem
+                                    key={`extra-${i}`}
+                                    name={(f as any).name || "Unknown"}
+                                    size={formatSize((f as any).size as number)}
+                                />
+                            ))}
                     </div>
                 </CardContent>
             </Card>

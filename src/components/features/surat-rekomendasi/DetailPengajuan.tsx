@@ -42,7 +42,15 @@ export function DetailPengajuan({ data, setData }: DetailPengajuanProps) {
                                 Nama Beasiswa
                             </Label>
                             <Input
+                                name="namaBeasiswa"
+                                value={data.namaBeasiswa as string}
                                 placeholder="Masukkan nama beasiswa"
+                                onChange={(e) =>
+                                    setData((prev) => ({
+                                        ...prev,
+                                        namaBeasiswa: e.target.value,
+                                    }))
+                                }
                                 className="h-11 bg-white border-gray-300"
                             />
                         </div>

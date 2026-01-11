@@ -21,6 +21,7 @@ import { BsFileEarmarkArrowUp } from "react-icons/bs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import {
@@ -475,27 +476,36 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     addMainFiles(e.dataTransfer.files);
                             }}
                         >
-                            <div className="bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] group-hover:scale-110 transition-transform">
-                                <BsFileEarmarkArrowUp size={24} />
-                            </div>
-                            <div className="text-sm font-medium text-gray-700">
-                                Seret &amp; lepas atau{" "}
-                                <span className="text-[#007bff] font-bold">
-                                    klik area
-                                </span>
-                            </div>
-                            <input
-                                ref={mainInputRef}
-                                type="file"
-                                accept=".pdf,.jpg,.png"
-                                multiple
-                                style={{ display: "none" }}
-                                onChange={handleMainFileChange}
-                                disabled={uploadingMain}
-                            />
-                            <p className="text-xs text-gray-400 mt-1">
-                                untuk diunggah
-                            </p>
+                            {uploadingMain ? (
+                                <div className="flex flex-col items-center gap-3">
+                                    <Spinner className="size-8 text-[#007bff]" />
+                                    <p className="text-sm text-gray-600">Mengunggah file...</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] group-hover:scale-110 transition-transform">
+                                        <BsFileEarmarkArrowUp size={24} />
+                                    </div>
+                                    <div className="text-sm font-medium text-gray-700">
+                                        Seret &amp; lepas atau{" "}
+                                        <span className="text-[#007bff] font-bold">
+                                            klik area
+                                        </span>
+                                    </div>
+                                    <input
+                                        ref={mainInputRef}
+                                        type="file"
+                                        accept=".pdf,.jpg,.png"
+                                        multiple
+                                        style={{ display: "none" }}
+                                        onChange={handleMainFileChange}
+                                        disabled={uploadingMain}
+                                    />
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        untuk diunggah
+                                    </p>
+                                </>
+                            )}
                         </div>
                     </div>
                 </CardContent>
@@ -702,27 +712,36 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     addTambahanFiles(e.dataTransfer.files);
                             }}
                         >
-                            <div className="bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] group-hover:scale-110 transition-transform">
-                                <BsFileEarmarkArrowUp size={24} />
-                            </div>
-                            <div className="text-sm font-medium text-gray-700">
-                                Seret &amp; lepas atau{" "}
-                                <span className="text-[#007bff] font-bold">
-                                    klik area
-                                </span>
-                            </div>
-                            <input
-                                ref={tambahanInputRef}
-                                type="file"
-                                accept=".pdf,.jpg,.png"
-                                multiple
-                                style={{ display: "none" }}
-                                onChange={handleAdditionalFileChange}
-                                disabled={uploadingTambahan}
-                            />
-                            <p className="text-xs text-gray-400 mt-1">
-                                untuk diunggah
-                            </p>
+                            {uploadingTambahan ? (
+                                <div className="flex flex-col items-center gap-3">
+                                    <Spinner className="size-8 text-[#007bff]" />
+                                    <p className="text-sm text-gray-600">Mengunggah file...</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] group-hover:scale-110 transition-transform">
+                                        <BsFileEarmarkArrowUp size={24} />
+                                    </div>
+                                    <div className="text-sm font-medium text-gray-700">
+                                        Seret &amp; lepas atau{" "}
+                                        <span className="text-[#007bff] font-bold">
+                                            klik area
+                                        </span>
+                                    </div>
+                                    <input
+                                        ref={tambahanInputRef}
+                                        type="file"
+                                        accept=".pdf,.jpg,.png"
+                                        multiple
+                                        style={{ display: "none" }}
+                                        onChange={handleAdditionalFileChange}
+                                        disabled={uploadingTambahan}
+                                    />
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        untuk diunggah
+                                    </p>
+                                </>
+                            )}
                         </div>
                     </div>
                 </CardContent>

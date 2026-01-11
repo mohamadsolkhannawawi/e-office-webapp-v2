@@ -20,6 +20,8 @@ import { Button } from "@/components/ui/button";
 export function Lampiran({ data, setData }: LampiranProps) {
     const [selectedUtama, setSelectedUtama] = useState<string>("Semua");
     const [selectedTambahan, setSelectedTambahan] = useState<string>("Semua");
+    const [dragActiveMain, setDragActiveMain] = useState(false);
+    const [dragActiveTambahan, setDragActiveTambahan] = useState(false);
 
     const inferCategory = (file: File) => {
         const t = (file.type || "").toLowerCase();
@@ -77,6 +79,39 @@ export function Lampiran({ data, setData }: LampiranProps) {
         if (mainInputRef.current) mainInputRef.current.value = "";
     };
 
+    const addMainFiles = (files: File[] | FileList) => {
+        if (!files) return;
+        const arr = Array.from(files as any as File[]);
+        const accepted: File[] = [];
+        for (const f of arr) {
+            if (f.size > 5 * 1024 * 1024) {
+                // eslint-disable-next-line no-alert
+                alert(`${f.name} terlalu besar (max 5MB). File diabaikan.`);
+                console.warn("File skipped due to size:", f.name, f.size);
+                continue;
+            }
+            accepted.push(f);
+        }
+        if (accepted.length === 0) return;
+        setData((prev) => {
+            const existing = Array.isArray(prev.lampiranUtama)
+                ? prev.lampiranUtama
+                : [];
+            const toAdd = accepted.map((file) => ({
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                file,
+                kategori: inferCategory(file),
+            }));
+            const maxRemain = Math.max(0, 5 - existing.length);
+            const newList = existing.concat(toAdd.slice(0, maxRemain));
+            if (toAdd.length > maxRemain)
+                console.warn("Some files were trimmed to respect max 5 utama");
+            return { ...prev, lampiranUtama: newList };
+        });
+    };
+
     // Append additional files, enforce max 3, validate size
     const handleAdditionalFileChange = (
         e: React.ChangeEvent<HTMLInputElement>
@@ -118,6 +153,41 @@ export function Lampiran({ data, setData }: LampiranProps) {
             return { ...prev, lampiranTambahan: newList };
         });
         if (tambahanInputRef.current) tambahanInputRef.current.value = "";
+    };
+
+    const addTambahanFiles = (files: File[] | FileList) => {
+        if (!files) return;
+        const arr = Array.from(files as any as File[]);
+        const accepted: File[] = [];
+        for (const f of arr) {
+            if (f.size > 5 * 1024 * 1024) {
+                // eslint-disable-next-line no-alert
+                alert(`${f.name} terlalu besar (max 5MB). File diabaikan.`);
+                console.warn("File skipped due to size:", f.name, f.size);
+                continue;
+            }
+            accepted.push(f);
+        }
+        if (accepted.length === 0) return;
+        setData((prev) => {
+            const existing = Array.isArray(prev.lampiranTambahan)
+                ? prev.lampiranTambahan
+                : [];
+            const toAdd = accepted.map((file) => ({
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                file,
+                kategori: inferCategory(file),
+            }));
+            const maxRemain = Math.max(0, 3 - existing.length);
+            const newList = existing.concat(toAdd.slice(0, maxRemain));
+            if (toAdd.length > maxRemain)
+                console.warn(
+                    "Some files were trimmed to respect max 3 tambahan"
+                );
+            return { ...prev, lampiranTambahan: newList };
+        });
     };
 
     const handleDelete = (which: "utama" | "tambahan", idx: number) => {
@@ -194,19 +264,38 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             Format: PDF, JPG, PNG. Maks: 5MB/file.
                         </p>
 
-                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-10 flex flex-col items-center justify-center text-center hover:bg-blue-50 hover:border-blue-400 transition cursor-pointer group">
+                        <div
+                            className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition cursor-pointer group ${
+                                dragActiveMain
+                                    ? "bg-blue-50 border-blue-400"
+                                    : "border-gray-300 hover:bg-blue-50 hover:border-blue-400"
+                            }`}
+                            onClick={() => mainInputRef.current?.click()}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDragEnter={(e) => {
+                                e.preventDefault();
+                                setDragActiveMain(true);
+                            }}
+                            onDragLeave={(e) => {
+                                e.preventDefault();
+                                setDragActiveMain(false);
+                            }}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                setDragActiveMain(false);
+                                if (e.dataTransfer?.files)
+                                    addMainFiles(e.dataTransfer.files);
+                            }}
+                        >
                             <div className="bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] group-hover:scale-110 transition-transform">
                                 <BsFileEarmarkArrowUp size={24} />
                             </div>
-                            <label
-                                className="text-sm font-medium text-gray-700 cursor-pointer"
-                                onClick={() => mainInputRef.current?.click()}
-                            >
+                            <div className="text-sm font-medium text-gray-700">
                                 Seret &amp; lepas atau{" "}
                                 <span className="text-[#007bff] font-bold">
-                                    pilih file
+                                    klik area
                                 </span>
-                            </label>
+                            </div>
                             <input
                                 ref={mainInputRef}
                                 type="file"
@@ -230,21 +319,38 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             diperlukan.
                         </p>
 
-                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-10 flex flex-col items-center justify-center text-center hover:bg-blue-50 hover:border-blue-400 transition cursor-pointer group">
+                        <div
+                            className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition cursor-pointer group ${
+                                dragActiveTambahan
+                                    ? "bg-blue-50 border-blue-400"
+                                    : "border-gray-300 hover:bg-blue-50 hover:border-blue-400"
+                            }`}
+                            onClick={() => tambahanInputRef.current?.click()}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDragEnter={(e) => {
+                                e.preventDefault();
+                                setDragActiveTambahan(true);
+                            }}
+                            onDragLeave={(e) => {
+                                e.preventDefault();
+                                setDragActiveTambahan(false);
+                            }}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                setDragActiveTambahan(false);
+                                if (e.dataTransfer?.files)
+                                    addTambahanFiles(e.dataTransfer.files);
+                            }}
+                        >
                             <div className="bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] group-hover:scale-110 transition-transform">
                                 <BsFileEarmarkArrowUp size={24} />
                             </div>
-                            <label
-                                className="text-sm font-medium text-gray-700 cursor-pointer"
-                                onClick={() =>
-                                    tambahanInputRef.current?.click()
-                                }
-                            >
+                            <div className="text-sm font-medium text-gray-700">
                                 Seret &amp; lepas atau{" "}
                                 <span className="text-[#007bff] font-bold">
-                                    pilih file
+                                    klik area
                                 </span>
-                            </label>
+                            </div>
                             <input
                                 ref={tambahanInputRef}
                                 type="file"

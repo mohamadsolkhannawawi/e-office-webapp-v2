@@ -20,6 +20,7 @@ interface ActionProps {
     onNext: () => void;
     onBack: () => void;
     isNextDisabled?: boolean;
+    letterInstanceId?: string;
 }
 
 export function FormAction({
@@ -27,14 +28,23 @@ export function FormAction({
     onNext,
     onBack,
     isNextDisabled,
+    letterInstanceId,
 }: ActionProps) {
     const router = useRouter();
 
     const handleConfirmAjukan = () => {
         // Logic untuk ajukan surat (API call, dll)
-        console.log("Surat diajukan!");
-        // Redirect ke halaman detail surat
-        router.push("/detail");
+        console.log("Surat diajukan!", letterInstanceId);
+
+        // Clear local storage for this form
+        localStorage.removeItem("suratRekomendasiForm");
+
+        // Redirect ke halaman detail surat sesuai ID
+        if (letterInstanceId) {
+            router.push(`/detail/${letterInstanceId}`);
+        } else {
+            router.push("/detail");
+        }
     };
 
     const handleAjukanSurat = () => {
@@ -86,16 +96,18 @@ export function FormAction({
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Konfirmasi Pengajuan Surat</AlertDialogTitle>
+                                <AlertDialogTitle>
+                                    Konfirmasi Pengajuan Surat
+                                </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    Apakah Anda yakin ingin mengajukan surat ini? 
-                                    Setelah diajukan, surat akan masuk ke proses verifikasi 
-                                    dan tidak dapat diubah.
+                                    Apakah Anda yakin ingin mengajukan surat
+                                    ini? Setelah diajukan, surat akan masuk ke
+                                    proses verifikasi dan tidak dapat diubah.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction 
+                                <AlertDialogAction
                                     onClick={handleConfirmAjukan}
                                     className="bg-[#007bff] hover:bg-blue-700"
                                 >

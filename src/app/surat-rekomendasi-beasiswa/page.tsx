@@ -31,20 +31,29 @@ export default function SuratRekomendasiPage() {
 
     // load persisted data on mount
     useEffect(() => {
-        try {
-            const raw = localStorage.getItem("suratRekomendasiForm");
-            if (raw) {
+        const raw = localStorage.getItem("suratRekomendasiForm");
+        if (!raw) return;
+
+        const timer = setTimeout(() => {
+            try {
                 const parsed = JSON.parse(raw);
                 if (parsed && typeof parsed === "object") {
-                    // merge parsed values with defaults
-                    setFormData((prev) => ({ ...prev, ...parsed.formData }));
-                    if (parsed.currentStep)
+                    if (parsed.formData) {
+                        setFormData((prev) => ({
+                            ...prev,
+                            ...parsed.formData,
+                        }));
+                    }
+                    if (parsed.currentStep) {
                         setCurrentStep(Number(parsed.currentStep) || 1);
+                    }
                 }
+            } catch (err) {
+                console.warn("Failed to load persisted form data", err);
             }
-        } catch (err) {
-            console.warn("Failed to load persisted form data", err);
-        }
+        }, 0);
+
+        return () => clearTimeout(timer);
     }, []);
 
     // persist formData and currentStep
@@ -86,7 +95,7 @@ export default function SuratRekomendasiPage() {
                 "ipk",
                 "ips",
             ].every((k) => {
-                const v = (formData as any)[k];
+                const v = formData[k as keyof FormDataType];
                 return v !== undefined && v !== null && String(v).trim() !== "";
             });
         }
@@ -184,6 +193,7 @@ export default function SuratRekomendasiPage() {
                     onNext={handleNext}
                     onBack={handleBack}
                     isNextDisabled={!isStepValid()}
+                    letterInstanceId={formData.letterInstanceId}
                 />
             </main>
         </div>

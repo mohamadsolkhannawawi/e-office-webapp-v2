@@ -16,6 +16,24 @@ import { BsFileEarmarkArrowUp } from "react-icons/bs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 export function Lampiran({ data, setData }: LampiranProps) {
     const [selectedUtama, setSelectedUtama] = useState<string>("Semua");
@@ -191,8 +209,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
     };
 
     const handleDelete = (which: "utama" | "tambahan", idx: number) => {
-        const confirmMsg = "Yakin ingin menghapus file ini?";
-        if (!window.confirm(confirmMsg)) return;
         if (which === "utama") {
             setData((prev) => {
                 const list = Array.isArray(prev.lampiranUtama)
@@ -253,7 +269,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
     return (
         <section aria-label="Upload Lampiran">
             <Card className="border-none shadow-sm bg-white">
-                <CardContent className="p-8 space-y-8">
+                <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">
                         <Label className="text-sm font-bold text-gray-800">
                             Lampiran Utama{" "}
@@ -309,7 +325,128 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             </p>
                         </div>
                     </div>
+                </CardContent>
+            </Card>
 
+            <Card className="mt-6 border-none shadow-sm bg-white">
+                <CardContent className="p-6">
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-sm font-bold text-gray-800">
+                                Ringkasan Lampiran Utama
+                            </Label>
+                            <div className="flex items-center gap-2">
+                                <div className="text-xs text-gray-600">
+                                    Tampilkan:
+                                </div>
+                                <Select
+                                    value={selectedUtama}
+                                    onValueChange={setSelectedUtama}
+                                >
+                                    <SelectTrigger className="h-9 w-[160px] text-sm">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Semua">Semua</SelectItem>
+                                        <SelectItem value="File">File (PDF)</SelectItem>
+                                        <SelectItem value="Foto">Foto (JPG/PNG)</SelectItem>
+                                        <SelectItem value="Lainnya">Lainnya</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        {Array.isArray(data.lampiranUtama) &&
+                        data.lampiranUtama.length > 0 ? (
+                            <ul className="space-y-3">
+                                {data.lampiranUtama
+                                    .filter((f: LampiranFile) =>
+                                        selectedUtama === "Semua"
+                                            ? true
+                                            : f.kategori === selectedUtama
+                                    )
+                                    .map((f: LampiranFile, idx: number) => (
+                                        <li
+                                            key={`preview-u-${idx}`}
+                                            className="flex items-center justify-between gap-4"
+                                        >
+                                            <div className="flex-1">
+                                                <div className="text-sm font-medium truncate">
+                                                    {f.name}
+                                                </div>
+                                                <div className="text-xs text-gray-500">
+                                                    {f.kategori ||
+                                                        "(Tidak tersedia)"}{" "}
+                                                    •{" "}
+                                                    {formatSize(
+                                                        Number(f.size) || 0
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    onClick={() =>
+                                                        handleViewFile(
+                                                            "utama",
+                                                            idx
+                                                        )
+                                                    }
+                                                    className="h-9"
+                                                >
+                                                    Lihat
+                                                </Button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            variant="destructive"
+                                                            className="h-9"
+                                                        >
+                                                            Hapus
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>
+                                                                Hapus File?
+                                                            </AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Yakin ingin menghapus file <strong>{f.name}</strong>? 
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>
+                                                                Batal
+                                                            </AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        "utama",
+                                                                        idx
+                                                                    )
+                                                                }
+                                                                className="bg-red-600 hover:bg-red-700"
+                                                            >
+                                                                Hapus
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            </div>
+                                        </li>
+                                    ))}
+                            </ul>
+                        ) : (
+                            <div className="text-sm text-gray-500">
+                                Belum ada lampiran utama yang diunggah.
+                            </div>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card className="mt-8 border-none shadow-sm bg-white">
+                <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">
                         <Label className="text-sm font-bold text-gray-800">
                             Lampiran Tambahan
@@ -367,99 +504,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
                 </CardContent>
             </Card>
 
-            {/* Card preview: Lampiran Utama */}
-            <Card className="mt-6 border-none shadow-sm bg-white">
-                <CardContent className="p-6">
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <Label className="text-sm font-bold text-gray-800">
-                                Ringkasan Lampiran Utama
-                            </Label>
-                            <div className="flex items-center gap-2">
-                                <div className="text-xs text-gray-600">
-                                    Tampilkan:
-                                </div>
-                                <select
-                                    value={selectedUtama}
-                                    onChange={(e) =>
-                                        setSelectedUtama(e.target.value)
-                                    }
-                                    className="h-9 text-sm border rounded px-2"
-                                >
-                                    <option value="Semua">Semua</option>
-                                    <option value="File">File (PDF)</option>
-                                    <option value="Foto">Foto (JPG/PNG)</option>
-                                    <option value="Lainnya">Lainnya</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {Array.isArray(data.lampiranUtama) &&
-                        data.lampiranUtama.length > 0 ? (
-                            <ul className="space-y-3">
-                                {data.lampiranUtama
-                                    .filter((f: LampiranFile) =>
-                                        selectedUtama === "Semua"
-                                            ? true
-                                            : f.kategori === selectedUtama
-                                    )
-                                    .map((f: LampiranFile, idx: number) => (
-                                        <li
-                                            key={`preview-u-${idx}`}
-                                            className="flex items-center justify-between gap-4"
-                                        >
-                                            <div className="flex-1">
-                                                <div className="text-sm font-medium truncate">
-                                                    {f.name}
-                                                </div>
-                                                <div className="text-xs text-gray-500">
-                                                    {f.kategori ||
-                                                        "(Tidak tersedia)"}{" "}
-                                                    •{" "}
-                                                    {formatSize(
-                                                        Number(f.size) || 0
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    onClick={() =>
-                                                        handleViewFile(
-                                                            "utama",
-                                                            idx
-                                                        )
-                                                    }
-                                                    className="h-9"
-                                                >
-                                                    Lihat
-                                                </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            "utama",
-                                                            idx
-                                                        )
-                                                    }
-                                                    className="h-9"
-                                                >
-                                                    Hapus
-                                                </Button>
-                                            </div>
-                                        </li>
-                                    ))}
-                            </ul>
-                        ) : (
-                            <div className="text-sm text-gray-500">
-                                Belum ada lampiran utama yang diunggah.
-                            </div>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Card preview: Lampiran Tambahan */}
             <Card className="mt-6 border-none shadow-sm bg-white">
                 <CardContent className="p-6">
                     <div className="space-y-4">
@@ -471,18 +515,20 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                 <div className="text-xs text-gray-600">
                                     Tampilkan:
                                 </div>
-                                <select
+                                <Select
                                     value={selectedTambahan}
-                                    onChange={(e) =>
-                                        setSelectedTambahan(e.target.value)
-                                    }
-                                    className="h-9 text-sm border rounded px-2"
+                                    onValueChange={setSelectedTambahan}
                                 >
-                                    <option value="Semua">Semua</option>
-                                    <option value="File">File (PDF)</option>
-                                    <option value="Foto">Foto (JPG/PNG)</option>
-                                    <option value="Lainnya">Lainnya</option>
-                                </select>
+                                    <SelectTrigger className="h-9 w-[160px] text-sm">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Semua">Semua</SelectItem>
+                                        <SelectItem value="File">File (PDF)</SelectItem>
+                                        <SelectItem value="Foto">Foto (JPG/PNG)</SelectItem>
+                                        <SelectItem value="Lainnya">Lainnya</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
 
@@ -526,18 +572,42 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                 >
                                                     Lihat
                                                 </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            "tambahan",
-                                                            idx
-                                                        )
-                                                    }
-                                                    className="h-9"
-                                                >
-                                                    Hapus
-                                                </Button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            variant="destructive"
+                                                            className="h-9"
+                                                        >
+                                                            Hapus
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>
+                                                                Hapus File?
+                                                            </AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Yakin ingin menghapus file <strong>{f.name}</strong>? 
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>
+                                                                Batal
+                                                            </AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        "tambahan",
+                                                                        idx
+                                                                    )
+                                                                }
+                                                                className="bg-red-600 hover:bg-red-700"
+                                                            >
+                                                                Hapus
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             </div>
                                         </li>
                                     ))}
@@ -551,17 +621,17 @@ export function Lampiran({ data, setData }: LampiranProps) {
                 </CardContent>
             </Card>
 
-            {/* Preview modal */}
             {previewUrl && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                     <div className="bg-white rounded-lg overflow-hidden w-[90%] max-w-3xl">
                         <div className="flex justify-end p-2">
-                            <button
+                            <Button
+                                variant="ghost"
                                 onClick={handleClosePreview}
-                                className="text-sm text-gray-600 px-3 py-1"
+                                className="text-sm"
                             >
                                 Tutup
-                            </button>
+                            </Button>
                         </div>
                         <div className="p-4">
                             {previewType === "pdf" ? (
@@ -570,7 +640,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     className="w-full h-[70vh]"
                                 />
                             ) : (
-                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                     src={previewUrl}
                                     alt="Preview"

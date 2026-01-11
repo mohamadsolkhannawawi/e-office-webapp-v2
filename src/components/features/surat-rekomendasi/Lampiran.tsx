@@ -267,7 +267,8 @@ export function Lampiran({ data, setData }: LampiranProps) {
         const { which, idx } = confirmDelete;
         if (!which || idx === null) return confirmDeleteCancel();
 
-        const list = which === "utama" ? data.lampiranUtama : data.lampiranTambahan;
+        const list =
+            which === "utama" ? data.lampiranUtama : data.lampiranTambahan;
         const file = Array.isArray(list) ? list[idx] : null;
         if (!file || !file.id) {
             alert("File tidak ditemukan");
@@ -707,10 +708,18 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             Yakin ingin menghapus file ini?
                         </div>
                         <div className="flex justify-end gap-2">
-                            <Button variant="ghost" onClick={confirmDeleteCancel} className="h-9">
+                            <Button
+                                variant="ghost"
+                                onClick={confirmDeleteCancel}
+                                className="h-9"
+                            >
                                 Batal
                             </Button>
-                            <Button variant="destructive" onClick={confirmDeleteProceed} className="h-9">
+                            <Button
+                                variant="destructive"
+                                onClick={confirmDeleteProceed}
+                                className="h-9"
+                            >
                                 Hapus
                             </Button>
                         </div>

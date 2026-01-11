@@ -3,6 +3,7 @@ export interface LampiranFile {
     size: number;
     type: string;
     kategori?: string;
+    file?: File; // File object untuk preview
     [key: string]: unknown;
 }
 

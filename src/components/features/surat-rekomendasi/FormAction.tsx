@@ -33,13 +33,10 @@ export function FormAction({
     const router = useRouter();
 
     const handleConfirmAjukan = () => {
-        // Logic untuk ajukan surat (API call, dll)
         console.log("Surat diajukan!", letterInstanceId);
 
-        // Clear local storage for this form
         localStorage.removeItem("suratRekomendasiForm");
 
-        // Redirect ke halaman detail surat sesuai ID
         if (letterInstanceId) {
             router.push(`/detail/${letterInstanceId}`);
         } else {
@@ -49,8 +46,6 @@ export function FormAction({
 
     const handleAjukanSurat = () => {
         if (currentStep === 4) {
-            // Di step terakhir, tidak langsung redirect tapi buka dialog konfirmasi
-            // Dialog akan handle via AlertDialogTrigger
             return;
         } else {
             onNext();
@@ -59,7 +54,6 @@ export function FormAction({
 
     return (
         <div className="flex flex-col-reverse sm:flex-row justify-between gap-4 mt-8 pt-6 border-t border-gray-200">
-            {/* Tombol KEMBALI (Hilang kalau di step 1) */}
             <Button
                 variant="outline"
                 onClick={onBack}
@@ -78,7 +72,6 @@ export function FormAction({
                 >
                     Simpan Draft
                 </Button>
-                {/* Tombol LANJUT / AJUKAN */}
                 {currentStep === 4 ? (
                     <AlertDialog>
                         <AlertDialogTrigger asChild>

@@ -146,7 +146,7 @@ export function FilePreview({
                                         <div className="w-full border border-gray-200 rounded">
                                             <iframe
                                                 src={fileUrl}
-                                                className="w-full h-[600px]"
+                                                className="w-full h-150"
                                                 title={file.name}
                                             />
                                         </div>

@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 
 import type { FormDataType } from "@/types/form";
 
@@ -7,20 +7,49 @@ interface DetailPengajuanProps {
     setData: Dispatch<SetStateAction<FormDataType>>;
 }
 
-// Import komponen Shadcn
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { validateNamaBeasiswa } from "@/utils/validations/suratRekomendasi";
 
 export function DetailPengajuan({ data, setData }: DetailPengajuanProps) {
-    // TODO: gunakan data dan setData untuk binding input
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const handleValidation = (field: string, value: unknown) => {
+        let result;
+        if (field === "namaBeasiswa") {
+            result = validateNamaBeasiswa(value);
+        } else {
+            return;
+        }
+
+        setErrors((prev) => ({
+            ...prev,
+            [field]: result.valid ? "" : result.errors[0] || "",
+        }));
+    };
+
+    const validateAllFields = () => {
+        const result = validateNamaBeasiswa(data.namaBeasiswa);
+        
+        if (!result.valid) {
+            setErrors({ namaBeasiswa: result.errors[0] || "" });
+            return false;
+        }
+        
+        setErrors({});
+        return true;
+    };
+
+    React.useEffect(() => {
+        (window as any).__validateDetailPengajuan = validateAllFields;
+        return () => {
+            delete (window as any).__validateDetailPengajuan;
+        };
+    }, [data]);
+
     return (
         <section aria-label="Detail Pengajuan">
             <Card className="border-none shadow-sm bg-white">
@@ -45,14 +74,31 @@ export function DetailPengajuan({ data, setData }: DetailPengajuanProps) {
                                 name="namaBeasiswa"
                                 value={data.namaBeasiswa as string}
                                 placeholder="Masukkan nama beasiswa"
-                                onChange={(e) =>
+                                onChange={(e) => {
+                                    const val = e.target.value;
                                     setData((prev) => ({
                                         ...prev,
-                                        namaBeasiswa: e.target.value,
-                                    }))
-                                }
-                                className="h-11 bg-white border-gray-300"
+                                        namaBeasiswa: val,
+                                    }));
+                                    if (errors.namaBeasiswa) {
+                                        handleValidation("namaBeasiswa", val);
+                                    }
+                                }}
+                                onBlur={() => handleValidation("namaBeasiswa", data.namaBeasiswa)}
+                                className={`h-11 ${
+                                    errors.namaBeasiswa
+                                        ? "bg-white border-red-500 focus-visible:ring-red-500"
+                                        : "bg-white border-gray-300"
+                                }`}
                             />
+                            {errors.namaBeasiswa && (
+                                <Alert variant="destructive" className="py-2">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription className="text-xs">
+                                        {errors.namaBeasiswa}
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                         </div>
                     </form>
                 </CardContent>

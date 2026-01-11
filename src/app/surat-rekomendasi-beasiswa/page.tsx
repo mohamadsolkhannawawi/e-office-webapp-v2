@@ -56,7 +56,6 @@ export default function SuratRekomendasiPage() {
         return () => clearTimeout(timer);
     }, []);
 
-    // persist formData and currentStep
     useEffect(() => {
         try {
             const payload = { formData, currentStep };
@@ -70,6 +69,28 @@ export default function SuratRekomendasiPage() {
     }, [formData, currentStep]);
 
     const handleNext = () => {
+        if (currentStep === 1) {
+            const validateFn = (window as any).__validateInfoPengajuan;
+            if (validateFn && typeof validateFn === "function") {
+                const isValid = validateFn();
+                if (!isValid) {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    return;
+                }
+            }
+        }
+
+        if (currentStep === 2) {
+            const validateFn = (window as any).__validateDetailPengajuan;
+            if (validateFn && typeof validateFn === "function") {
+                const isValid = validateFn();
+                if (!isValid) {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    return;
+                }
+            }
+        }
+
         window.scrollTo({ top: 0, behavior: "smooth" });
         setCurrentStep((prev) => Math.min(prev + 1, 4));
     };
@@ -81,7 +102,6 @@ export default function SuratRekomendasiPage() {
 
     const isStepValid = () => {
         if (currentStep === 1) {
-            // require essential identity fields
             return [
                 "namaLengkap",
                 "role",

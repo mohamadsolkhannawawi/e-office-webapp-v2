@@ -1,9 +1,24 @@
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import type { FormDataType } from "@/types/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import {
+    validateNamaLengkap,
+    validateRole,
+    validateNIM,
+    validateEmail,
+    validateDepartemen,
+    validateProgramStudi,
+    validateTempatLahir,
+    validateTanggalLahir,
+    validateNoHp,
+    validateIPK,
+    validateIPS,
+} from "@/utils/validations/suratRekomendasi";
 
 interface InfoPengajuanProps {
     data: FormDataType;
@@ -19,6 +34,8 @@ interface FieldProps {
     icon?: React.ReactNode;
     className?: string;
     onChange?: (val: string) => void;
+    onBlur?: () => void;
+    error?: string;
 }
 
 function FormField({
@@ -30,6 +47,8 @@ function FormField({
     className,
     name,
     onChange,
+    onBlur,
+    error,
 }: FieldProps) {
     return (
         <div className={`space-y-2 ${className}`}>
@@ -43,9 +62,12 @@ function FormField({
                     placeholder={placeholder}
                     readOnly={readOnly}
                     onChange={(e) => onChange && onChange(e.target.value)}
+                    onBlur={onBlur}
                     className={`h-11 ${
                         readOnly
                             ? "bg-gray-100 text-gray-500 border-gray-200"
+                            : error
+                            ? "bg-white border-red-500 focus-visible:ring-red-500"
                             : "bg-white border-gray-300"
                     }`}
                 />
@@ -55,11 +77,142 @@ function FormField({
                     </div>
                 )}
             </div>
+            {error && (
+                <Alert variant="destructive" className="py-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-xs">{error}</AlertDescription>
+                </Alert>
+            )}
         </div>
     );
 }
 
 export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const handleValidation = (field: string, value: unknown) => {
+        let result;
+        switch (field) {
+            case "namaLengkap":
+                result = validateNamaLengkap(value);
+                break;
+            case "role":
+                result = validateRole(value);
+                break;
+            case "nim":
+                result = validateNIM(value);
+                break;
+            case "email":
+                result = validateEmail(value);
+                break;
+            case "departemen":
+                result = validateDepartemen(value);
+                break;
+            case "programStudi":
+                result = validateProgramStudi(value);
+                break;
+            case "tempatLahir":
+                result = validateTempatLahir(value);
+                break;
+            case "tanggalLahir":
+                result = validateTanggalLahir(value);
+                break;
+            case "noHp":
+                result = validateNoHp(value);
+                break;
+            case "ipk":
+                result = validateIPK(value);
+                break;
+            case "ips":
+                result = validateIPS(value);
+                break;
+            default:
+                return;
+        }
+
+        setErrors((prev) => ({
+            ...prev,
+            [field]: result.valid ? "" : result.errors[0] || "",
+        }));
+    };
+
+    const validateAllFields = () => {
+        const fields = [
+            "namaLengkap",
+            "role",
+            "nim",
+            "email",
+            "departemen",
+            "programStudi",
+            "tempatLahir",
+            "tanggalLahir",
+            "noHp",
+            "ipk",
+            "ips",
+        ];
+
+        const newErrors: Record<string, string> = {};
+        let allValid = true;
+
+        fields.forEach((field) => {
+            const value = data[field as keyof FormDataType];
+            let result;
+
+            switch (field) {
+                case "namaLengkap":
+                    result = validateNamaLengkap(value);
+                    break;
+                case "role":
+                    result = validateRole(value);
+                    break;
+                case "nim":
+                    result = validateNIM(value);
+                    break;
+                case "email":
+                    result = validateEmail(value);
+                    break;
+                case "departemen":
+                    result = validateDepartemen(value);
+                    break;
+                case "programStudi":
+                    result = validateProgramStudi(value);
+                    break;
+                case "tempatLahir":
+                    result = validateTempatLahir(value);
+                    break;
+                case "tanggalLahir":
+                    result = validateTanggalLahir(value);
+                    break;
+                case "noHp":
+                    result = validateNoHp(value);
+                    break;
+                case "ipk":
+                    result = validateIPK(value);
+                    break;
+                case "ips":
+                    result = validateIPS(value);
+                    break;
+                default:
+                    return;
+            }
+
+            if (!result.valid) {
+                newErrors[field] = result.errors[0] || "";
+                allValid = false;
+            }
+        });
+
+        setErrors(newErrors);
+        return allValid;
+    };
+
+    React.useEffect(() => {
+        (window as any).__validateInfoPengajuan = validateAllFields;
+        return () => {
+            delete (window as any).__validateInfoPengajuan;
+        };
+    }, [data]);
+
     return (
         <section aria-label="Informasi Identitas">
             <Card className="border-none shadow-sm bg-white">
@@ -70,21 +223,31 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             label="Nama Lengkap"
                             value={data.namaLengkap as string}
                             placeholder="Contoh: Ahmad Syaifullah"
-                            onChange={(val) =>
+                            error={errors.namaLengkap}
+                            onChange={(val) => {
                                 setData((prev) => ({
                                     ...prev,
                                     namaLengkap: val,
-                                }))
-                            }
+                                }));
+                                if (errors.namaLengkap) {
+                                    handleValidation("namaLengkap", val);
+                                }
+                            }}
+                            onBlur={() => handleValidation("namaLengkap", data.namaLengkap)}
                         />
                         <FormField
                             name="role"
                             label="Role"
                             value={data.role as string}
                             placeholder="Contoh: Mahasiswa"
-                            onChange={(val) =>
-                                setData((prev) => ({ ...prev, role: val }))
-                            }
+                            error={errors.role}
+                            onChange={(val) => {
+                                setData((prev) => ({ ...prev, role: val }));
+                                if (errors.role) {
+                                    handleValidation("role", val);
+                                }
+                            }}
+                            onBlur={() => handleValidation("role", data.role)}
                         />
 
                         <FormField
@@ -92,18 +255,28 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             label="NIM"
                             value={data.nim as string}
                             placeholder="Contoh: 24060121130089"
-                            onChange={(val) =>
-                                setData((prev) => ({ ...prev, nim: val }))
-                            }
+                            error={errors.nim}
+                            onChange={(val) => {
+                                setData((prev) => ({ ...prev, nim: val }));
+                                if (errors.nim) {
+                                    handleValidation("nim", val);
+                                }
+                            }}
+                            onBlur={() => handleValidation("nim", data.nim)}
                         />
                         <FormField
                             name="email"
                             label="Email"
                             value={data.email as string}
                             placeholder="Contoh: ahmadsyaifullah@students.undip.ac.id"
-                            onChange={(val) =>
-                                setData((prev) => ({ ...prev, email: val }))
-                            }
+                            error={errors.email}
+                            onChange={(val) => {
+                                setData((prev) => ({ ...prev, email: val }));
+                                if (errors.email) {
+                                    handleValidation("email", val);
+                                }
+                            }}
+                            onBlur={() => handleValidation("email", data.email)}
                         />
 
                         <FormField
@@ -111,24 +284,34 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             label="Departemen"
                             value={data.departemen as string}
                             placeholder="Contoh: Informatika"
-                            onChange={(val) =>
+                            error={errors.departemen}
+                            onChange={(val) => {
                                 setData((prev) => ({
                                     ...prev,
                                     departemen: val,
-                                }))
-                            }
+                                }));
+                                if (errors.departemen) {
+                                    handleValidation("departemen", val);
+                                }
+                            }}
+                            onBlur={() => handleValidation("departemen", data.departemen)}
                         />
                         <FormField
                             name="programStudi"
                             label="Program Studi"
                             value={data.programStudi as string}
                             placeholder="Contoh: S1 - Informatika"
-                            onChange={(val) =>
+                            error={errors.programStudi}
+                            onChange={(val) => {
                                 setData((prev) => ({
                                     ...prev,
                                     programStudi: val,
-                                }))
-                            }
+                                }));
+                                if (errors.programStudi) {
+                                    handleValidation("programStudi", val);
+                                }
+                            }}
+                            onBlur={() => handleValidation("programStudi", data.programStudi)}
                         />
 
                         <FormField
@@ -136,12 +319,17 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             label="Tempat Lahir"
                             value={data.tempatLahir as string}
                             placeholder="Contoh: Blora"
-                            onChange={(val) =>
+                            error={errors.tempatLahir}
+                            onChange={(val) => {
                                 setData((prev) => ({
                                     ...prev,
                                     tempatLahir: val,
-                                }))
-                            }
+                                }));
+                                if (errors.tempatLahir) {
+                                    handleValidation("tempatLahir", val);
+                                }
+                            }}
+                            onBlur={() => handleValidation("tempatLahir", data.tempatLahir)}
                         />
                         
                         <div className="space-y-2">
@@ -154,14 +342,25 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                         ? new Date(data.tanggalLahir as string)
                                         : undefined
                                 }
-                                onDateChange={(date) =>
+                                onDateChange={(date) => {
                                     setData((prev) => ({
                                         ...prev,
                                         tanggalLahir: date?.toISOString() || "",
-                                    }))
-                                }
+                                    }));
+                                    if (errors.tanggalLahir) {
+                                        handleValidation("tanggalLahir", date?.toISOString() || "");
+                                    }
+                                }}
                                 placeholder="Pilih tanggal lahir"
                             />
+                            {errors.tanggalLahir && (
+                                <Alert variant="destructive" className="py-2">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription className="text-xs">
+                                        {errors.tanggalLahir}
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                         </div>
 
                         <div className="space-y-2">
@@ -190,10 +389,26 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     const val = e.target.value;
                                     if (val === "" || /^\d+$/.test(val)) {
                                         setData((prev) => ({ ...prev, noHp: val }));
+                                        if (errors.noHp) {
+                                            handleValidation("noHp", val);
+                                        }
                                     }
                                 }}
-                                className="h-11 bg-white border-gray-300"
+                                onBlur={() => handleValidation("noHp", data.noHp)}
+                                className={`h-11 ${
+                                    errors.noHp
+                                        ? "bg-white border-red-500 focus-visible:ring-red-500"
+                                        : "bg-white border-gray-300"
+                                }`}
                             />
+                            {errors.noHp && (
+                                <Alert variant="destructive" className="py-2">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription className="text-xs">
+                                        {errors.noHp}
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <Label className="text-sm font-semibold text-gray-700">
@@ -223,12 +438,28 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                 }}
                                 onChange={(e) => {
                                     const val = e.target.value;
-                                    if (val === "" || (/^\d*\.?\d*$/.test(val) && parseFloat(val) <= 4)) {
+                                    if (val === "" || (/^\d*\.?\d*$/.test(val) && (val === "" || parseFloat(val) <= 4))) {
                                         setData((prev) => ({ ...prev, ipk: val }));
+                                        if (errors.ipk) {
+                                            handleValidation("ipk", val);
+                                        }
                                     }
                                 }}
-                                className="h-11 bg-white border-gray-300"
+                                onBlur={() => handleValidation("ipk", data.ipk)}
+                                className={`h-11 ${
+                                    errors.ipk
+                                        ? "bg-white border-red-500 focus-visible:ring-red-500"
+                                        : "bg-white border-gray-300"
+                                }`}
                             />
+                            {errors.ipk && (
+                                <Alert variant="destructive" className="py-2">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription className="text-xs">
+                                        {errors.ipk}
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                         </div>
 
                         <div className="space-y-2">
@@ -259,12 +490,28 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                 }}
                                 onChange={(e) => {
                                     const val = e.target.value;
-                                    if (val === "" || (/^\d*\.?\d*$/.test(val) && parseFloat(val) <= 4)) {
+                                    if (val === "" || (/^\d*\.?\d*$/.test(val) && (val === "" || parseFloat(val) <= 4))) {
                                         setData((prev) => ({ ...prev, ips: val }));
+                                        if (errors.ips) {
+                                            handleValidation("ips", val);
+                                        }
                                     }
                                 }}
-                                className="h-11 bg-white border-gray-300"
+                                onBlur={() => handleValidation("ips", data.ips)}
+                                className={`h-11 ${
+                                    errors.ips
+                                        ? "bg-white border-red-500 focus-visible:ring-red-500"
+                                        : "bg-white border-gray-300"
+                                }`}
                             />
+                            {errors.ips && (
+                                <Alert variant="destructive" className="py-2">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription className="text-xs">
+                                        {errors.ips}
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                         </div>
                     </form>
                 </CardContent>

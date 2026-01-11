@@ -55,7 +55,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
         if (
             t.includes("image") ||
             file.name.toLowerCase().endsWith(".jpg") ||
-            file.name.toLowerCase().endsWith(".jpeg") ||
             file.name.toLowerCase().endsWith(".png")
         )
             return "Foto";
@@ -403,7 +402,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             <input
                                 ref={mainInputRef}
                                 type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
+                                accept=".pdf,.jpg,.png"
                                 multiple
                                 style={{ display: "none" }}
                                 onChange={handleMainFileChange}
@@ -606,7 +605,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             <input
                                 ref={tambahanInputRef}
                                 type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
+                                accept=".pdf,.jpg,.png"
                                 multiple
                                 style={{ display: "none" }}
                                 onChange={handleAdditionalFileChange}

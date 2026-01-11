@@ -32,7 +32,6 @@ interface LampiranSuratProps {
 }
 
 export function LampiranSurat({ files }: LampiranSuratProps) {
-  // Data dummy jika tidak ada props
   const lampiran = files || [
     {
       name: "File Proposal.pdf",

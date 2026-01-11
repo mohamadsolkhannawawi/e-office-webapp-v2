@@ -11,7 +11,6 @@ interface TimelineItemProps {
 }
 
 function TimelineItem({ role, status, date, time, catatan, isLast }: TimelineItemProps) {
-  // Menentukan warna badge berdasarkan status
   const getBadgeColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "diajukan":
@@ -30,17 +29,14 @@ function TimelineItem({ role, status, date, time, catatan, isLast }: TimelineIte
 
   return (
     <div className="flex gap-4 relative pb-6">
-      {/* Timeline Line */}
       {!isLast && (
         <div className="absolute left-2 top-8 w-0.5 h-full bg-gray-200" />
       )}
 
-      {/* Timeline Dot */}
       <div className="relative shrink-0">
         <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-md z-10" />
       </div>
 
-      {/* Content */}
       <div className="flex-1 -mt-1">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-sm font-semibold text-gray-800">{role}</span>
@@ -83,7 +79,6 @@ interface RiwayatSuratProps {
 }
 
 export function RiwayatSurat({ riwayat }: RiwayatSuratProps) {
-  // Data dummy jika tidak ada props
   const timeline = riwayat || [
     {
       role: "Admin Surat",
@@ -116,7 +111,7 @@ export function RiwayatSurat({ riwayat }: RiwayatSuratProps) {
   ];
 
   return (
-    <Card className="border-none shadow-sm bg-white h-fit sticky top-20">
+    <Card className="border-none shadow-sm bg-white h-fit">
       <CardHeader className="pb-3 border-b border-gray-100">
         <CardTitle className="text-base font-bold text-gray-800">
           Riwayat Surat <span className="text-blue-600">({timeline.length})</span>

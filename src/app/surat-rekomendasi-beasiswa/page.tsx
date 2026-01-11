@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-// 1. Import Layout Global
 import { Navbar } from "@/components/layout/Navbar";
-
-// 2. Import Komponen Fitur (Wizard)
 import { Stepper } from "@/components/features/surat-rekomendasi/Stepper";
 import { InfoPengajuan } from "@/components/features/surat-rekomendasi/InfoPengajuan";
 import { DetailPengajuan } from "@/components/features/surat-rekomendasi/DetailPengajuan";
@@ -43,28 +39,15 @@ export default function SuratRekomendasiPage() {
         setCurrentStep((prev) => Math.max(prev - 1, 1));
     };
 
-    // Validasi sederhana: cek semua field step terisi
     const isStepValid = () => {
         if (currentStep === 1) {
-            return [
-                "namaLengkap",
-                "role",
-                "nim",
-                "email",
-                "departemen",
-                "programStudi",
-                "tempatLahir",
-                "tanggalLahir",
-                "noHp",
-                "ipk",
-                "ips",
-            ].every((key) => formData[key]);
+            return true; 
         }
         if (currentStep === 2) {
             return !!formData.namaBeasiswa;
         }
         if (currentStep === 3) {
-            return formData.lampiranUtama && formData.lampiranUtama.length > 0;
+            return true;
         }
         return true;
     };
@@ -74,9 +57,7 @@ export default function SuratRekomendasiPage() {
             case 1:
                 return <InfoPengajuan data={formData} setData={setFormData} />;
             case 2:
-                return (
-                    <DetailPengajuan data={formData} setData={setFormData} />
-                );
+                return <DetailPengajuan data={formData} setData={setFormData} />;
             case 3:
                 return <Lampiran data={formData} setData={setFormData} />;
             case 4:
@@ -89,8 +70,42 @@ export default function SuratRekomendasiPage() {
     return (
         <div className="min-h-screen bg-[#f8f9fa] font-sans text-slate-800 pb-20">
             <Navbar />
+            <main className="max-w-5xl mx-auto px-4 py-8">                
+                <div className="mb-8">
+                    {currentStep === 1 && (
+                        <>
+                            <h2 className="text-2xl font-bold text-gray-900">Identitas Pemohon</h2>
+                            <p className="text-gray-500 mt-1">
+                                Data berikut diisi secara otomatis berdasarkan data Anda. Mohon periksa kembali.
+                            </p>
+                        </>
+                    )}
+                    {currentStep === 2 && (
+                        <>
+                            <h2 className="text-2xl font-bold text-gray-900">Detail Pengajuan</h2>
+                            <p className="text-gray-500 mt-1">
+                                Lengkapi detail informasi surat rekomendasi yang Anda ajukan.
+                            </p>
+                        </>
+                    )}
+                    {currentStep === 3 && (
+                        <>
+                            <h2 className="text-2xl font-bold text-gray-900">Lampiran Dokumen</h2>
+                            <p className="text-gray-500 mt-1">
+                                Unggah dokumen pendukung yang diperlukan untuk pengajuan ini.
+                            </p>
+                        </>
+                    )}
+                    {currentStep === 4 && (
+                        <>
+                            <h2 className="text-2xl font-bold text-gray-900">Review & Ajukan</h2>
+                            <p className="text-gray-500 mt-1">
+                                Periksa kembali seluruh data sebelum melakukan pengajuan surat.
+                            </p>
+                        </>
+                    )}
+                </div>
 
-            <main className="max-w-5xl mx-auto px-4 py-8">
                 <Stepper currentStep={currentStep} />
 
                 <div className="min-h-125 animate-in fade-in zoom-in duration-300">

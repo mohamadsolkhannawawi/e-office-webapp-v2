@@ -35,7 +35,6 @@ interface IdentitasPengajuProps {
 }
 
 export function IdentitasPengaju({ data }: IdentitasPengajuProps) {
-  // Data dummy jika tidak ada props
   const identitas = data || {
     namaLengkap: "Ahmad Syaifullah",
     nimNip: "24060121120000",
@@ -56,7 +55,7 @@ export function IdentitasPengaju({ data }: IdentitasPengajuProps) {
           Identitas Pengaju
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent className="pt-3">
         <div className="space-y-0">
           <InfoRow label="Nama Lengkap" value={identitas.namaLengkap} />
           <InfoRow label="NIM/NIP" value={identitas.nimNip} />

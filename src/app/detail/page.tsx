@@ -55,8 +55,6 @@ export default function DetailSuratPage() {
                                 <RiwayatSurat />
                             </div>
                         </div>
-
-                        {/* Actions intentionally removed on detail page */}
                     </div>
                 </main>
             </div>

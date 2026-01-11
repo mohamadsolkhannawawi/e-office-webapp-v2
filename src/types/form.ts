@@ -6,6 +6,8 @@ export interface LampiranFile {
     kategori?: string;
     attachmentType?: "File" | "Foto" | "Lainnya";
     createdAt?: string;
+    file?: File;
+    downloadUrl?: string;
     [key: string]: unknown;
 }
 

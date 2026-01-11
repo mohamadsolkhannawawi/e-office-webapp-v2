@@ -100,7 +100,7 @@ export default function DetailSuratPage() {
                 month: "long",
                 year: "numeric",
             }).format(date);
-        } catch (e) {
+        } catch {
             return dateStr;
         }
     };

@@ -1,5 +1,5 @@
 import React from "react";
-import type { FormDataType } from "@/types/form";
+import type { FormDataType, LampiranFile } from "@/types/form";
 import { FaCheckCircle } from "react-icons/fa";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -54,7 +54,7 @@ export function Review({ data }: ReviewProps) {
     const previewFiles: FilePreviewItem[] = [];
 
     if (Array.isArray(data.lampiranUtama)) {
-        data.lampiranUtama.forEach((f: any) => {
+        data.lampiranUtama.forEach((f: LampiranFile) => {
             previewFiles.push({
                 name: f.name || "Unknown",
                 type: f.type || "",
@@ -66,7 +66,7 @@ export function Review({ data }: ReviewProps) {
     }
 
     if (Array.isArray(data.lampiranTambahan)) {
-        data.lampiranTambahan.forEach((f: any) => {
+        data.lampiranTambahan.forEach((f: LampiranFile) => {
             previewFiles.push({
                 name: f.name || "Unknown",
                 type: f.type || "",

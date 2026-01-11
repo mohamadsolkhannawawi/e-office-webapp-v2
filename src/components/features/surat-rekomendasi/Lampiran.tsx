@@ -127,6 +127,12 @@ export function Lampiran({ data, setData }: LampiranProps) {
         // Clear any previous error
         setErrorMessage(null);
 
+        // Check if trying to upload more files than capacity
+        const maxRemain = Math.max(0, 5 - existing.length);
+        if (arr.length > maxRemain) {
+            setErrorMessage("Maksimal 5 file");
+        }
+
         // ensure we have a concrete string letterId to use
         let letterId: string | undefined = data.letterInstanceId;
         if (!letterId) {
@@ -150,8 +156,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
         setUploadingMain(true);
         try {
-            const maxRemain = Math.max(0, 5 - existing.length);
-
             let uploaded = 0;
             for (const file of arr) {
                 if (uploaded >= maxRemain) break;
@@ -162,7 +166,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                         setData((prev) => ({
                             ...prev,
                             lampiranUtama: [
-                                ...existing,
+                                ...(Array.isArray(prev.lampiranUtama) ? prev.lampiranUtama : []),
                                 {
                                     id: res.data.id,
                                     name: res.data.filename,
@@ -231,6 +235,12 @@ export function Lampiran({ data, setData }: LampiranProps) {
         // Clear any previous error
         setErrorMessage(null);
 
+        // Check if trying to upload more files than capacity
+        const maxRemain = Math.max(0, 3 - existing.length);
+        if (arr.length > maxRemain) {
+            setErrorMessage("Maksimal 3 file");
+        }
+
         let letterId: string | undefined = data.letterInstanceId;
         if (!letterId) {
             try {
@@ -253,8 +263,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
         setUploadingTambahan(true);
         try {
-            const maxRemain = Math.max(0, 3 - existing.length);
-
             let uploaded = 0;
             for (const file of arr) {
                 if (uploaded >= maxRemain) break;
@@ -269,7 +277,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                         setData((prev) => ({
                             ...prev,
                             lampiranTambahan: [
-                                ...existing,
+                                ...(Array.isArray(prev.lampiranTambahan) ? prev.lampiranTambahan : []),
                                 {
                                     id: res.data.id,
                                     name: res.data.filename,

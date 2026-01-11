@@ -1,9 +1,11 @@
 export interface LampiranFile {
+    id?: string; // API response에서 제공
     name: string;
     size: number;
-    type: string;
+    type?: string;
     kategori?: string;
-    file?: File; // File object untuk preview
+    attachmentType?: "File" | "Foto" | "Lainnya";
+    createdAt?: string;
     [key: string]: unknown;
 }
 
@@ -22,5 +24,6 @@ export type FormDataType = {
     namaBeasiswa: string;
     lampiranUtama: LampiranFile[];
     lampiranTambahan: LampiranFile[];
+    letterInstanceId?: string; // Created after submit to API
     [key: string]: unknown;
 };

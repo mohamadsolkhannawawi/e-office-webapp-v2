@@ -51,6 +51,16 @@ export function Lampiran({ data, setData }: LampiranProps) {
     const [uploadingTambahan, setUploadingTambahan] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+    // Auto-dismiss error after 5 seconds
+    useEffect(() => {
+        if (errorMessage) {
+            const timer = setTimeout(() => {
+                setErrorMessage(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [errorMessage]);
+
     // File validation functions
     const isValidFormat = (file: File): boolean => {
         const allowedFormats = [".pdf", ".jpg", ".png"];
@@ -391,11 +401,21 @@ export function Lampiran({ data, setData }: LampiranProps) {
     return (
         <section aria-label="Upload Lampiran">
             {errorMessage && (
-                <Alert variant="destructive" className="mb-6">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>{errorMessage}</AlertDescription>
-                </Alert>
+                <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5">
+                    <Alert variant="destructive" className="shadow-lg min-w-[320px] max-w-md">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription className="flex items-start justify-between gap-2">
+                            <span>{errorMessage}</span>
+                            <button
+                                onClick={() => setErrorMessage(null)}
+                                className="text-red-500 hover:text-red-700 font-bold"
+                            >
+                                ×
+                            </button>
+                        </AlertDescription>
+                    </Alert>
+                </div>
             )}
             
             <Card className="border-none shadow-sm bg-white">
@@ -408,6 +428,8 @@ export function Lampiran({ data, setData }: LampiranProps) {
                         <p className="text-xs text-gray-500 -mt-2">
                             Wajib. Unggah minimal 1 dokumen pendukung utama.
                             Format: PDF, JPG, PNG. Maks: 5MB/file.
+                            <br />
+                            <span className="text-red-500">Maksimal 5 file.</span>
                         </p>
 
                         <div
@@ -509,18 +531,38 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
                         {Array.isArray(data.lampiranUtama) &&
                         data.lampiranUtama.length > 0 ? (
-                            <ul className="space-y-3">
-                                {data.lampiranUtama
-                                    .filter((f: LampiranFile) =>
+                            (() => {
+                                const filteredFiles = data.lampiranUtama.filter(
+                                    (f: LampiranFile) =>
                                         selectedUtama === "Semua"
                                             ? true
                                             : f.kategori === selectedUtama
-                                    )
-                                    .map((f: LampiranFile, idx: number) => (
-                                        <li
-                                            key={`preview-u-${idx}`}
-                                            className="flex items-center justify-between gap-4"
-                                        >
+                                );
+
+                                if (filteredFiles.length === 0) {
+                                    let message = "";
+                                    if (selectedUtama === "File") {
+                                        message = "Belum ada Lampiran File yang diunggah";
+                                    } else if (selectedUtama === "Foto") {
+                                        message = "Belum ada Lampiran Foto yang diunggah";
+                                    } else if (selectedUtama === "Lainnya") {
+                                        message = "Belum ada Lampiran Lainnya yang diunggah";
+                                    }
+                                    return (
+                                        <div className="text-sm text-gray-500">
+                                            {message}
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <ul className="space-y-3">
+                                        {filteredFiles.map(
+                                            (f: LampiranFile, idx: number) => (
+                                                <li
+                                                    key={`preview-u-${idx}`}
+                                                    className="flex items-center justify-between gap-4"
+                                                >
                                             <div className="flex-1">
                                                 <div className="text-sm font-medium truncate">
                                                     {f.name}
@@ -592,6 +634,8 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                         </li>
                                     ))}
                             </ul>
+                                );
+                            })()
                         ) : (
                             <div className="text-sm text-gray-500">
                                 Belum ada lampiran utama yang diunggah.
@@ -610,6 +654,8 @@ export function Lampiran({ data, setData }: LampiranProps) {
                         <p className="text-xs text-gray-500 -mt-2">
                             Opsional. Tambahkan dokumen pendukung lainnya jika
                             diperlukan.
+                            <br />
+                            <span className="text-red-500">Maksimal 3 file.</span>
                         </p>
 
                         <div
@@ -712,18 +758,38 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
                         {Array.isArray(data.lampiranTambahan) &&
                         data.lampiranTambahan.length > 0 ? (
-                            <ul className="space-y-3">
-                                {data.lampiranTambahan
-                                    .filter((f: LampiranFile) =>
+                            (() => {
+                                const filteredFiles = data.lampiranTambahan.filter(
+                                    (f: LampiranFile) =>
                                         selectedTambahan === "Semua"
                                             ? true
                                             : f.kategori === selectedTambahan
-                                    )
-                                    .map((f: LampiranFile, idx: number) => (
-                                        <li
-                                            key={`preview-t-${idx}`}
-                                            className="flex items-center justify-between gap-4"
-                                        >
+                                );
+
+                                if (filteredFiles.length === 0) {
+                                    let message = "";
+                                    if (selectedTambahan === "File") {
+                                        message = "Belum ada Lampiran File yang diunggah";
+                                    } else if (selectedTambahan === "Foto") {
+                                        message = "Belum ada Lampiran Foto yang diunggah";
+                                    } else if (selectedTambahan === "Lainnya") {
+                                        message = "Belum ada Lampiran Lainnya yang diunggah";
+                                    }
+                                    return (
+                                        <div className="text-sm text-gray-500">
+                                            {message}
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <ul className="space-y-3">
+                                        {filteredFiles.map(
+                                            (f: LampiranFile, idx: number) => (
+                                                <li
+                                                    key={`preview-t-${idx}`}
+                                                    className="flex items-center justify-between gap-4"
+                                                >
                                             <div className="flex-1">
                                                 <div className="text-sm font-medium truncate">
                                                     {f.name}
@@ -793,8 +859,10 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                 </AlertDialog>
                                             </div>
                                         </li>
-                                    ))}
-                            </ul>
+                                    ))}                            
+                                    </ul>
+                                );
+                            })()
                         ) : (
                             <div className="text-sm text-gray-500">
                                 Belum ada lampiran tambahan yang diunggah.

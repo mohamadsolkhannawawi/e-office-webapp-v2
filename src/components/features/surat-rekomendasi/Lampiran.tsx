@@ -7,10 +7,7 @@ import React, {
 } from "react";
 
 import type { FormDataType, LampiranFile } from "@/types/form";
-import {
-    uploadAttachment,
-    deleteAttachment,
-} from "@/lib/attachment-api";
+import { uploadAttachment, deleteAttachment } from "@/lib/attachment-api";
 
 interface LampiranProps {
     data: FormDataType;
@@ -59,14 +56,16 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
     const addMainFiles = async (files: File[] | FileList) => {
         if (!files || !data.letterInstanceId) {
-            // eslint-disable-next-line no-alert
-            alert("Aplikasi harus dibuat terlebih dahulu. Klik Submit pada step sebelumnya.");
+            alert(
+                "Aplikasi harus dibuat terlebih dahulu. Klik Submit pada step sebelumnya."
+            );
             return;
         }
 
         setUploadingMain(true);
         try {
-            const arr = Array.from(files as any as File[]);
+            const arr: File[] =
+                files instanceof FileList ? Array.from(files) : files;
             const existing = Array.isArray(data.lampiranUtama)
                 ? data.lampiranUtama
                 : [];
@@ -81,11 +80,14 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
                 // Validate size
                 if (file.size > 5 * 1024 * 1024) {
-                    // eslint-disable-next-line no-alert
                     alert(
                         `${file.name} terlalu besar (max 5MB). File diabaikan.`
                     );
-                    console.warn("File skipped due to size:", file.name, file.size);
+                    console.warn(
+                        "File skipped due to size:",
+                        file.name,
+                        file.size
+                    );
                     continue;
                 }
 
@@ -112,7 +114,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                         name: response.data.filename,
                                         size: response.data.fileSize,
                                         type: response.data.mimeType,
-                                        kategori: response.data.attachmentType,
+                                        kategori: inferCategory(file),
                                         attachmentType:
                                             response.data.attachmentType,
                                         createdAt: response.data.createdAt,
@@ -124,9 +126,12 @@ export function Lampiran({ data, setData }: LampiranProps) {
                     }
                 } catch (error) {
                     console.error("Upload error for", file.name, ":", error);
-                    // eslint-disable-next-line no-alert
                     alert(
-                        `Gagal upload ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`
+                        `Gagal upload ${file.name}: ${
+                            error instanceof Error
+                                ? error.message
+                                : "Unknown error"
+                        }`
                     );
                 }
             }
@@ -149,14 +154,16 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
     const addTambahanFiles = async (files: File[] | FileList) => {
         if (!files || !data.letterInstanceId) {
-            // eslint-disable-next-line no-alert
-            alert("Aplikasi harus dibuat terlebih dahulu. Klik Submit pada step sebelumnya.");
+            alert(
+                "Aplikasi harus dibuat terlebih dahulu. Klik Submit pada step sebelumnya."
+            );
             return;
         }
 
         setUploadingTambahan(true);
         try {
-            const arr = Array.from(files as any as File[]);
+            const arr: File[] =
+                files instanceof FileList ? Array.from(files) : files;
             const existing = Array.isArray(data.lampiranTambahan)
                 ? data.lampiranTambahan
                 : [];
@@ -171,11 +178,14 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
                 // Validate size
                 if (file.size > 5 * 1024 * 1024) {
-                    // eslint-disable-next-line no-alert
                     alert(
                         `${file.name} terlalu besar (max 5MB). File diabaikan.`
                     );
-                    console.warn("File skipped due to size:", file.name, file.size);
+                    console.warn(
+                        "File skipped due to size:",
+                        file.name,
+                        file.size
+                    );
                     continue;
                 }
 
@@ -202,7 +212,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                         name: response.data.filename,
                                         size: response.data.fileSize,
                                         type: response.data.mimeType,
-                                        kategori: response.data.attachmentType,
+                                        kategori: inferCategory(file),
                                         attachmentType:
                                             response.data.attachmentType,
                                         createdAt: response.data.createdAt,
@@ -214,9 +224,12 @@ export function Lampiran({ data, setData }: LampiranProps) {
                     }
                 } catch (error) {
                     console.error("Upload error for", file.name, ":", error);
-                    // eslint-disable-next-line no-alert
                     alert(
-                        `Gagal upload ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`
+                        `Gagal upload ${file.name}: ${
+                            error instanceof Error
+                                ? error.message
+                                : "Unknown error"
+                        }`
                     );
                 }
             }
@@ -234,7 +247,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
         const file = Array.isArray(list) ? list[idx] : null;
 
         if (!file || !file.id) {
-            // eslint-disable-next-line no-alert
             alert("File tidak ditemukan");
             return;
         }
@@ -262,9 +274,10 @@ export function Lampiran({ data, setData }: LampiranProps) {
             }
         } catch (error) {
             console.error("Delete error:", error);
-            // eslint-disable-next-line no-alert
             alert(
-                `Gagal hapus file: ${error instanceof Error ? error.message : "Unknown error"}`
+                `Gagal hapus file: ${
+                    error instanceof Error ? error.message : "Unknown error"
+                }`
             );
         }
     };
@@ -289,7 +302,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
         // For files uploaded to API, use downloadUrl if available, or open in new tab
         // For now, just show message that preview is available
-        // eslint-disable-next-line no-alert
         alert(
             `File: ${f.name}\nUntuk preview, silakan download dari halaman detail aplikasi.`
         );
@@ -326,10 +338,13 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                 dragActiveMain
                                     ? "bg-blue-50 border-blue-400"
                                     : "border-gray-300 hover:bg-blue-50 hover:border-blue-400"
-                            } ${uploadingMain ? "opacity-60 bg-gray-50" : "cursor-pointer group hover:"} `}
+                            } ${
+                                uploadingMain
+                                    ? "opacity-60 bg-gray-50"
+                                    : "cursor-pointer group hover:"
+                            } `}
                             onClick={() =>
-                                !uploadingMain &&
-                                mainInputRef.current?.click()
+                                !uploadingMain && mainInputRef.current?.click()
                             }
                             onDragOver={(e) => {
                                 if (!uploadingMain) e.preventDefault();
@@ -347,24 +362,21 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             onDrop={(e) => {
                                 e.preventDefault();
                                 setDragActiveMain(false);
-                                if (!uploadingMain &&
-                                    e.dataTransfer?.files)
-                                    addMainFiles(
-                                        e.dataTransfer.files
-                                    );
+                                if (!uploadingMain && e.dataTransfer?.files)
+                                    addMainFiles(e.dataTransfer.files);
                             }}
                         >
-                            <div className={`bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] ${
-                                !uploadingMain
-                                    ? "group-hover:scale-110 transition-transform"
-                                    : ""
-                            }`}>
+                            <div
+                                className={`bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] ${
+                                    !uploadingMain
+                                        ? "group-hover:scale-110 transition-transform"
+                                        : ""
+                                }`}
+                            >
                                 <BsFileEarmarkArrowUp
                                     size={24}
                                     className={
-                                        uploadingMain
-                                            ? "animate-bounce"
-                                            : ""
+                                        uploadingMain ? "animate-bounce" : ""
                                     }
                                 />
                             </div>
@@ -407,7 +419,11 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                 dragActiveTambahan
                                     ? "bg-blue-50 border-blue-400"
                                     : "border-gray-300 hover:bg-blue-50 hover:border-blue-400"
-                            } ${uploadingTambahan ? "opacity-60 bg-gray-50" : "cursor-pointer group hover:"}`}
+                            } ${
+                                uploadingTambahan
+                                    ? "opacity-60 bg-gray-50"
+                                    : "cursor-pointer group hover:"
+                            }`}
                             onClick={() =>
                                 !uploadingTambahan &&
                                 tambahanInputRef.current?.click()
@@ -428,18 +444,17 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             onDrop={(e) => {
                                 e.preventDefault();
                                 setDragActiveTambahan(false);
-                                if (!uploadingTambahan &&
-                                    e.dataTransfer?.files)
-                                    addTambahanFiles(
-                                        e.dataTransfer.files
-                                    );
+                                if (!uploadingTambahan && e.dataTransfer?.files)
+                                    addTambahanFiles(e.dataTransfer.files);
                             }}
                         >
-                            <div className={`bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] ${
-                                !uploadingTambahan
-                                    ? "group-hover:scale-110 transition-transform"
-                                    : ""
-                            }`}>
+                            <div
+                                className={`bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] ${
+                                    !uploadingTambahan
+                                        ? "group-hover:scale-110 transition-transform"
+                                        : ""
+                                }`}
+                            >
                                 <BsFileEarmarkArrowUp
                                     size={24}
                                     className={

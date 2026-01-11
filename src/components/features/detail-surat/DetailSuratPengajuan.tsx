@@ -27,7 +27,6 @@ interface DetailSuratPengajuanProps {
 }
 
 export function DetailSuratPengajuan({ data }: DetailSuratPengajuanProps) {
-  // Data dummy jika tidak ada props
   const detail = data || {
     jenisSurat: "SRB / Surat Rekomendasi Beasiswa",
     keperluan: "Beasiswa Djarum Foundation",

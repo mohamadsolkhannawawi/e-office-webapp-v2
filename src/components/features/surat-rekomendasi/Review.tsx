@@ -1,13 +1,12 @@
 import React from "react";
-
 import type { FormDataType } from "@/types/form";
+import { FileText } from "lucide-react";
+import { FaCheckCircle } from "react-icons/fa";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface ReviewProps {
     data: FormDataType;
 }
-import { FileText } from "lucide-react";
-import { FaCheckCircle } from "react-icons/fa";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 function SummaryRow({
     label,
@@ -46,7 +45,6 @@ function FileItem({ name, size }: { name: string; size: string }) {
 }
 
 export function Review({ data }: ReviewProps) {
-    // compute completeness
     const isDataComplete = () =>
         [
             "namaLengkap",
@@ -72,8 +70,10 @@ export function Review({ data }: ReviewProps) {
             return `${(size / 1024).toFixed(1).replace(/\.0$/, "")} KB`;
         return `${(size / (1024 * 1024)).toFixed(1).replace(/\.0$/, "")} MB`;
     };
+
     return (
         <section aria-label="Review dan Ajukan" className="space-y-6">
+            
             <Card className="border-none shadow-sm bg-white">
                 <CardHeader className="pb-3 border-b border-gray-100">
                     <CardTitle className="text-base font-bold text-gray-800">
@@ -138,9 +138,10 @@ export function Review({ data }: ReviewProps) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex flex-col">
-                        <div className="flex flex-row items-start py-3 gap-48">
-                            <span className="text-sm text-green-700 font-medium w-40 sm:w-52 shrink-0">
+                    <div className="flex flex-col space-y-2">
+                        
+                        <div className="flex flex-row items-center py-2">
+                            <span className="text-sm text-green-700 font-medium flex items-center">
                                 {isDataComplete() ? (
                                     <FaCheckCircle className="inline w-4 h-4 mr-2 text-green-600" />
                                 ) : (
@@ -148,12 +149,10 @@ export function Review({ data }: ReviewProps) {
                                 )}
                                 Data ini lengkap
                             </span>
-                            <span className="text-sm font-semibold text-green-700 text-left flex-1">
-                                {isDataComplete() ? "Complete" : "Incomplete"}
-                            </span>
                         </div>
-                        <div className="flex flex-row items-start py-3 gap-48">
-                            <span className="text-sm text-green-700 font-medium w-40 sm:w-52 shrink-0">
+
+                        <div className="flex flex-row items-center py-2">
+                            <span className="text-sm text-green-700 font-medium flex items-center">
                                 {hasMainAttachments ? (
                                     <FaCheckCircle className="inline w-4 h-4 mr-2 text-green-600" />
                                 ) : (
@@ -161,10 +160,8 @@ export function Review({ data }: ReviewProps) {
                                 )}
                                 Lampiran utama ada
                             </span>
-                            <span className="text-sm font-semibold text-green-700 text-left flex-1">
-                                {hasMainAttachments ? "Present" : "Missing"}
-                            </span>
                         </div>
+
                     </div>
                 </CardContent>
             </Card>

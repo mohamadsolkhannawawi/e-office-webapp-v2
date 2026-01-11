@@ -49,40 +49,13 @@ export default function DetailSuratPage() {
                 <LampiranSurat />
               </div>
 
-              <div className="lg:col-span-1">
-                <RiwayatSurat />
-              </div>
+                            <div className="lg:col-span-1">
+                                <RiwayatSurat />
+                            </div>
+                        </div>
+                    </div>
+                </main>
             </div>
-
-            <div className="flex flex-col-reverse sm:flex-row justify-between gap-4 mt-8 pt-6 border-t border-gray-200">
-              <Button
-                variant="outline"
-                onClick={handleKembali}
-                className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 px-6 h-11"
-              >
-                Kembali
-              </Button>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  variant="outline"
-                  onClick={handleSimpanDraft}
-                  className="text-[#007bff] border-[#007bff]/50 hover:bg-blue-50 h-11 px-6"
-                >
-                  Simpan Draft
-                </Button>
-
-                <Button
-                  onClick={handleAjukanSurat}
-                  className="bg-[#007bff] hover:bg-blue-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
-                >
-                  Ajukan Surat
-                </Button>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+        </div>
+    );
 }

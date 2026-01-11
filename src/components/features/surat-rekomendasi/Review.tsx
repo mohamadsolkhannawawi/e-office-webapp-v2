@@ -2,7 +2,10 @@ import React from "react";
 import type { FormDataType } from "@/types/form";
 import { FaCheckCircle } from "react-icons/fa";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { FilePreview, FilePreviewItem } from "@/components/features/common/FilePreview";
+import {
+    FilePreview,
+    FilePreviewItem,
+} from "@/components/features/common/FilePreview";
 
 interface ReviewProps {
     data: FormDataType;
@@ -49,7 +52,7 @@ export function Review({ data }: ReviewProps) {
 
     // Convert files to FilePreviewItem format
     const previewFiles: FilePreviewItem[] = [];
-    
+
     if (Array.isArray(data.lampiranUtama)) {
         data.lampiranUtama.forEach((f: any) => {
             previewFiles.push({
@@ -57,6 +60,7 @@ export function Review({ data }: ReviewProps) {
                 type: f.type || "",
                 size: f.size || 0,
                 file: f.file,
+                url: f.downloadUrl, // Use downloadUrl from MinIO upload
             });
         });
     }
@@ -68,13 +72,13 @@ export function Review({ data }: ReviewProps) {
                 type: f.type || "",
                 size: f.size || 0,
                 file: f.file,
+                url: f.downloadUrl, // Use downloadUrl from MinIO upload
             });
         });
     }
 
     return (
         <section aria-label="Review dan Ajukan" className="space-y-6">
-            
             <Card className="border-none shadow-sm bg-white">
                 <CardHeader className="pb-3 border-b border-gray-100">
                     <CardTitle className="text-base font-bold text-gray-800">
@@ -140,7 +144,6 @@ export function Review({ data }: ReviewProps) {
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-col space-y-2">
-                        
                         <div className="flex flex-row items-center py-2">
                             <span className="text-sm text-green-700 font-medium flex items-center">
                                 {isDataComplete() ? (
@@ -162,7 +165,6 @@ export function Review({ data }: ReviewProps) {
                                 Lampiran utama ada
                             </span>
                         </div>
-
                     </div>
                 </CardContent>
             </Card>
@@ -175,8 +177,8 @@ export function Review({ data }: ReviewProps) {
                 </CardHeader>
                 <CardContent className="pt-2">
                     {previewFiles.length > 0 ? (
-                        <FilePreview 
-                            files={previewFiles} 
+                        <FilePreview
+                            files={previewFiles}
                             showPreviewByDefault={true}
                             readonly={true}
                         />

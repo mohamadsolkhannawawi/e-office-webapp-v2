@@ -7,6 +7,10 @@ import React, {
 } from "react";
 
 import type { FormDataType, LampiranFile } from "@/types/form";
+import {
+    uploadAttachment,
+    deleteAttachment,
+} from "@/lib/attachment-api";
 
 interface LampiranProps {
     data: FormDataType;
@@ -22,6 +26,8 @@ export function Lampiran({ data, setData }: LampiranProps) {
     const [selectedTambahan, setSelectedTambahan] = useState<string>("Semua");
     const [dragActiveMain, setDragActiveMain] = useState(false);
     const [dragActiveTambahan, setDragActiveTambahan] = useState(false);
+    const [uploadingMain, setUploadingMain] = useState(false);
+    const [uploadingTambahan, setUploadingTambahan] = useState(false);
 
     const inferCategory = (file: File) => {
         const t = (file.type || "").toLowerCase();
@@ -40,175 +46,226 @@ export function Lampiran({ data, setData }: LampiranProps) {
     const mainInputRef = useRef<HTMLInputElement | null>(null);
     const tambahanInputRef = useRef<HTMLInputElement | null>(null);
 
-    // Append main files, enforce max 5, validate size
+    /**
+     * Upload main attachment files
+     * Calls API untuk upload dan simpan metadata
+     */
     const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
-        const arr = Array.from(files);
-        const accepted: File[] = [];
-        for (const f of arr) {
-            if (f.size > 5 * 1024 * 1024) {
-                // eslint-disable-next-line no-alert
-                alert(`${f.name} terlalu besar (max 5MB). File diabaikan.`);
-                console.warn("File skipped due to size:", f.name, f.size);
-                continue;
-            }
-            accepted.push(f);
-        }
-        if (accepted.length === 0) {
-            if (mainInputRef.current) mainInputRef.current.value = "";
-            return;
-        }
-        setData((prev) => {
-            const existing = Array.isArray(prev.lampiranUtama)
-                ? prev.lampiranUtama
-                : [];
-            const toAdd = accepted.map((file) => ({
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                file,
-                kategori: inferCategory(file),
-            }));
-            const maxRemain = Math.max(0, 5 - existing.length);
-            const newList = existing.concat(toAdd.slice(0, maxRemain));
-            if (toAdd.length > maxRemain)
-                console.warn("Some files were trimmed to respect max 5 utama");
-            return { ...prev, lampiranUtama: newList };
-        });
+        addMainFiles(files);
         if (mainInputRef.current) mainInputRef.current.value = "";
     };
 
-    const addMainFiles = (files: File[] | FileList) => {
-        if (!files) return;
-        const arr = Array.from(files as any as File[]);
-        const accepted: File[] = [];
-        for (const f of arr) {
-            if (f.size > 5 * 1024 * 1024) {
-                // eslint-disable-next-line no-alert
-                alert(`${f.name} terlalu besar (max 5MB). File diabaikan.`);
-                console.warn("File skipped due to size:", f.name, f.size);
-                continue;
-            }
-            accepted.push(f);
+    const addMainFiles = async (files: File[] | FileList) => {
+        if (!files || !data.letterInstanceId) {
+            // eslint-disable-next-line no-alert
+            alert("Aplikasi harus dibuat terlebih dahulu. Klik Submit pada step sebelumnya.");
+            return;
         }
-        if (accepted.length === 0) return;
-        setData((prev) => {
-            const existing = Array.isArray(prev.lampiranUtama)
-                ? prev.lampiranUtama
+
+        setUploadingMain(true);
+        try {
+            const arr = Array.from(files as any as File[]);
+            const existing = Array.isArray(data.lampiranUtama)
+                ? data.lampiranUtama
                 : [];
-            const toAdd = accepted.map((file) => ({
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                file,
-                kategori: inferCategory(file),
-            }));
             const maxRemain = Math.max(0, 5 - existing.length);
-            const newList = existing.concat(toAdd.slice(0, maxRemain));
-            if (toAdd.length > maxRemain)
-                console.warn("Some files were trimmed to respect max 5 utama");
-            return { ...prev, lampiranUtama: newList };
-        });
+
+            let uploaded = 0;
+            for (const file of arr) {
+                if (uploaded >= maxRemain) {
+                    console.warn("Reached max 5 utama files limit");
+                    break;
+                }
+
+                // Validate size
+                if (file.size > 5 * 1024 * 1024) {
+                    // eslint-disable-next-line no-alert
+                    alert(
+                        `${file.name} terlalu besar (max 5MB). File diabaikan.`
+                    );
+                    console.warn("File skipped due to size:", file.name, file.size);
+                    continue;
+                }
+
+                try {
+                    // Call API to upload
+                    const response = await uploadAttachment(
+                        data.letterInstanceId,
+                        file,
+                        "Utama"
+                    );
+
+                    if (response) {
+                        // Update state dengan response attachment
+                        setData((prev) => {
+                            const list = Array.isArray(prev.lampiranUtama)
+                                ? prev.lampiranUtama
+                                : [];
+                            return {
+                                ...prev,
+                                lampiranUtama: [
+                                    ...list,
+                                    {
+                                        id: response.data.id,
+                                        name: response.data.filename,
+                                        size: response.data.fileSize,
+                                        type: response.data.mimeType,
+                                        kategori: response.data.attachmentType,
+                                        attachmentType:
+                                            response.data.attachmentType,
+                                        createdAt: response.data.createdAt,
+                                    },
+                                ],
+                            };
+                        });
+                        uploaded++;
+                    }
+                } catch (error) {
+                    console.error("Upload error for", file.name, ":", error);
+                    // eslint-disable-next-line no-alert
+                    alert(
+                        `Gagal upload ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`
+                    );
+                }
+            }
+        } finally {
+            setUploadingMain(false);
+        }
     };
 
-    // Append additional files, enforce max 3, validate size
+    /**
+     * Upload additional attachment files
+     */
     const handleAdditionalFileChange = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
-        const arr = Array.from(files);
-        const accepted: File[] = [];
-        for (const f of arr) {
-            if (f.size > 5 * 1024 * 1024) {
-                // eslint-disable-next-line no-alert
-                alert(`${f.name} terlalu besar (max 5MB). File diabaikan.`);
-                console.warn("File skipped due to size:", f.name, f.size);
-                continue;
-            }
-            accepted.push(f);
-        }
-        if (accepted.length === 0) {
-            if (tambahanInputRef.current) tambahanInputRef.current.value = "";
-            return;
-        }
-        setData((prev) => {
-            const existing = Array.isArray(prev.lampiranTambahan)
-                ? prev.lampiranTambahan
-                : [];
-            const toAdd = accepted.map((file) => ({
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                file,
-                kategori: inferCategory(file),
-            }));
-            const maxRemain = Math.max(0, 3 - existing.length);
-            const newList = existing.concat(toAdd.slice(0, maxRemain));
-            if (toAdd.length > maxRemain)
-                console.warn(
-                    "Some files were trimmed to respect max 3 tambahan"
-                );
-            return { ...prev, lampiranTambahan: newList };
-        });
+        addTambahanFiles(files);
         if (tambahanInputRef.current) tambahanInputRef.current.value = "";
     };
 
-    const addTambahanFiles = (files: File[] | FileList) => {
-        if (!files) return;
-        const arr = Array.from(files as any as File[]);
-        const accepted: File[] = [];
-        for (const f of arr) {
-            if (f.size > 5 * 1024 * 1024) {
-                // eslint-disable-next-line no-alert
-                alert(`${f.name} terlalu besar (max 5MB). File diabaikan.`);
-                console.warn("File skipped due to size:", f.name, f.size);
-                continue;
-            }
-            accepted.push(f);
+    const addTambahanFiles = async (files: File[] | FileList) => {
+        if (!files || !data.letterInstanceId) {
+            // eslint-disable-next-line no-alert
+            alert("Aplikasi harus dibuat terlebih dahulu. Klik Submit pada step sebelumnya.");
+            return;
         }
-        if (accepted.length === 0) return;
-        setData((prev) => {
-            const existing = Array.isArray(prev.lampiranTambahan)
-                ? prev.lampiranTambahan
+
+        setUploadingTambahan(true);
+        try {
+            const arr = Array.from(files as any as File[]);
+            const existing = Array.isArray(data.lampiranTambahan)
+                ? data.lampiranTambahan
                 : [];
-            const toAdd = accepted.map((file) => ({
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                file,
-                kategori: inferCategory(file),
-            }));
             const maxRemain = Math.max(0, 3 - existing.length);
-            const newList = existing.concat(toAdd.slice(0, maxRemain));
-            if (toAdd.length > maxRemain)
-                console.warn(
-                    "Some files were trimmed to respect max 3 tambahan"
-                );
-            return { ...prev, lampiranTambahan: newList };
-        });
+
+            let uploaded = 0;
+            for (const file of arr) {
+                if (uploaded >= maxRemain) {
+                    console.warn("Reached max 3 tambahan files limit");
+                    break;
+                }
+
+                // Validate size
+                if (file.size > 5 * 1024 * 1024) {
+                    // eslint-disable-next-line no-alert
+                    alert(
+                        `${file.name} terlalu besar (max 5MB). File diabaikan.`
+                    );
+                    console.warn("File skipped due to size:", file.name, file.size);
+                    continue;
+                }
+
+                try {
+                    // Call API to upload
+                    const response = await uploadAttachment(
+                        data.letterInstanceId,
+                        file,
+                        "Tambahan"
+                    );
+
+                    if (response) {
+                        // Update state dengan response attachment
+                        setData((prev) => {
+                            const list = Array.isArray(prev.lampiranTambahan)
+                                ? prev.lampiranTambahan
+                                : [];
+                            return {
+                                ...prev,
+                                lampiranTambahan: [
+                                    ...list,
+                                    {
+                                        id: response.data.id,
+                                        name: response.data.filename,
+                                        size: response.data.fileSize,
+                                        type: response.data.mimeType,
+                                        kategori: response.data.attachmentType,
+                                        attachmentType:
+                                            response.data.attachmentType,
+                                        createdAt: response.data.createdAt,
+                                    },
+                                ],
+                            };
+                        });
+                        uploaded++;
+                    }
+                } catch (error) {
+                    console.error("Upload error for", file.name, ":", error);
+                    // eslint-disable-next-line no-alert
+                    alert(
+                        `Gagal upload ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`
+                    );
+                }
+            }
+        } finally {
+            setUploadingTambahan(false);
+        }
     };
 
-    const handleDelete = (which: "utama" | "tambahan", idx: number) => {
+    const handleDelete = async (which: "utama" | "tambahan", idx: number) => {
         const confirmMsg = "Yakin ingin menghapus file ini?";
         if (!window.confirm(confirmMsg)) return;
-        if (which === "utama") {
-            setData((prev) => {
-                const list = Array.isArray(prev.lampiranUtama)
-                    ? [...prev.lampiranUtama]
-                    : [];
-                list.splice(idx, 1);
-                return { ...prev, lampiranUtama: list };
-            });
-        } else {
-            setData((prev) => {
-                const list = Array.isArray(prev.lampiranTambahan)
-                    ? [...prev.lampiranTambahan]
-                    : [];
-                list.splice(idx, 1);
-                return { ...prev, lampiranTambahan: list };
-            });
+
+        const list =
+            which === "utama" ? data.lampiranUtama : data.lampiranTambahan;
+        const file = Array.isArray(list) ? list[idx] : null;
+
+        if (!file || !file.id) {
+            // eslint-disable-next-line no-alert
+            alert("File tidak ditemukan");
+            return;
+        }
+
+        try {
+            await deleteAttachment(file.id);
+
+            // Remove dari state
+            if (which === "utama") {
+                setData((prev) => {
+                    const list = Array.isArray(prev.lampiranUtama)
+                        ? [...prev.lampiranUtama]
+                        : [];
+                    list.splice(idx, 1);
+                    return { ...prev, lampiranUtama: list };
+                });
+            } else {
+                setData((prev) => {
+                    const list = Array.isArray(prev.lampiranTambahan)
+                        ? [...prev.lampiranTambahan]
+                        : [];
+                    list.splice(idx, 1);
+                    return { ...prev, lampiranTambahan: list };
+                });
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
+            // eslint-disable-next-line no-alert
+            alert(
+                `Gagal hapus file: ${error instanceof Error ? error.message : "Unknown error"}`
+            );
         }
     };
 
@@ -228,14 +285,14 @@ export function Lampiran({ data, setData }: LampiranProps) {
         const list =
             which === "utama" ? data.lampiranUtama : data.lampiranTambahan;
         const f = Array.isArray(list) ? list[idx] : null;
-        if (!f || !f.file) return;
-        const fileObj = f.file as File;
-        const url = URL.createObjectURL(fileObj);
-        const t = (fileObj.type || fileObj.name).toLowerCase();
-        if (t.includes("pdf") || fileObj.name.toLowerCase().endsWith(".pdf"))
-            setPreviewType("pdf");
-        else setPreviewType("image");
-        setPreviewUrl(url);
+        if (!f) return;
+
+        // For files uploaded to API, use downloadUrl if available, or open in new tab
+        // For now, just show message that preview is available
+        // eslint-disable-next-line no-alert
+        alert(
+            `File: ${f.name}\nUntuk preview, silakan download dari halaman detail aplikasi.`
+        );
     };
 
     const handleClosePreview = () => {
@@ -265,16 +322,23 @@ export function Lampiran({ data, setData }: LampiranProps) {
                         </p>
 
                         <div
-                            className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition cursor-pointer group ${
+                            className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition ${
                                 dragActiveMain
                                     ? "bg-blue-50 border-blue-400"
                                     : "border-gray-300 hover:bg-blue-50 hover:border-blue-400"
-                            }`}
-                            onClick={() => mainInputRef.current?.click()}
-                            onDragOver={(e) => e.preventDefault()}
+                            } ${uploadingMain ? "opacity-60 bg-gray-50" : "cursor-pointer group hover:"} `}
+                            onClick={() =>
+                                !uploadingMain &&
+                                mainInputRef.current?.click()
+                            }
+                            onDragOver={(e) => {
+                                if (!uploadingMain) e.preventDefault();
+                            }}
                             onDragEnter={(e) => {
-                                e.preventDefault();
-                                setDragActiveMain(true);
+                                if (!uploadingMain) {
+                                    e.preventDefault();
+                                    setDragActiveMain(true);
+                                }
                             }}
                             onDragLeave={(e) => {
                                 e.preventDefault();
@@ -283,18 +347,36 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             onDrop={(e) => {
                                 e.preventDefault();
                                 setDragActiveMain(false);
-                                if (e.dataTransfer?.files)
-                                    addMainFiles(e.dataTransfer.files);
+                                if (!uploadingMain &&
+                                    e.dataTransfer?.files)
+                                    addMainFiles(
+                                        e.dataTransfer.files
+                                    );
                             }}
                         >
-                            <div className="bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] group-hover:scale-110 transition-transform">
-                                <BsFileEarmarkArrowUp size={24} />
+                            <div className={`bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] ${
+                                !uploadingMain
+                                    ? "group-hover:scale-110 transition-transform"
+                                    : ""
+                            }`}>
+                                <BsFileEarmarkArrowUp
+                                    size={24}
+                                    className={
+                                        uploadingMain
+                                            ? "animate-bounce"
+                                            : ""
+                                    }
+                                />
                             </div>
                             <div className="text-sm font-medium text-gray-700">
-                                Seret &amp; lepas atau{" "}
-                                <span className="text-[#007bff] font-bold">
-                                    klik area
-                                </span>
+                                {uploadingMain
+                                    ? "Sedang mengunggah..."
+                                    : "Seret & lepas atau "}
+                                {!uploadingMain && (
+                                    <span className="text-[#007bff] font-bold">
+                                        klik area
+                                    </span>
+                                )}
                             </div>
                             <input
                                 ref={mainInputRef}
@@ -303,6 +385,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                 multiple
                                 style={{ display: "none" }}
                                 onChange={handleMainFileChange}
+                                disabled={uploadingMain}
                             />
                             <p className="text-xs text-gray-400 mt-1">
                                 untuk diunggah
@@ -320,16 +403,23 @@ export function Lampiran({ data, setData }: LampiranProps) {
                         </p>
 
                         <div
-                            className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition cursor-pointer group ${
+                            className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition ${
                                 dragActiveTambahan
                                     ? "bg-blue-50 border-blue-400"
                                     : "border-gray-300 hover:bg-blue-50 hover:border-blue-400"
-                            }`}
-                            onClick={() => tambahanInputRef.current?.click()}
-                            onDragOver={(e) => e.preventDefault()}
+                            } ${uploadingTambahan ? "opacity-60 bg-gray-50" : "cursor-pointer group hover:"}`}
+                            onClick={() =>
+                                !uploadingTambahan &&
+                                tambahanInputRef.current?.click()
+                            }
+                            onDragOver={(e) => {
+                                if (!uploadingTambahan) e.preventDefault();
+                            }}
                             onDragEnter={(e) => {
-                                e.preventDefault();
-                                setDragActiveTambahan(true);
+                                if (!uploadingTambahan) {
+                                    e.preventDefault();
+                                    setDragActiveTambahan(true);
+                                }
                             }}
                             onDragLeave={(e) => {
                                 e.preventDefault();
@@ -338,18 +428,36 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             onDrop={(e) => {
                                 e.preventDefault();
                                 setDragActiveTambahan(false);
-                                if (e.dataTransfer?.files)
-                                    addTambahanFiles(e.dataTransfer.files);
+                                if (!uploadingTambahan &&
+                                    e.dataTransfer?.files)
+                                    addTambahanFiles(
+                                        e.dataTransfer.files
+                                    );
                             }}
                         >
-                            <div className="bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] group-hover:scale-110 transition-transform">
-                                <BsFileEarmarkArrowUp size={24} />
+                            <div className={`bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] ${
+                                !uploadingTambahan
+                                    ? "group-hover:scale-110 transition-transform"
+                                    : ""
+                            }`}>
+                                <BsFileEarmarkArrowUp
+                                    size={24}
+                                    className={
+                                        uploadingTambahan
+                                            ? "animate-bounce"
+                                            : ""
+                                    }
+                                />
                             </div>
                             <div className="text-sm font-medium text-gray-700">
-                                Seret &amp; lepas atau{" "}
-                                <span className="text-[#007bff] font-bold">
-                                    klik area
-                                </span>
+                                {uploadingTambahan
+                                    ? "Sedang mengunggah..."
+                                    : "Seret & lepas atau "}
+                                {!uploadingTambahan && (
+                                    <span className="text-[#007bff] font-bold">
+                                        klik area
+                                    </span>
+                                )}
                             </div>
                             <input
                                 ref={tambahanInputRef}
@@ -358,6 +466,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                 multiple
                                 style={{ display: "none" }}
                                 onChange={handleAdditionalFileChange}
+                                disabled={uploadingTambahan}
                             />
                             <p className="text-xs text-gray-400 mt-1">
                                 untuk diunggah

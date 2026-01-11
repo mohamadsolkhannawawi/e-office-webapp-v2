@@ -40,9 +40,8 @@ export async function uploadAttachment(
                 method: "POST",
                 body: formData,
                 // Don't set Content-Type header, let browser set it with boundary
-                headers: {
-                    // Removed Content-Type to allow browser to set it correctly with FormData
-                },
+                // include credentials so cookies (session) are sent to backend
+                credentials: "include",
             }
         );
 
@@ -69,6 +68,7 @@ export async function deleteAttachment(attachmentId: string): Promise<boolean> {
             `/api/surat-rekomendasi/attachments/${attachmentId}`,
             {
                 method: "DELETE",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -100,6 +100,7 @@ export async function getAttachments(
             `/api/surat-rekomendasi/${letterInstanceId}/attachments`,
             {
                 method: "GET",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -132,6 +133,7 @@ export async function createApplication(
     try {
         const response = await fetch("/api/surat-rekomendasi/applications", {
             method: "POST",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },

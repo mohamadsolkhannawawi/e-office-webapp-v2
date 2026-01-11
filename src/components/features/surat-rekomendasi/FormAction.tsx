@@ -3,6 +3,17 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ActionProps {
     currentStep: number;
@@ -19,10 +30,18 @@ export function FormAction({
 }: ActionProps) {
     const router = useRouter();
 
+    const handleConfirmAjukan = () => {
+        // Logic untuk ajukan surat (API call, dll)
+        console.log("Surat diajukan!");
+        // Redirect ke halaman detail surat
+        router.push("/detail");
+    };
+
     const handleAjukanSurat = () => {
         if (currentStep === 4) {
-            // Redirect ke halaman detail surat
-            router.push("/detail");
+            // Di step terakhir, tidak langsung redirect tapi buka dialog konfirmasi
+            // Dialog akan handle via AlertDialogTrigger
+            return;
         } else {
             onNext();
         }
@@ -50,18 +69,55 @@ export function FormAction({
                     Simpan Draft
                 </Button>
                 {/* Tombol LANJUT / AJUKAN */}
-                <Button
-                    onClick={handleAjukanSurat}
-                    className="bg-[#007bff] hover:bg-blue-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
-                    disabled={
-                        !!(
-                            typeof isNextDisabled !== "undefined" &&
-                            isNextDisabled
-                        )
-                    }
-                >
-                    {currentStep === 4 ? "Ajukan Surat" : "Lanjut"}
-                </Button>
+                {currentStep === 4 ? (
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                className="bg-[#007bff] hover:bg-blue-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
+                                disabled={
+                                    !!(
+                                        typeof isNextDisabled !== "undefined" &&
+                                        isNextDisabled
+                                    )
+                                }
+                            >
+                                Ajukan Surat
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Konfirmasi Pengajuan Surat</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Apakah Anda yakin ingin mengajukan surat ini? 
+                                    Setelah diajukan, surat akan masuk ke proses verifikasi 
+                                    dan tidak dapat diubah.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Batal</AlertDialogCancel>
+                                <AlertDialogAction 
+                                    onClick={handleConfirmAjukan}
+                                    className="bg-[#007bff] hover:bg-blue-700"
+                                >
+                                    Ya, Ajukan
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                ) : (
+                    <Button
+                        onClick={handleAjukanSurat}
+                        className="bg-[#007bff] hover:bg-blue-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
+                        disabled={
+                            !!(
+                                typeof isNextDisabled !== "undefined" &&
+                                isNextDisabled
+                            )
+                        }
+                    >
+                        Lanjut
+                    </Button>
+                )}
             </div>
         </div>
     );

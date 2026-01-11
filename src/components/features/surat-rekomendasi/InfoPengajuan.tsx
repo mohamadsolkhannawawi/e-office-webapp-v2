@@ -1,19 +1,15 @@
 import React, { Dispatch, SetStateAction } from "react";
-
 import type { FormDataType } from "@/types/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface InfoPengajuanProps {
     data: FormDataType;
     setData: Dispatch<SetStateAction<FormDataType>>;
 }
-import { BsCalendar } from "react-icons/bs";
 
-// Import komponen Shadcn
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-
-// --- SUB-COMPONENT: FormField (Helper agar kode tidak berulang) ---
 interface FieldProps {
     label: string;
     name?: string;
@@ -21,7 +17,7 @@ interface FieldProps {
     placeholder?: string;
     readOnly?: boolean;
     icon?: React.ReactNode;
-    className?: string; // Untuk custom width (misal col-span-2)
+    className?: string;
     onChange?: (val: string) => void;
 }
 
@@ -64,7 +60,6 @@ function FormField({
 }
 
 export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
-    // controlled inputs: gunakan data dan setData untuk binding input
     return (
         <section aria-label="Informasi Identitas">
             <Card className="border-none shadow-sm bg-white">
@@ -148,48 +143,129 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                 }))
                             }
                         />
-                        <FormField
-                            name="tanggalLahir"
-                            label="Tanggal Lahir"
-                            value={data.tanggalLahir as string}
-                            placeholder="Contoh: 03/18/2006"
-                            icon={<BsCalendar />}
-                            onChange={(val) =>
-                                setData((prev) => ({
-                                    ...prev,
-                                    tanggalLahir: val,
-                                }))
-                            }
-                        />
+                        
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-gray-700">
+                                Tanggal Lahir
+                            </Label>
+                            <DatePicker
+                                date={
+                                    data.tanggalLahir
+                                        ? new Date(data.tanggalLahir as string)
+                                        : undefined
+                                }
+                                onDateChange={(date) =>
+                                    setData((prev) => ({
+                                        ...prev,
+                                        tanggalLahir: date?.toISOString() || "",
+                                    }))
+                                }
+                                placeholder="Pilih tanggal lahir"
+                            />
+                        </div>
 
-                        <FormField
-                            name="noHp"
-                            label="No. HP"
-                            value={data.noHp as string}
-                            placeholder="Contoh: 081234567890"
-                            onChange={(val) =>
-                                setData((prev) => ({ ...prev, noHp: val }))
-                            }
-                        />
-                        <FormField
-                            name="ipk"
-                            label="IPK"
-                            value={data.ipk as string}
-                            placeholder="Masukkan IPK"
-                            onChange={(val) =>
-                                setData((prev) => ({ ...prev, ipk: val }))
-                            }
-                        />
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-gray-700">
+                                No. HP
+                            </Label>
+                            <Input
+                                name="noHp"
+                                type="text"
+                                inputMode="numeric"
+                                value={data.noHp as string}
+                                placeholder="Contoh: 081234567890"
+                                onKeyDown={(e) => {
+                                    if (
+                                        e.key !== "Backspace" &&
+                                        e.key !== "Delete" &&
+                                        e.key !== "ArrowLeft" &&
+                                        e.key !== "ArrowRight" &&
+                                        e.key !== "Tab" &&
+                                        !/^\d$/.test(e.key)
+                                    ) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === "" || /^\d+$/.test(val)) {
+                                        setData((prev) => ({ ...prev, noHp: val }));
+                                    }
+                                }}
+                                className="h-11 bg-white border-gray-300"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-gray-700">
+                                IPK
+                            </Label>
+                            <Input
+                                name="ipk"
+                                type="text"
+                                inputMode="decimal"
+                                value={data.ipk as string}
+                                placeholder="Contoh: 3.75"
+                                onKeyDown={(e) => {
+                                    if (
+                                        e.key !== "Backspace" &&
+                                        e.key !== "Delete" &&
+                                        e.key !== "ArrowLeft" &&
+                                        e.key !== "ArrowRight" &&
+                                        e.key !== "Tab" &&
+                                        e.key !== "." &&
+                                        !/^\d$/.test(e.key)
+                                    ) {
+                                        e.preventDefault();
+                                    }
+                                    if (e.key === "." && (e.target as HTMLInputElement).value.includes(".")) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === "" || (/^\d*\.?\d*$/.test(val) && parseFloat(val) <= 4)) {
+                                        setData((prev) => ({ ...prev, ipk: val }));
+                                    }
+                                }}
+                                className="h-11 bg-white border-gray-300"
+                            />
+                        </div>
 
-                        <FormField
-                            name="ips"
-                            label="IPS"
-                            value={data.ips as string}
-                            placeholder="Masukkan IPS"
-                            onChange={(val) =>
-                                setData((prev) => ({ ...prev, ips: val }))
-                            }
-                        />
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-gray-700">
+                                IPS
+                            </Label>
+                            <Input
+                                name="ips"
+                                type="text"
+                                inputMode="decimal"
+                                value={data.ips as string}
+                                placeholder="Contoh: 3.80"
+                                onKeyDown={(e) => {
+                                    if (
+                                        e.key !== "Backspace" &&
+                                        e.key !== "Delete" &&
+                                        e.key !== "ArrowLeft" &&
+                                        e.key !== "ArrowRight" &&
+                                        e.key !== "Tab" &&
+                                        e.key !== "." &&
+                                        !/^\d$/.test(e.key)
+                                    ) {
+                                        e.preventDefault();
+                                    }
+                                    if (e.key === "." && (e.target as HTMLInputElement).value.includes(".")) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === "" || (/^\d*\.?\d*$/.test(val) && parseFloat(val) <= 4)) {
+                                        setData((prev) => ({ ...prev, ips: val }));
+                                    }
+                                }}
+                                className="h-11 bg-white border-gray-300"
+                            />
+                        </div>
                     </form>
                 </CardContent>
             </Card>

@@ -7,7 +7,11 @@ import React, {
 } from "react";
 
 import type { FormDataType, LampiranFile } from "@/types/form";
-import { uploadAttachment, deleteAttachment } from "@/lib/attachment-api";
+import {
+    uploadAttachment,
+    deleteAttachment,
+    createApplication,
+} from "@/lib/attachment-api";
 
 interface LampiranProps {
     data: FormDataType;
@@ -61,10 +65,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
     const mainInputRef = useRef<HTMLInputElement | null>(null);
     const tambahanInputRef = useRef<HTMLInputElement | null>(null);
 
-    /**
-     * Upload main attachment files
-     * Calls API untuk upload dan simpan metadata
-     */
+    // Append main files, enforce max 5, validate size -> upload to API
     const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
@@ -73,12 +74,28 @@ export function Lampiran({ data, setData }: LampiranProps) {
     };
 
     const addMainFiles = async (files: File[] | FileList) => {
-        if (!files || !data.letterInstanceId) {
-            alert(
-                "Aplikasi harus dibuat terlebih dahulu. Klik Submit pada step sebelumnya."
-            );
-            return;
+        if (!files) return;
+
+        // ensure we have a concrete string letterId to use
+        let letterId: string | undefined = data.letterInstanceId;
+        if (!letterId) {
+            try {
+                const created = await createApplication(
+                    data.namaBeasiswa || "Surat Rekomendasi",
+                    (data as unknown as Record<string, unknown>) || {}
+                );
+                letterId = created.id;
+                setData((prev) => ({ ...prev, letterInstanceId: created.id }));
+            } catch (err) {
+                console.error("Auto-create application failed:", err);
+                alert(
+                    "Gagal membuat aplikasi otomatis. Silakan submit pada langkah sebelumnya atau coba lagi."
+                );
+                return;
+            }
         }
+
+        if (!letterId) return;
 
         setUploadingMain(true);
         try {
@@ -91,64 +108,40 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
             let uploaded = 0;
             for (const file of arr) {
-                if (uploaded >= maxRemain) {
-                    console.warn("Reached max 5 utama files limit");
-                    break;
-                }
-
-                // Validate size
+                if (uploaded >= maxRemain) break;
                 if (file.size > 5 * 1024 * 1024) {
                     alert(
                         `${file.name} terlalu besar (max 5MB). File diabaikan.`
-                    );
-                    console.warn(
-                        "File skipped due to size:",
-                        file.name,
-                        file.size
                     );
                     continue;
                 }
 
                 try {
-                    // Call API to upload
-                    const response = await uploadAttachment(
-                        data.letterInstanceId,
-                        file,
-                        "Utama"
-                    );
-
-                    if (response) {
-                        // Update state dengan response attachment
-                        setData((prev) => {
-                            const list = Array.isArray(prev.lampiranUtama)
-                                ? prev.lampiranUtama
-                                : [];
-                            return {
-                                ...prev,
-                                lampiranUtama: [
-                                    ...list,
-                                    {
-                                        id: response.data.id,
-                                        name: response.data.filename,
-                                        size: response.data.fileSize,
-                                        type: response.data.mimeType,
-                                        kategori: inferCategory(file),
-                                        attachmentType:
-                                            response.data.attachmentType,
-                                        createdAt: response.data.createdAt,
-                                    },
-                                ],
-                            };
-                        });
+                    const res = await uploadAttachment(letterId, file, "Utama");
+                    if (res) {
+                        setData((prev) => ({
+                            ...prev,
+                            lampiranUtama: [
+                                ...existing,
+                                {
+                                    id: res.data.id,
+                                    name: res.data.filename,
+                                    size: res.data.fileSize,
+                                    type: res.data.mimeType,
+                                    kategori: inferCategory(file),
+                                    attachmentType: res.data.attachmentType,
+                                    downloadUrl: res.data.downloadUrl,
+                                    createdAt: res.data.createdAt,
+                                },
+                            ],
+                        }));
                         uploaded++;
                     }
-                } catch (error) {
-                    console.error("Upload error for", file.name, ":", error);
+                } catch (err) {
+                    console.error("Upload error:", err);
                     alert(
                         `Gagal upload ${file.name}: ${
-                            error instanceof Error
-                                ? error.message
-                                : "Unknown error"
+                            err instanceof Error ? err.message : String(err)
                         }`
                     );
                 }
@@ -158,9 +151,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
         }
     };
 
-    /**
-     * Upload additional attachment files
-     */
+    // Append additional files, enforce max 3, validate size -> upload to API
     const handleAdditionalFileChange = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
@@ -171,12 +162,27 @@ export function Lampiran({ data, setData }: LampiranProps) {
     };
 
     const addTambahanFiles = async (files: File[] | FileList) => {
-        if (!files || !data.letterInstanceId) {
-            alert(
-                "Aplikasi harus dibuat terlebih dahulu. Klik Submit pada step sebelumnya."
-            );
-            return;
+        if (!files) return;
+
+        let letterId: string | undefined = data.letterInstanceId;
+        if (!letterId) {
+            try {
+                const created = await createApplication(
+                    data.namaBeasiswa || "Surat Rekomendasi",
+                    (data as unknown as Record<string, unknown>) || {}
+                );
+                letterId = created.id;
+                setData((prev) => ({ ...prev, letterInstanceId: created.id }));
+            } catch (err) {
+                console.error("Auto-create application failed:", err);
+                alert(
+                    "Gagal membuat aplikasi otomatis. Silakan submit pada langkah sebelumnya atau coba lagi."
+                );
+                return;
+            }
         }
+
+        if (!letterId) return;
 
         setUploadingTambahan(true);
         try {
@@ -189,64 +195,44 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
             let uploaded = 0;
             for (const file of arr) {
-                if (uploaded >= maxRemain) {
-                    console.warn("Reached max 3 tambahan files limit");
-                    break;
-                }
-
-                // Validate size
+                if (uploaded >= maxRemain) break;
                 if (file.size > 5 * 1024 * 1024) {
                     alert(
                         `${file.name} terlalu besar (max 5MB). File diabaikan.`
-                    );
-                    console.warn(
-                        "File skipped due to size:",
-                        file.name,
-                        file.size
                     );
                     continue;
                 }
 
                 try {
-                    // Call API to upload
-                    const response = await uploadAttachment(
-                        data.letterInstanceId,
+                    const res = await uploadAttachment(
+                        letterId,
                         file,
                         "Tambahan"
                     );
-
-                    if (response) {
-                        // Update state dengan response attachment
-                        setData((prev) => {
-                            const list = Array.isArray(prev.lampiranTambahan)
-                                ? prev.lampiranTambahan
-                                : [];
-                            return {
-                                ...prev,
-                                lampiranTambahan: [
-                                    ...list,
-                                    {
-                                        id: response.data.id,
-                                        name: response.data.filename,
-                                        size: response.data.fileSize,
-                                        type: response.data.mimeType,
-                                        kategori: inferCategory(file),
-                                        attachmentType:
-                                            response.data.attachmentType,
-                                        createdAt: response.data.createdAt,
-                                    },
-                                ],
-                            };
-                        });
+                    if (res) {
+                        setData((prev) => ({
+                            ...prev,
+                            lampiranTambahan: [
+                                ...existing,
+                                {
+                                    id: res.data.id,
+                                    name: res.data.filename,
+                                    size: res.data.fileSize,
+                                    type: res.data.mimeType,
+                                    kategori: inferCategory(file),
+                                    attachmentType: res.data.attachmentType,
+                                    downloadUrl: res.data.downloadUrl,
+                                    createdAt: res.data.createdAt,
+                                },
+                            ],
+                        }));
                         uploaded++;
                     }
-                } catch (error) {
-                    console.error("Upload error for", file.name, ":", error);
+                } catch (err) {
+                    console.error("Upload error:", err);
                     alert(
                         `Gagal upload ${file.name}: ${
-                            error instanceof Error
-                                ? error.message
-                                : "Unknown error"
+                            err instanceof Error ? err.message : String(err)
                         }`
                     );
                 }
@@ -257,70 +243,42 @@ export function Lampiran({ data, setData }: LampiranProps) {
     };
 
     const handleDelete = async (which: "utama" | "tambahan", idx: number) => {
-        // Open confirmation modal instead of immediate deletion
         const list =
             which === "utama" ? data.lampiranUtama : data.lampiranTambahan;
         const file = Array.isArray(list) ? list[idx] : null;
+        if (!file) return;
 
-        if (!file || !file.id) {
-            alert("File tidak ditemukan");
-            return;
-        }
-
-        setConfirmDelete({ open: true, which, idx });
-    };
-
-    // Confirmation modal state and actions
-    const [confirmDelete, setConfirmDelete] = useState<{
-        open: boolean;
-        which: "utama" | "tambahan" | null;
-        idx: number | null;
-    }>({ open: false, which: null, idx: null });
-
-    const confirmDeleteCancel = () => {
-        setConfirmDelete({ open: false, which: null, idx: null });
-    };
-
-    const confirmDeleteProceed = async () => {
-        const { which, idx } = confirmDelete;
-        if (!which || idx === null) return confirmDeleteCancel();
-
-        const list = which === "utama" ? data.lampiranUtama : data.lampiranTambahan;
-        const file = Array.isArray(list) ? list[idx] : null;
-        if (!file || !file.id) {
-            alert("File tidak ditemukan");
-            return confirmDeleteCancel();
-        }
-
-        try {
-            await deleteAttachment(file.id);
-
-            if (which === "utama") {
-                setData((prev) => {
-                    const list = Array.isArray(prev.lampiranUtama)
-                        ? [...prev.lampiranUtama]
-                        : [];
-                    list.splice(idx, 1);
-                    return { ...prev, lampiranUtama: list };
-                });
-            } else {
-                setData((prev) => {
-                    const list = Array.isArray(prev.lampiranTambahan)
-                        ? [...prev.lampiranTambahan]
-                        : [];
-                    list.splice(idx, 1);
-                    return { ...prev, lampiranTambahan: list };
-                });
+        if (file.id) {
+            try {
+                await deleteAttachment(file.id);
+            } catch (err) {
+                console.error("Delete error:", err);
+                alert(
+                    `Gagal hapus file: ${
+                        err instanceof Error ? err.message : String(err)
+                    }`
+                );
+                return;
             }
-        } catch (error) {
-            console.error("Delete error:", error);
-            alert(
-                `Gagal hapus file: ${
-                    error instanceof Error ? error.message : "Unknown error"
-                }`
-            );
-        } finally {
-            confirmDeleteCancel();
+        }
+
+        // remove from state
+        if (which === "utama") {
+            setData((prev) => {
+                const list = Array.isArray(prev.lampiranUtama)
+                    ? [...prev.lampiranUtama]
+                    : [];
+                list.splice(idx, 1);
+                return { ...prev, lampiranUtama: list };
+            });
+        } else {
+            setData((prev) => {
+                const list = Array.isArray(prev.lampiranTambahan)
+                    ? [...prev.lampiranTambahan]
+                    : [];
+                list.splice(idx, 1);
+                return { ...prev, lampiranTambahan: list };
+            });
         }
     };
 
@@ -342,11 +300,34 @@ export function Lampiran({ data, setData }: LampiranProps) {
         const f = Array.isArray(list) ? list[idx] : null;
         if (!f) return;
 
-        // For files uploaded to API, use downloadUrl if available, or open in new tab
-        // For now, just show message that preview is available
-        alert(
-            `File: ${f.name}\nUntuk preview, silakan download dari halaman detail aplikasi.`
-        );
+        const attachment = f as LampiranFile & {
+            downloadUrl?: string;
+            file?: File;
+        };
+        if (attachment.downloadUrl) {
+            const t = (attachment.type || "").toLowerCase();
+            if (
+                t.includes("pdf") ||
+                attachment.name.toLowerCase().endsWith(".pdf")
+            )
+                setPreviewType("pdf");
+            else setPreviewType("image");
+            setPreviewUrl(attachment.downloadUrl);
+            return;
+        }
+
+        if (attachment.file) {
+            const fileObj = attachment.file as File;
+            const url = URL.createObjectURL(fileObj);
+            const t = (fileObj.type || fileObj.name).toLowerCase();
+            if (
+                t.includes("pdf") ||
+                fileObj.name.toLowerCase().endsWith(".pdf")
+            )
+                setPreviewType("pdf");
+            else setPreviewType("image");
+            setPreviewUrl(url);
+        }
     };
 
     const handleClosePreview = () => {
@@ -377,14 +358,14 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
                         <div
                             className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition ${
+                                uploadingMain
+                                    ? "opacity-60 bg-gray-50 cursor-not-allowed"
+                                    : "cursor-pointer group"
+                            } ${
                                 dragActiveMain
                                     ? "bg-blue-50 border-blue-400"
                                     : "border-gray-300 hover:bg-blue-50 hover:border-blue-400"
-                            } ${
-                                uploadingMain
-                                    ? "opacity-60 bg-gray-50"
-                                    : "cursor-pointer group hover:"
-                            } `}
+                            }`}
                             onClick={() =>
                                 !uploadingMain && mainInputRef.current?.click()
                             }
@@ -398,8 +379,10 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                 }
                             }}
                             onDragLeave={(e) => {
-                                e.preventDefault();
-                                setDragActiveMain(false);
+                                if (!uploadingMain) {
+                                    e.preventDefault();
+                                    setDragActiveMain(false);
+                                }
                             }}
                             onDrop={(e) => {
                                 e.preventDefault();
@@ -408,29 +391,14 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     addMainFiles(e.dataTransfer.files);
                             }}
                         >
-                            <div
-                                className={`bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] ${
-                                    !uploadingMain
-                                        ? "group-hover:scale-110 transition-transform"
-                                        : ""
-                                }`}
-                            >
-                                <BsFileEarmarkArrowUp
-                                    size={24}
-                                    className={
-                                        uploadingMain ? "animate-bounce" : ""
-                                    }
-                                />
+                            <div className="bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] group-hover:scale-110 transition-transform">
+                                <BsFileEarmarkArrowUp size={24} />
                             </div>
                             <div className="text-sm font-medium text-gray-700">
-                                {uploadingMain
-                                    ? "Sedang mengunggah..."
-                                    : "Seret & lepas atau "}
-                                {!uploadingMain && (
-                                    <span className="text-[#007bff] font-bold">
-                                        klik area
-                                    </span>
-                                )}
+                                Seret &amp; lepas atau{" "}
+                                <span className="text-[#007bff] font-bold">
+                                    klik area
+                                </span>
                             </div>
                             <input
                                 ref={mainInputRef}
@@ -440,90 +408,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                 style={{ display: "none" }}
                                 onChange={handleMainFileChange}
                                 disabled={uploadingMain}
-                            />
-                            <p className="text-xs text-gray-400 mt-1">
-                                untuk diunggah
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <Label className="text-sm font-bold text-gray-800">
-                            Lampiran Tambahan
-                        </Label>
-                        <p className="text-xs text-gray-500 -mt-2">
-                            Opsional. Tambahkan dokumen pendukung lainnya jika
-                            diperlukan.
-                        </p>
-
-                        <div
-                            className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition ${
-                                dragActiveTambahan
-                                    ? "bg-blue-50 border-blue-400"
-                                    : "border-gray-300 hover:bg-blue-50 hover:border-blue-400"
-                            } ${
-                                uploadingTambahan
-                                    ? "opacity-60 bg-gray-50"
-                                    : "cursor-pointer group hover:"
-                            }`}
-                            onClick={() =>
-                                !uploadingTambahan &&
-                                tambahanInputRef.current?.click()
-                            }
-                            onDragOver={(e) => {
-                                if (!uploadingTambahan) e.preventDefault();
-                            }}
-                            onDragEnter={(e) => {
-                                if (!uploadingTambahan) {
-                                    e.preventDefault();
-                                    setDragActiveTambahan(true);
-                                }
-                            }}
-                            onDragLeave={(e) => {
-                                e.preventDefault();
-                                setDragActiveTambahan(false);
-                            }}
-                            onDrop={(e) => {
-                                e.preventDefault();
-                                setDragActiveTambahan(false);
-                                if (!uploadingTambahan && e.dataTransfer?.files)
-                                    addTambahanFiles(e.dataTransfer.files);
-                            }}
-                        >
-                            <div
-                                className={`bg-blue-100 p-4 rounded-full mb-4 text-[#007bff] ${
-                                    !uploadingTambahan
-                                        ? "group-hover:scale-110 transition-transform"
-                                        : ""
-                                }`}
-                            >
-                                <BsFileEarmarkArrowUp
-                                    size={24}
-                                    className={
-                                        uploadingTambahan
-                                            ? "animate-bounce"
-                                            : ""
-                                    }
-                                />
-                            </div>
-                            <div className="text-sm font-medium text-gray-700">
-                                {uploadingTambahan
-                                    ? "Sedang mengunggah..."
-                                    : "Seret & lepas atau "}
-                                {!uploadingTambahan && (
-                                    <span className="text-[#007bff] font-bold">
-                                        klik area
-                                    </span>
-                                )}
-                            </div>
-                            <input
-                                ref={tambahanInputRef}
-                                type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                multiple
-                                style={{ display: "none" }}
-                                onChange={handleAdditionalFileChange}
-                                disabled={uploadingTambahan}
                             />
                             <p className="text-xs text-gray-400 mt-1">
                                 untuk diunggah
@@ -548,14 +432,22 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     value={selectedUtama}
                                     onValueChange={setSelectedUtama}
                                 >
-                                    <SelectTrigger className="h-9 w-[160px] text-sm">
+                                    <SelectTrigger className="h-9 w-40 text-sm">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Semua">Semua</SelectItem>
-                                        <SelectItem value="File">File (PDF)</SelectItem>
-                                        <SelectItem value="Foto">Foto (JPG/PNG)</SelectItem>
-                                        <SelectItem value="Lainnya">Lainnya</SelectItem>
+                                        <SelectItem value="Semua">
+                                            Semua
+                                        </SelectItem>
+                                        <SelectItem value="File">
+                                            File (PDF)
+                                        </SelectItem>
+                                        <SelectItem value="Foto">
+                                            Foto (JPG/PNG)
+                                        </SelectItem>
+                                        <SelectItem value="Lainnya">
+                                            Lainnya
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -616,7 +508,12 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                 Hapus File?
                                                             </AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                Yakin ingin menghapus file <strong>{f.name}</strong>? 
+                                                                Yakin ingin
+                                                                menghapus file{" "}
+                                                                <strong>
+                                                                    {f.name}
+                                                                </strong>
+                                                                ?
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
@@ -662,25 +559,38 @@ export function Lampiran({ data, setData }: LampiranProps) {
                         </p>
 
                         <div
-                            className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition cursor-pointer group ${
+                            className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition ${
+                                uploadingTambahan
+                                    ? "opacity-60 bg-gray-50 cursor-not-allowed"
+                                    : "cursor-pointer group"
+                            } ${
                                 dragActiveTambahan
                                     ? "bg-blue-50 border-blue-400"
                                     : "border-gray-300 hover:bg-blue-50 hover:border-blue-400"
                             }`}
-                            onClick={() => tambahanInputRef.current?.click()}
-                            onDragOver={(e) => e.preventDefault()}
+                            onClick={() =>
+                                !uploadingTambahan &&
+                                tambahanInputRef.current?.click()
+                            }
+                            onDragOver={(e) => {
+                                if (!uploadingTambahan) e.preventDefault();
+                            }}
                             onDragEnter={(e) => {
-                                e.preventDefault();
-                                setDragActiveTambahan(true);
+                                if (!uploadingTambahan) {
+                                    e.preventDefault();
+                                    setDragActiveTambahan(true);
+                                }
                             }}
                             onDragLeave={(e) => {
-                                e.preventDefault();
-                                setDragActiveTambahan(false);
+                                if (!uploadingTambahan) {
+                                    e.preventDefault();
+                                    setDragActiveTambahan(false);
+                                }
                             }}
                             onDrop={(e) => {
                                 e.preventDefault();
                                 setDragActiveTambahan(false);
-                                if (e.dataTransfer?.files)
+                                if (!uploadingTambahan && e.dataTransfer?.files)
                                     addTambahanFiles(e.dataTransfer.files);
                             }}
                         >
@@ -700,6 +610,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                 multiple
                                 style={{ display: "none" }}
                                 onChange={handleAdditionalFileChange}
+                                disabled={uploadingTambahan}
                             />
                             <p className="text-xs text-gray-400 mt-1">
                                 untuk diunggah
@@ -724,14 +635,22 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     value={selectedTambahan}
                                     onValueChange={setSelectedTambahan}
                                 >
-                                    <SelectTrigger className="h-9 w-[160px] text-sm">
+                                    <SelectTrigger className="h-9 w-40 text-sm">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Semua">Semua</SelectItem>
-                                        <SelectItem value="File">File (PDF)</SelectItem>
-                                        <SelectItem value="Foto">Foto (JPG/PNG)</SelectItem>
-                                        <SelectItem value="Lainnya">Lainnya</SelectItem>
+                                        <SelectItem value="Semua">
+                                            Semua
+                                        </SelectItem>
+                                        <SelectItem value="File">
+                                            File (PDF)
+                                        </SelectItem>
+                                        <SelectItem value="Foto">
+                                            Foto (JPG/PNG)
+                                        </SelectItem>
+                                        <SelectItem value="Lainnya">
+                                            Lainnya
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -792,7 +711,12 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                 Hapus File?
                                                             </AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                Yakin ingin menghapus file <strong>{f.name}</strong>? 
+                                                                Yakin ingin
+                                                                menghapus file{" "}
+                                                                <strong>
+                                                                    {f.name}
+                                                                </strong>
+                                                                ?
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
@@ -826,24 +750,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
                 </CardContent>
             </Card>
 
-            {/* Preview modal */}
-            {confirmDelete.open && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="bg-white rounded-lg overflow-hidden w-[90%] max-w-md p-4">
-                        <div className="text-sm font-medium text-gray-800 mb-4">
-                            Yakin ingin menghapus file ini?
-                        </div>
-                        <div className="flex justify-end gap-2">
-                            <Button variant="ghost" onClick={confirmDeleteCancel} className="h-9">
-                                Batal
-                            </Button>
-                            <Button variant="destructive" onClick={confirmDeleteProceed} className="h-9">
-                                Hapus
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
             {previewUrl && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                     <div className="bg-white rounded-lg overflow-hidden w-[90%] max-w-3xl">
@@ -863,11 +769,14 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     className="w-full h-[70vh]"
                                 />
                             ) : (
-                                <img
-                                    src={previewUrl}
-                                    alt="Preview"
-                                    className="w-full h-auto max-h-[70vh] object-contain"
-                                />
+                                <>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={previewUrl}
+                                        alt="Preview"
+                                        className="w-full h-auto max-h-[70vh] object-contain"
+                                    />
+                                </>
                             )}
                         </div>
                     </div>

@@ -1,8 +1,8 @@
 import React from "react";
 import type { FormDataType } from "@/types/form";
-import { FileText } from "lucide-react";
 import { FaCheckCircle } from "react-icons/fa";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { FilePreview, FilePreviewItem } from "@/components/features/common/FilePreview";
 
 interface ReviewProps {
     data: FormDataType;
@@ -28,22 +28,6 @@ function SummaryRow({
     );
 }
 
-function FileItem({ name, size }: { name: string; size: string }) {
-    return (
-        <div className="flex items-center p-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-md mr-3">
-                <FileText className="w-5 h-5" />
-            </div>
-            <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-medium text-gray-700 truncate">
-                    {name}
-                </p>
-                <p className="text-xs text-gray-400">{size}</p>
-            </div>
-        </div>
-    );
-}
-
 export function Review({ data }: ReviewProps) {
     const isDataComplete = () =>
         [
@@ -63,13 +47,30 @@ export function Review({ data }: ReviewProps) {
     const hasMainAttachments =
         Array.isArray(data.lampiranUtama) && data.lampiranUtama.length > 0;
 
-    const formatSize = (size?: number) => {
-        if (!size && size !== 0) return "-";
-        if (size < 1024) return `${size} B`;
-        if (size < 1024 * 1024)
-            return `${(size / 1024).toFixed(1).replace(/\.0$/, "")} KB`;
-        return `${(size / (1024 * 1024)).toFixed(1).replace(/\.0$/, "")} MB`;
-    };
+    // Convert files to FilePreviewItem format
+    const previewFiles: FilePreviewItem[] = [];
+    
+    if (Array.isArray(data.lampiranUtama)) {
+        data.lampiranUtama.forEach((f: any) => {
+            previewFiles.push({
+                name: f.name || "Unknown",
+                type: f.type || "",
+                size: f.size || 0,
+                file: f.file,
+            });
+        });
+    }
+
+    if (Array.isArray(data.lampiranTambahan)) {
+        data.lampiranTambahan.forEach((f: any) => {
+            previewFiles.push({
+                name: f.name || "Unknown",
+                type: f.type || "",
+                size: f.size || 0,
+                file: f.file,
+            });
+        });
+    }
 
     return (
         <section aria-label="Review dan Ajukan" className="space-y-6">
@@ -172,33 +173,18 @@ export function Review({ data }: ReviewProps) {
                         Lampiran Dokumen
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {Array.isArray(data.lampiranUtama) &&
-                        data.lampiranUtama.length > 0 ? (
-                            data.lampiranUtama.map((f, i) => (
-                                <FileItem
-                                    key={`main-${i}`}
-                                    name={(f as any).name || "Unknown"}
-                                    size={formatSize((f as any).size as number)}
-                                />
-                            ))
-                        ) : (
-                            <div className="text-sm text-gray-500">
-                                No main attachments
-                            </div>
-                        )}
-
-                        {Array.isArray(data.lampiranTambahan) &&
-                            data.lampiranTambahan.length > 0 &&
-                            data.lampiranTambahan.map((f, i) => (
-                                <FileItem
-                                    key={`extra-${i}`}
-                                    name={(f as any).name || "Unknown"}
-                                    size={formatSize((f as any).size as number)}
-                                />
-                            ))}
-                    </div>
+                <CardContent className="pt-2">
+                    {previewFiles.length > 0 ? (
+                        <FilePreview 
+                            files={previewFiles} 
+                            showPreviewByDefault={true}
+                            readonly={true}
+                        />
+                    ) : (
+                        <div className="text-sm text-gray-500 text-center py-8">
+                            Belum ada lampiran dokumen
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </section>

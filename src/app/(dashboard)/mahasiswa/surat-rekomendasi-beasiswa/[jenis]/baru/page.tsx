@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -15,7 +15,6 @@ import type { FormDataType } from "@/types/form";
 
 export default function PengajuanBaruPage() {
     const params = useParams();
-    const router = useRouter();
     const jenis = params.jenis as string;
 
     const [currentStep, setCurrentStep] = useState<number>(1);
@@ -75,9 +74,16 @@ export default function PengajuanBaruPage() {
         }
     }, [formData, currentStep, storageKey]);
 
+    // Define interface for window validation functions
+    interface ValidationWindow extends Window {
+        __validateInfoPengajuan?: () => boolean;
+        __validateDetailPengajuan?: () => boolean;
+    }
+
     const handleNext = () => {
         if (currentStep === 1) {
-            const validateFn = (window as any).__validateInfoPengajuan;
+            const validateFn = (window as unknown as ValidationWindow)
+                .__validateInfoPengajuan;
             if (validateFn && typeof validateFn === "function") {
                 const isValid = validateFn();
                 if (!isValid) {
@@ -88,7 +94,8 @@ export default function PengajuanBaruPage() {
         }
 
         if (currentStep === 2) {
-            const validateFn = (window as any).__validateDetailPengajuan;
+            const validateFn = (window as unknown as ValidationWindow)
+                .__validateDetailPengajuan;
             if (validateFn && typeof validateFn === "function") {
                 const isValid = validateFn();
                 if (!isValid) {

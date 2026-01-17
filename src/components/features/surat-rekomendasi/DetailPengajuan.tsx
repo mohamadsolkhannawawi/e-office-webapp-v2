@@ -31,24 +31,27 @@ export function DetailPengajuan({ data, setData }: DetailPengajuanProps) {
         }));
     };
 
-    const validateAllFields = () => {
+    const validateAllFields = React.useCallback(() => {
         const result = validateNamaBeasiswa(data.namaBeasiswa);
-        
+
         if (!result.valid) {
             setErrors({ namaBeasiswa: result.errors[0] || "" });
             return false;
         }
-        
+
         setErrors({});
         return true;
-    };
+    }, [data.namaBeasiswa]);
 
     React.useEffect(() => {
-        (window as any).__validateDetailPengajuan = validateAllFields;
-        return () => {
-            delete (window as any).__validateDetailPengajuan;
+        const customWindow = window as unknown as {
+            __validateDetailPengajuan?: () => boolean;
         };
-    }, [data]);
+        customWindow.__validateDetailPengajuan = validateAllFields;
+        return () => {
+            delete customWindow.__validateDetailPengajuan;
+        };
+    }, [validateAllFields]);
 
     return (
         <section aria-label="Detail Pengajuan">
@@ -84,7 +87,12 @@ export function DetailPengajuan({ data, setData }: DetailPengajuanProps) {
                                         handleValidation("namaBeasiswa", val);
                                     }
                                 }}
-                                onBlur={() => handleValidation("namaBeasiswa", data.namaBeasiswa)}
+                                onBlur={() =>
+                                    handleValidation(
+                                        "namaBeasiswa",
+                                        data.namaBeasiswa,
+                                    )
+                                }
                                 className={`h-11 ${
                                     errors.namaBeasiswa
                                         ? "bg-white border-red-500 focus-visible:ring-red-500"

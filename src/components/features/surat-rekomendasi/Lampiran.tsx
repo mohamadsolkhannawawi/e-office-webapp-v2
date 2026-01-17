@@ -52,7 +52,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
     const [uploadingTambahan, setUploadingTambahan] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    // Auto-dismiss error after 5 seconds
+    // Tutup pesan kesalahan otomatis setelah 5 detik
     useEffect(() => {
         if (errorMessage) {
             const timer = setTimeout(() => {
@@ -62,7 +62,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
         }
     }, [errorMessage]);
 
-    // File validation functions
+    // Fungsi validasi file
     const isValidFormat = (file: File): boolean => {
         const allowedFormats = [".pdf", ".jpg", ".png"];
         const fileName = file.name.toLowerCase();
@@ -90,7 +90,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
     const mainInputRef = useRef<HTMLInputElement | null>(null);
     const tambahanInputRef = useRef<HTMLInputElement | null>(null);
 
-    // Append main files, enforce max 5, validate size -> upload to API
+    // Tambahkan file utama, batasi maksimal 5, validasi ukuran -> unggah ke API
     const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
@@ -128,13 +128,13 @@ export function Lampiran({ data, setData }: LampiranProps) {
         // Clear any previous error
         setErrorMessage(null);
 
-        // Check if trying to upload more files than capacity
+        // Periksa apakah mencoba mengunggah lebih banyak file daripada kapasitas
         const maxRemain = Math.max(0, 5 - existing.length);
         if (arr.length > maxRemain) {
             setErrorMessage("Maksimal 5 file");
         }
 
-        // ensure we have a concrete string letterId to use
+        // pastikan kita memiliki letterId yang valid untuk digunakan
         let letterId: string | undefined = data.letterInstanceId;
         if (!letterId) {
             try {
@@ -167,7 +167,9 @@ export function Lampiran({ data, setData }: LampiranProps) {
                         setData((prev) => ({
                             ...prev,
                             lampiranUtama: [
-                                ...(Array.isArray(prev.lampiranUtama) ? prev.lampiranUtama : []),
+                                ...(Array.isArray(prev.lampiranUtama)
+                                    ? prev.lampiranUtama
+                                    : []),
                                 {
                                     id: res.data.id,
                                     name: res.data.filename,
@@ -196,7 +198,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
         }
     };
 
-    // Append additional files, enforce max 3, validate size -> upload to API
+    // Tambahkan file tambahan, batasi maksimal 3, validasi ukuran -> unggah ke API
     const handleAdditionalFileChange = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
@@ -278,7 +280,9 @@ export function Lampiran({ data, setData }: LampiranProps) {
                         setData((prev) => ({
                             ...prev,
                             lampiranTambahan: [
-                                ...(Array.isArray(prev.lampiranTambahan) ? prev.lampiranTambahan : []),
+                                ...(Array.isArray(prev.lampiranTambahan)
+                                    ? prev.lampiranTambahan
+                                    : []),
                                 {
                                     id: res.data.id,
                                     name: res.data.filename,
@@ -327,7 +331,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
             }
         }
 
-        // remove from state
+        // hapus dari state
         if (which === "utama") {
             setData((prev) => {
                 const list = Array.isArray(prev.lampiranUtama)
@@ -347,7 +351,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
         }
     };
 
-    // Preview modal
+    // Modal pratinjau
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [previewType, setPreviewType] = useState<"pdf" | "image" | null>(
         null
@@ -411,7 +415,10 @@ export function Lampiran({ data, setData }: LampiranProps) {
         <section aria-label="Upload Lampiran">
             {errorMessage && (
                 <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5">
-                    <Alert variant="destructive" className="shadow-lg min-w-[320px] max-w-md">
+                    <Alert
+                        variant="destructive"
+                        className="shadow-lg min-w-[320px] max-w-md"
+                    >
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle>Error</AlertTitle>
                         <AlertDescription className="flex items-start justify-between gap-2">
@@ -426,7 +433,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                     </Alert>
                 </div>
             )}
-            
+
             <Card className="border-none shadow-sm bg-white">
                 <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">
@@ -438,7 +445,9 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             Wajib. Unggah minimal 1 dokumen pendukung utama.
                             Format: PDF, JPG, PNG. Maks: 5MB/file.
                             <br />
-                            <span className="text-red-500">Maksimal 5 file.</span>
+                            <span className="text-red-500">
+                                Maksimal 5 file.
+                            </span>
                         </p>
 
                         <div
@@ -479,7 +488,9 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             {uploadingMain ? (
                                 <div className="flex flex-col items-center gap-3">
                                     <Spinner className="size-8 text-[#007bff]" />
-                                    <p className="text-sm text-gray-600">Mengunggah file...</p>
+                                    <p className="text-sm text-gray-600">
+                                        Mengunggah file...
+                                    </p>
                                 </div>
                             ) : (
                                 <>
@@ -560,11 +571,14 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                 if (filteredFiles.length === 0) {
                                     let message = "";
                                     if (selectedUtama === "File") {
-                                        message = "Belum ada Lampiran File yang diunggah";
+                                        message =
+                                            "Belum ada Lampiran File yang diunggah";
                                     } else if (selectedUtama === "Foto") {
-                                        message = "Belum ada Lampiran Foto yang diunggah";
+                                        message =
+                                            "Belum ada Lampiran Foto yang diunggah";
                                     } else if (selectedUtama === "Lainnya") {
-                                        message = "Belum ada Lampiran Lainnya yang diunggah";
+                                        message =
+                                            "Belum ada Lampiran Lainnya yang diunggah";
                                     }
                                     return (
                                         <div className="text-sm text-gray-500">
@@ -581,77 +595,87 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                     key={`preview-u-${idx}`}
                                                     className="flex items-center justify-between gap-4"
                                                 >
-                                            <div className="flex-1">
-                                                <div className="text-sm font-medium truncate">
-                                                    {f.name}
-                                                </div>
-                                                <div className="text-xs text-gray-500">
-                                                    {f.kategori ||
-                                                        "(Tidak tersedia)"}{" "}
-                                                    •{" "}
-                                                    {formatSize(
-                                                        Number(f.size) || 0
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    onClick={() =>
-                                                        handleViewFile(
-                                                            "utama",
-                                                            idx
-                                                        )
-                                                    }
-                                                    className="h-9"
-                                                >
-                                                    Lihat
-                                                </Button>
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
+                                                    <div className="flex-1">
+                                                        <div className="text-sm font-medium truncate">
+                                                            {f.name}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {f.kategori ||
+                                                                "(Tidak tersedia)"}{" "}
+                                                            •{" "}
+                                                            {formatSize(
+                                                                Number(
+                                                                    f.size
+                                                                ) || 0
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
                                                         <Button
-                                                            variant="destructive"
+                                                            variant="ghost"
+                                                            onClick={() =>
+                                                                handleViewFile(
+                                                                    "utama",
+                                                                    idx
+                                                                )
+                                                            }
                                                             className="h-9"
                                                         >
-                                                            Hapus
+                                                            Lihat
                                                         </Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>
-                                                                Hapus File?
-                                                            </AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                Yakin ingin
-                                                                menghapus file{" "}
-                                                                <strong>
-                                                                    {f.name}
-                                                                </strong>
-                                                                ?
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>
-                                                                Batal
-                                                            </AlertDialogCancel>
-                                                            <AlertDialogAction
-                                                                onClick={() =>
-                                                                    handleDelete(
-                                                                        "utama",
-                                                                        idx
-                                                                    )
-                                                                }
-                                                                className="bg-red-600 hover:bg-red-700"
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger
+                                                                asChild
                                                             >
-                                                                Hapus
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
-                                            </div>
-                                        </li>
-                                    ))}
-                            </ul>
+                                                                <Button
+                                                                    variant="destructive"
+                                                                    className="h-9"
+                                                                >
+                                                                    Hapus
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>
+                                                                        Hapus
+                                                                        File?
+                                                                    </AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        Yakin
+                                                                        ingin
+                                                                        menghapus
+                                                                        file{" "}
+                                                                        <strong>
+                                                                            {
+                                                                                f.name
+                                                                            }
+                                                                        </strong>
+                                                                        ?
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>
+                                                                        Batal
+                                                                    </AlertDialogCancel>
+                                                                    <AlertDialogAction
+                                                                        onClick={() =>
+                                                                            handleDelete(
+                                                                                "utama",
+                                                                                idx
+                                                                            )
+                                                                        }
+                                                                        className="bg-red-600 hover:bg-red-700"
+                                                                    >
+                                                                        Hapus
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </div>
+                                                </li>
+                                            )
+                                        )}
+                                    </ul>
                                 );
                             })()
                         ) : (
@@ -673,7 +697,9 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             Opsional. Tambahkan dokumen pendukung lainnya jika
                             diperlukan.
                             <br />
-                            <span className="text-red-500">Maksimal 3 file.</span>
+                            <span className="text-red-500">
+                                Maksimal 3 file.
+                            </span>
                         </p>
 
                         <div
@@ -715,7 +741,9 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             {uploadingTambahan ? (
                                 <div className="flex flex-col items-center gap-3">
                                     <Spinner className="size-8 text-[#007bff]" />
-                                    <p className="text-sm text-gray-600">Mengunggah file...</p>
+                                    <p className="text-sm text-gray-600">
+                                        Mengunggah file...
+                                    </p>
                                 </div>
                             ) : (
                                 <>
@@ -786,21 +814,26 @@ export function Lampiran({ data, setData }: LampiranProps) {
                         {Array.isArray(data.lampiranTambahan) &&
                         data.lampiranTambahan.length > 0 ? (
                             (() => {
-                                const filteredFiles = data.lampiranTambahan.filter(
-                                    (f: LampiranFile) =>
-                                        selectedTambahan === "Semua"
-                                            ? true
-                                            : f.kategori === selectedTambahan
-                                );
+                                const filteredFiles =
+                                    data.lampiranTambahan.filter(
+                                        (f: LampiranFile) =>
+                                            selectedTambahan === "Semua"
+                                                ? true
+                                                : f.kategori ===
+                                                  selectedTambahan
+                                    );
 
                                 if (filteredFiles.length === 0) {
                                     let message = "";
                                     if (selectedTambahan === "File") {
-                                        message = "Belum ada Lampiran File yang diunggah";
+                                        message =
+                                            "Belum ada Lampiran File yang diunggah";
                                     } else if (selectedTambahan === "Foto") {
-                                        message = "Belum ada Lampiran Foto yang diunggah";
+                                        message =
+                                            "Belum ada Lampiran Foto yang diunggah";
                                     } else if (selectedTambahan === "Lainnya") {
-                                        message = "Belum ada Lampiran Lainnya yang diunggah";
+                                        message =
+                                            "Belum ada Lampiran Lainnya yang diunggah";
                                     }
                                     return (
                                         <div className="text-sm text-gray-500">
@@ -817,76 +850,86 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                     key={`preview-t-${idx}`}
                                                     className="flex items-center justify-between gap-4"
                                                 >
-                                            <div className="flex-1">
-                                                <div className="text-sm font-medium truncate">
-                                                    {f.name}
-                                                </div>
-                                                <div className="text-xs text-gray-500">
-                                                    {f.kategori ||
-                                                        "(Tidak tersedia)"}{" "}
-                                                    •{" "}
-                                                    {formatSize(
-                                                        Number(f.size) || 0
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    onClick={() =>
-                                                        handleViewFile(
-                                                            "tambahan",
-                                                            idx
-                                                        )
-                                                    }
-                                                    className="h-9"
-                                                >
-                                                    Lihat
-                                                </Button>
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
+                                                    <div className="flex-1">
+                                                        <div className="text-sm font-medium truncate">
+                                                            {f.name}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {f.kategori ||
+                                                                "(Tidak tersedia)"}{" "}
+                                                            •{" "}
+                                                            {formatSize(
+                                                                Number(
+                                                                    f.size
+                                                                ) || 0
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
                                                         <Button
-                                                            variant="destructive"
+                                                            variant="ghost"
+                                                            onClick={() =>
+                                                                handleViewFile(
+                                                                    "tambahan",
+                                                                    idx
+                                                                )
+                                                            }
                                                             className="h-9"
                                                         >
-                                                            Hapus
+                                                            Lihat
                                                         </Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>
-                                                                Hapus File?
-                                                            </AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                Yakin ingin
-                                                                menghapus file{" "}
-                                                                <strong>
-                                                                    {f.name}
-                                                                </strong>
-                                                                ?
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>
-                                                                Batal
-                                                            </AlertDialogCancel>
-                                                            <AlertDialogAction
-                                                                onClick={() =>
-                                                                    handleDelete(
-                                                                        "tambahan",
-                                                                        idx
-                                                                    )
-                                                                }
-                                                                className="bg-red-600 hover:bg-red-700"
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger
+                                                                asChild
                                                             >
-                                                                Hapus
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
-                                            </div>
-                                        </li>
-                                    ))}                            
+                                                                <Button
+                                                                    variant="destructive"
+                                                                    className="h-9"
+                                                                >
+                                                                    Hapus
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>
+                                                                        Hapus
+                                                                        File?
+                                                                    </AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        Yakin
+                                                                        ingin
+                                                                        menghapus
+                                                                        file{" "}
+                                                                        <strong>
+                                                                            {
+                                                                                f.name
+                                                                            }
+                                                                        </strong>
+                                                                        ?
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>
+                                                                        Batal
+                                                                    </AlertDialogCancel>
+                                                                    <AlertDialogAction
+                                                                        onClick={() =>
+                                                                            handleDelete(
+                                                                                "tambahan",
+                                                                                idx
+                                                                            )
+                                                                        }
+                                                                        className="bg-red-600 hover:bg-red-700"
+                                                                    >
+                                                                        Hapus
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </div>
+                                                </li>
+                                            )
+                                        )}
                                     </ul>
                                 );
                             })()

@@ -27,7 +27,7 @@ interface LampiranSuratProps {
 
 export function LampiranSurat({ data }: LampiranSuratProps) {
     const [selectedFilter, setSelectedFilter] = useState<string>("Semua");
-    
+
     const lampiran = data || [
         {
             name: "File Proposal.pdf",
@@ -43,26 +43,32 @@ export function LampiranSurat({ data }: LampiranSuratProps) {
         },
     ];
 
-    // Infer category from file type
+    // Tentukan kategori berdasarkan tipe file
     const inferCategory = (file: { name: string; type: string }) => {
         const t = file.type.toLowerCase();
         const name = file.name.toLowerCase();
         if (t.includes("pdf") || name.endsWith(".pdf")) return "File";
-        if (t.includes("image") || name.endsWith(".jpg") || name.endsWith(".png"))
+        if (
+            t.includes("image") ||
+            name.endsWith(".jpg") ||
+            name.endsWith(".png")
+        )
             return "Foto";
         return "Lainnya";
     };
 
-    // Convert to FilePreviewItem format with category
-    const previewFiles: (FilePreviewItem & { kategori: string })[] = lampiran.map((file) => ({
-        name: file.name,
-        type: file.type,
-        size: typeof file.size === "string" ? parseInt(file.size) : file.size,
-        url: file.downloadUrl || file.url, // Prioritize downloadUrl from MinIO
-        kategori: inferCategory(file),
-    }));
+    // Konversi ke format FilePreviewItem dengan kategori
+    const previewFiles: (FilePreviewItem & { kategori: string })[] =
+        lampiran.map((file) => ({
+            name: file.name,
+            type: file.type,
+            size:
+                typeof file.size === "string" ? parseInt(file.size) : file.size,
+            url: file.downloadUrl || file.url, // Prioritaskan downloadUrl dari MinIO
+            kategori: inferCategory(file),
+        }));
 
-    // Filter files based on selection
+    // Filter file berdasarkan pilihan
     const filteredFiles = previewFiles.filter((f) =>
         selectedFilter === "Semua" ? true : f.kategori === selectedFilter
     );
@@ -93,9 +99,15 @@ export function LampiranSurat({ data }: LampiranSuratProps) {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="Semua">Semua</SelectItem>
-                                    <SelectItem value="File">File (PDF)</SelectItem>
-                                    <SelectItem value="Foto">Foto (JPG/PNG)</SelectItem>
-                                    <SelectItem value="Lainnya">Lainnya</SelectItem>
+                                    <SelectItem value="File">
+                                        File (PDF)
+                                    </SelectItem>
+                                    <SelectItem value="Foto">
+                                        Foto (JPG/PNG)
+                                    </SelectItem>
+                                    <SelectItem value="Lainnya">
+                                        Lainnya
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

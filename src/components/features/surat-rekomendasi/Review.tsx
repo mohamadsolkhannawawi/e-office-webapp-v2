@@ -50,7 +50,7 @@ export function Review({ data }: ReviewProps) {
     const hasMainAttachments =
         Array.isArray(data.lampiranUtama) && data.lampiranUtama.length > 0;
 
-    // Convert files to FilePreviewItem format
+    // Konversi file ke format FilePreviewItem
     const previewFiles: FilePreviewItem[] = [];
 
     if (Array.isArray(data.lampiranUtama)) {

@@ -39,8 +39,8 @@ export async function uploadAttachment(
             {
                 method: "POST",
                 body: formData,
-                // Don't set Content-Type header, let browser set it with boundary
-                // include credentials so cookies (session) are sent to backend
+                // Jangan atur header Content-Type, biarkan browser mengaturnya dengan boundary
+                // Sertakan kredensial agar cookie (sesi) dikirim ke backend
                 credentials: "include",
             }
         );

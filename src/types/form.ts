@@ -1,5 +1,5 @@
 export interface LampiranFile {
-    id?: string; // API response에서 제공
+    id?: string; // Diberikan dari respons API
     name: string;
     size: number;
     type?: string;
@@ -26,6 +26,6 @@ export type FormDataType = {
     namaBeasiswa: string;
     lampiranUtama: LampiranFile[];
     lampiranTambahan: LampiranFile[];
-    letterInstanceId?: string; // Created after submit to API
+    letterInstanceId?: string; // Dibuat setelah submit ke API
     [key: string]: unknown;
 };

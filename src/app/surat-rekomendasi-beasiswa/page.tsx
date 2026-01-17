@@ -61,16 +61,23 @@ export default function SuratRekomendasiPage() {
             const payload = { formData, currentStep };
             localStorage.setItem(
                 "suratRekomendasiForm",
-                JSON.stringify(payload)
+                JSON.stringify(payload),
             );
         } catch (err) {
             console.warn("Failed to persist form data", err);
         }
     }, [formData, currentStep]);
 
+    // Define interface for window validation functions
+    interface ValidationWindow extends Window {
+        __validateInfoPengajuan?: () => boolean;
+        __validateDetailPengajuan?: () => boolean;
+    }
+
     const handleNext = () => {
         if (currentStep === 1) {
-            const validateFn = (window as any).__validateInfoPengajuan;
+            const validateFn = (window as unknown as ValidationWindow)
+                .__validateInfoPengajuan;
             if (validateFn && typeof validateFn === "function") {
                 const isValid = validateFn();
                 if (!isValid) {
@@ -81,7 +88,8 @@ export default function SuratRekomendasiPage() {
         }
 
         if (currentStep === 2) {
-            const validateFn = (window as any).__validateDetailPengajuan;
+            const validateFn = (window as unknown as ValidationWindow)
+                .__validateDetailPengajuan;
             if (validateFn && typeof validateFn === "function") {
                 const isValid = validateFn();
                 if (!isValid) {

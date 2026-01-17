@@ -67,8 +67,8 @@ function FormField({
                         readOnly
                             ? "bg-gray-100 text-gray-500 border-gray-200"
                             : error
-                            ? "bg-white border-red-500 focus-visible:ring-red-500"
-                            : "bg-white border-gray-300"
+                              ? "bg-white border-red-500 focus-visible:ring-red-500"
+                              : "bg-white border-gray-300"
                     }`}
                 />
                 {icon && (
@@ -80,7 +80,9 @@ function FormField({
             {error && (
                 <Alert variant="destructive" className="py-2">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="text-xs">{error}</AlertDescription>
+                    <AlertDescription className="text-xs">
+                        {error}
+                    </AlertDescription>
                 </Alert>
             )}
         </div>
@@ -136,7 +138,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
         }));
     };
 
-    const validateAllFields = () => {
+    const validateAllFields = React.useCallback(() => {
         const fields = [
             "namaLengkap",
             "role",
@@ -204,14 +206,17 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
 
         setErrors(newErrors);
         return allValid;
-    };
+    }, [data]);
 
     React.useEffect(() => {
-        (window as any).__validateInfoPengajuan = validateAllFields;
-        return () => {
-            delete (window as any).__validateInfoPengajuan;
+        const customWindow = window as unknown as {
+            __validateInfoPengajuan?: () => boolean;
         };
-    }, [data]);
+        customWindow.__validateInfoPengajuan = validateAllFields;
+        return () => {
+            delete customWindow.__validateInfoPengajuan;
+        };
+    }, [validateAllFields]);
 
     return (
         <section aria-label="Informasi Identitas">
@@ -233,7 +238,12 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     handleValidation("namaLengkap", val);
                                 }
                             }}
-                            onBlur={() => handleValidation("namaLengkap", data.namaLengkap)}
+                            onBlur={() =>
+                                handleValidation(
+                                    "namaLengkap",
+                                    data.namaLengkap,
+                                )
+                            }
                         />
                         <FormField
                             name="role"
@@ -294,7 +304,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     handleValidation("departemen", val);
                                 }
                             }}
-                            onBlur={() => handleValidation("departemen", data.departemen)}
+                            onBlur={() =>
+                                handleValidation("departemen", data.departemen)
+                            }
                         />
                         <FormField
                             name="programStudi"
@@ -311,7 +323,12 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     handleValidation("programStudi", val);
                                 }
                             }}
-                            onBlur={() => handleValidation("programStudi", data.programStudi)}
+                            onBlur={() =>
+                                handleValidation(
+                                    "programStudi",
+                                    data.programStudi,
+                                )
+                            }
                         />
 
                         <FormField
@@ -329,9 +346,14 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     handleValidation("tempatLahir", val);
                                 }
                             }}
-                            onBlur={() => handleValidation("tempatLahir", data.tempatLahir)}
+                            onBlur={() =>
+                                handleValidation(
+                                    "tempatLahir",
+                                    data.tempatLahir,
+                                )
+                            }
                         />
-                        
+
                         <div className="space-y-2">
                             <Label className="text-sm font-semibold text-gray-700">
                                 Tanggal Lahir
@@ -348,7 +370,10 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                         tanggalLahir: date?.toISOString() || "",
                                     }));
                                     if (errors.tanggalLahir) {
-                                        handleValidation("tanggalLahir", date?.toISOString() || "");
+                                        handleValidation(
+                                            "tanggalLahir",
+                                            date?.toISOString() || "",
+                                        );
                                     }
                                 }}
                                 placeholder="Pilih tanggal lahir"
@@ -388,13 +413,18 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                 onChange={(e) => {
                                     const val = e.target.value;
                                     if (val === "" || /^\d+$/.test(val)) {
-                                        setData((prev) => ({ ...prev, noHp: val }));
+                                        setData((prev) => ({
+                                            ...prev,
+                                            noHp: val,
+                                        }));
                                         if (errors.noHp) {
                                             handleValidation("noHp", val);
                                         }
                                     }
                                 }}
-                                onBlur={() => handleValidation("noHp", data.noHp)}
+                                onBlur={() =>
+                                    handleValidation("noHp", data.noHp)
+                                }
                                 className={`h-11 ${
                                     errors.noHp
                                         ? "bg-white border-red-500 focus-visible:ring-red-500"
@@ -432,14 +462,27 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     ) {
                                         e.preventDefault();
                                     }
-                                    if (e.key === "." && (e.target as HTMLInputElement).value.includes(".")) {
+                                    if (
+                                        e.key === "." &&
+                                        (
+                                            e.target as HTMLInputElement
+                                        ).value.includes(".")
+                                    ) {
                                         e.preventDefault();
                                     }
                                 }}
                                 onChange={(e) => {
                                     const val = e.target.value;
-                                    if (val === "" || (/^\d*\.?\d*$/.test(val) && (val === "" || parseFloat(val) <= 4))) {
-                                        setData((prev) => ({ ...prev, ipk: val }));
+                                    if (
+                                        val === "" ||
+                                        (/^\d*\.?\d*$/.test(val) &&
+                                            (val === "" ||
+                                                parseFloat(val) <= 4))
+                                    ) {
+                                        setData((prev) => ({
+                                            ...prev,
+                                            ipk: val,
+                                        }));
                                         if (errors.ipk) {
                                             handleValidation("ipk", val);
                                         }
@@ -484,14 +527,27 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     ) {
                                         e.preventDefault();
                                     }
-                                    if (e.key === "." && (e.target as HTMLInputElement).value.includes(".")) {
+                                    if (
+                                        e.key === "." &&
+                                        (
+                                            e.target as HTMLInputElement
+                                        ).value.includes(".")
+                                    ) {
                                         e.preventDefault();
                                     }
                                 }}
                                 onChange={(e) => {
                                     const val = e.target.value;
-                                    if (val === "" || (/^\d*\.?\d*$/.test(val) && (val === "" || parseFloat(val) <= 4))) {
-                                        setData((prev) => ({ ...prev, ips: val }));
+                                    if (
+                                        val === "" ||
+                                        (/^\d*\.?\d*$/.test(val) &&
+                                            (val === "" ||
+                                                parseFloat(val) <= 4))
+                                    ) {
+                                        setData((prev) => ({
+                                            ...prev,
+                                            ips: val,
+                                        }));
                                         if (errors.ips) {
                                             handleValidation("ips", val);
                                         }

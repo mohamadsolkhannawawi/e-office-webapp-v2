@@ -8,6 +8,8 @@ import {
     Info,
     Hash,
     Send,
+    ShieldCheck,
+    Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -22,6 +24,7 @@ export default function SuratPreviewPage() {
     const [upaLetterNumber, setUpaLetterNumber] = useState(
         searchParams.get("no") || "",
     );
+    const [upaIsStampApplied, setUpaIsStampApplied] = useState(false);
     const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
 
     const handleBack = () => {
@@ -50,7 +53,7 @@ export default function SuratPreviewPage() {
             case "selesai":
                 return {
                     showSignature: true,
-                    showStamp: true,
+                    showStamp: upaIsStampApplied,
                     nomorSurat: upaLetterNumber || defaultNo,
                 };
             default:
@@ -60,7 +63,7 @@ export default function SuratPreviewPage() {
                     nomorSurat: "",
                 };
         }
-    }, [stage, upaLetterNumber]);
+    }, [stage, upaLetterNumber, upaIsStampApplied]);
 
     const attributes = [
         {
@@ -130,54 +133,105 @@ export default function SuratPreviewPage() {
 
                     {stage === "upa" && (
                         <div className="space-y-4 animate-in slide-in-from-left-4 duration-500">
-                            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-4">
+                            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6">
                                 <div className="flex flex-col items-center gap-2 mb-2">
                                     <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
-                                        <Hash className="h-6 w-6" />
+                                        <ShieldCheck className="h-6 w-6" />
                                     </div>
-                                    <h3 className="font-bold text-slate-800 tracking-tight">
-                                        Aksi Penomoran
+                                    <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
+                                        Otoritas UPA
                                     </h3>
                                 </div>
 
-                                <Button
-                                    onClick={() =>
-                                        setIsNumberingModalOpen(true)
-                                    }
-                                    className="w-full bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-xs shadow-sm"
-                                >
-                                    <Hash className="h-4 w-4" />
-                                    {upaLetterNumber
-                                        ? "Ubah Nomor"
-                                        : "Beri Nomor"}
-                                </Button>
+                                <div className="space-y-3">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                                        Tahap 1: Penomoran
+                                    </p>
+                                    <Button
+                                        onClick={() =>
+                                            setIsNumberingModalOpen(true)
+                                        }
+                                        className={`w-full ${upaLetterNumber ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
+                                    >
+                                        <Hash className="h-4 w-4" />
+                                        {upaLetterNumber
+                                            ? "Ubah No. Surat"
+                                            : "Isi No. Surat"}
+                                        {upaLetterNumber && (
+                                            <Check className="h-3 w-3" />
+                                        )}
+                                    </Button>
 
-                                {upaLetterNumber && (
-                                    <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-2 animate-in fade-in zoom-in">
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center">
-                                            Nomor Terpilih
-                                        </p>
-                                        <div className="bg-white border border-blue-100 rounded-lg py-2 px-3 text-center">
-                                            <span className="text-[11px] font-bold text-undip-blue">
-                                                {upaLetterNumber}
+                                    {upaLetterNumber && (
+                                        <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 animate-in zoom-in duration-300">
+                                            <div className="bg-white border border-emerald-100 rounded-lg py-2 px-3 text-center shadow-inner">
+                                                <span className="text-[10px] font-bold text-emerald-700 font-mono tracking-tight">
+                                                    {upaLetterNumber}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="space-y-3 border-t border-slate-100 pt-5">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                                        Tahap 2: Pengesahan
+                                    </p>
+                                    <Button
+                                        onClick={() =>
+                                            setUpaIsStampApplied(
+                                                !upaIsStampApplied,
+                                            )
+                                        }
+                                        className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
+                                    >
+                                        <ShieldCheck className="h-4 w-4" />
+                                        {upaIsStampApplied
+                                            ? "Hapus Stempel"
+                                            : "Bubuhkan Stempel"}
+                                        {upaIsStampApplied && (
+                                            <Check className="h-3 w-3" />
+                                        )}
+                                    </Button>
+
+                                    {upaIsStampApplied && (
+                                        <div className="flex items-center gap-2 justify-center py-1">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                                            <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">
+                                                Stempel On-Board
                                             </span>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
 
-                                <Button
-                                    disabled={!upaLetterNumber}
-                                    className={`w-full ${!upaLetterNumber ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg shadow-blue-100"} font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-xs transition-all`}
-                                    onClick={() => {
-                                        alert(
-                                            "Surat Berhasil Di-publish! (Simulasi)",
-                                        );
-                                        router.push("/upa/surat/penomoran");
-                                    }}
-                                >
-                                    <Send className="h-4 w-4" />
-                                    Publish Surat
-                                </Button>
+                                <div className="space-y-3 border-t border-slate-100 pt-5">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
+                                        Langkah Terakhir
+                                    </p>
+                                    <Button
+                                        disabled={
+                                            !upaLetterNumber ||
+                                            !upaIsStampApplied
+                                        }
+                                        className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg shadow-blue-200"} font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] transition-all relative overflow-hidden group`}
+                                        onClick={() => {
+                                            alert(
+                                                "Surat Berhasil Di-publish dan diarsipkan!",
+                                            );
+                                            router.push("/upa/surat/penomoran");
+                                        }}
+                                    >
+                                        <Send className="h-4 w-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                        Publish & Terbitkan
+                                    </Button>
+                                    {(!upaLetterNumber ||
+                                        !upaIsStampApplied) && (
+                                        <p className="text-[9px] text-slate-400 text-center leading-tight">
+                                            Nomor dan stempel wajib diisi
+                                            sebelum publikasi.
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}

@@ -9,6 +9,7 @@ import {
     XOctagon,
     Send,
     PenTool,
+    ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +38,7 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
     const [wd1Signature, setWd1Signature] = useState<string | null>(null);
     const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
     const [upaLetterNumber, setUpaLetterNumber] = useState("");
-    const [upaIsStampApplied, setUpaIsStampApplied] = useState(true);
+    const [upaIsStampApplied, setUpaIsStampApplied] = useState(false);
     const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
 
     const handleAction = (
@@ -319,23 +320,55 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                                                 : "Beri Nomor Surat"}
                                         </Button>
 
-                                        {upaLetterNumber && (
-                                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center animate-in zoom-in duration-300">
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest text-center">
-                                                    Nomor Surat Terpilih
-                                                </p>
-                                                <div className="flex items-center gap-2 text-undip-blue font-bold text-sm bg-white px-4 py-2 rounded-lg shadow-sm border border-blue-50">
-                                                    <Sparkles className="h-3.5 w-3.5" />
-                                                    {upaLetterNumber}
-                                                </div>
+                                        <Button
+                                            onClick={() =>
+                                                setUpaIsStampApplied(
+                                                    !upaIsStampApplied,
+                                                )
+                                            }
+                                            className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50"} font-bold py-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm`}
+                                        >
+                                            <ShieldCheck className="h-5 w-5" />
+                                            {upaIsStampApplied
+                                                ? "Hapus Stempel"
+                                                : "Bubuhkan Stempel"}
+                                        </Button>
+
+                                        {(upaLetterNumber ||
+                                            upaIsStampApplied) && (
+                                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 animate-in zoom-in duration-300">
+                                                {upaLetterNumber && (
+                                                    <div className="flex flex-col items-center">
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest text-center">
+                                                            Nomor Surat Terpilih
+                                                        </p>
+                                                        <div className="flex items-center gap-2 text-undip-blue font-bold text-sm bg-white px-4 py-2 rounded-lg shadow-sm border border-blue-50 w-full justify-center">
+                                                            <Sparkles className="h-3.5 w-3.5" />
+                                                            {upaLetterNumber}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {upaIsStampApplied && (
+                                                    <div className="flex items-center gap-2 justify-center py-1 border-t border-slate-100 pt-3">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                                                        <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest text-center">
+                                                            Stempel Digital
+                                                            Aktif
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
 
                                     <Button
                                         onClick={() => handleAction("publish")}
-                                        disabled={!upaLetterNumber}
-                                        className={`w-full ${!upaLetterNumber ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
+                                        disabled={
+                                            !upaLetterNumber ||
+                                            !upaIsStampApplied
+                                        }
+                                        className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
                                     >
                                         <Send className="h-5 w-5" />
                                         Publish

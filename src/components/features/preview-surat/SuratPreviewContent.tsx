@@ -20,6 +20,7 @@ import { SuratDocument } from "@/components/features/preview-surat/SuratDocument
 import { UPANumberingModal } from "@/components/features/admin-detail-surat/UPANumberingModal";
 import { WD1SignatureModal } from "@/components/features/admin-detail-surat/WD1SignatureModal";
 import { AdminActionModals } from "@/components/features/admin-detail-surat/AdminActionModals";
+import { SuccessStampModal } from "@/components/features/admin-detail-surat/SuccessStampModal";
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 
@@ -47,6 +48,8 @@ export function SuratPreviewContent({
     const [modalType, setModalType] = useState<
         "approve" | "revise" | "reject" | "publish"
     >("approve");
+    const [isSuccessStampModalOpen, setIsSuccessStampModalOpen] =
+        useState(false);
 
     const handleBack = () => {
         if (backUrl) {
@@ -119,6 +122,10 @@ export function SuratPreviewContent({
                 onClose={() => setIsNumberingModalOpen(false)}
                 onNumberChange={setUpaLetterNumber}
                 onStampApply={() => {}} // Stamp is always true in this UI
+            />
+            <SuccessStampModal
+                isOpen={isSuccessStampModalOpen}
+                onClose={() => setIsSuccessStampModalOpen(false)}
             />
             <WD1SignatureModal
                 isOpen={isSignatureModalOpen}
@@ -309,11 +316,16 @@ export function SuratPreviewContent({
                                         Tahap 2: Pengesahan
                                     </p>
                                     <Button
-                                        onClick={() =>
-                                            setUpaIsStampApplied(
-                                                !upaIsStampApplied,
-                                            )
-                                        }
+                                        onClick={() => {
+                                            const nextValue =
+                                                !upaIsStampApplied;
+                                            setUpaIsStampApplied(nextValue);
+                                            if (nextValue) {
+                                                setIsSuccessStampModalOpen(
+                                                    true,
+                                                );
+                                            }
+                                        }}
                                         className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
                                     >
                                         <ShieldCheck className="h-4 w-4" />

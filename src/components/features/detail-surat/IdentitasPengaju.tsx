@@ -8,11 +8,11 @@ interface InfoRowProps {
 
 function InfoRow({ label, value }: InfoRowProps) {
     return (
-        <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-0">
-            <span className="text-sm text-gray-600 font-medium w-full sm:w-40 mb-1 sm:mb-0">
-                {label}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50/30 transition-colors px-6">
+            <span className="text-sm text-slate-500 font-medium">{label}</span>
+            <span className="md:col-span-2 text-sm font-bold text-slate-800">
+                {value}
             </span>
-            <span className="text-sm font-semibold text-gray-900">{value}</span>
         </div>
     );
 }

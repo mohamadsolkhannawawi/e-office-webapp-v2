@@ -109,7 +109,7 @@ export function AdminActionModals({
                                     {type === "approve" &&
                                         "Lanjutkan dokumen ke tahapan berikutnya."}
                                     {type === "publish" &&
-                                        "Nomor surat dan stempel akan dibubuhkan secara otomatis."}
+                                        "Nomor surat akan dibubuhkan secara otomatis."}
                                     {type === "revise" &&
                                         "Berikan instruksi revisi yang jelas untuk pengaju."}
                                     {type === "reject" &&
@@ -176,7 +176,7 @@ export function AdminActionModals({
                                         Nomor Surat Otomatis (Format:
                                         FSM/KM/2026)
                                     </li>
-                                    <li>Stempel Digital Fakultas</li>
+
                                     <li>
                                         Status &quot;Publikasi&quot; (Mahasiswa
                                         dapat mengunduh)

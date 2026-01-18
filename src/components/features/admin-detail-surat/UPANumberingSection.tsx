@@ -41,7 +41,7 @@ export function UPANumberingSection({
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                     <Hash className="h-5 w-5 text-undip-blue" />
-                    Penomoran & Stempel Digital
+                    Penomoran Dokumen
                 </h2>
                 <div className="flex items-center gap-2 text-undip-blue bg-blue-50 px-3 py-1 rounded-full text-xs font-bold border border-blue-100">
                     <ShieldCheck className="h-3 w-3" />
@@ -87,39 +87,6 @@ export function UPANumberingSection({
                             penomoran Fakultas Sains dan Matematika.
                         </p>
                     </div>
-
-                    {/* Stamp Configuration */}
-                    <div className="pt-6 border-t border-slate-100">
-                        <div className="flex items-center justify-between bg-slate-50/80 p-5 rounded-2xl border border-slate-100 ring-1 ring-white/50 shadow-inner">
-                            <div className="flex items-center gap-4">
-                                <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
-                                    <div className="w-10 h-10 border-4 border-undip-blue/20 rounded-full flex items-center justify-center relative">
-                                        <div className="w-6 h-6 border-2 border-undip-blue/40 rounded-full flex items-center justify-center">
-                                            <div className="w-2 h-2 bg-undip-blue/60 rounded-full"></div>
-                                        </div>
-                                        <div className="absolute -top-1 -right-1 bg-undip-blue text-white rounded-full p-0.5 shadow-sm">
-                                            <Check className="h-2 w-2" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-slate-800">
-                                        Stempel Digital Aktif
-                                    </h4>
-                                    <p className="text-[11px] text-slate-500 mt-0.5">
-                                        Stempel resmi Fakultas otomatis
-                                        dibubuhkan saat Publish.
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
-                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
-                                    Ready to Seal
-                                </span>
-                            </div>
-                        </div>
-                    </div>
                 </CardContent>
             </Card>
 
@@ -133,9 +100,9 @@ export function UPANumberingSection({
                     </h5>
                     <p className="text-[11px] text-amber-700 leading-relaxed">
                         Setelah Anda menekan tombol <strong>Publish</strong> di
-                        sidebar, surat akan dikunci, nomor dan stempel akan
-                        dibubuhkan secara permanen, dan status akan berubah
-                        menjadi <strong>Selesai (Publikasi)</strong>.
+                        sidebar, surat akan dikunci, nomor akan dibubuhkan
+                        secara permanen, dan status akan berubah menjadi{" "}
+                        <strong>Selesai (Publikasi)</strong>.
                     </p>
                 </div>
             </div>

@@ -173,7 +173,15 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                         </h2>
                         <div className="space-y-3">
                             <Link
-                                href={`/mahasiswa/surat/proses/preview/dummy-id`}
+                                href={`/mahasiswa/surat/proses/preview/dummy-id?stage=${
+                                    role === "supervisor-akademik"
+                                        ? "supervisor"
+                                        : role === "manajer-tu"
+                                          ? "manajer"
+                                          : role === "wakil-dekan-1"
+                                            ? "wd1"
+                                            : "upa"
+                                }`}
                             >
                                 <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 mb-3">
                                     <Eye className="h-5 w-5" />

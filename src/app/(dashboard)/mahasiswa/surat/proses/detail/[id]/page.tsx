@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Download, Eye, EditNote } from "lucide-react";
+import { ChevronRight, Download, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
@@ -130,7 +130,7 @@ export default function DetailSuratProsesPage() {
                             Aksi
                         </h2>
                         <div className="space-y-3">
-                            <Link href="/mahasiswa/surat/proses/preview/dummy-id">
+                            <Link href="/mahasiswa/surat/proses/preview/dummy-id?stage=mahasiswa">
                                 <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-medium py-6 rounded-lg flex items-center justify-center gap-2">
                                     <Eye className="h-4 w-4" />
                                     Preview

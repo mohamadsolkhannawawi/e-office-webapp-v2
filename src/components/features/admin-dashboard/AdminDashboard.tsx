@@ -11,11 +11,11 @@ import {
     Eye,
     ChevronLeft,
     ChevronRight,
-    Users,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 interface StatCardProps {
     label: string;
@@ -42,9 +42,12 @@ function StatCard({
                         {label}
                     </span>
                     <div className={`p-2 rounded-lg ${iconBgClass}`}>
-                        {React.cloneElement(icon as React.ReactElement, {
-                            className: `h-5 w-5 ${colorClass}`,
-                        })}
+                        {React.cloneElement(
+                            icon as React.ReactElement<{ className?: string }>,
+                            {
+                                className: `h-5 w-5 ${colorClass}`,
+                            },
+                        )}
                     </div>
                 </div>
                 <div>
@@ -358,14 +361,18 @@ export function AdminDashboard({
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="rounded-full h-8 text-xs font-bold border-slate-100 text-slate-600 hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4"
+                                        <Link
+                                            href={`/${roleName.toLowerCase().replace(/ /g, "-")}/surat/${roleName === "Supervisor Akademik" || roleName === "Manajer TU" ? "penerima" : roleName === "Wakil Dekan 1" ? "persetujuan" : "penomoran"}/detail/${letter.id}`}
                                         >
-                                            <Eye className="h-3.5 w-3.5" />
-                                            Preview
-                                        </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="rounded-full h-8 text-xs font-bold border-slate-100 text-slate-600 hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4"
+                                            >
+                                                <Eye className="h-3.5 w-3.5" />
+                                                Preview
+                                            </Button>
+                                        </Link>
                                     </td>
                                 </tr>
                             ))}

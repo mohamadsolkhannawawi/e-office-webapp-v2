@@ -1,47 +1,71 @@
+"use client";
+
+import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FaRegBell } from "react-icons/fa";
+import logoNavbar from "@/assets/images/logo-undip-navbar.png";
 
-export function Navbar() {
+interface NavbarProps {
+    userName?: string;
+    showProfile?: boolean;
+}
+
+export function Navbar({
+    userName = "Mahasiswa",
+    showProfile = true,
+}: NavbarProps) {
     return (
-        <header className="bg-[#007bff] text-white py-3 px-6 shadow-sm flex justify-between items-center sticky top-0 z-50">
+        <header className="relative z-50 flex h-16 w-full items-center justify-between bg-undip-blue px-4 shadow-md md:px-8">
             {/* Bagian Kiri: Logo & Nama Instansi */}
             <div className="flex items-center gap-3">
-                {/* Placeholder Logo (Ganti Image nanti kalau sudah ada file logo) */}
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-[10px]">
-                    LOGO
+                <div className="flex h-10 w-10 items-center justify-start">
+                    <Image
+                        src={logoNavbar}
+                        alt="UNDIP Logo Small"
+                        width={48}
+                        height={48}
+                        className="h-full w-full object-contain"
+                    />
                 </div>
-                <div className="leading-tight">
-                    <h1 className="font-bold text-xs uppercase opacity-90">
-                        Fakultas Sains & Matematika
-                    </h1>
-                    <p className="text-[10px] uppercase opacity-75">
-                        Universitas Diponegoro
-                    </p>
+                <div className="flex flex-col leading-tight text-white">
+                    <span className="text-xs font-medium opacity-90">
+                        Fakultas
+                    </span>
+                    <span className="text-sm font-bold tracking-wide">
+                        SAINS DAN MATEMATIKA
+                    </span>
+                    <span className="text-[10px] font-medium opacity-80">
+                        UNIVERSITAS DIPONEGORO
+                    </span>
                 </div>
             </div>
 
             {/* Bagian Kanan: Notifikasi & Profil */}
-            <div className="flex items-center gap-4">
-                <button
-                    aria-label="Notifikasi"
-                    className="hover:opacity-80 transition"
-                >
-                    <FaRegBell size={18} />
-                </button>
+            {showProfile && (
+                <div className="flex items-center gap-4 text-white">
+                    <button
+                        aria-label="Notifikasi"
+                        className="hover:opacity-80 transition"
+                    >
+                        <FaRegBell size={18} />
+                    </button>
 
-                <div className="flex items-center gap-2 pl-4 border-l border-white/20">
-                    <span className="text-sm font-medium hidden sm:block">
-                        Ahmad Douglas
-                    </span>
-                    <Avatar className="w-8 h-8 border-2 border-white/30 cursor-pointer">
-                        <AvatarImage
-                            src="https://github.com/shadcn.png"
-                            alt="@shadcn"
-                        />
-                        <AvatarFallback>AD</AvatarFallback>
-                    </Avatar>
+                    <div className="flex items-center gap-2 pl-4 border-l border-white/20">
+                        <span className="text-sm font-medium hidden sm:block">
+                            {userName}
+                        </span>
+                        <Avatar className="w-8 h-8 border-2 border-white/30 cursor-pointer">
+                            <AvatarImage
+                                src="https://github.com/shadcn.png"
+                                alt={userName}
+                            />
+                            <AvatarFallback>
+                                {userName.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                        </Avatar>
+                    </div>
                 </div>
-            </div>
+            )}
         </header>
     );
 }

@@ -73,17 +73,6 @@ export function AdminActionModals({
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[500px] rounded-2xl border-none shadow-2xl p-0 overflow-hidden">
-                {/* Header Decoration */}
-                <div
-                    className={`h-2 w-full ${
-                        type === "approve" || type === "publish"
-                            ? "bg-undip-blue"
-                            : type === "revise"
-                              ? "bg-orange-500"
-                              : "bg-red-600"
-                    }`}
-                />
-
                 <div className="p-8">
                     <DialogHeader className="mb-6">
                         <div className="flex items-center gap-4">

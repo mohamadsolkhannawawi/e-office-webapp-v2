@@ -7,8 +7,6 @@ import {
     Check,
     RotateCcw,
     XOctagon,
-    FileText,
-    ExternalLink,
     Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +16,8 @@ import {
     RiwayatSurat,
 } from "@/components/features/detail-surat";
 import Link from "next/link";
+import { AdminActionModals } from "./AdminActionModals";
+import { useState } from "react";
 
 interface AdminDetailSuratProps {
     role: "supervisor-akademik" | "manajer-tu" | "wakil-dekan-1" | "upa";
@@ -25,6 +25,25 @@ interface AdminDetailSuratProps {
 }
 
 export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
+    const [modalConfig, setModalConfig] = useState<{
+        isOpen: boolean;
+        type: "approve" | "revise" | "reject" | "publish";
+    }>({ isOpen: false, type: "approve" });
+
+    const handleAction = (
+        type: "approve" | "revise" | "reject" | "publish",
+    ) => {
+        setModalConfig({ isOpen: true, type });
+    };
+
+    const handleConfirmAction = (data: {
+        reason?: string;
+        targetRole?: string;
+    }) => {
+        console.log("Action Confirmed:", modalConfig.type, data);
+        // Here you would typically call an API
+    };
+
     const identitasData = {
         namaLengkap: "Ahmad Syaifullah",
         nimNip: "24060121120001",
@@ -62,6 +81,15 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-10">
+            <AdminActionModals
+                isOpen={modalConfig.isOpen}
+                onClose={() =>
+                    setModalConfig({ ...modalConfig, isOpen: false })
+                }
+                onConfirm={handleConfirmAction}
+                type={modalConfig.type}
+                role={role}
+            />
             {/* Breadcrumb */}
             <nav className="flex items-center text-sm font-medium text-slate-500">
                 {currentBreadcrumb.map((crumb, index) => (
@@ -173,7 +201,7 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                         </h2>
                         <div className="space-y-3">
                             <Link
-                                href={`/mahasiswa/surat/proses/preview/dummy-id?stage=${
+                                href={`/mahasiswa/surat/proses/preview/${id}?stage=${
                                     role === "supervisor-akademik"
                                         ? "supervisor"
                                         : role === "manajer-tu"
@@ -191,22 +219,34 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
 
                             {role !== "upa" ? (
                                 <>
-                                    <Button className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
+                                    <Button
+                                        onClick={() => handleAction("approve")}
+                                        className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                    >
                                         <Check className="h-5 w-5" />
                                         Setujui
                                     </Button>
-                                    <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
+                                    <Button
+                                        onClick={() => handleAction("revise")}
+                                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                    >
                                         <RotateCcw className="h-5 w-5" />
                                         Revisi
                                     </Button>
-                                    <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
+                                    <Button
+                                        onClick={() => handleAction("reject")}
+                                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                    >
                                         <XOctagon className="h-5 w-5" />
                                         Tolak
                                     </Button>
                                 </>
                             ) : (
                                 <>
-                                    <Button className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
+                                    <Button
+                                        onClick={() => handleAction("publish")}
+                                        className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                    >
                                         <Send className="h-5 w-5" />
                                         Publish
                                     </Button>

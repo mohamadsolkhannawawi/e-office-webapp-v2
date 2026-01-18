@@ -17,6 +17,7 @@ import {
 } from "@/components/features/detail-surat";
 import Link from "next/link";
 import { AdminActionModals } from "./AdminActionModals";
+import { WD1SignatureSection } from "./WD1SignatureSection";
 import { useState } from "react";
 
 interface AdminDetailSuratProps {
@@ -29,6 +30,7 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
         isOpen: boolean;
         type: "approve" | "revise" | "reject" | "publish";
     }>({ isOpen: false, type: "approve" });
+    const [wd1Signature, setWd1Signature] = useState<string | null>(null);
 
     const handleAction = (
         type: "approve" | "revise" | "reject" | "publish",
@@ -40,7 +42,9 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
         reason?: string;
         targetRole?: string;
     }) => {
-        console.log("Action Confirmed:", modalConfig.type, data);
+        console.log("Action Confirmed:", modalConfig.type, data, {
+            wd1Signature,
+        });
         // Here you would typically call an API
     };
 
@@ -110,7 +114,14 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Left Column */}
-                <div className="lg:col-span-8 space-y-6">
+                <div className="lg:col-span-8 space-y-8">
+                    {/* Role Specific Top Section */}
+                    {role === "wakil-dekan-1" && (
+                        <WD1SignatureSection
+                            onSignatureChange={setWd1Signature}
+                        />
+                    )}
+
                     {/* Identitas Pengaju */}
                     <IdentitasPengaju data={identitasData as any} />
 

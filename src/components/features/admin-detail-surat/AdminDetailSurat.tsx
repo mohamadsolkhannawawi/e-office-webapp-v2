@@ -8,6 +8,7 @@ import {
     RotateCcw,
     XOctagon,
     Send,
+    PenTool,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +18,11 @@ import {
 } from "@/components/features/detail-surat";
 import Link from "next/link";
 import { AdminActionModals } from "./AdminActionModals";
-import { WD1SignatureSection } from "./WD1SignatureSection";
+import { WD1SignatureModal } from "./WD1SignatureModal";
+import { UPANumberingModal } from "./UPANumberingModal";
 import { useState } from "react";
+import Image from "next/image";
+import { Hash, Sparkles } from "lucide-react";
 
 interface AdminDetailSuratProps {
     role: "supervisor-akademik" | "manajer-tu" | "wakil-dekan-1" | "upa";
@@ -31,6 +35,10 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
         type: "approve" | "revise" | "reject" | "publish";
     }>({ isOpen: false, type: "approve" });
     const [wd1Signature, setWd1Signature] = useState<string | null>(null);
+    const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
+    const [upaLetterNumber, setUpaLetterNumber] = useState("");
+    const [upaIsStampApplied, setUpaIsStampApplied] = useState(true);
+    const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
 
     const handleAction = (
         type: "approve" | "revise" | "reject" | "publish",
@@ -44,6 +52,8 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
     }) => {
         console.log("Action Confirmed:", modalConfig.type, data, {
             wd1Signature,
+            upaLetterNumber,
+            upaIsStampApplied,
         });
         // Here you would typically call an API
     };
@@ -94,6 +104,17 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                 type={modalConfig.type}
                 role={role}
             />
+            <WD1SignatureModal
+                isOpen={isSignatureModalOpen}
+                onClose={() => setIsSignatureModalOpen(false)}
+                onSignatureChange={setWd1Signature}
+            />
+            <UPANumberingModal
+                isOpen={isNumberingModalOpen}
+                onClose={() => setIsNumberingModalOpen(false)}
+                onNumberChange={setUpaLetterNumber}
+                onStampApply={setUpaIsStampApplied}
+            />
             {/* Breadcrumb */}
             <nav className="flex items-center text-sm font-medium text-slate-500">
                 {currentBreadcrumb.map((crumb, index) => (
@@ -115,13 +136,6 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Left Column */}
                 <div className="lg:col-span-8 space-y-8">
-                    {/* Role Specific Top Section */}
-                    {role === "wakil-dekan-1" && (
-                        <WD1SignatureSection
-                            onSignatureChange={setWd1Signature}
-                        />
-                    )}
-
                     {/* Identitas Pengaju */}
                     <IdentitasPengaju data={identitasData as any} />
 
@@ -220,7 +234,7 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                                           : role === "wakil-dekan-1"
                                             ? "wd1"
                                             : "upa"
-                                }`}
+                                }${upaLetterNumber ? `&no=${encodeURIComponent(upaLetterNumber)}` : ""}`}
                             >
                                 <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 mb-3">
                                     <Eye className="h-5 w-5" />
@@ -230,9 +244,47 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
 
                             {role !== "upa" ? (
                                 <>
+                                    {role === "wakil-dekan-1" && (
+                                        <div className="space-y-3 mb-3">
+                                            <Button
+                                                onClick={() =>
+                                                    setIsSignatureModalOpen(
+                                                        true,
+                                                    )
+                                                }
+                                                className="w-full bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50 font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                            >
+                                                <PenTool className="h-5 w-5" />
+                                                {wd1Signature
+                                                    ? "Ubah Tanda Tangan"
+                                                    : "Tandatangani"}
+                                            </Button>
+
+                                            {wd1Signature && (
+                                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col items-center animate-in zoom-in duration-300">
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">
+                                                        Tanda Tangan Terpilih
+                                                    </p>
+                                                    <div className="bg-white rounded-lg p-2 border border-slate-100 shadow-sm relative w-32 h-16">
+                                                        <Image
+                                                            src={wd1Signature}
+                                                            alt="Signature Preview"
+                                                            fill
+                                                            className="object-contain p-1"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <Button
                                         onClick={() => handleAction("approve")}
-                                        className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                        disabled={
+                                            role === "wakil-dekan-1" &&
+                                            !wd1Signature
+                                        }
+                                        className={`w-full ${role === "wakil-dekan-1" && !wd1Signature ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
                                     >
                                         <Check className="h-5 w-5" />
                                         Setujui
@@ -254,9 +306,36 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                                 </>
                             ) : (
                                 <>
+                                    <div className="space-y-3 mb-3">
+                                        <Button
+                                            onClick={() =>
+                                                setIsNumberingModalOpen(true)
+                                            }
+                                            className="w-full bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50 font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                        >
+                                            <Hash className="h-5 w-5" />
+                                            {upaLetterNumber
+                                                ? "Ubah No. Surat"
+                                                : "Beri Nomor Surat"}
+                                        </Button>
+
+                                        {upaLetterNumber && (
+                                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center animate-in zoom-in duration-300">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest text-center">
+                                                    Nomor Surat Terpilih
+                                                </p>
+                                                <div className="flex items-center gap-2 text-undip-blue font-bold text-sm bg-white px-4 py-2 rounded-lg shadow-sm border border-blue-50">
+                                                    <Sparkles className="h-3.5 w-3.5" />
+                                                    {upaLetterNumber}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
                                     <Button
                                         onClick={() => handleAction("publish")}
-                                        className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                        disabled={!upaLetterNumber}
+                                        className={`w-full ${!upaLetterNumber ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
                                     >
                                         <Send className="h-5 w-5" />
                                         Publish

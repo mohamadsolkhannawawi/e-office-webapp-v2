@@ -1,21 +1,36 @@
 "use client";
 
-import { ChevronLeft, Minus, Plus, Maximize2, Info } from "lucide-react";
+import {
+    ChevronLeft,
+    Minus,
+    Plus,
+    Maximize2,
+    Info,
+    Hash,
+    Send,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SuratDocument } from "@/components/features/preview-surat/SuratDocument";
-import React, { useMemo } from "react";
+import { UPANumberingModal } from "@/components/features/admin-detail-surat/UPANumberingModal";
+import React, { useMemo, useState } from "react";
 
 export default function SuratPreviewPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const stage = searchParams.get("stage") || "mahasiswa";
+    const [upaLetterNumber, setUpaLetterNumber] = useState(
+        searchParams.get("no") || "",
+    );
+    const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
 
     const handleBack = () => {
         router.back();
     };
 
     const config = useMemo(() => {
+        const defaultNo = "1234/UN7.F8.1/KM/2026";
+
         switch (stage) {
             case "mahasiswa":
             case "supervisor":
@@ -36,7 +51,7 @@ export default function SuratPreviewPage() {
                 return {
                     showSignature: true,
                     showStamp: true,
-                    nomorSurat: "1234/UN7.F8.1/KM/2026",
+                    nomorSurat: upaLetterNumber || defaultNo,
                 };
             default:
                 return {
@@ -45,7 +60,7 @@ export default function SuratPreviewPage() {
                     nomorSurat: "",
                 };
         }
-    }, [stage]);
+    }, [stage, upaLetterNumber]);
 
     const attributes = [
         {
@@ -71,6 +86,12 @@ export default function SuratPreviewPage() {
 
     return (
         <div className="h-[calc(100vh-64px)] flex overflow-hidden">
+            <UPANumberingModal
+                isOpen={isNumberingModalOpen}
+                onClose={() => setIsNumberingModalOpen(false)}
+                onNumberChange={setUpaLetterNumber}
+                onStampApply={() => {}} // Stamp is always true in this UI
+            />
             {/* Left Sidebar: Attributes */}
             <div className="w-80 border-r border-gray-200 bg-white overflow-y-auto hidden md:block">
                 <div className="p-6 space-y-6">
@@ -84,14 +105,14 @@ export default function SuratPreviewPage() {
                         </p>
                     </div>
 
-                    <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden text-center">
                         <div className="bg-slate-50 px-4 py-3 border-b border-gray-100 flex items-center gap-2">
                             <Info className="h-4 w-4 text-slate-400" />
                             <h2 className="font-bold text-sm text-slate-700 uppercase tracking-wider">
                                 Atribut Surat
                             </h2>
                         </div>
-                        <div className="p-4 space-y-4">
+                        <div className="p-4 space-y-4 text-left">
                             {attributes.map((attr, index) => (
                                 <div key={index} className="space-y-1">
                                     <p className="text-[11px] font-medium text-slate-400 uppercase">
@@ -106,6 +127,60 @@ export default function SuratPreviewPage() {
                             ))}
                         </div>
                     </div>
+
+                    {stage === "upa" && (
+                        <div className="space-y-4 animate-in slide-in-from-left-4 duration-500">
+                            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-4">
+                                <div className="flex flex-col items-center gap-2 mb-2">
+                                    <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
+                                        <Hash className="h-6 w-6" />
+                                    </div>
+                                    <h3 className="font-bold text-slate-800 tracking-tight">
+                                        Aksi Penomoran
+                                    </h3>
+                                </div>
+
+                                <Button
+                                    onClick={() =>
+                                        setIsNumberingModalOpen(true)
+                                    }
+                                    className="w-full bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-xs shadow-sm"
+                                >
+                                    <Hash className="h-4 w-4" />
+                                    {upaLetterNumber
+                                        ? "Ubah Nomor"
+                                        : "Beri Nomor"}
+                                </Button>
+
+                                {upaLetterNumber && (
+                                    <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-2 animate-in fade-in zoom-in">
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center">
+                                            Nomor Terpilih
+                                        </p>
+                                        <div className="bg-white border border-blue-100 rounded-lg py-2 px-3 text-center">
+                                            <span className="text-[11px] font-bold text-undip-blue">
+                                                {upaLetterNumber}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <Button
+                                    disabled={!upaLetterNumber}
+                                    className={`w-full ${!upaLetterNumber ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg shadow-blue-100"} font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-xs transition-all`}
+                                    onClick={() => {
+                                        alert(
+                                            "Surat Berhasil Di-publish! (Simulasi)",
+                                        );
+                                        router.push("/upa/surat/penomoran");
+                                    }}
+                                >
+                                    <Send className="h-4 w-4" />
+                                    Publish Surat
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

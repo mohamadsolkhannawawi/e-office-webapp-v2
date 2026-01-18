@@ -69,9 +69,23 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             icon: <LayoutDashboard size={20} />,
         },
         {
-            label: "Verifikasi Surat",
-            href: "/supervisor-akademik/verifikasi",
+            label: "Surat Masuk",
             icon: <Mail size={20} />,
+            submenu: [
+                {
+                    label: "Penerima",
+                    href: "/supervisor-akademik/surat/penerima",
+                },
+                {
+                    label: "Disposisi",
+                    href: "/supervisor-akademik/surat/disposisi",
+                },
+                {
+                    label: "Tembusan",
+                    href: "/supervisor-akademik/surat/tembusan",
+                },
+                { label: "Arsip", href: "/supervisor-akademik/surat/arsip" },
+            ],
         },
     ],
     "manajer-tu": [
@@ -82,8 +96,12 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
         },
         {
             label: "Surat Masuk",
-            href: "/manajer-tu/incoming",
             icon: <Mail size={20} />,
+            submenu: [
+                { label: "Penerima", href: "/manajer-tu/surat/penerima" },
+                { label: "Disposisi", href: "/manajer-tu/surat/disposisi" },
+                { label: "Arsip", href: "/manajer-tu/surat/arsip" },
+            ],
         },
     ],
     "wakil-dekan-1": [
@@ -93,9 +111,15 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             icon: <LayoutDashboard size={20} />,
         },
         {
-            label: "Persetujuan",
-            href: "/wakil-dekan-1/approval",
+            label: "Surat Masuk",
             icon: <Mail size={20} />,
+            submenu: [
+                {
+                    label: "Persetujuan",
+                    href: "/wakil-dekan-1/surat/persetujuan",
+                },
+                { label: "Arsip", href: "/wakil-dekan-1/surat/arsip" },
+            ],
         },
     ],
     upa: [
@@ -105,9 +129,13 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             icon: <LayoutDashboard size={20} />,
         },
         {
-            label: "Manajemen",
-            href: "/upa/manajemen",
+            label: "Surat Masuk",
             icon: <Mail size={20} />,
+            submenu: [
+                { label: "Penomoran", href: "/upa/surat/penomoran" },
+                { label: "Publish", href: "/upa/surat/publish" },
+                { label: "Arsip", href: "/upa/surat/arsip" },
+            ],
         },
     ],
 };

@@ -18,7 +18,9 @@ import {
     validateNoHp,
     validateIPK,
     validateIPS,
+    validateSemester,
 } from "@/utils/validations/suratRekomendasi";
+import { Edit2 } from "lucide-react";
 
 interface InfoPengajuanProps {
     data: FormDataType;
@@ -36,6 +38,8 @@ interface FieldProps {
     onChange?: (val: string) => void;
     onBlur?: () => void;
     error?: string;
+    onEditToggle?: () => void;
+    isEditable?: boolean;
 }
 
 function FormField({
@@ -49,26 +53,44 @@ function FormField({
     onChange,
     onBlur,
     error,
+    onEditToggle,
+    isEditable,
 }: FieldProps) {
     return (
         <div className={`space-y-2 ${className}`}>
-            <Label className="text-sm font-semibold text-gray-700">
-                {label}
+            <Label className="text-sm font-semibold text-gray-700 flex items-center justify-between">
+                <span>{label}</span>
+                {onEditToggle && (
+                    <button
+                        type="button"
+                        onClick={onEditToggle}
+                        className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-md ${
+                            isEditable
+                                ? "text-amber-600 bg-amber-50 font-bold border border-amber-100"
+                                : "text-slate-400 hover:text-undip-blue hover:bg-slate-50"
+                        }`}
+                    >
+                        <Edit2 size={10} />
+                        {isEditable ? "Sedang Diedit" : "Koreksi Data"}
+                    </button>
+                )}
             </Label>
             <div className="relative">
                 <Input
                     value={value}
                     name={name}
                     placeholder={placeholder}
-                    readOnly={readOnly}
+                    readOnly={readOnly && !isEditable}
                     onChange={(e) => onChange && onChange(e.target.value)}
                     onBlur={onBlur}
-                    className={`h-11 ${
-                        readOnly
-                            ? "bg-gray-100 text-gray-500 border-gray-200"
-                            : error
-                              ? "bg-white border-red-500 focus-visible:ring-red-500"
-                              : "bg-white border-gray-300"
+                    className={`h-11 transition-all duration-200 ${
+                        readOnly && !isEditable
+                            ? "bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed select-none opacity-80"
+                            : isEditable
+                              ? "bg-white border-amber-300 ring-2 ring-amber-500/10 focus-visible:ring-amber-500"
+                              : error
+                                ? "bg-white border-red-500 focus-visible:ring-red-500"
+                                : "bg-white border-gray-300 focus-visible:ring-undip-blue"
                     }`}
                 />
                 {icon && (
@@ -78,7 +100,10 @@ function FormField({
                 )}
             </div>
             {error && (
-                <Alert variant="destructive" className="py-2">
+                <Alert
+                    variant="destructive"
+                    className="py-2 animate-in slide-in-from-top-1 duration-200"
+                >
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription className="text-xs">
                         {error}
@@ -128,6 +153,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
             case "ips":
                 result = validateIPS(value);
                 break;
+            case "semester":
+                result = validateSemester(value);
+                break;
             default:
                 return;
         }
@@ -151,6 +179,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
             "noHp",
             "ipk",
             "ips",
+            "semester",
         ];
 
         const newErrors: Record<string, string> = {};
@@ -194,6 +223,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                 case "ips":
                     result = validateIPS(value);
                     break;
+                case "semester":
+                    result = validateSemester(value);
+                    break;
                 default:
                     return;
             }
@@ -218,6 +250,14 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
         };
     }, [validateAllFields]);
 
+    const [editableFields, setEditableFields] = useState<
+        Record<string, boolean>
+    >({});
+
+    const toggleEdit = (field: string) => {
+        setEditableFields((prev) => ({ ...prev, [field]: !prev[field] }));
+    };
+
     return (
         <section aria-label="Informasi Identitas">
             <Card className="border-none shadow-sm bg-white">
@@ -228,6 +268,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             label="Nama Lengkap"
                             value={data.namaLengkap as string}
                             placeholder="Contoh: Ahmad Syaifullah"
+                            readOnly
+                            isEditable={editableFields.namaLengkap}
+                            onEditToggle={() => toggleEdit("namaLengkap")}
                             error={errors.namaLengkap}
                             onChange={(val) => {
                                 setData((prev) => ({
@@ -250,6 +293,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             label="Role"
                             value={data.role as string}
                             placeholder="Contoh: Mahasiswa"
+                            readOnly
                             error={errors.role}
                             onChange={(val) => {
                                 setData((prev) => ({ ...prev, role: val }));
@@ -265,6 +309,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             label="NIM"
                             value={data.nim as string}
                             placeholder="Contoh: 24060121130089"
+                            readOnly
+                            isEditable={editableFields.nim}
+                            onEditToggle={() => toggleEdit("nim")}
                             error={errors.nim}
                             onChange={(val) => {
                                 setData((prev) => ({ ...prev, nim: val }));
@@ -279,6 +326,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             label="Email"
                             value={data.email as string}
                             placeholder="Contoh: ahmadsyaifullah@students.undip.ac.id"
+                            readOnly
+                            isEditable={editableFields.email}
+                            onEditToggle={() => toggleEdit("email")}
                             error={errors.email}
                             onChange={(val) => {
                                 setData((prev) => ({ ...prev, email: val }));
@@ -294,6 +344,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             label="Departemen"
                             value={data.departemen as string}
                             placeholder="Contoh: Informatika"
+                            readOnly
+                            isEditable={editableFields.departemen}
+                            onEditToggle={() => toggleEdit("departemen")}
                             error={errors.departemen}
                             onChange={(val) => {
                                 setData((prev) => ({
@@ -313,6 +366,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             label="Program Studi"
                             value={data.programStudi as string}
                             placeholder="Contoh: S1 - Informatika"
+                            readOnly
+                            isEditable={editableFields.programStudi}
+                            onEditToggle={() => toggleEdit("programStudi")}
                             error={errors.programStudi}
                             onChange={(val) => {
                                 setData((prev) => ({
@@ -336,6 +392,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             label="Tempat Lahir"
                             value={data.tempatLahir as string}
                             placeholder="Contoh: Blora"
+                            readOnly
+                            isEditable={editableFields.tempatLahir}
+                            onEditToggle={() => toggleEdit("tempatLahir")}
                             error={errors.tempatLahir}
                             onChange={(val) => {
                                 setData((prev) => ({
@@ -355,29 +414,54 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                         />
 
                         <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-gray-700">
-                                Tanggal Lahir
+                            <Label className="text-sm font-semibold text-gray-700 flex items-center justify-between">
+                                <span>Tanggal Lahir</span>
+                                <button
+                                    type="button"
+                                    onClick={() => toggleEdit("tanggalLahir")}
+                                    className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-md ${
+                                        editableFields.tanggalLahir
+                                            ? "text-amber-600 bg-amber-50 font-bold border border-amber-100"
+                                            : "text-slate-400 hover:text-undip-blue hover:bg-slate-50"
+                                    }`}
+                                >
+                                    <Edit2 size={10} />
+                                    {editableFields.tanggalLahir
+                                        ? "Sedang Diedit"
+                                        : "Koreksi Data"}
+                                </button>
                             </Label>
-                            <DatePicker
-                                date={
-                                    data.tanggalLahir
-                                        ? new Date(data.tanggalLahir as string)
-                                        : undefined
+                            <div
+                                className={
+                                    !editableFields.tanggalLahir
+                                        ? "pointer-events-none opacity-80"
+                                        : ""
                                 }
-                                onDateChange={(date) => {
-                                    setData((prev) => ({
-                                        ...prev,
-                                        tanggalLahir: date?.toISOString() || "",
-                                    }));
-                                    if (errors.tanggalLahir) {
-                                        handleValidation(
-                                            "tanggalLahir",
-                                            date?.toISOString() || "",
-                                        );
+                            >
+                                <DatePicker
+                                    date={
+                                        data.tanggalLahir
+                                            ? new Date(
+                                                  data.tanggalLahir as string,
+                                              )
+                                            : undefined
                                     }
-                                }}
-                                placeholder="Pilih tanggal lahir"
-                            />
+                                    onDateChange={(date) => {
+                                        setData((prev) => ({
+                                            ...prev,
+                                            tanggalLahir:
+                                                date?.toISOString() || "",
+                                        }));
+                                        if (errors.tanggalLahir) {
+                                            handleValidation(
+                                                "tanggalLahir",
+                                                date?.toISOString() || "",
+                                            );
+                                        }
+                                    }}
+                                    placeholder="Pilih tanggal lahir"
+                                />
+                            </div>
                             {errors.tanggalLahir && (
                                 <Alert variant="destructive" className="py-2">
                                     <AlertCircle className="h-4 w-4" />
@@ -565,6 +649,63 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     <AlertCircle className="h-4 w-4" />
                                     <AlertDescription className="text-xs">
                                         {errors.ips}
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-gray-700">
+                                Semester
+                            </Label>
+                            <Input
+                                name="semester"
+                                type="text"
+                                inputMode="numeric"
+                                value={data.semester as string}
+                                placeholder="Contoh: 7"
+                                onKeyDown={(e) => {
+                                    if (
+                                        e.key !== "Backspace" &&
+                                        e.key !== "Delete" &&
+                                        e.key !== "ArrowLeft" &&
+                                        e.key !== "ArrowRight" &&
+                                        e.key !== "Tab" &&
+                                        !/^\d$/.test(e.key)
+                                    ) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (
+                                        val === "" ||
+                                        (/^\d+$/.test(val) &&
+                                            parseInt(val) <= 14)
+                                    ) {
+                                        setData((prev) => ({
+                                            ...prev,
+                                            semester: val,
+                                        }));
+                                        if (errors.semester) {
+                                            handleValidation("semester", val);
+                                        }
+                                    }
+                                }}
+                                onBlur={() =>
+                                    handleValidation("semester", data.semester)
+                                }
+                                className={`h-11 ${
+                                    errors.semester
+                                        ? "bg-white border-red-500 focus-visible:ring-red-500"
+                                        : "bg-white border-gray-300"
+                                }`}
+                            />
+                            {errors.semester && (
+                                <Alert variant="destructive" className="py-2">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription className="text-xs">
+                                        {errors.semester}
                                     </AlertDescription>
                                 </Alert>
                             )}

@@ -30,6 +30,7 @@ export default function PengajuanBaruPage() {
         noHp: "",
         ipk: "",
         ips: "",
+        semester: "",
         namaBeasiswa: "",
         lampiranUtama: [],
         lampiranTambahan: [],
@@ -128,6 +129,7 @@ export default function PengajuanBaruPage() {
                 "noHp",
                 "ipk",
                 "ips",
+                "semester",
             ].every((k) => {
                 const v = formData[k as keyof FormDataType];
                 return v !== undefined && v !== null && String(v).trim() !== "";

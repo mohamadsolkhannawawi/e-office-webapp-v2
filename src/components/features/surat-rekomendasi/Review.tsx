@@ -45,6 +45,7 @@ export function Review({ data }: ReviewProps) {
             "noHp",
             "ipk",
             "ips",
+            "semester",
         ].every((k) => !!data[k]);
 
     const hasMainAttachments =
@@ -110,6 +111,10 @@ export function Review({ data }: ReviewProps) {
                             value={data.tanggalLahir || "-"}
                         />
                         <SummaryRow label="No HP" value={data.noHp || "-"} />
+                        <SummaryRow
+                            label="Semester"
+                            value={data.semester || "-"}
+                        />
                         <SummaryRow label="IPK" value={data.ipk || "-"} />
                         <SummaryRow label="IPS" value={data.ips || "-"} />
                     </div>

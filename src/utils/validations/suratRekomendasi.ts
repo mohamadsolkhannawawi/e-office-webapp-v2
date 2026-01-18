@@ -96,7 +96,9 @@ export function validateNoHp(value: unknown): ValidationResult {
     const errors: string[] = [];
     const hpStr = typeof value === "string" ? value : String(value);
     if (!/^08[0-9]{8,11}$/.test(hpStr)) {
-        errors.push("Format nomor HP tidak valid. Harus dimulai dengan 08 dan terdiri dari 10-13 digit");
+        errors.push(
+            "Format nomor HP tidak valid. Harus dimulai dengan 08 dan terdiri dari 10-13 digit",
+        );
     }
     return { valid: errors.length === 0, errors };
 }
@@ -139,6 +141,21 @@ export function validateTanggalLahir(value: unknown): ValidationResult {
     const errors: string[] = [];
     if (!value || value === "") {
         errors.push("Tanggal lahir harus diisi");
+    }
+    return { valid: errors.length === 0, errors };
+}
+
+export function validateSemester(value: unknown): ValidationResult {
+    const errors: string[] = [];
+    let parsed: number | null = null;
+    if (typeof value === "number") {
+        parsed = value;
+    } else if (typeof value === "string") {
+        const p = parseInt(value);
+        if (!isNaN(p)) parsed = p;
+    }
+    if (parsed === null || parsed < 1 || parsed > 14) {
+        errors.push("Semester harus valid (1-14)");
     }
     return { valid: errors.length === 0, errors };
 }

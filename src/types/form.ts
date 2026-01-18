@@ -23,6 +23,7 @@ export type FormDataType = {
     noHp: string;
     ipk: string;
     ips: string;
+    semester: string;
     namaBeasiswa: string;
     lampiranUtama: LampiranFile[];
     lampiranTambahan: LampiranFile[];

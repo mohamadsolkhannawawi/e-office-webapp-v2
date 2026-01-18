@@ -140,14 +140,14 @@ export function Lampiran({ data, setData }: LampiranProps) {
             try {
                 const created = await createApplication(
                     data.namaBeasiswa || "Surat Rekomendasi",
-                    (data as unknown as Record<string, unknown>) || {}
+                    (data as unknown as Record<string, unknown>) || {},
                 );
                 letterId = created.id;
                 setData((prev) => ({ ...prev, letterInstanceId: created.id }));
             } catch (err) {
                 console.error("Auto-create application failed:", err);
                 setErrorMessage(
-                    "Gagal membuat aplikasi otomatis. Silakan submit pada langkah sebelumnya atau coba lagi."
+                    "Gagal membuat aplikasi otomatis. Silakan submit pada langkah sebelumnya atau coba lagi.",
                 );
                 return;
             }
@@ -189,7 +189,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                     alert(
                         `Gagal upload ${file.name}: ${
                             err instanceof Error ? err.message : String(err)
-                        }`
+                        }`,
                     );
                 }
             }
@@ -200,7 +200,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
     // Tambahkan file tambahan, batasi maksimal 3, validasi ukuran -> unggah ke API
     const handleAdditionalFileChange = (
-        e: React.ChangeEvent<HTMLInputElement>
+        e: React.ChangeEvent<HTMLInputElement>,
     ) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
@@ -249,14 +249,14 @@ export function Lampiran({ data, setData }: LampiranProps) {
             try {
                 const created = await createApplication(
                     data.namaBeasiswa || "Surat Rekomendasi",
-                    (data as unknown as Record<string, unknown>) || {}
+                    (data as unknown as Record<string, unknown>) || {},
                 );
                 letterId = created.id;
                 setData((prev) => ({ ...prev, letterInstanceId: created.id }));
             } catch (err) {
                 console.error("Auto-create application failed:", err);
                 setErrorMessage(
-                    "Gagal membuat aplikasi otomatis. Silakan submit pada langkah sebelumnya atau coba lagi."
+                    "Gagal membuat aplikasi otomatis. Silakan submit pada langkah sebelumnya atau coba lagi.",
                 );
                 return;
             }
@@ -274,7 +274,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                     const res = await uploadAttachment(
                         letterId,
                         file,
-                        "Tambahan"
+                        "Tambahan",
                     );
                     if (res) {
                         setData((prev) => ({
@@ -302,7 +302,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                     setErrorMessage(
                         `Gagal upload ${file.name}: ${
                             err instanceof Error ? err.message : String(err)
-                        }`
+                        }`,
                     );
                 }
             }
@@ -325,7 +325,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                 setErrorMessage(
                     `Gagal hapus file: ${
                         err instanceof Error ? err.message : String(err)
-                    }`
+                    }`,
                 );
                 return;
             }
@@ -354,7 +354,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
     // Modal pratinjau
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [previewType, setPreviewType] = useState<"pdf" | "image" | null>(
-        null
+        null,
     );
 
     useEffect(() => {
@@ -442,8 +442,13 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             <span className="text-red-500">*</span>
                         </Label>
                         <p className="text-xs text-gray-500 -mt-2">
-                            Wajib. Unggah minimal 1 dokumen pendukung utama.
-                            Format: PDF, JPG, PNG. Maks: 5MB/file.
+                            Wajib. Unggah minimal 2 dokumen pendukung utama (KTM
+                            & KHS). Format: PDF, JPG, PNG. Maks: 5MB/file.
+                            <br />
+                            <span className="text-red-500 font-semibold italic">
+                                Catatan: Pastikan mengunggah KTM dan KHS
+                                terbaru.
+                            </span>
                             <br />
                             <span className="text-red-500">
                                 Maksimal 5 file.
@@ -565,7 +570,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     (f: LampiranFile) =>
                                         selectedUtama === "Semua"
                                             ? true
-                                            : f.kategori === selectedUtama
+                                            : f.kategori === selectedUtama,
                                 );
 
                                 if (filteredFiles.length === 0) {
@@ -605,8 +610,8 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                             •{" "}
                                                             {formatSize(
                                                                 Number(
-                                                                    f.size
-                                                                ) || 0
+                                                                    f.size,
+                                                                ) || 0,
                                                             )}
                                                         </div>
                                                     </div>
@@ -616,7 +621,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                             onClick={() =>
                                                                 handleViewFile(
                                                                     "utama",
-                                                                    idx
+                                                                    idx,
                                                                 )
                                                             }
                                                             className="h-9"
@@ -661,7 +666,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                         onClick={() =>
                                                                             handleDelete(
                                                                                 "utama",
-                                                                                idx
+                                                                                idx,
                                                                             )
                                                                         }
                                                                         className="bg-red-600 hover:bg-red-700"
@@ -673,7 +678,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                         </AlertDialog>
                                                     </div>
                                                 </li>
-                                            )
+                                            ),
                                         )}
                                     </ul>
                                 );
@@ -820,7 +825,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                             selectedTambahan === "Semua"
                                                 ? true
                                                 : f.kategori ===
-                                                  selectedTambahan
+                                                  selectedTambahan,
                                     );
 
                                 if (filteredFiles.length === 0) {
@@ -860,8 +865,8 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                             •{" "}
                                                             {formatSize(
                                                                 Number(
-                                                                    f.size
-                                                                ) || 0
+                                                                    f.size,
+                                                                ) || 0,
                                                             )}
                                                         </div>
                                                     </div>
@@ -871,7 +876,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                             onClick={() =>
                                                                 handleViewFile(
                                                                     "tambahan",
-                                                                    idx
+                                                                    idx,
                                                                 )
                                                             }
                                                             className="h-9"
@@ -916,7 +921,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                         onClick={() =>
                                                                             handleDelete(
                                                                                 "tambahan",
-                                                                                idx
+                                                                                idx,
                                                                             )
                                                                         }
                                                                         className="bg-red-600 hover:bg-red-700"
@@ -928,7 +933,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                         </AlertDialog>
                                                     </div>
                                                 </li>
-                                            )
+                                            ),
                                         )}
                                     </ul>
                                 );

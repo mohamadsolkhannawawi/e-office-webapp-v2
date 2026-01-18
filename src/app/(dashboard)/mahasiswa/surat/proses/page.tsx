@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ChevronRight, Filter, Eye, Edit3, ChevronLeft } from "lucide-react";
+import { ChevronRight, Filter, ChevronLeft } from "lucide-react";
+import Link from "next/link";
 
 const IN_PROGRESS_LETTERS = [
     {
@@ -94,12 +94,16 @@ export default function SuratDalamProsesPage() {
                                             </Button>
                                             {letter.statusType ===
                                                 "warning" && (
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-undip-blue hover:bg-sky-700 text-xs px-4 h-8"
+                                                <Link
+                                                    href={`/mahasiswa/surat/proses/revisi/${letter.id}`}
                                                 >
-                                                    Revisi
-                                                </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        className="bg-undip-blue hover:bg-sky-700 text-xs px-4 h-8"
+                                                    >
+                                                        Revisi
+                                                    </Button>
+                                                </Link>
                                             )}
                                         </div>
                                     </td>

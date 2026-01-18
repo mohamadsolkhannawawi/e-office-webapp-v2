@@ -45,7 +45,7 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             label: "Surat Saya",
             icon: <Mail size={20} />,
             submenu: [
-                { label: "Semua Surat", href: "/mahasiswa/surat/semua" },
+                { label: "Dalam Proses", href: "/mahasiswa/surat/proses" },
                 { label: "Sudah Selesai", href: "/mahasiswa/surat/selesai" },
             ],
         },

@@ -70,13 +70,13 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
 
         let redirectPath = "";
         if (role === "supervisor-akademik") {
-            redirectPath = "/supervisor-akademik/surat/penerima";
+            redirectPath = "/supervisor-akademik/surat/perlu-tindakan";
         } else if (role === "manajer-tu") {
-            redirectPath = "/manajer-tu/surat/penerima";
+            redirectPath = "/manajer-tu/surat/perlu-tindakan";
         } else if (role === "wakil-dekan-1") {
-            redirectPath = "/wakil-dekan-1/surat/persetujuan";
+            redirectPath = "/wakil-dekan-1/surat/perlu-tindakan";
         } else if (role === "upa") {
-            redirectPath = "/upa/surat/penomoran";
+            redirectPath = "/upa/surat/perlu-tindakan";
         }
 
         setPendingRedirect(redirectPath);

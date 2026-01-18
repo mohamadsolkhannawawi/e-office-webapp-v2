@@ -4,16 +4,16 @@ import React from "react";
 import { LetterList } from "@/components/features/admin-dashboard/LetterList";
 import { ChevronRight } from "lucide-react";
 
-export default function SelesaiPage() {
+export default function PerluTindakanPage() {
     const letters = [
         {
-            id: 10,
-            applicant: "Maxwell Santosso",
+            id: 1,
+            applicant: "Ahmad Syaifullah",
             subject: "Surat Rekomendasi Beasiswa",
-            date: "12 Agu 2023",
-            target: "Selesai",
-            status: "Selesai",
-            statusColor: "bg-emerald-500",
+            date: "14 Agu 2023",
+            target: "UPA",
+            status: "Menunggu Verifikasi",
+            statusColor: "bg-amber-500",
         },
     ];
 
@@ -24,14 +24,14 @@ export default function SelesaiPage() {
                     Surat Masuk
                 </span>
                 <ChevronRight className="mx-2 h-4 w-4" />
-                <span className="text-slate-800">Selesai</span>
+                <span className="text-slate-800">Perlu Tindakan</span>
             </nav>
 
             <LetterList
-                title="Daftar Surat Selesai"
+                title="Perlu Tindakan"
                 letters={letters}
-                rolePath="wakil-dekan-1"
-                detailBasePath="persetujuan"
+                rolePath="upa"
+                detailBasePath="perlu-tindakan"
             />
         </div>
     );

@@ -178,13 +178,14 @@ export function SuratPreviewContent({
 
                     let redirectPath = "";
                     if (stage === "supervisor") {
-                        redirectPath = "/supervisor-akademik/surat/penerima";
+                        redirectPath =
+                            "/supervisor-akademik/surat/perlu-tindakan";
                     } else if (stage === "manajer") {
-                        redirectPath = "/manajer-tu/surat/penerima";
+                        redirectPath = "/manajer-tu/surat/perlu-tindakan";
                     } else if (stage === "wd1") {
-                        redirectPath = "/wakil-dekan-1/surat/persetujuan";
+                        redirectPath = "/wakil-dekan-1/surat/perlu-tindakan";
                     } else if (stage === "upa") {
-                        redirectPath = "/upa/surat/penomoran";
+                        redirectPath = "/upa/surat/perlu-tindakan";
                     }
 
                     setPendingRedirect(redirectPath);

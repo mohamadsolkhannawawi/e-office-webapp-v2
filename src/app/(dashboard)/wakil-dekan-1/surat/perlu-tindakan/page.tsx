@@ -11,7 +11,7 @@ export default function PerluTindakanPage() {
             applicant: "Ahmad Syaifullah",
             subject: "Surat Rekomendasi Beasiswa",
             date: "14 Agu 2023",
-            target: "UPA",
+            target: "Wakil Dekan 1",
             status: "Menunggu Verifikasi",
             statusColor: "bg-amber-500",
         },
@@ -30,8 +30,8 @@ export default function PerluTindakanPage() {
             <LetterList
                 title="Perlu Tindakan"
                 letters={letters}
-                rolePath="upa"
-                detailBasePath="penomoran"
+                rolePath="wakil-dekan-1"
+                detailBasePath="perlu-tindakan"
             />
         </div>
     );

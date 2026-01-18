@@ -80,11 +80,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             submenu: [
                 {
                     label: "Perlu Tindakan",
-                    href: "/supervisor-akademik/surat/penerima",
+                    href: "/supervisor-akademik/surat/perlu-tindakan",
                 },
                 {
                     label: "Selesai",
-                    href: "/supervisor-akademik/surat/arsip",
+                    href: "/supervisor-akademik/surat/selesai",
                 },
             ],
         },
@@ -101,11 +101,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             submenu: [
                 {
                     label: "Perlu Tindakan",
-                    href: "/manajer-tu/surat/penerima",
+                    href: "/manajer-tu/surat/perlu-tindakan",
                 },
                 {
                     label: "Selesai",
-                    href: "/manajer-tu/surat/arsip",
+                    href: "/manajer-tu/surat/selesai",
                 },
             ],
         },
@@ -122,11 +122,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             submenu: [
                 {
                     label: "Perlu Tindakan",
-                    href: "/wakil-dekan-1/surat/persetujuan",
+                    href: "/wakil-dekan-1/surat/perlu-tindakan",
                 },
                 {
                     label: "Selesai",
-                    href: "/wakil-dekan-1/surat/arsip",
+                    href: "/wakil-dekan-1/surat/selesai",
                 },
             ],
         },
@@ -143,11 +143,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             submenu: [
                 {
                     label: "Perlu Tindakan",
-                    href: "/upa/surat/penomoran",
+                    href: "/upa/surat/perlu-tindakan",
                 },
                 {
                     label: "Selesai",
-                    href: "/upa/surat/arsip",
+                    href: "/upa/surat/selesai",
                 },
             ],
         },

@@ -1,21 +1,8 @@
 "use client";
 
 import React from "react";
-import {
-    Inbox,
-    CheckCircle,
-    BarChart,
-    Search,
-    Calendar,
-    Filter,
-    Eye,
-    ChevronLeft,
-    ChevronRight,
-} from "lucide-react";
+import { Inbox, CheckCircle, BarChart, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { LetterList } from "./LetterList";
 
 interface StatCardProps {
@@ -292,14 +279,7 @@ export function AdminDashboard({
                 title="Semua Surat"
                 letters={letters}
                 rolePath={roleName.toLowerCase().replace(/ /g, "-")}
-                detailBasePath={
-                    roleName === "Supervisor Akademik" ||
-                    roleName === "Manajer TU"
-                        ? "penerima"
-                        : roleName === "Wakil Dekan 1"
-                          ? "persetujuan"
-                          : "penomoran"
-                }
+                detailBasePath="perlu-tindakan"
             />
         </div>
     );

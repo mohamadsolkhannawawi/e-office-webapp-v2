@@ -30,8 +30,8 @@ export default function SelesaiPage() {
             <LetterList
                 title="Daftar Surat Selesai"
                 letters={letters}
-                rolePath="manajer-tu"
-                detailBasePath="penerima"
+                rolePath="supervisor-akademik"
+                detailBasePath="perlu-tindakan"
             />
         </div>
     );

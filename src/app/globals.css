@@ -42,6 +42,15 @@
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
 
+    /* User requested colors */
+    --color-undip-blue: #0079bd;
+    --color-dark-navy: #2c3e50;
+    --color-bg-light: #f3f4f6;
+    --color-bg-dark: #111827;
+    --color-card-light: #ffffff;
+    --color-card-dark: #1f2937;
+    --color-panel-light: #f9fafb;
+    --color-panel-dark: #111827;
 }
 
 :root {

@@ -21,9 +21,11 @@ import Link from "next/link";
 import { AdminActionModals } from "./AdminActionModals";
 import { WD1SignatureModal } from "./WD1SignatureModal";
 import { UPANumberingModal } from "./UPANumberingModal";
+import { ActionStatusModal } from "./ActionStatusModal";
 import { useState } from "react";
 import Image from "next/image";
 import { Hash, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface AdminDetailSuratProps {
     role: "supervisor-akademik" | "manajer-tu" | "wakil-dekan-1" | "upa";
@@ -40,6 +42,14 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
     const [upaLetterNumber, setUpaLetterNumber] = useState("");
     const [upaIsStampApplied, setUpaIsStampApplied] = useState(false);
     const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
+    const [statusModal, setStatusModal] = useState<{
+        isOpen: boolean;
+        status: "success" | "error";
+        type: "approve" | "revise" | "reject" | "publish";
+        message?: string;
+    }>({ isOpen: false, status: "success", type: "approve" });
+    const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
+    const router = useRouter();
 
     const handleAction = (
         type: "approve" | "revise" | "reject" | "publish",
@@ -51,12 +61,31 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
         reason?: string;
         targetRole?: string;
     }) => {
-        console.log("Action Confirmed:", modalConfig.type, data, {
-            wd1Signature,
-            upaLetterNumber,
-            upaIsStampApplied,
+        const messages: Record<string, string> = {
+            approve: "Surat Berhasil Disetujui!",
+            revise: `Revisi diminta ke ${data.targetRole}. Alasan: ${data.reason}`,
+            reject: `Surat Berhasil Ditolak. Alasan: ${data.reason}`,
+            publish: "Surat Berhasil Dipublikasikan!",
+        };
+
+        let redirectPath = "";
+        if (role === "supervisor-akademik") {
+            redirectPath = "/supervisor-akademik/surat/penerima";
+        } else if (role === "manajer-tu") {
+            redirectPath = "/manajer-tu/surat/penerima";
+        } else if (role === "wakil-dekan-1") {
+            redirectPath = "/wakil-dekan-1/surat/persetujuan";
+        } else if (role === "upa") {
+            redirectPath = "/upa/surat/penomoran";
+        }
+
+        setPendingRedirect(redirectPath);
+        setStatusModal({
+            isOpen: true,
+            status: "success",
+            type: modalConfig.type,
+            message: messages[modalConfig.type],
         });
-        // Here you would typically call an API
     };
 
     const identitasData = {
@@ -116,6 +145,19 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                 onNumberChange={setUpaLetterNumber}
                 onStampApply={setUpaIsStampApplied}
             />
+            <ActionStatusModal
+                isOpen={statusModal.isOpen}
+                onClose={() => {
+                    setStatusModal((prev) => ({ ...prev, isOpen: false }));
+                    if (statusModal.status === "success" && pendingRedirect) {
+                        router.push(pendingRedirect);
+                    }
+                }}
+                status={statusModal.status}
+                type={statusModal.type}
+                customMessage={statusModal.message}
+            />
+
             {/* Breadcrumb */}
             <nav className="flex items-center text-sm font-medium text-slate-500">
                 {currentBreadcrumb.map((crumb, index) => (

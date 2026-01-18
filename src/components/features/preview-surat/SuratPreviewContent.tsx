@@ -21,6 +21,7 @@ import { UPANumberingModal } from "@/components/features/admin-detail-surat/UPAN
 import { WD1SignatureModal } from "@/components/features/admin-detail-surat/WD1SignatureModal";
 import { AdminActionModals } from "@/components/features/admin-detail-surat/AdminActionModals";
 import { SuccessStampModal } from "@/components/features/admin-detail-surat/SuccessStampModal";
+import { ActionStatusModal } from "@/components/features/admin-detail-surat/ActionStatusModal";
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 
@@ -50,6 +51,13 @@ export function SuratPreviewContent({
     >("approve");
     const [isSuccessStampModalOpen, setIsSuccessStampModalOpen] =
         useState(false);
+    const [statusModal, setStatusModal] = useState<{
+        isOpen: boolean;
+        status: "success" | "error";
+        type: "approve" | "revise" | "reject" | "publish";
+        message?: string;
+    }>({ isOpen: false, status: "success", type: "approve" });
+    const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
 
     const handleBack = () => {
         if (backUrl) {
@@ -127,6 +135,18 @@ export function SuratPreviewContent({
                 isOpen={isSuccessStampModalOpen}
                 onClose={() => setIsSuccessStampModalOpen(false)}
             />
+            <ActionStatusModal
+                isOpen={statusModal.isOpen}
+                onClose={() => {
+                    setStatusModal((prev) => ({ ...prev, isOpen: false }));
+                    if (statusModal.status === "success" && pendingRedirect) {
+                        router.push(pendingRedirect);
+                    }
+                }}
+                status={statusModal.status}
+                type={statusModal.type}
+                customMessage={statusModal.message}
+            />
             <WD1SignatureModal
                 isOpen={isSignatureModalOpen}
                 onClose={() => setIsSignatureModalOpen(false)}
@@ -155,18 +175,25 @@ export function SuratPreviewContent({
                         revise: `Revisi diminta ke ${data.targetRole}. Alasan: ${data.reason}`,
                         reject: `Surat Berhasil Ditolak. Alasan: ${data.reason}`,
                     };
-                    alert(messages[modalType] || "Aksi Berhasil!");
 
-                    // Redirect based on role and stage
+                    let redirectPath = "";
                     if (stage === "supervisor") {
-                        router.push("/supervisor-akademik/surat/penerima");
+                        redirectPath = "/supervisor-akademik/surat/penerima";
                     } else if (stage === "manajer") {
-                        router.push("/manajer-tu/surat/penerima");
+                        redirectPath = "/manajer-tu/surat/penerima";
                     } else if (stage === "wd1") {
-                        router.push("/wakil-dekan-1/surat/persetujuan");
+                        redirectPath = "/wakil-dekan-1/surat/persetujuan";
                     } else if (stage === "upa") {
-                        router.push("/upa/surat/penomoran");
+                        redirectPath = "/upa/surat/penomoran";
                     }
+
+                    setPendingRedirect(redirectPath);
+                    setStatusModal({
+                        isOpen: true,
+                        status: "success",
+                        type: modalType,
+                        message: messages[modalType],
+                    });
                 }}
             />
             {/* Left Sidebar: Attributes */}
@@ -358,10 +385,14 @@ export function SuratPreviewContent({
                                         }
                                         className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg shadow-blue-200"} font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] transition-all relative overflow-hidden group`}
                                         onClick={() => {
-                                            alert(
-                                                "Surat Berhasil Di-publish dan diarsipkan!",
+                                            setStatusModal({
+                                                isOpen: true,
+                                                status: "success",
+                                                type: "publish",
+                                            });
+                                            setPendingRedirect(
+                                                "/upa/surat/penomoran",
                                             );
-                                            router.push("/upa/surat/penomoran");
                                         }}
                                     >
                                         <Send className="h-4 w-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
@@ -448,11 +479,13 @@ export function SuratPreviewContent({
                                         disabled={!wd1Signature}
                                         className={`w-full ${!wd1Signature ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg shadow-blue-200"} font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] transition-all relative overflow-hidden group`}
                                         onClick={() => {
-                                            alert(
-                                                "Surat Berhasil Disetujui! Proses dilanjutkan ke UPA.",
-                                            );
-                                            router.push(
-                                                "/wakil-dekan-1/surat/verifikasi",
+                                            setStatusModal({
+                                                isOpen: true,
+                                                status: "success",
+                                                type: "approve",
+                                            });
+                                            setPendingRedirect(
+                                                "/wakil-dekan-1/surat/persetujuan",
                                             );
                                         }}
                                     >

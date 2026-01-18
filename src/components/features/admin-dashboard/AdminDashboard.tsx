@@ -71,13 +71,28 @@ export function AdminDashboard({
     title,
     description,
 }: AdminDashboardProps) {
+    const getNextTarget = (role: string) => {
+        switch (role) {
+            case "Supervisor Akademik":
+                return "Manajer TU";
+            case "Manajer TU":
+                return "Wakil Dekan 1";
+            case "Wakil Dekan 1":
+                return "UPA";
+            case "UPA":
+                return "Selesai";
+            default:
+                return "Manajer TU";
+        }
+    };
+
     const letters = [
         {
             id: 1,
             applicant: "Ahmad Syaifullah",
             subject: "Surat Rekomendasi Beasiswa",
             date: "14 Agu 2023",
-            target: "Manajer TU",
+            target: getNextTarget(roleName),
             status: "Menunggu Verifikasi",
             statusColor: "bg-amber-500",
         },
@@ -86,7 +101,7 @@ export function AdminDashboard({
             applicant: "Heru Budiman",
             subject: "Surat Rekomendasi Beasiswa",
             date: "14 Agu 2023",
-            target: "Manajer TU",
+            target: getNextTarget(roleName),
             status: "Menunggu Verifikasi",
             statusColor: "bg-amber-500",
         },
@@ -95,7 +110,7 @@ export function AdminDashboard({
             applicant: "Maxwell Santosso",
             subject: "Surat Rekomendasi Beasiswa",
             date: "12 Agu 2023",
-            target: "Manajer TU",
+            target: getNextTarget(roleName),
             status: "Menunggu Verifikasi",
             statusColor: "bg-amber-500",
         },
@@ -104,7 +119,7 @@ export function AdminDashboard({
             applicant: "Budi Pekerti",
             subject: "Surat Rekomendasi Beasiswa",
             date: "11 Agu 2023",
-            target: "Manajer TU",
+            target: getNextTarget(roleName),
             status: "Ditolak",
             statusColor: "bg-red-500",
         },
@@ -113,7 +128,7 @@ export function AdminDashboard({
             applicant: "Solkhan",
             subject: "Surat Rekomendasi Beasiswa",
             date: "10 Agu 2023",
-            target: "Manajer TU",
+            target: getNextTarget(roleName),
             status: "Menunggu Verifikasi",
             statusColor: "bg-amber-500",
         },

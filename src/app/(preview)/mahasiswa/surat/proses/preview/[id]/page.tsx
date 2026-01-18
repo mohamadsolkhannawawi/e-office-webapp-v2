@@ -130,10 +130,74 @@ export default function SuratPreviewPage() {
                             ))}
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    {stage === "upa" && (
-                        <div className="space-y-4 animate-in slide-in-from-left-4 duration-500">
-                            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6">
+            {/* Main Content: Document Preview */}
+            <div className="flex-1 flex flex-col bg-slate-200 overflow-hidden relative">
+                {/* Toolbar */}
+                <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 shrink-0 shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-bold text-slate-600 uppercase tracking-tight">
+                            Pratinjau Surat
+                        </span>
+                    </div>
+
+                    <div className="flex items-center gap-4 bg-slate-100 rounded-lg px-2 py-1">
+                        <button className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200">
+                            <Minus className="h-4 w-4 text-slate-600" />
+                        </button>
+                        <span className="text-xs font-bold text-slate-700 px-3 border-x border-slate-200">
+                            100%
+                        </span>
+                        <button className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200">
+                            <Plus className="h-4 w-4 text-slate-600" />
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Halaman 1/1
+                        </span>
+                        <Maximize2 className="h-4 w-4 text-slate-400 cursor-pointer hover:text-undip-blue transition-colors" />
+                    </div>
+                </div>
+
+                {/* Document Area */}
+                <div className="flex-1 overflow-auto p-12 flex justify-center bg-[#F1F5F9]">
+                    <div className="transform scale-95 origin-top transition-transform duration-300">
+                        <SuratDocument {...config} />
+                    </div>
+                </div>
+
+                {/* Floating Footer Back Button */}
+                <div className="absolute bottom-10 right-10 flex justify-end gap-4">
+                    <Button
+                        onClick={handleBack}
+                        variant="outline"
+                        className="bg-white/90 backdrop-blur-md hover:bg-white border-none px-8 py-6 h-14 shadow-xl font-bold text-slate-700 rounded-2xl transition-all hover:scale-105 active:scale-95 flex gap-2 items-center"
+                    >
+                        <ChevronLeft className="h-5 w-5" />
+                        Kembali
+                    </Button>
+                </div>
+            </div>
+
+            {/* Right Sidebar: UPA Actions */}
+            {stage === "upa" && (
+                <div className="w-80 border-l border-gray-200 bg-white overflow-y-auto hidden md:block">
+                    <div className="p-6 space-y-6">
+                        <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                            <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
+                                Penerbitan
+                            </h2>
+                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
+                                Finalisasi Dokumen
+                            </p>
+                        </div>
+
+                        <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
+                            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
                                 <div className="flex flex-col items-center gap-2 mb-2">
                                     <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
                                         <ShieldCheck className="h-6 w-6" />
@@ -234,59 +298,9 @@ export default function SuratPreviewPage() {
                                 </div>
                             </div>
                         </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Main Content: Document Preview */}
-            <div className="flex-1 flex flex-col bg-slate-200 overflow-hidden relative">
-                {/* Toolbar */}
-                <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 shrink-0 shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold text-slate-600 uppercase tracking-tight">
-                            Pratinjau Surat
-                        </span>
-                    </div>
-
-                    <div className="flex items-center gap-4 bg-slate-100 rounded-lg px-2 py-1">
-                        <button className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200">
-                            <Minus className="h-4 w-4 text-slate-600" />
-                        </button>
-                        <span className="text-xs font-bold text-slate-700 px-3 border-x border-slate-200">
-                            100%
-                        </span>
-                        <button className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200">
-                            <Plus className="h-4 w-4 text-slate-600" />
-                        </button>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                            Halaman 1/1
-                        </span>
-                        <Maximize2 className="h-4 w-4 text-slate-400 cursor-pointer hover:text-undip-blue transition-colors" />
                     </div>
                 </div>
-
-                {/* Document Area */}
-                <div className="flex-1 overflow-auto p-12 flex justify-center bg-[#F1F5F9]">
-                    <div className="transform scale-95 origin-top transition-transform duration-300">
-                        <SuratDocument {...config} />
-                    </div>
-                </div>
-
-                {/* Floating Footer Back Button */}
-                <div className="absolute bottom-10 right-10 flex justify-end gap-4">
-                    <Button
-                        onClick={handleBack}
-                        variant="outline"
-                        className="bg-white/90 backdrop-blur-md hover:bg-white border-none px-8 py-6 h-14 shadow-xl font-bold text-slate-700 rounded-2xl transition-all hover:scale-105 active:scale-95 flex gap-2 items-center"
-                    >
-                        <ChevronLeft className="h-5 w-5" />
-                        Kembali
-                    </Button>
-                </div>
-            </div>
+            )}
         </div>
     );
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -9,7 +11,7 @@ import {
     LogOut,
     ChevronDown,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 interface SidebarProps {
     className?: string;
@@ -42,14 +44,18 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             icon: <LayoutDashboard size={20} />,
         },
         {
-            label: "Surat Dalam Proses",
-            href: "/mahasiswa/surat/proses",
+            label: "Surat Saya",
             icon: <Mail size={20} />,
-        },
-        {
-            label: "Surat Selesai",
-            href: "/mahasiswa/surat/selesai",
-            icon: <Mail size={20} />,
+            submenu: [
+                {
+                    label: "Dalam Proses",
+                    href: "/mahasiswa/surat/proses",
+                },
+                {
+                    label: "Selesai",
+                    href: "/mahasiswa/surat/selesai",
+                },
+            ],
         },
         {
             label: "Draft Surat",
@@ -152,6 +158,20 @@ export function Sidebar({ className = "" }: SidebarProps) {
     const toggleMenu = (label: string) => {
         setExpandedMenu(expandedMenu === label ? null : label);
     };
+
+    // Auto-expand menu if child is active
+    useEffect(() => {
+        menuItems.forEach((item) => {
+            if (item.submenu) {
+                const isActive = item.submenu.some(
+                    (sub) => pathname === sub.href,
+                );
+                if (isActive) {
+                    setExpandedMenu(item.label);
+                }
+            }
+        });
+    }, [pathname, menuItems]);
 
     const isActive = (href?: string) => {
         if (!href) return false;

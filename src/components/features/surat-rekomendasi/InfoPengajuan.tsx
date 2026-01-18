@@ -250,6 +250,11 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
         };
     }, [validateAllFields]);
 
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const [editableFields, setEditableFields] = useState<
         Record<string, boolean>
     >({});
@@ -438,29 +443,33 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                         : ""
                                 }
                             >
-                                <DatePicker
-                                    date={
-                                        data.tanggalLahir
-                                            ? new Date(
-                                                  data.tanggalLahir as string,
-                                              )
-                                            : undefined
-                                    }
-                                    onDateChange={(date) => {
-                                        setData((prev) => ({
-                                            ...prev,
-                                            tanggalLahir:
-                                                date?.toISOString() || "",
-                                        }));
-                                        if (errors.tanggalLahir) {
-                                            handleValidation(
-                                                "tanggalLahir",
-                                                date?.toISOString() || "",
-                                            );
+                                {mounted ? (
+                                    <DatePicker
+                                        date={
+                                            data.tanggalLahir
+                                                ? new Date(
+                                                      data.tanggalLahir as string,
+                                                  )
+                                                : undefined
                                         }
-                                    }}
-                                    placeholder="Pilih tanggal lahir"
-                                />
+                                        onDateChange={(date) => {
+                                            setData((prev) => ({
+                                                ...prev,
+                                                tanggalLahir:
+                                                    date?.toISOString() || "",
+                                            }));
+                                            if (errors.tanggalLahir) {
+                                                handleValidation(
+                                                    "tanggalLahir",
+                                                    date?.toISOString() || "",
+                                                );
+                                            }
+                                        }}
+                                        placeholder="Pilih tanggal lahir"
+                                    />
+                                ) : (
+                                    <div className="h-11 w-full bg-slate-50 border border-slate-200 rounded-md animate-pulse" />
+                                )}
                             </div>
                             {errors.tanggalLahir && (
                                 <Alert variant="destructive" className="py-2">

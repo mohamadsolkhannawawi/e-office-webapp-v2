@@ -227,7 +227,15 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                         </h2>
                         <div className="space-y-3">
                             <Link
-                                href={`/mahasiswa/surat/proses/preview/${id}?stage=${
+                                href={`${
+                                    role === "supervisor-akademik"
+                                        ? "/supervisor-akademik"
+                                        : role === "manajer-tu"
+                                          ? "/manajer-tu"
+                                          : role === "wakil-dekan-1"
+                                            ? "/wakil-dekan-1"
+                                            : "/upa"
+                                }/surat/proses/preview/${id}?stage=${
                                     role === "supervisor-akademik"
                                         ? "supervisor"
                                         : role === "manajer-tu"

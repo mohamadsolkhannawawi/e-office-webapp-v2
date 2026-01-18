@@ -108,14 +108,18 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
     };
 
     const breadcrumbs = {
-        "supervisor-akademik": ["Surat Masuk", "Penerima", "Identitas Pemohon"],
-        "manajer-tu": ["Surat Masuk", "Penerima", "Identitas Pemohon"],
+        "supervisor-akademik": [
+            "Surat Masuk",
+            "Perlu Tindakan",
+            "Identitas Pemohon",
+        ],
+        "manajer-tu": ["Surat Masuk", "Perlu Tindakan", "Identitas Pemohon"],
         "wakil-dekan-1": [
             "Surat Masuk",
-            "Persetujuan",
+            "Perlu Tindakan",
             "Detail Penandatanganan",
         ],
-        upa: ["Surat Masuk", "Penomoran", "Detail Publikasi"],
+        upa: ["Surat Masuk", "Perlu Tindakan", "Detail Publikasi"],
     };
 
     const currentBreadcrumb = breadcrumbs[role] || [

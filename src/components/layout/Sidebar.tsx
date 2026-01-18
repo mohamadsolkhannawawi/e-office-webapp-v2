@@ -79,18 +79,13 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             icon: <Mail size={20} />,
             submenu: [
                 {
-                    label: "Penerima",
+                    label: "Perlu Tindakan",
                     href: "/supervisor-akademik/surat/penerima",
                 },
                 {
-                    label: "Disposisi",
-                    href: "/supervisor-akademik/surat/disposisi",
+                    label: "Selesai",
+                    href: "/supervisor-akademik/surat/arsip",
                 },
-                {
-                    label: "Tembusan",
-                    href: "/supervisor-akademik/surat/tembusan",
-                },
-                { label: "Arsip", href: "/supervisor-akademik/surat/arsip" },
             ],
         },
     ],
@@ -104,9 +99,14 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             label: "Surat Masuk",
             icon: <Mail size={20} />,
             submenu: [
-                { label: "Penerima", href: "/manajer-tu/surat/penerima" },
-                { label: "Disposisi", href: "/manajer-tu/surat/disposisi" },
-                { label: "Arsip", href: "/manajer-tu/surat/arsip" },
+                {
+                    label: "Perlu Tindakan",
+                    href: "/manajer-tu/surat/penerima",
+                },
+                {
+                    label: "Selesai",
+                    href: "/manajer-tu/surat/arsip",
+                },
             ],
         },
     ],
@@ -121,10 +121,13 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             icon: <Mail size={20} />,
             submenu: [
                 {
-                    label: "Persetujuan",
+                    label: "Perlu Tindakan",
                     href: "/wakil-dekan-1/surat/persetujuan",
                 },
-                { label: "Arsip", href: "/wakil-dekan-1/surat/arsip" },
+                {
+                    label: "Selesai",
+                    href: "/wakil-dekan-1/surat/arsip",
+                },
             ],
         },
     ],
@@ -138,9 +141,14 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             label: "Surat Masuk",
             icon: <Mail size={20} />,
             submenu: [
-                { label: "Penomoran", href: "/upa/surat/penomoran" },
-                { label: "Publish", href: "/upa/surat/publish" },
-                { label: "Arsip", href: "/upa/surat/arsip" },
+                {
+                    label: "Perlu Tindakan",
+                    href: "/upa/surat/penomoran",
+                },
+                {
+                    label: "Selesai",
+                    href: "/upa/surat/arsip",
+                },
             ],
         },
     ],

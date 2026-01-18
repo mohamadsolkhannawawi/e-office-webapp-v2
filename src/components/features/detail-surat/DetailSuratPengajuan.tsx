@@ -17,7 +17,7 @@ function InfoRow({ label, value }: InfoRowProps) {
     );
 }
 
-interface DetailSuratPengajuanProps {
+export interface DetailSuratPengajuanProps {
     data?: {
         jenisSurat: string;
         namaBeasiswa?: string;

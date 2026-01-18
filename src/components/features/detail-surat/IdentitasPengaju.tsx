@@ -17,7 +17,7 @@ function InfoRow({ label, value }: InfoRowProps) {
     );
 }
 
-interface IdentitasPengajuProps {
+export interface IdentitasPengajuProps {
     data?: {
         namaLengkap: string;
         nimNip: string;

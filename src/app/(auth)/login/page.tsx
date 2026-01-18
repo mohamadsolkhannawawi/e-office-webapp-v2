@@ -22,7 +22,7 @@ export default function LoginPage() {
             <Navbar showProfile={false} />
 
             {/* Main Content */}
-            <main className="flex flex-grow items-center justify-center p-4 md:p-6">
+            <main className="flex grow items-center justify-center p-4 md:p-6">
                 <div className="flex min-h-[600px] w-full max-w-5xl flex-col overflow-hidden rounded-lg bg-card-light shadow-xl dark:bg-card-dark md:flex-row">
                     {/* Left Panel */}
                     <div className="flex w-full flex-col items-center justify-center border-b border-gray-100 p-8 text-center dark:border-gray-700 dark:bg-gray-900 md:w-1/2 md:border-b-0 md:border-r md:p-12">
@@ -127,13 +127,13 @@ export default function LoginPage() {
                             </Button>
 
                             <div className="relative flex items-center py-2">
-                                <div className="flex-grow">
+                                <div className="grow">
                                     <Separator />
                                 </div>
-                                <span className="mx-4 flex-shrink-0 text-sm text-gray-400 dark:text-gray-500">
+                                <span className="mx-4 shrink-0 text-sm text-gray-400 dark:text-gray-500">
                                     atau
                                 </span>
-                                <div className="flex-grow">
+                                <div className="grow">
                                     <Separator />
                                 </div>
                             </div>

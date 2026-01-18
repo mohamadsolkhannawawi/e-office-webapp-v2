@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useState, useEffect } from "react";
 import type { FormDataType } from "@/types/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -240,7 +240,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
         return allValid;
     }, [data]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const customWindow = window as unknown as {
             __validateInfoPengajuan?: () => boolean;
         };
@@ -252,7 +252,8 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
 
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
-        setMounted(true);
+        const timer = setTimeout(() => setMounted(true), 0);
+        return () => clearTimeout(timer);
     }, []);
 
     const [editableFields, setEditableFields] = useState<

@@ -7,6 +7,8 @@ import {
     IdentitasPengaju,
     DetailSuratPengajuan,
     RiwayatSurat,
+    IdentitasPengajuProps,
+    DetailSuratPengajuanProps,
 } from "@/components/features/detail-surat";
 
 // Custom Icon for EditNote if not found
@@ -28,7 +30,7 @@ const EditNoteIcon = () => (
 );
 
 export default function DetailSuratProsesPage() {
-    const identitasData = {
+    const identitasData: IdentitasPengajuProps["data"] = {
         namaLengkap: "Ahmad Syaifullah",
         nimNip: "24060121120001",
         email: "ahmadsyaifullah@students.undip.ac.id",
@@ -39,10 +41,9 @@ export default function DetailSuratProsesPage() {
         noHp: "089123141241412412",
         ipk: "3.9",
         ips: "3.8",
-        sks: "100",
     };
 
-    const detailSuratData = {
+    const detailSuratData: DetailSuratPengajuanProps["data"] = {
         jenisSurat: "SRB/ Surat Rekomendasi Beasiswa",
         keperluan: "Beasiswa Djarum Foundation",
     };
@@ -60,10 +61,10 @@ export default function DetailSuratProsesPage() {
                 {/* Left Column */}
                 <div className="lg:col-span-8 space-y-6">
                     {/* Identitas Pengaju */}
-                    <IdentitasPengaju data={identitasData as any} />
+                    <IdentitasPengaju data={identitasData} />
 
                     {/* Detail Surat Pengajuan */}
-                    <DetailSuratPengajuan data={detailSuratData as any} />
+                    <DetailSuratPengajuan data={detailSuratData} />
 
                     {/* Lampiran Section */}
                     <div>
@@ -81,7 +82,7 @@ export default function DetailSuratProsesPage() {
                                 </button>
                                 <div className="px-6 pb-6 pt-2">
                                     <div className="w-full bg-[#6A8E7F] rounded-lg p-12 flex items-center justify-center overflow-hidden">
-                                        <div className="bg-white shadow-xl max-w-sm w-full aspect-[3/4] p-8 transform rotate-1 transition-transform hover:rotate-0 flex flex-col gap-4">
+                                        <div className="bg-white shadow-xl max-w-sm w-full aspect-3/4 p-8 transform rotate-1 transition-transform hover:rotate-0 flex flex-col gap-4">
                                             <div className="h-4 bg-gray-100 w-1/2 mx-auto mb-6"></div>
                                             <div className="space-y-2">
                                                 <div className="h-2 bg-gray-50 w-full"></div>
@@ -105,7 +106,7 @@ export default function DetailSuratProsesPage() {
                                 </button>
                                 <div className="px-6 pb-6 pt-2">
                                     <div className="w-full bg-[#6A8E7F] rounded-lg p-12 flex items-center justify-center overflow-hidden">
-                                        <div className="bg-white shadow-xl max-w-sm w-full aspect-[3/4] p-8 transform -rotate-1 transition-transform hover:rotate-0 flex flex-col gap-4">
+                                        <div className="bg-white shadow-xl max-w-sm w-full aspect-3/4 p-8 transform -rotate-1 transition-transform hover:rotate-0 flex flex-col gap-4">
                                             <div className="h-4 bg-gray-100 w-1/2 mx-auto mb-6"></div>
                                             <div className="space-y-2">
                                                 <div className="h-2 bg-gray-50 w-full"></div>

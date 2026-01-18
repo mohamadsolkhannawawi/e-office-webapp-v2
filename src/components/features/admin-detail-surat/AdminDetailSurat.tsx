@@ -16,6 +16,8 @@ import {
     IdentitasPengaju,
     DetailSuratPengajuan,
     RiwayatSurat,
+    IdentitasPengajuProps,
+    DetailSuratPengajuanProps,
 } from "@/components/features/detail-surat";
 import Link from "next/link";
 import { AdminActionModals } from "./AdminActionModals";
@@ -88,7 +90,7 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
         });
     };
 
-    const identitasData = {
+    const identitasData: IdentitasPengajuProps["data"] = {
         namaLengkap: "Ahmad Syaifullah",
         nimNip: "24060121120001",
         email: "ahmadsyaifullah@students.undip.ac.id",
@@ -99,10 +101,9 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
         noHp: "089123141241412412",
         ipk: "3.9",
         ips: "3.8",
-        sks: "100",
     };
 
-    const detailSuratData = {
+    const detailSuratData: DetailSuratPengajuanProps["data"] = {
         jenisSurat: "SRB/ Surat Rekomendasi Beasiswa",
         keperluan: "Beasiswa Djarum Foundation",
     };
@@ -184,10 +185,10 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                 {/* Left Column */}
                 <div className="lg:col-span-8 space-y-8">
                     {/* Identitas Pengaju */}
-                    <IdentitasPengaju data={identitasData as any} />
+                    <IdentitasPengaju data={identitasData} />
 
                     {/* Detail Surat Pengajuan */}
-                    <DetailSuratPengajuan data={detailSuratData as any} />
+                    <DetailSuratPengajuan data={detailSuratData} />
 
                     {/* Lampiran Section */}
                     <div>

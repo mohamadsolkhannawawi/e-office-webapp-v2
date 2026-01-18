@@ -7,11 +7,13 @@ import {
     DetailSuratPengajuan,
     RiwayatSurat,
     DetailRevisi,
+    IdentitasPengajuProps,
+    DetailSuratPengajuanProps,
 } from "@/components/features/detail-surat";
 
 export default function DetailRevisiPage() {
     // Dummy data to match the provided HTML/Design
-    const identitasData = {
+    const identitasData: IdentitasPengajuProps["data"] = {
         namaLengkap: "Ahmad Syaifullah",
         nimNip: "24060121120001",
         email: "ahmadsyaifullah@students.undip.ac.id",
@@ -22,10 +24,9 @@ export default function DetailRevisiPage() {
         noHp: "089123141241412412",
         ipk: "3.9",
         ips: "3.8",
-        sks: "100",
     };
 
-    const detailSuratData = {
+    const detailSuratData: DetailSuratPengajuanProps["data"] = {
         jenisSurat: "SRB/ Surat Rekomendasi Beasiswa",
         keperluan: "Beasiswa Djarum Foundation",
     };
@@ -49,10 +50,10 @@ export default function DetailRevisiPage() {
                     />
 
                     {/* Identitas Pengaju */}
-                    <IdentitasPengaju data={identitasData as any} />
+                    <IdentitasPengaju data={identitasData} />
 
                     {/* Detail Surat Pengajuan */}
-                    <DetailSuratPengajuan data={detailSuratData as any} />
+                    <DetailSuratPengajuan data={detailSuratData} />
 
                     {/* Lampiran */}
                     <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">

@@ -10,12 +10,15 @@ import {
     Send,
     ShieldCheck,
     Check,
+    PenTool,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SuratDocument } from "@/components/features/preview-surat/SuratDocument";
 import { UPANumberingModal } from "@/components/features/admin-detail-surat/UPANumberingModal";
+import { WD1SignatureModal } from "@/components/features/admin-detail-surat/WD1SignatureModal";
 import React, { useMemo, useState } from "react";
+import Image from "next/image";
 
 export default function SuratPreviewPage() {
     const router = useRouter();
@@ -25,7 +28,9 @@ export default function SuratPreviewPage() {
         searchParams.get("no") || "",
     );
     const [upaIsStampApplied, setUpaIsStampApplied] = useState(false);
+    const [wd1Signature, setWd1Signature] = useState<string | null>(null);
     const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
+    const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
     const handleBack = () => {
         router.back();
@@ -45,7 +50,7 @@ export default function SuratPreviewPage() {
                 };
             case "wd1":
                 return {
-                    showSignature: true,
+                    showSignature: !!wd1Signature,
                     showStamp: false,
                     nomorSurat: "",
                 };
@@ -63,7 +68,7 @@ export default function SuratPreviewPage() {
                     nomorSurat: "",
                 };
         }
-    }, [stage, upaLetterNumber, upaIsStampApplied]);
+    }, [stage, upaLetterNumber, upaIsStampApplied, wd1Signature]);
 
     const attributes = [
         {
@@ -94,6 +99,11 @@ export default function SuratPreviewPage() {
                 onClose={() => setIsNumberingModalOpen(false)}
                 onNumberChange={setUpaLetterNumber}
                 onStampApply={() => {}} // Stamp is always true in this UI
+            />
+            <WD1SignatureModal
+                isOpen={isSignatureModalOpen}
+                onClose={() => setIsSignatureModalOpen(false)}
+                onSignatureChange={setWd1Signature}
             />
             {/* Left Sidebar: Attributes */}
             <div className="w-80 border-r border-gray-200 bg-white overflow-y-auto hidden md:block">
@@ -186,6 +196,7 @@ export default function SuratPreviewPage() {
             {/* Right Sidebar: UPA Actions */}
             {stage === "upa" && (
                 <div className="w-80 border-l border-gray-200 bg-white overflow-y-auto hidden md:block">
+                    {/* ... UPA content remains ... */}
                     <div className="p-6 space-y-6">
                         <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
                             <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
@@ -293,6 +304,97 @@ export default function SuratPreviewPage() {
                                         <p className="text-[9px] text-slate-400 text-center leading-tight">
                                             Nomor dan stempel wajib diisi
                                             sebelum publikasi.
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Right Sidebar: WD1 Actions */}
+            {stage === "wd1" && (
+                <div className="w-80 border-l border-gray-200 bg-white overflow-y-auto hidden md:block">
+                    <div className="p-6 space-y-6">
+                        <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                            <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
+                                Persetujuan
+                            </h2>
+                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
+                                Otorisasi Dokumen
+                            </p>
+                        </div>
+
+                        <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
+                            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                <div className="flex flex-col items-center gap-2 mb-2">
+                                    <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
+                                        <PenTool className="h-6 w-6" />
+                                    </div>
+                                    <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
+                                        Wakil Dekan 1
+                                    </h3>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                                        Langkah 1: Tanda Tangan
+                                    </p>
+                                    <Button
+                                        onClick={() =>
+                                            setIsSignatureModalOpen(true)
+                                        }
+                                        className={`w-full ${wd1Signature ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
+                                    >
+                                        <PenTool className="h-4 w-4" />
+                                        {wd1Signature
+                                            ? "Ubah Tanda Tangan"
+                                            : "Bubuhkan Tanda Tangan"}
+                                        {wd1Signature && (
+                                            <Check className="h-3 w-3" />
+                                        )}
+                                    </Button>
+
+                                    {wd1Signature && (
+                                        <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 animate-in zoom-in duration-300">
+                                            <div className="bg-white border border-emerald-100 rounded-lg py-2 px-3 flex justify-center shadow-inner pt-2">
+                                                <div className="relative w-32 h-16">
+                                                    <Image
+                                                        src={wd1Signature}
+                                                        alt="WD1 Signature"
+                                                        fill
+                                                        className="object-contain mix-blend-multiply"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="space-y-3 border-t border-slate-100 pt-5">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
+                                        Langkah Terakhir
+                                    </p>
+                                    <Button
+                                        disabled={!wd1Signature}
+                                        className={`w-full ${!wd1Signature ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg shadow-blue-200"} font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] transition-all relative overflow-hidden group`}
+                                        onClick={() => {
+                                            alert(
+                                                "Surat Berhasil Disetujui! Proses dilanjutkan ke UPA.",
+                                            );
+                                            router.push(
+                                                "/wd1/surat/verifikasi",
+                                            );
+                                        }}
+                                    >
+                                        <Send className="h-4 w-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                        Setujui & Teruskan
+                                    </Button>
+                                    {!wd1Signature && (
+                                        <p className="text-[9px] text-slate-400 text-center leading-tight">
+                                            Harap bubuhkan tanda tangan sebelum
+                                            menyetujui.
                                         </p>
                                     )}
                                 </div>

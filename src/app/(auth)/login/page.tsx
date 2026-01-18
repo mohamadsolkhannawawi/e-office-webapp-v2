@@ -11,38 +11,15 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 import logoMain from "@/assets/images/logo-undip-main.png";
-import logoNavbar from "@/assets/images/logo-undip-navbar.png";
+
+import { Navbar } from "@/components/layout/Navbar";
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
         <div className="flex min-h-screen flex-col bg-bg-light font-sans text-gray-800 antialiased dark:bg-bg-dark dark:text-gray-200">
-            {/* Header */}
-            <header className="relative z-10 flex h-16 w-full items-center bg-undip-blue px-4 shadow-md md:px-8">
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-start">
-                        <Image
-                            src={logoNavbar}
-                            alt="UNDIP Logo Small"
-                            width={48}
-                            height={48}
-                            className="h-full w-full object-contain"
-                        />
-                    </div>
-                    <div className="flex flex-col leading-tight text-white">
-                        <span className="text-xs font-medium opacity-90">
-                            Fakultas
-                        </span>
-                        <span className="text-sm font-bold tracking-wide">
-                            SAINS DAN MATEMATIKA
-                        </span>
-                        <span className="text-[10px] font-medium opacity-80">
-                            UNIVERSITAS DIPONEGORO
-                        </span>
-                    </div>
-                </div>
-            </header>
+            <Navbar showProfile={false} />
 
             {/* Main Content */}
             <main className="flex flex-grow items-center justify-center p-4 md:p-6">

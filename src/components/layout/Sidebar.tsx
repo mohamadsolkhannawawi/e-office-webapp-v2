@@ -42,12 +42,14 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             icon: <LayoutDashboard size={20} />,
         },
         {
-            label: "Surat Saya",
+            label: "Surat Dalam Proses",
+            href: "/mahasiswa/surat/proses",
             icon: <Mail size={20} />,
-            submenu: [
-                { label: "Dalam Proses", href: "/mahasiswa/surat/proses" },
-                { label: "Sudah Selesai", href: "/mahasiswa/surat/selesai" },
-            ],
+        },
+        {
+            label: "Surat Selesai",
+            href: "/mahasiswa/surat/selesai",
+            icon: <Mail size={20} />,
         },
         {
             label: "Draft Surat",

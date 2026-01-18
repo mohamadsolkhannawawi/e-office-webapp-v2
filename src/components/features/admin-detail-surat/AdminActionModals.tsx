@@ -186,11 +186,11 @@ export function AdminActionModals({
                         )}
                     </div>
 
-                    <DialogFooter className="mt-8 gap-3 sm:gap-0">
+                    <DialogFooter className="mt-8 gap-3">
                         <Button
                             variant="outline"
                             onClick={onClose}
-                            className="flex-1 h-12 rounded-xl font-bold border-slate-200 text-slate-600 hover:bg-slate-50"
+                            className="flex-1 h-12 rounded-xl font-bold border-slate-300 text-slate-600 hover:bg-slate-50"
                         >
                             Batal
                         </Button>

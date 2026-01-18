@@ -1,0 +1,254 @@
+"use client";
+
+import React from "react";
+import {
+    ChevronRight,
+    Eye,
+    Check,
+    RotateCcw,
+    XOctagon,
+    FileText,
+    ExternalLink,
+    Send,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+    IdentitasPengaju,
+    DetailSuratPengajuan,
+    RiwayatSurat,
+} from "@/components/features/detail-surat";
+import Link from "next/link";
+
+interface AdminDetailSuratProps {
+    role: "supervisor-akademik" | "manajer-tu" | "wakil-dekan-1" | "upa";
+    id: string;
+}
+
+export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
+    const identitasData = {
+        namaLengkap: "Ahmad Syaifullah",
+        nimNip: "24060121120001",
+        email: "ahmadsyaifullah@students.undip.ac.id",
+        departemen: "Informatika",
+        programStudi: "Informatika",
+        tempatLahir: "Blora",
+        tanggalLahir: "03/18/2006",
+        noHp: "089123141241412412",
+        ipk: "3.9",
+        ips: "3.8",
+        sks: "100",
+    };
+
+    const detailSuratData = {
+        jenisSurat: "SRB/ Surat Rekomendasi Beasiswa",
+        keperluan: "Beasiswa Djarum Foundation",
+    };
+
+    const breadcrumbs = {
+        "supervisor-akademik": ["Surat Masuk", "Penerima", "Identitas Pemohon"],
+        "manajer-tu": ["Surat Masuk", "Penerima", "Identitas Pemohon"],
+        "wakil-dekan-1": [
+            "Surat Masuk",
+            "Persetujuan",
+            "Detail Penandatanganan",
+        ],
+        upa: ["Surat Masuk", "Penomoran", "Detail Publikasi"],
+    };
+
+    const currentBreadcrumb = breadcrumbs[role] || [
+        "Persuratan",
+        "Detail Surat",
+    ];
+
+    return (
+        <div className="space-y-6 animate-in fade-in duration-500 pb-10">
+            {/* Breadcrumb */}
+            <nav className="flex items-center text-sm font-medium text-slate-500">
+                {currentBreadcrumb.map((crumb, index) => (
+                    <React.Fragment key={index}>
+                        {index > 0 && <ChevronRight className="mx-2 h-4 w-4" />}
+                        <span
+                            className={
+                                index === currentBreadcrumb.length - 1
+                                    ? "text-slate-800"
+                                    : ""
+                            }
+                        >
+                            {crumb}
+                        </span>
+                    </React.Fragment>
+                ))}
+            </nav>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Left Column */}
+                <div className="lg:col-span-8 space-y-6">
+                    {/* Identitas Pengaju */}
+                    <IdentitasPengaju data={identitasData as any} />
+
+                    {/* Detail Surat Pengajuan */}
+                    <DetailSuratPengajuan data={detailSuratData as any} />
+
+                    {/* Lampiran Section */}
+                    <div>
+                        <h2 className="text-xl font-bold text-slate-800 mb-4">
+                            Lampiran
+                        </h2>
+                        <div className="space-y-4">
+                            {/* KTM Attachment */}
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                                <button className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-50">
+                                    <div className="flex items-center gap-3">
+                                        <span className="font-bold text-slate-800">
+                                            KTM
+                                        </span>
+                                        <span className="text-slate-400 text-sm">
+                                            - KTM_24060121120001.jpg
+                                        </span>
+                                    </div>
+                                    <ChevronRight className="h-5 w-5 text-slate-400 rotate-90" />
+                                </button>
+                                <div className="px-6 pb-6 pt-6">
+                                    <div className="w-full bg-[#6A8E7F] rounded-lg p-12 flex items-center justify-center overflow-hidden">
+                                        <div className="bg-white shadow-xl max-w-sm w-full aspect-3/4 p-8 flex flex-col items-center justify-center relative border border-gray-100">
+                                            {/* Stack of paper effect */}
+                                            <div className="absolute top-2 left-2 right-2 bottom-2 border border-gray-100 -z-10 bg-white shadow-sm transform rotate-1"></div>
+                                            <div className="absolute top-1 left-1 right-1 bottom-1 border border-gray-100 -z-20 bg-white shadow-sm transform -rotate-1"></div>
+
+                                            <div className="w-16 h-20 border-2 border-gray-200 rounded flex flex-col gap-2 p-2">
+                                                <div className="h-2 bg-gray-100 w-full"></div>
+                                                <div className="h-2 bg-gray-100 w-3/4"></div>
+                                                <div className="h-2 bg-gray-100 w-full"></div>
+                                            </div>
+                                            <p className="mt-4 text-[10px] text-slate-400 font-medium">
+                                                SIMULASI DOKUMEN
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* KHS Attachment */}
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                                <button className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-50">
+                                    <div className="flex items-center gap-3">
+                                        <span className="font-bold text-slate-800">
+                                            Transkrip
+                                        </span>
+                                        <span className="text-slate-400 text-sm">
+                                            - Transkrip_Nilai_Semester_6.pdf
+                                        </span>
+                                    </div>
+                                    <ChevronRight className="h-5 w-5 text-slate-400 rotate-90" />
+                                </button>
+                                <div className="px-6 pb-6 pt-6">
+                                    <div className="w-full bg-[#6A8E7F] rounded-lg p-12 flex items-center justify-center overflow-hidden">
+                                        <div className="bg-white shadow-xl max-w-sm w-full aspect-3/4 p-8 flex flex-col items-center justify-center relative border border-gray-100">
+                                            <div className="absolute top-2 left-2 right-2 bottom-2 border border-gray-100 -z-10 bg-white shadow-sm transform rotate-1"></div>
+                                            <div className="absolute top-1 left-1 right-1 bottom-1 border border-gray-100 -z-20 bg-white shadow-sm transform -rotate-1"></div>
+
+                                            <div className="w-16 h-20 border-2 border-gray-200 rounded flex flex-col gap-2 p-2 font-serif text-[6px] text-gray-400 overflow-hidden leading-tight">
+                                                LOREM IPSUM DOLOR SIT AMET
+                                                CONSECTETUR ADIPISCING ELIT SED
+                                                DO EIUSMOD TEMPOR INCIDIDUNT UT
+                                                LABORE ET DOLORE MAGNA ALIQUA...
+                                            </div>
+                                            <p className="mt-4 text-[10px] text-slate-400 font-medium">
+                                                SIMULASI DOKUMEN
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="lg:col-span-4 space-y-6">
+                    {/* Aksi Card */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+                        <h2 className="font-bold text-slate-800 mb-4 uppercase tracking-wider text-sm">
+                            Aksi
+                        </h2>
+                        <div className="space-y-3">
+                            <Link
+                                href={`/mahasiswa/surat/proses/preview/dummy-id`}
+                            >
+                                <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 mb-3">
+                                    <Eye className="h-5 w-5" />
+                                    Preview
+                                </Button>
+                            </Link>
+
+                            {role !== "upa" ? (
+                                <>
+                                    <Button className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
+                                        <Check className="h-5 w-5" />
+                                        Setujui
+                                    </Button>
+                                    <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
+                                        <RotateCcw className="h-5 w-5" />
+                                        Revisi
+                                    </Button>
+                                    <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
+                                        <XOctagon className="h-5 w-5" />
+                                        Tolak
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <Button className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
+                                        <Send className="h-5 w-5" />
+                                        Publish
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Timeline Card */}
+                    <RiwayatSurat
+                        riwayat={[
+                            {
+                                role: "Supervisor Akademik",
+                                status: "Verifikasi Supervisor Akademik",
+                                date: "09 Desember 2025",
+                                time: "00:58:49",
+                                catatan: "Tidak ada catatan",
+                            },
+                            {
+                                role: "Supervisor Akademik",
+                                status: "Verifikasi Supervisor Akademik",
+                                date: "09 Desember 2025",
+                                time: "00:58:49",
+                                catatan: "Tidak ada catatan",
+                            },
+                            {
+                                role: "Supervisor Akademik",
+                                status: "Verifikasi Supervisor Akademik",
+                                date: "09 Desember 2025",
+                                time: "00:58:49",
+                                catatan: "Tidak ada catatan",
+                            },
+                            {
+                                role: "Supervisor Akademik",
+                                status: "Verifikasi Supervisor Akademik",
+                                date: "09 Desember 2025",
+                                time: "00:58:49",
+                                catatan: "Tidak ada catatan",
+                            },
+                            {
+                                role: "Mahasiswa",
+                                status: "Surat Diajukan",
+                                date: "08 Desember 2025",
+                                time: "00:58:49",
+                                catatan: "Tidak ada catatan",
+                            },
+                        ]}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}

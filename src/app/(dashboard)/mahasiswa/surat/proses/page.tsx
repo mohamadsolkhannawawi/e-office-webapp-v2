@@ -87,10 +87,11 @@ export default function SuratDalamProsesPage() {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">
                                             <Button
+                                                variant="outline"
                                                 size="sm"
-                                                className="bg-undip-blue hover:bg-sky-700 text-xs px-4 h-8"
+                                                className="border-gray-200 text-slate-600 hover:bg-gray-50 text-xs px-4 h-8"
                                             >
-                                                Preview
+                                                Detail
                                             </Button>
                                             {letter.statusType ===
                                                 "warning" && (

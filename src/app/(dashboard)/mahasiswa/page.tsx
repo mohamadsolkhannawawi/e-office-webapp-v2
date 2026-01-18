@@ -1,112 +1,112 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
+    GraduationCap,
+    FileText,
+    Search,
+    MoreHorizontal,
+    ChevronRight,
+} from "lucide-react";
 import Link from "next/link";
 
+const DASHBOARD_ACTIONS = [
+    {
+        title: "Surat Rekomendasi Beasiswa",
+        description: "Pengajuan surat untuk keperluan beasiswa",
+        icon: <GraduationCap className="h-5 w-5" />,
+        href: "/mahasiswa/surat-rekomendasi-beasiswa/beasiswa/baru",
+        color: "bg-blue-50 text-undip-blue",
+        disabled: false,
+    },
+    {
+        title: "Surat Keterangan Aktif Kuliah",
+        description: "Bukti keaktifan mahasiswa semester ini",
+        icon: <FileText className="h-5 w-5" />,
+        href: "#",
+        color: "bg-gray-50 text-gray-400",
+        disabled: true,
+    },
+    {
+        title: "Surat Izin Penelitian",
+        description: "Permohonan izin riset ke instansi terkait",
+        icon: <Search className="h-5 w-5" />,
+        href: "#",
+        color: "bg-gray-50 text-gray-400",
+        disabled: true,
+    },
+    {
+        title: "Surat Lainnya",
+        description: "Permohonan surat administrasi lainnya",
+        icon: <MoreHorizontal className="h-5 w-5" />,
+        href: "#",
+        color: "bg-gray-50 text-gray-400",
+        disabled: true,
+    },
+];
+
 export default function MahasiswaDashboardPage() {
-    // TODO: Fetch actual data from API
-    const stats = {
-        total: 5,
-        pending: 2,
-        approved: 2,
-        rejected: 1,
-    };
-
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                    Dashboard Mahasiswa
-                </h1>
-                <p className="text-muted-foreground">
-                    Kelola pengajuan surat rekomendasi beasiswa Anda
-                </p>
-            </div>
+        <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Breadcrumb */}
+            <nav className="flex items-center text-sm font-medium text-slate-500">
+                <span className="text-slate-800">Dashboard</span>
+                <ChevronRight className="mx-2 h-4 w-4" />
+            </nav>
 
-            {/* Stats Grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Total Pengajuan
-                        </CardTitle>
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.total}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Menunggu
-                        </CardTitle>
-                        <Clock className="h-4 w-4 text-yellow-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {stats.pending}
+            {/* Actions Grid */}
+            <div className="grid gap-4 max-w-5xl">
+                {DASHBOARD_ACTIONS.map((action) => (
+                    <div
+                        key={action.title}
+                        className={`group bg-white rounded-xl border border-gray-100 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all duration-300 ${
+                            action.disabled
+                                ? "opacity-60 cursor-not-allowed"
+                                : "hover:shadow-md hover:border-blue-100"
+                        }`}
+                    >
+                        <div className="flex items-center gap-4">
+                            <div
+                                className={`w-12 h-12 rounded-full ${action.color} flex items-center justify-center shrink-0 transition-transform ${!action.disabled && "group-hover:scale-110"}`}
+                            >
+                                {action.icon}
+                            </div>
+                            <div>
+                                <h3
+                                    className={`text-base font-bold ${action.disabled ? "text-gray-400" : "text-slate-800"}`}
+                                >
+                                    {action.title}
+                                    {action.disabled && (
+                                        <span className="ml-2 text-[10px] font-medium bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                            Segera Hadir
+                                        </span>
+                                    )}
+                                </h3>
+                                <p className="text-sm text-slate-500 mt-0.5">
+                                    {action.description}
+                                </p>
+                            </div>
                         </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Disetujui
-                        </CardTitle>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {stats.approved}
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Ditolak
-                        </CardTitle>
-                        <XCircle className="h-4 w-4 text-red-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {stats.rejected}
-                        </div>
-                    </CardContent>
-                </Card>
+                        {action.disabled ? (
+                            <Button
+                                disabled
+                                className="w-full sm:w-80 bg-gray-100 text-gray-400 rounded-full py-6 font-semibold"
+                            >
+                                Belum Tersedia
+                            </Button>
+                        ) : (
+                            <Link
+                                href={action.href}
+                                className="w-full sm:w-auto"
+                            >
+                                <Button className="w-full sm:w-80 bg-undip-blue hover:bg-sky-700 text-white rounded-full py-6 font-semibold shadow-sm transition-all active:scale-95">
+                                    Ajukan
+                                </Button>
+                            </Link>
+                        )}
+                    </div>
+                ))}
             </div>
-
-            {/* Quick Actions */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Aksi Cepat</CardTitle>
-                    <CardDescription>
-                        Pilih jenis surat untuk mengajukan
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-4 md:grid-cols-2">
-                    <Link href="/mahasiswa/surat-rekomendasi-beasiswa">
-                        <Card className="cursor-pointer hover:bg-slate-50 transition-colors">
-                            <CardHeader>
-                                <CardTitle className="text-lg">
-                                    Surat Rekomendasi Beasiswa
-                                </CardTitle>
-                                <CardDescription>
-                                    Ajukan surat rekomendasi untuk beasiswa
-                                </CardDescription>
-                            </CardHeader>
-                        </Card>
-                    </Link>
-                    {/* TODO: Add more letter types here */}
-                </CardContent>
-            </Card>
         </div>
     );
 }

@@ -86,13 +86,17 @@ export default function SuratDalamProsesPage() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="border-gray-200 text-slate-600 hover:bg-gray-50 text-xs px-4 h-8"
+                                            <Link
+                                                href={`/mahasiswa/surat/proses/detail/${letter.id}`}
                                             >
-                                                Detail
-                                            </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="border-gray-200 text-slate-600 hover:bg-gray-50 text-xs px-4 h-8"
+                                                >
+                                                    Detail
+                                                </Button>
+                                            </Link>
                                             {letter.statusType ===
                                                 "warning" && (
                                                 <Link

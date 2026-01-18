@@ -1,5 +1,16 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+    FileText,
+    CheckCircle2,
+    Clock,
+    XCircle,
+    RotateCcw,
+    ShieldCheck,
+    User,
+    PenTool,
+    Hash,
+} from "lucide-react";
 
 interface TimelineItemProps {
     role: string;
@@ -18,60 +29,102 @@ function TimelineItem({
     catatan,
     isLast,
 }: TimelineItemProps) {
-    const getBadgeColor = (status: string) => {
-        switch (status.toLowerCase()) {
-            case "diajukan":
-                return "bg-blue-100 text-blue-700 border-blue-200";
-            case "disetujui":
-            case "verifikasi supervisor akademik":
-                return "bg-green-100 text-green-700 border-green-200";
-            case "ditolak":
-                return "bg-red-100 text-red-700 border-red-200";
-            case "menunggu":
-                return "bg-yellow-100 text-yellow-700 border-yellow-200";
-            default:
-                return "bg-gray-100 text-gray-700 border-gray-200";
-        }
+    const getStatusConfig = (status: string) => {
+        const s = status.toLowerCase();
+        if (s.includes("diajukan"))
+            return {
+                color: "text-blue-600 bg-blue-50 border-blue-100",
+                icon: <FileText className="h-3 w-3" />,
+            };
+        if (
+            s.includes("disetujui") ||
+            s.includes("selesai") ||
+            s.includes("publikasi")
+        )
+            return {
+                color: "text-emerald-600 bg-emerald-50 border-emerald-100",
+                icon: <CheckCircle2 className="h-3 w-3" />,
+            };
+        if (s.includes("ditolak"))
+            return {
+                color: "text-red-600 bg-red-50 border-red-100",
+                icon: <XCircle className="h-3 w-3" />,
+            };
+        if (s.includes("revisi"))
+            return {
+                color: "text-orange-600 bg-orange-50 border-orange-100",
+                icon: <RotateCcw className="h-3 w-3" />,
+            };
+        if (s.includes("verifikasi") || s.includes("menunggu"))
+            return {
+                color: "text-amber-600 bg-amber-50 border-amber-100",
+                icon: <Clock className="h-3 w-3" />,
+            };
+        return {
+            color: "text-slate-600 bg-slate-50 border-slate-100",
+            icon: <ShieldCheck className="h-3 w-3" />,
+        };
     };
 
+    const getRoleIcon = (role: string) => {
+        const r = role.toLowerCase();
+        if (r.includes("mahasiswa")) return <User className="h-3.5 w-3.5" />;
+        if (r.includes("supervisor"))
+            return <ShieldCheck className="h-3.5 w-3.5" />;
+        if (r.includes("manajer"))
+            return <ShieldCheck className="h-3.5 w-3.5 text-undip-blue" />;
+        if (r.includes("dekan"))
+            return <PenTool className="h-3.5 w-3.5 text-indigo-600" />;
+        if (r.includes("upa"))
+            return <Hash className="h-3.5 w-3.5 text-sky-600" />;
+        return <ShieldCheck className="h-3.5 w-3.5" />;
+    };
+
+    const config = getStatusConfig(status);
+
     return (
-        <div className="flex gap-4 relative pb-6">
+        <div className="flex gap-4 relative pb-8 group">
             {!isLast && (
-                <div className="absolute left-2 top-8 w-0.5 h-full bg-gray-200" />
+                <div className="absolute left-[11px] top-8 w-0.5 h-[calc(100%-24px)] bg-slate-100 group-hover:bg-blue-100 transition-colors" />
             )}
 
-            <div className="relative shrink-0">
-                <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-md z-10" />
+            <div className="relative shrink-0 mt-1">
+                <div
+                    className={`w-6 h-6 rounded-full border-2 border-white shadow-sm z-10 flex items-center justify-center transition-all ${config.color.split(" ")[1]}`}
+                >
+                    {getRoleIcon(role)}
+                </div>
             </div>
 
-            <div className="flex-1 -mt-1">
-                <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-semibold text-gray-800">
-                        {role}
-                    </span>
+            <div className="flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-slate-800 tracking-tight">
+                            {role}
+                        </span>
+                        <div
+                            className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${config.color}`}
+                        >
+                            {config.icon}
+                            {status}
+                        </div>
+                    </div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest sm:text-right">
+                        {date} • {time}
+                    </div>
                 </div>
 
-                <div className="mb-2">
-                    <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border ${getBadgeColor(
-                            status
-                        )}`}
-                    >
-                        {status}
-                    </span>
-                </div>
-
-                <p className="text-xs text-gray-500 mb-1">
-                    {date} • {time}
-                </p>
-
-                {catatan && (
-                    <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-100">
-                        <p className="text-xs text-gray-600">
-                            <span className="font-medium">Catatan:</span>{" "}
-                            {catatan}
+                {catatan ? (
+                    <div className="p-3 bg-slate-50/80 backdrop-blur-sm rounded-xl border border-slate-100 shadow-inner">
+                        <p className="text-xs text-slate-600 leading-relaxed italic">
+                            &quot;{catatan}&quot;
                         </p>
                     </div>
+                ) : (
+                    <p className="text-[11px] text-slate-400 font-medium">
+                        Melanjutkan dokumen ke tahapan berikutnya tanpa catatan
+                        tambahan.
+                    </p>
                 )}
             </div>
         </div>

@@ -161,7 +161,7 @@ export default function SuratRekomendasiPage() {
 
     return (
         <div className="min-h-screen bg-[#f8f9fa] font-sans text-slate-800 pb-20">
-            <Navbar />
+            <Navbar userName={formData.namaLengkap || "Mahasiswa"} />
             <main className="max-w-5xl mx-auto px-4 py-8">
                 <div className="mb-8">
                     {currentStep === 1 && (

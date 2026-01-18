@@ -23,7 +23,7 @@ export default function DetailSuratPage() {
     const id = params.id as string;
 
     const [application, setApplication] = useState<ApplicationDetail | null>(
-        null
+        null,
     );
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -41,7 +41,7 @@ export default function DetailSuratPage() {
                 setError(
                     err instanceof Error
                         ? err.message
-                        : "Failed to load application"
+                        : "Failed to load application",
                 );
             } finally {
                 setLoading(false);
@@ -58,7 +58,7 @@ export default function DetailSuratPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-[#f8f9fa]">
-                <Navbar />
+                <Navbar userName="Mahasiswa" />
                 <div className="flex">
                     <Sidebar />
                     <main className="flex-1 p-6 flex items-center justify-center">
@@ -75,7 +75,7 @@ export default function DetailSuratPage() {
     if (error || !application) {
         return (
             <div className="min-h-screen bg-[#f8f9fa]">
-                <Navbar />
+                <Navbar userName="Mahasiswa" />
                 <div className="flex">
                     <Sidebar />
                     <main className="flex-1 p-6 flex items-center justify-center">
@@ -136,7 +136,9 @@ export default function DetailSuratPage() {
 
     return (
         <div className="min-h-screen bg-[#f8f9fa]">
-            <Navbar />
+            <Navbar
+                userName={application?.formData.namaLengkap || "Mahasiswa"}
+            />
 
             <div className="flex">
                 <Sidebar />

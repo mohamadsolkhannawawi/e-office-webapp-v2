@@ -198,7 +198,7 @@ export default function PengajuanBaruPage() {
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center gap-4">
-                <Link href={`/mahasiswa/surat-rekomendasi-beasiswa/${jenis}`}>
+                <Link href="/mahasiswa">
                     <Button variant="ghost" size="icon">
                         <ArrowLeft className="h-4 w-4" />
                     </Button>

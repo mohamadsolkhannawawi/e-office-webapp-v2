@@ -6,6 +6,7 @@ import React from "react";
 interface SuratDocumentProps {
     nomorSurat?: string;
     showSignature?: boolean;
+    signaturePath?: string | null;
     showStamp?: boolean;
     data?: {
         nama?: string;
@@ -24,6 +25,7 @@ interface SuratDocumentProps {
 export function SuratDocument({
     nomorSurat,
     showSignature = false,
+    signaturePath,
     showStamp = false,
     data,
 }: SuratDocumentProps) {
@@ -161,7 +163,10 @@ export function SuratDocument({
                     {showSignature && (
                         <div className="relative w-48 h-24">
                             <Image
-                                src="/assets/signature-dummy.png"
+                                src={
+                                    signaturePath ||
+                                    "/assets/signature-dummy.png"
+                                }
                                 alt="Signature"
                                 fill
                                 className="object-contain mix-blend-multiply opacity-90"

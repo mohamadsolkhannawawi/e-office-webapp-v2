@@ -1,16 +1,33 @@
 // Type definitions untuk Detail Surat
 
+export type WorkflowRole =
+    | "Mahasiswa"
+    | "Supervisor Akademik"
+    | "Manajer TU"
+    | "Wakil Dekan 1"
+    | "UPA";
+
+export type ApplicationStatus =
+    | "PENDING" // Menunggu Verifikasi
+    | "IN_PROGRESS" // Sedang Diproses
+    | "REVISION_REQUIRED" // Perlu Revisi
+    | "REJECTED" // Ditolak
+    | "COMPLETED" // Selesai/Published
+    | "DRAFT"; // Belum dikirim
+
 export interface IdentitasPengajuData {
     namaLengkap: string;
-    nimNip: string;
+    role: string;
+    nim: string;
     email: string;
     departemen: string;
     programStudi: string;
     tempatLahir: string;
     tanggalLahir: string; // Format: "DD/MM/YYYY"
     noHp: string;
+    semester: string;
     ipk: string;
-    sks: string;
+    ips: string;
 }
 
 export interface DetailSuratData {
@@ -26,11 +43,14 @@ export interface LampiranFile {
 }
 
 export interface RiwayatItem {
-    role: string;
+    id: string;
+    senderRole: WorkflowRole | string;
+    receiverRole?: WorkflowRole | string;
     status: string;
-    date: string; // Format: "DD Bulan YYYY" misal, "06 November 2021"
-    time: string; // Format: "HH:MM:SS" misal, "09:43:48"
+    date: string;
+    time: string;
     catatan?: string;
+    actionType?: "APPROVE" | "REJECT" | "REVISION" | "SUBMIT" | "PUBLISH";
 }
 
 export interface DetailSuratPageData {
@@ -39,22 +59,36 @@ export interface DetailSuratPageData {
     detailSurat: DetailSuratData;
     lampiran: LampiranFile[];
     riwayat: RiwayatItem[];
+    status: ApplicationStatus;
+    currentStep: number;
+    scholarshipName: string;
+    noSurat?: string;
+    signatureData?: {
+        method: "upload" | "template" | "canvas";
+        path?: string;
+        timestamp: string;
+    };
 }
 
 // Dummy data untuk development
 export const dummyDetailSuratData: DetailSuratPageData = {
     id: "1",
+    status: "IN_PROGRESS",
+    currentStep: 2,
+    scholarshipName: "Beasiswa Djarum Foundation",
     identitas: {
         namaLengkap: "Ahmad Syaifullah",
-        nimNip: "24060121120000",
+        role: "Mahasiswa",
+        nim: "24060121120000",
         email: "ahmadsyaifullah@students.undip.ac.id",
         departemen: "Informatika",
         programStudi: "Informatika",
         tempatLahir: "Blora",
         tanggalLahir: "03/18/2003",
         noHp: "081234567890",
+        semester: "5",
         ipk: "3.6",
-        sks: "102",
+        ips: "3.8",
     },
     detailSurat: {
         jenisSurat: "SRB / Surat Rekomendasi Beasiswa",
@@ -74,29 +108,13 @@ export const dummyDetailSuratData: DetailSuratPageData = {
     ],
     riwayat: [
         {
-            role: "Admin Surat",
-            status: "Diajukan",
+            id: "r1",
+            senderRole: "Supervisor Akademik",
+            receiverRole: "Manajer TU",
+            status: "Disetujui",
             date: "06 November 2021",
             time: "09:43:48",
-        },
-        {
-            role: "Supervisor Akademik",
-            status: "Verifikasi Supervisor Akademik",
-            date: "05 November 2021",
-            time: "07:12:34",
-            catatan: "Sudah diverifikasi oleh Supervisor Akademik",
-        },
-        {
-            role: "Supervisor Akademik",
-            status: "Disetujui",
-            date: "05 November 2021",
-            time: "07:12:34",
-        },
-        {
-            role: "Mahasiswa",
-            status: "Diajukan",
-            date: "04 November 2021",
-            time: "14:58:12",
+            actionType: "APPROVE",
         },
     ],
 };

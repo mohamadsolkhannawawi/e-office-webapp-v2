@@ -13,20 +13,24 @@ import {
 } from "lucide-react";
 
 interface TimelineItemProps {
-    role: string;
+    senderRole: string;
+    receiverRole?: string;
     status: string;
     date: string;
     time: string;
     catatan?: string;
+    actionType?: string;
     isLast?: boolean;
 }
 
 function TimelineItem({
-    role,
+    senderRole,
+    receiverRole,
     status,
     date,
     time,
     catatan,
+    actionType,
     isLast,
 }: TimelineItemProps) {
     const getStatusConfig = (status: string) => {
@@ -92,18 +96,25 @@ function TimelineItem({
                 <div
                     className={`w-6 h-6 rounded-full border-2 border-white shadow-sm z-10 flex items-center justify-center transition-all ${config.color.split(" ")[1]}`}
                 >
-                    {getRoleIcon(role)}
+                    {getRoleIcon(senderRole)}
                 </div>
             </div>
 
             <div className="flex-1">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-slate-800 tracking-tight">
-                            {role}
-                        </span>
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-slate-800 tracking-tight">
+                                {senderRole}
+                                {receiverRole && (
+                                    <span className="text-slate-400 font-normal ml-2 mr-1">
+                                        → {receiverRole}
+                                    </span>
+                                )}
+                            </span>
+                        </div>
                         <div
-                            className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${config.color}`}
+                            className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider w-fit ${config.color}`}
                         >
                             {config.icon}
                             {status}
@@ -136,11 +147,13 @@ interface RiwayatSuratProps {
     status?: string;
     createdAt?: string;
     riwayat?: Array<{
-        role: string;
+        senderRole: string;
+        receiverRole?: string;
         status: string;
         date: string;
         time: string;
         catatan?: string;
+        actionType?: string;
     }>;
 }
 
@@ -166,7 +179,8 @@ export function RiwayatSurat({
 
             return [
                 {
-                    role: "Mahasiswa",
+                    senderRole: "Mahasiswa",
+                    receiverRole: "Supervisor Akademik",
                     status:
                         status === "PENDING"
                             ? "Diajukan"
@@ -174,6 +188,7 @@ export function RiwayatSurat({
                     date: dateStr,
                     time: timeStr,
                     catatan: undefined,
+                    actionType: "SUBMIT",
                 },
             ];
         }
@@ -183,32 +198,22 @@ export function RiwayatSurat({
     const timeline = riwayat ||
         generateDefaultTimeline() || [
             {
-                role: "Admin Surat",
-                status: "Diajukan",
+                senderRole: "Supervisor Akademik",
+                receiverRole: "Manajer TU",
+                status: "Disetujui",
                 date: "06 November 2021",
                 time: "09:43:48",
                 catatan: undefined,
+                actionType: "APPROVE",
             },
             {
-                role: "Supervisor Akademik",
-                status: "Verifikasi Supervisor Akademik",
-                date: "05 November 2021",
-                time: "07:12:34",
-                catatan: "Sudah diverifikasi oleh Supervisor Akademik",
-            },
-            {
-                role: "Supervisor Akademik",
-                status: "Disetujui",
-                date: "05 November 2021",
-                time: "07:12:34",
-                catatan: undefined,
-            },
-            {
-                role: "Mahasiswa",
+                senderRole: "Mahasiswa",
+                receiverRole: "Supervisor Akademik",
                 status: "Diajukan",
                 date: "04 November 2021",
                 time: "14:58:12",
                 catatan: undefined,
+                actionType: "SUBMIT",
             },
         ];
 
@@ -225,11 +230,13 @@ export function RiwayatSurat({
                     {timeline.map((item, index) => (
                         <TimelineItem
                             key={index}
-                            role={item.role}
+                            senderRole={item.senderRole}
+                            receiverRole={item.receiverRole}
                             status={item.status}
                             date={item.date}
                             time={item.time}
                             catatan={item.catatan}
+                            actionType={item.actionType}
                             isLast={index === timeline.length - 1}
                         />
                     ))}

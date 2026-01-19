@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react";
-import { AdminDetailSurat } from "@/components/features/admin-detail-surat";
+import { AdminDetailSurat } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/AdminDetailSurat";
 
 export default function WD1DetailSuratPage({
     params,

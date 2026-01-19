@@ -77,7 +77,7 @@ export async function getApplications(): Promise<ApplicationSummary[]> {
  * Fetch single application by ID
  */
 export async function getApplicationById(
-    applicationId: string
+    applicationId: string,
 ): Promise<ApplicationDetail> {
     try {
         const response = await fetch(
@@ -88,7 +88,7 @@ export async function getApplicationById(
                 headers: {
                     "Content-Type": "application/json",
                 },
-            }
+            },
         );
 
         if (!response.ok) {

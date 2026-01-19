@@ -1,0 +1,289 @@
+"use client";
+
+import React, { useRef, useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Camera, Layout, PenTool, Trash2, Upload, Check } from "lucide-react";
+import SignatureCanvas from "react-signature-canvas";
+import Image from "next/image";
+
+interface WD1SignatureSectionProps {
+    onSignatureChange: (signature: string | null) => void;
+}
+
+export function WD1SignatureSection({
+    onSignatureChange,
+}: WD1SignatureSectionProps) {
+    const sigCanvas = useRef<SignatureCanvas>(null);
+    const [selectedMethod, setSelectedMethod] = useState("upload");
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [selectedTemplate, setSelectedTemplate] = useState<number | null>(
+        null,
+    );
+
+    const templates = [
+        { id: 1, src: "/assets/signature-dummy.png" },
+        { id: 2, src: "/assets/signature-dummy.png" }, // Reusing dummy for mock
+    ];
+
+    const clearCanvas = () => {
+        sigCanvas.current?.clear();
+        onSignatureChange(null);
+    };
+
+    const saveCanvas = () => {
+        if (sigCanvas.current?.isEmpty()) return;
+        const dataUrl = sigCanvas.current
+            ?.getTrimmedCanvas()
+            .toDataURL("image/png");
+        if (dataUrl) {
+            setPreviewImage(dataUrl);
+            onSignatureChange(dataUrl);
+        }
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = reader.result as string;
+                setPreviewImage(result);
+                onSignatureChange(result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const selectTemplate = (id: number, src: string) => {
+        setSelectedTemplate(id);
+        setPreviewImage(src);
+        onSignatureChange(src);
+    };
+
+    return (
+        <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <PenTool className="h-5 w-5 text-undip-blue" />
+                    Pemberian Tanda Tangan
+                </h2>
+                {previewImage && (
+                    <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-1 rounded-full text-xs font-bold border border-green-100">
+                        <Check className="h-3 w-3" />
+                        Tersimpan
+                    </div>
+                )}
+            </div>
+
+            <Card className="border-none shadow-sm overflow-hidden bg-white/50 backdrop-blur-sm border border-slate-100">
+                <CardContent className="p-0">
+                    <Tabs
+                        defaultValue="upload"
+                        className="w-full"
+                        onValueChange={setSelectedMethod}
+                    >
+                        <TabsList className="w-full h-14 bg-slate-50 p-1 rounded-none border-b border-slate-100">
+                            <TabsTrigger
+                                value="upload"
+                                className="flex-1 h-full rounded-none data-[state=active]:bg-white data-[state=active]:text-undip-blue data-[state=active]:shadow-none border-r border-slate-100 gap-2 font-bold text-sm"
+                            >
+                                <Camera className="h-4 w-4" />
+                                Kamera/File
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="template"
+                                className="flex-1 h-full rounded-none data-[state=active]:bg-white data-[state=active]:text-undip-blue data-[state=active]:shadow-none border-r border-slate-100 gap-2 font-bold text-sm"
+                            >
+                                <Layout className="h-4 w-4" />
+                                Template
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="canvas"
+                                className="flex-1 h-full rounded-none data-[state=active]:bg-white data-[state=active]:text-undip-blue data-[state=active]:shadow-none gap-2 font-bold text-sm"
+                            >
+                                <PenTool className="h-4 w-4" />
+                                Manual Scribble
+                            </TabsTrigger>
+                        </TabsList>
+
+                        <div className="p-8">
+                            <TabsContent
+                                value="upload"
+                                className="mt-0 focus-visible:outline-none"
+                            >
+                                <div className="space-y-4">
+                                    <div
+                                        className="border-2 border-dashed border-slate-200 rounded-2xl p-12 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-white hover:border-undip-blue transition-all group cursor-pointer relative"
+                                        onClick={() =>
+                                            document
+                                                .getElementById("sig-upload")
+                                                ?.click()
+                                        }
+                                    >
+                                        <input
+                                            id="sig-upload"
+                                            type="file"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleFileUpload}
+                                        />
+                                        <div className="bg-white p-4 rounded-2xl shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                                            <Upload className="h-8 w-8 text-undip-blue" />
+                                        </div>
+                                        <p className="font-bold text-slate-700">
+                                            Unggah Foto Tanda Tangan
+                                        </p>
+                                        <p className="text-xs text-slate-400 mt-2 text-center">
+                                            Seret file ke sini atau klik untuk
+                                            memilih file dari komputer Anda.
+                                            <br />
+                                            (Format .PNG dengan background
+                                            transparan disarankan)
+                                        </p>
+                                    </div>
+
+                                    {previewImage &&
+                                        selectedMethod === "upload" && (
+                                            <div className="bg-slate-50 rounded-xl p-4 flex flex-col items-center border border-slate-100">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                                                    Pratinjau Unggahan
+                                                </p>
+                                                <div className="relative w-48 h-24 bg-white rounded-lg border border-slate-200 p-2 overflow-hidden shadow-sm">
+                                                    <Image
+                                                        src={previewImage}
+                                                        alt="Uploaded Signature"
+                                                        fill
+                                                        className="object-contain p-2 mix-blend-multiply"
+                                                    />
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="mt-3 text-red-500 hover:text-red-600 hover:bg-red-50 h-8 gap-1.5 font-bold"
+                                                    onClick={() => {
+                                                        setPreviewImage(null);
+                                                        onSignatureChange(null);
+                                                    }}
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                    Hapus
+                                                </Button>
+                                            </div>
+                                        )}
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent
+                                value="template"
+                                className="mt-0 focus-visible:outline-none"
+                            >
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                    {templates.map((template) => (
+                                        <div
+                                            key={template.id}
+                                            className={`relative aspect-video rounded-xl border-2 transition-all cursor-pointer group flex items-center justify-center p-4 bg-white ${
+                                                selectedTemplate === template.id
+                                                    ? "border-undip-blue shadow-md shadow-blue-50 ring-2 ring-blue-50"
+                                                    : "border-slate-100 hover:border-slate-300"
+                                            }`}
+                                            onClick={() =>
+                                                selectTemplate(
+                                                    template.id,
+                                                    template.src,
+                                                )
+                                            }
+                                        >
+                                            <Image
+                                                src={template.src}
+                                                alt="Signature Template"
+                                                width={100}
+                                                height={50}
+                                                className="object-contain mix-blend-multiply"
+                                            />
+                                            {selectedTemplate ===
+                                                template.id && (
+                                                <div className="absolute top-2 right-2 bg-undip-blue text-white rounded-full p-1 shadow-sm animate-in zoom-in">
+                                                    <Check className="h-3 w-3" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <div className="aspect-video rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-undip-blue hover:text-undip-blue transition-all cursor-pointer">
+                                        <Upload className="h-5 w-5 mb-2" />
+                                        <p className="text-[10px] font-bold uppercase">
+                                            Tambah Baru
+                                        </p>
+                                    </div>
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent
+                                value="canvas"
+                                className="mt-0 focus-visible:outline-none"
+                            >
+                                <div className="space-y-4">
+                                    <div className="border border-slate-200 rounded-2xl bg-white overflow-hidden shadow-sm">
+                                        <SignatureCanvas
+                                            ref={sigCanvas}
+                                            canvasProps={{
+                                                className:
+                                                    "w-full h-64 cursor-crosshair",
+                                            }}
+                                            onEnd={saveCanvas}
+                                            backgroundColor="transparent"
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <div className="text-[11px] text-slate-500 font-medium">
+                                            Gunakan kursor atau pen untuk
+                                            membubuhkan tanda tangan dalam kotak
+                                            di atas.
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={clearCanvas}
+                                                className="h-9 rounded-lg border-slate-200 text-slate-600 hover:bg-white hover:text-red-500 hover:border-red-100 font-bold gap-1.5"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                                Bersihkan
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                onClick={saveCanvas}
+                                                className="h-9 rounded-lg bg-undip-blue hover:bg-sky-700 text-white font-bold gap-1.5 shadow-sm shadow-blue-100"
+                                            >
+                                                <Check className="h-3.5 w-3.5" />
+                                                Simpan
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </TabsContent>
+                        </div>
+                    </Tabs>
+                </CardContent>
+            </Card>
+
+            <div className="flex items-start gap-4 p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
+                <div className="bg-white p-2.5 rounded-xl shadow-sm text-undip-blue">
+                    <Check className="h-5 w-5" />
+                </div>
+                <div>
+                    <h4 className="text-sm font-bold text-slate-800">
+                        Verifikasi Tanda Tangan Digital
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                        Tanda tangan yang Anda bubuhkan di sini akan otomatis
+                        disematkan pada dokumen Surat Rekomendasi Beasiswa di
+                        tahapan final publikasi. Pastikan tanda tangan terlihat
+                        jelas.
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { LetterList } from "@/components/features/admin-dashboard/LetterList";
+import { LetterList } from "@/components/features/dashboard/LetterList";
 import { ChevronRight } from "lucide-react";
 
 export default function SelesaiPage() {

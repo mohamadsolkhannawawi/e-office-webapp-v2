@@ -21,10 +21,15 @@ import {
 } from "@/components/ui/select";
 import { Check, XCircle, RotateCcw, Send, AlertTriangle } from "lucide-react";
 
+import { WorkflowRole } from "@/types/detail-surat";
+
 interface ActionModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (data: { reason?: string; targetRole?: string }) => void;
+    onConfirm: (data: {
+        reason?: string;
+        targetRole?: WorkflowRole | string;
+    }) => void;
     type: "approve" | "revise" | "reject" | "publish";
     role: "supervisor-akademik" | "manajer-tu" | "wakil-dekan-1" | "upa";
 }
@@ -36,37 +41,37 @@ export function AdminActionModals({
     type,
     role,
 }: ActionModalProps) {
-    const [reason, setReason] = useState("");
-    const [targetRole, setTargetRole] = useState("");
-
     const getRevisionRoles = () => {
         switch (role) {
             case "manajer-tu":
                 return [
-                    { value: "mahasiswa", label: "Mahasiswa" },
+                    { value: "Mahasiswa", label: "Mahasiswa (Pengaju)" },
                     {
-                        value: "supervisor-akademik",
+                        value: "Supervisor Akademik",
                         label: "Supervisor Akademik",
                     },
                 ];
             case "wakil-dekan-1":
                 return [
-                    { value: "mahasiswa", label: "Mahasiswa" },
+                    { value: "Mahasiswa", label: "Mahasiswa (Pengaju)" },
                     {
-                        value: "supervisor-akademik",
+                        value: "Supervisor Akademik",
                         label: "Supervisor Akademik",
                     },
-                    { value: "manajer-tu", label: "Manajer TU" },
+                    { value: "Manajer TU", label: "Manajer TU" },
                 ];
             default:
-                return [{ value: "mahasiswa", label: "Mahasiswa" }];
+                return [{ value: "Mahasiswa", label: "Mahasiswa" }];
         }
     };
+
+    const [reason, setReason] = useState("");
+    const [targetRole, setTargetRole] = useState(getRevisionRoles()[0].value);
 
     const handleConfirm = () => {
         onConfirm({ reason, targetRole });
         setReason("");
-        setTargetRole("");
+        setTargetRole(getRevisionRoles()[0].value);
         onClose();
     };
 

@@ -20,13 +20,15 @@ function InfoRow({ label, value }: InfoRowProps) {
 export interface IdentitasPengajuProps {
     data?: {
         namaLengkap: string;
-        nimNip: string;
+        role: string;
+        nim: string;
         email: string;
         departemen: string;
         programStudi: string;
         tempatLahir: string;
         tanggalLahir: string;
         noHp: string;
+        semester: string;
         ipk: string;
         ips: string;
     };
@@ -35,13 +37,15 @@ export interface IdentitasPengajuProps {
 export function IdentitasPengaju({ data }: IdentitasPengajuProps) {
     const identitas = data || {
         namaLengkap: "Ahmad Syaifullah",
-        nimNip: "24060121120000",
+        role: "Mahasiswa",
+        nim: "24060121120000",
         email: "ahmadsyaifullah@students.undip.ac.id",
         departemen: "Informatika",
         programStudi: "Informatika",
         tempatLahir: "Blora",
         tanggalLahir: "03/18/2003",
         noHp: "081234567890",
+        semester: "5",
         ipk: "3.6",
         ips: "3.8",
     };
@@ -59,7 +63,8 @@ export function IdentitasPengaju({ data }: IdentitasPengajuProps) {
                         label="Nama Lengkap"
                         value={identitas.namaLengkap}
                     />
-                    <InfoRow label="NIM/NIP" value={identitas.nimNip} />
+                    <InfoRow label="Role" value={identitas.role} />
+                    <InfoRow label="NIM" value={identitas.nim} />
                     <InfoRow label="Email" value={identitas.email} />
                     <InfoRow label="Departemen" value={identitas.departemen} />
                     <InfoRow
@@ -75,6 +80,7 @@ export function IdentitasPengaju({ data }: IdentitasPengajuProps) {
                         value={identitas.tanggalLahir}
                     />
                     <InfoRow label="No HP" value={identitas.noHp} />
+                    <InfoRow label="Semester" value={identitas.semester} />
                     <InfoRow label="IPK" value={identitas.ipk} />
                     <InfoRow label="IPS" value={identitas.ips} />
                 </div>

@@ -92,13 +92,15 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
 
     const identitasData: IdentitasPengajuProps["data"] = {
         namaLengkap: "Ahmad Syaifullah",
-        nimNip: "24060121120001",
+        role: "Mahasiswa",
+        nim: "24060121120001",
         email: "ahmadsyaifullah@students.undip.ac.id",
         departemen: "Informatika",
         programStudi: "Informatika",
         tempatLahir: "Blora",
         tanggalLahir: "03/18/2006",
         noHp: "089123141241412412",
+        semester: "7",
         ipk: "3.9",
         ips: "3.8",
     };
@@ -437,39 +439,20 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                     <RiwayatSurat
                         riwayat={[
                             {
-                                role: "Supervisor Akademik",
-                                status: "Verifikasi Supervisor Akademik",
+                                senderRole: "Supervisor Akademik",
+                                receiverRole: "Manajer TU",
+                                status: "Disetujui",
                                 date: "09 Desember 2025",
                                 time: "00:58:49",
-                                catatan: "Tidak ada catatan",
+                                catatan: "Data sudah lengkap",
                             },
                             {
-                                role: "Supervisor Akademik",
-                                status: "Verifikasi Supervisor Akademik",
-                                date: "09 Desember 2025",
-                                time: "00:58:49",
-                                catatan: "Tidak ada catatan",
-                            },
-                            {
-                                role: "Supervisor Akademik",
-                                status: "Verifikasi Supervisor Akademik",
-                                date: "09 Desember 2025",
-                                time: "00:58:49",
-                                catatan: "Tidak ada catatan",
-                            },
-                            {
-                                role: "Supervisor Akademik",
-                                status: "Verifikasi Supervisor Akademik",
-                                date: "09 Desember 2025",
-                                time: "00:58:49",
-                                catatan: "Tidak ada catatan",
-                            },
-                            {
-                                role: "Mahasiswa",
+                                senderRole: "Mahasiswa",
+                                receiverRole: "Supervisor Akademik",
                                 status: "Surat Diajukan",
                                 date: "08 Desember 2025",
                                 time: "00:58:49",
-                                catatan: "Tidak ada catatan",
+                                catatan: "Mohon segera diproses",
                             },
                         ]}
                     />

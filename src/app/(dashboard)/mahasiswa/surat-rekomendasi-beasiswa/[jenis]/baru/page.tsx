@@ -5,12 +5,12 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { Stepper } from "@/components/features/surat-rekomendasi/Stepper";
-import { InfoPengajuan } from "@/components/features/surat-rekomendasi/InfoPengajuan";
-import { DetailPengajuan } from "@/components/features/surat-rekomendasi/DetailPengajuan";
-import { Lampiran } from "@/components/features/surat-rekomendasi/Lampiran";
-import { Review } from "@/components/features/surat-rekomendasi/Review";
-import { FormAction } from "@/components/features/surat-rekomendasi/FormAction";
+import { Stepper } from "@/components/features/surat-rekomendasi-beasiswa/form/Stepper";
+import { InfoPengajuan } from "@/components/features/surat-rekomendasi-beasiswa/form/InfoPengajuan";
+import { DetailPengajuan } from "@/components/features/surat-rekomendasi-beasiswa/form/DetailPengajuan";
+import { Lampiran } from "@/components/features/surat-rekomendasi-beasiswa/form/Lampiran";
+import { Review } from "@/components/features/surat-rekomendasi-beasiswa/form/Review";
+import { FormAction } from "@/components/features/surat-rekomendasi-beasiswa/form/FormAction";
 import type { FormDataType } from "@/types/form";
 
 export default function PengajuanBaruPage() {

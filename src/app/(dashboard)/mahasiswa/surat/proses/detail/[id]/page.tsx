@@ -9,7 +9,7 @@ import {
     RiwayatSurat,
     IdentitasPengajuProps,
     DetailSuratPengajuanProps,
-} from "@/components/features/detail-surat";
+} from "@/components/features/surat-rekomendasi-beasiswa/detail/common";
 
 // Custom Icon for EditNote if not found
 const EditNoteIcon = () => (

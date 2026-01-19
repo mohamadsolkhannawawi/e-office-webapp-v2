@@ -9,7 +9,7 @@ import {
     DetailRevisi,
     IdentitasPengajuProps,
     DetailSuratPengajuanProps,
-} from "@/components/features/detail-surat";
+} from "@/components/features/surat-rekomendasi-beasiswa/detail/common";
 
 export default function DetailRevisiPage() {
     // Dummy data to match the provided HTML/Design

@@ -10,7 +10,7 @@ import {
     DetailSuratPengajuan,
     LampiranSurat,
     RiwayatSurat,
-} from "@/components/features/detail-surat";
+} from "@/components/features/surat-rekomendasi-beasiswa/detail/common";
 import {
     getApplicationById,
     type ApplicationDetail,
@@ -23,7 +23,7 @@ export default function DetailPengajuanPage() {
     const id = params.id as string;
 
     const [application, setApplication] = useState<ApplicationDetail | null>(
-        null
+        null,
     );
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -41,7 +41,7 @@ export default function DetailPengajuanPage() {
                 setError(
                     err instanceof Error
                         ? err.message
-                        : "Gagal memuat data pengajuan"
+                        : "Gagal memuat data pengajuan",
                 );
             } finally {
                 setLoading(false);

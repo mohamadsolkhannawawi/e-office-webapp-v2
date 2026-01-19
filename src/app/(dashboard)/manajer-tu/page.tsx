@@ -1,6 +1,6 @@
 "use client";
 
-import { AdminDashboard } from "@/components/features/admin-dashboard";
+import { AdminDashboard } from "@/components/features/dashboard";
 
 export default function ManajerTUPage() {
     return (

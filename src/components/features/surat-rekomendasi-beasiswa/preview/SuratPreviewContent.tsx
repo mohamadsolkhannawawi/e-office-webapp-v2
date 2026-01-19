@@ -28,11 +28,13 @@ import Image from "next/image";
 interface SuratPreviewContentProps {
     defaultStage?: string;
     backUrl?: string; // Optional custom back URL
+    data?: any; // Data dari backend
 }
 
 export function SuratPreviewContent({
     defaultStage = "mahasiswa",
     backUrl,
+    data,
 }: SuratPreviewContentProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -76,30 +78,39 @@ export function SuratPreviewContent({
             case "manajer":
                 return {
                     showSignature: false,
+                    signaturePath: null,
                     showStamp: false,
                     nomorSurat: "",
+                    data: data,
                 };
             case "wd1":
                 return {
                     showSignature: !!wd1Signature,
+                    signaturePath: wd1Signature,
                     showStamp: false,
                     nomorSurat: "",
+                    data: data,
                 };
             case "upa":
             case "selesai":
                 return {
                     showSignature: true,
+                    signaturePath:
+                        wd1Signature || "/assets/signature-dummy.png",
                     showStamp: upaIsStampApplied,
                     nomorSurat: upaLetterNumber || defaultNo,
+                    data: data,
                 };
             default:
                 return {
                     showSignature: false,
+                    signaturePath: null,
                     showStamp: false,
                     nomorSurat: "",
+                    data: data,
                 };
         }
-    }, [stage, upaLetterNumber, upaIsStampApplied, wd1Signature]);
+    }, [stage, upaLetterNumber, upaIsStampApplied, wd1Signature, data]);
 
     const attributes = [
         {
@@ -110,17 +121,28 @@ export function SuratPreviewContent({
                     : `Menunggu Verifikasi (${stage.toUpperCase()})`,
         },
         { label: "Jenis Surat", value: "Surat Rekomendasi Beasiswa" },
-        { label: "Keperluan", value: "Beasiswa Djarum Foundation" },
-        { label: "Nama", value: "Ahmad Syaifullah" },
-        { label: "NIM", value: "24060121120001" },
-        { label: "Email", value: "ahmadsyaifullah@students.undip.ac.id" },
-        { label: "Tempat Lahir", value: "Blora" },
-        { label: "Tanggal Lahir", value: "18 Maret 2006" },
-        { label: "No. HP", value: "0812321312312" },
-        { label: "Semester", value: "8" },
-        { label: "Departemen", value: "Informatika" },
-        { label: "IPK", value: "3.34" },
-        { label: "IPS", value: "3.34" },
+        {
+            label: "Keperluan",
+            value: data?.keperluan || "Beasiswa Djarum Foundation",
+        },
+        { label: "Nama Lengkap", value: data?.nama || "Ahmad Syaifullah" },
+        { label: "Role", value: "Mahasiswa" },
+        { label: "NIM", value: data?.nim || "24060121120001" },
+        {
+            label: "Email",
+            value: data?.email || "ahmadsyaifullah@students.undip.ac.id",
+        },
+        { label: "Departemen", value: data?.jurusan || "Informatika" },
+        { label: "Program Studi", value: "S1 - Informatika" },
+        { label: "Tempat Lahir", value: data?.tempatLahir || "Blora" },
+        {
+            label: "Tanggal Lahir",
+            value: data?.tanggalLahir || "18 Maret 2006",
+        },
+        { label: "No. HP", value: data?.noHp || "0812321312312" },
+        { label: "Semester", value: data?.semester || "8" },
+        { label: "IPK", value: data?.ipk || "3.34" },
+        { label: "IPS", value: data?.ips || "3.34" },
     ];
 
     return (

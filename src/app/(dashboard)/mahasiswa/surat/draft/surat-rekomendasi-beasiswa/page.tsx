@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
     ChevronRight,
     Filter,
@@ -9,14 +9,26 @@ import {
     Trash2,
     Play,
     FileText,
+    Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
+
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 export default function SuratDraftPage() {
     const [applications, setApplications] = useState<ApplicationSummary[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [jenisFilter, setJenisFilter] = useState<string>("ALL");
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 10,
@@ -24,31 +36,40 @@ export default function SuratDraftPage() {
         totalPages: 1,
     });
 
-    const fetchApplications = async (page = 1) => {
-        setIsLoading(true);
-        try {
-            const { data, meta } = await getApplications({
-                status: "DRAFT",
-                page,
-                limit: 10,
-            });
-            setApplications(data);
-            setPagination({
-                page: meta.page,
-                limit: meta.limit,
-                total: meta.total,
-                totalPages: meta.totalPages,
-            });
-        } catch (error) {
-            console.error("Failed to fetch applications:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const fetchApplications = useCallback(
+        async (page = 1, search = searchTerm, jenis = jenisFilter) => {
+            setIsLoading(true);
+            try {
+                const { data, meta } = await getApplications({
+                    status: "DRAFT",
+                    page,
+                    limit: 10,
+                    search: search || undefined,
+                    jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
+                });
+                setApplications(data);
+                setPagination({
+                    page: meta.page,
+                    limit: meta.limit,
+                    total: meta.total,
+                    totalPages: meta.totalPages,
+                });
+            } catch (error) {
+                console.error("Failed to fetch applications:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [searchTerm, jenisFilter],
+    );
 
     useEffect(() => {
-        fetchApplications();
-    }, []);
+        const delaySearch = setTimeout(() => {
+            fetchApplications(1, searchTerm, jenisFilter);
+        }, 500);
+
+        return () => clearTimeout(delaySearch);
+    }, [searchTerm, jenisFilter, fetchApplications]);
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pagination.totalPages) {
@@ -104,14 +125,36 @@ export default function SuratDraftPage() {
             </div>
 
             {/* Filter Bar */}
-            <div className="flex items-center">
-                <Button
-                    variant="outline"
-                    className="bg-white border-gray-200 text-slate-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                    Filter Draft
-                    <Filter className="h-4 w-4" />
-                </Button>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                        placeholder="Cari draft..."
+                        className="pl-9 bg-white border-gray-200"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <Select value={jenisFilter} onValueChange={setJenisFilter}>
+                    <SelectTrigger className="w-full sm:w-48 bg-white border-gray-200 text-slate-700">
+                        <div className="flex items-center gap-2">
+                            <Filter className="h-4 w-4" />
+                            <SelectValue placeholder="Filter Draft" />
+                        </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="ALL">Semua Jenis</SelectItem>
+                        <SelectItem value="internal">
+                            Beasiswa Internal
+                        </SelectItem>
+                        <SelectItem value="external">
+                            Beasiswa Eksternal
+                        </SelectItem>
+                        <SelectItem value="akademik">
+                            Beasiswa Akademik
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Table Container */}

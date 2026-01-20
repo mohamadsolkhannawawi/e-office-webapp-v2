@@ -28,13 +28,30 @@ import { useState } from "react";
 import Image from "next/image";
 import { Hash, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ApplicationDetail } from "@/lib/application-api";
 
 interface AdminDetailSuratProps {
     role: "supervisor-akademik" | "manajer-tu" | "wakil-dekan-1" | "upa";
     id: string;
+    initialData?: ApplicationDetail & {
+        history?: Array<{
+            id: string;
+            status: string;
+            action: string;
+            note?: string;
+            createdAt: string;
+            actor?: {
+                name: string;
+            };
+        }>;
+    };
 }
 
-export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
+export function AdminDetailSurat({
+    role,
+    id,
+    initialData,
+}: AdminDetailSuratProps) {
     const [modalConfig, setModalConfig] = useState<{
         isOpen: boolean;
         type: "approve" | "revise" | "reject" | "publish";
@@ -91,23 +108,26 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
     };
 
     const identitasData: IdentitasPengajuProps["data"] = {
-        namaLengkap: "Ahmad Syaifullah",
+        namaLengkap: initialData?.formData?.namaLengkap || "N/A",
         role: "Mahasiswa",
-        nim: "24060121120001",
-        email: "ahmadsyaifullah@students.undip.ac.id",
-        departemen: "Informatika",
-        programStudi: "Informatika",
-        tempatLahir: "Blora",
-        tanggalLahir: "03/18/2006",
-        noHp: "089123141241412412",
-        semester: "7",
-        ipk: "3.9",
-        ips: "3.8",
+        nim: initialData?.formData?.nim || "N/A",
+        email: initialData?.formData?.email || "N/A",
+        departemen: initialData?.formData?.departemen || "N/A",
+        programStudi: initialData?.formData?.programStudi || "N/A",
+        tempatLahir: initialData?.formData?.tempatLahir || "N/A",
+        tanggalLahir: initialData?.formData?.tanggalLahir || "N/A",
+        noHp: initialData?.formData?.noHp || "N/A",
+        semester: initialData?.formData?.semester || "N/A",
+        ipk: initialData?.formData?.ipk || "N/A",
+        ips: initialData?.formData?.ips || "N/A",
     };
 
     const detailSuratData: DetailSuratPengajuanProps["data"] = {
-        jenisSurat: "SRB/ Surat Rekomendasi Beasiswa",
-        keperluan: "Beasiswa Djarum Foundation",
+        jenisSurat: "Surat Rekomendasi Beasiswa",
+        keperluan:
+            initialData?.scholarshipName ||
+            initialData?.formData?.namaBeasiswa ||
+            "N/A",
     };
 
     const breadcrumbs = {
@@ -198,71 +218,88 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                             Lampiran
                         </h2>
                         <div className="space-y-4">
-                            {/* KTM Attachment */}
-                            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-                                <button className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-50">
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-bold text-slate-800">
-                                            KTM
-                                        </span>
-                                        <span className="text-slate-400 text-sm">
-                                            - KTM_24060121120001.jpg
-                                        </span>
-                                    </div>
-                                    <ChevronRight className="h-5 w-5 text-slate-400 rotate-90" />
-                                </button>
-                                <div className="px-6 pb-6 pt-6">
-                                    <div className="w-full bg-[#6A8E7F] rounded-lg p-12 flex items-center justify-center overflow-hidden">
-                                        <div className="bg-white shadow-xl max-w-sm w-full aspect-3/4 p-8 flex flex-col items-center justify-center relative border border-gray-100">
-                                            {/* Stack of paper effect */}
-                                            <div className="absolute top-2 left-2 right-2 bottom-2 border border-gray-100 -z-10 bg-white shadow-sm transform rotate-1"></div>
-                                            <div className="absolute top-1 left-1 right-1 bottom-1 border border-gray-100 -z-20 bg-white shadow-sm transform -rotate-1"></div>
-
-                                            <div className="w-16 h-20 border-2 border-gray-200 rounded flex flex-col gap-2 p-2">
-                                                <div className="h-2 bg-gray-100 w-full"></div>
-                                                <div className="h-2 bg-gray-100 w-3/4"></div>
-                                                <div className="h-2 bg-gray-100 w-full"></div>
+                            {initialData?.attachments?.map((att) => (
+                                <div
+                                    key={att.id}
+                                    className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden"
+                                >
+                                    <Link
+                                        href={att.downloadUrl || "#"}
+                                        target="_blank"
+                                    >
+                                        <button className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-50">
+                                            <div className="flex items-center gap-3">
+                                                <span className="font-bold text-slate-800">
+                                                    {att.category || "Lampiran"}
+                                                </span>
+                                                <span className="text-slate-400 text-sm">
+                                                    - {att.filename}
+                                                </span>
                                             </div>
-                                            <p className="mt-4 text-[10px] text-slate-400 font-medium">
-                                                SIMULASI DOKUMEN
-                                            </p>
-                                        </div>
+                                            <ChevronRight className="h-5 w-5 text-slate-400 rotate-90" />
+                                        </button>
+                                    </Link>
+                                    <div className="px-4 pb-4 pt-4 bg-slate-50">
+                                        {att.mimeType?.startsWith(
+                                            "application/pdf",
+                                        ) ||
+                                        att.filename
+                                            ?.toLowerCase()
+                                            .endsWith(".pdf") ? (
+                                            <div className="w-full border border-gray-200 rounded-lg overflow-hidden bg-white">
+                                                <iframe
+                                                    src={att.downloadUrl}
+                                                    className="w-full h-[500px]"
+                                                    title={att.filename}
+                                                />
+                                            </div>
+                                        ) : att.mimeType?.startsWith(
+                                              "image/",
+                                          ) ||
+                                          att.filename?.match(
+                                              /\.(jpg|jpeg|png|gif)$/i,
+                                          ) ? (
+                                            <div className="w-full border border-gray-200 rounded-lg overflow-hidden bg-white">
+                                                <div className="relative w-full h-auto min-h-[300px]">
+                                                    <Image
+                                                        src={
+                                                            att.downloadUrl ||
+                                                            ""
+                                                        }
+                                                        alt={att.filename}
+                                                        width={0}
+                                                        height={0}
+                                                        sizes="100vw"
+                                                        className="w-full h-auto object-contain"
+                                                        unoptimized
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center py-10 text-slate-500">
+                                                <p className="text-sm">
+                                                    Preview tidak tersedia.
+                                                </p>
+                                                <Link
+                                                    href={
+                                                        att.downloadUrl || "#"
+                                                    }
+                                                    target="_blank"
+                                                    className="text-undip-blue hover:underline text-xs mt-2"
+                                                >
+                                                    Download File
+                                                </Link>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* KHS Attachment */}
-                            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-                                <button className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-50">
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-bold text-slate-800">
-                                            Transkrip
-                                        </span>
-                                        <span className="text-slate-400 text-sm">
-                                            - Transkrip_Nilai_Semester_6.pdf
-                                        </span>
-                                    </div>
-                                    <ChevronRight className="h-5 w-5 text-slate-400 rotate-90" />
-                                </button>
-                                <div className="px-6 pb-6 pt-6">
-                                    <div className="w-full bg-[#6A8E7F] rounded-lg p-12 flex items-center justify-center overflow-hidden">
-                                        <div className="bg-white shadow-xl max-w-sm w-full aspect-3/4 p-8 flex flex-col items-center justify-center relative border border-gray-100">
-                                            <div className="absolute top-2 left-2 right-2 bottom-2 border border-gray-100 -z-10 bg-white shadow-sm transform rotate-1"></div>
-                                            <div className="absolute top-1 left-1 right-1 bottom-1 border border-gray-100 -z-20 bg-white shadow-sm transform -rotate-1"></div>
-
-                                            <div className="w-16 h-20 border-2 border-gray-200 rounded flex flex-col gap-2 p-2 font-serif text-[6px] text-gray-400 overflow-hidden leading-tight">
-                                                LOREM IPSUM DOLOR SIT AMET
-                                                CONSECTETUR ADIPISCING ELIT SED
-                                                DO EIUSMOD TEMPOR INCIDIDUNT UT
-                                                LABORE ET DOLORE MAGNA ALIQUA...
-                                            </div>
-                                            <p className="mt-4 text-[10px] text-slate-400 font-medium">
-                                                SIMULASI DOKUMEN
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            ))}
+                            {(!initialData?.attachments ||
+                                initialData.attachments.length === 0) && (
+                                <p className="text-slate-400 italic">
+                                    Tidak ada lampiran.
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -438,21 +475,51 @@ export function AdminDetailSurat({ role, id }: AdminDetailSuratProps) {
                     {/* Timeline Card */}
                     <RiwayatSurat
                         riwayat={[
+                            ...(initialData?.history?.map((log) => ({
+                                senderRole: log.actor?.name || "Sistem",
+                                receiverRole: "-",
+                                status: log.status || log.action,
+                                date: new Date(
+                                    log.createdAt,
+                                ).toLocaleDateString("id-ID", {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                }),
+                                time: new Date(
+                                    log.createdAt,
+                                ).toLocaleTimeString("id-ID", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    second: "2-digit",
+                                }),
+                                catatan: log.note || "-",
+                            })) || []),
                             {
-                                senderRole: "Supervisor Akademik",
-                                receiverRole: "Manajer TU",
-                                status: "Disetujui",
-                                date: "09 Desember 2025",
-                                time: "00:58:49",
-                                catatan: "Data sudah lengkap",
-                            },
-                            {
-                                senderRole: "Mahasiswa",
+                                senderRole:
+                                    initialData?.createdBy?.mahasiswa?.user
+                                        ?.name || "Mahasiswa",
                                 receiverRole: "Supervisor Akademik",
-                                status: "Surat Diajukan",
-                                date: "08 Desember 2025",
-                                time: "00:58:49",
-                                catatan: "Mohon segera diproses",
+                                status: "Diajukan",
+                                date: initialData?.createdAt
+                                    ? new Date(
+                                          initialData.createdAt,
+                                      ).toLocaleDateString("id-ID", {
+                                          day: "numeric",
+                                          month: "long",
+                                          year: "numeric",
+                                      })
+                                    : "-",
+                                time: initialData?.createdAt
+                                    ? new Date(
+                                          initialData.createdAt,
+                                      ).toLocaleTimeString("id-ID", {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                          second: "2-digit",
+                                      })
+                                    : "-",
+                                catatan: "-",
                             },
                         ]}
                     />

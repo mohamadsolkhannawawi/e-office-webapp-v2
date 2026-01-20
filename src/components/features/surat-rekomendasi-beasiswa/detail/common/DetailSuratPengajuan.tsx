@@ -28,8 +28,8 @@ export interface DetailSuratPengajuanProps {
 
 export function DetailSuratPengajuan({ data }: DetailSuratPengajuanProps) {
     const detail = data || {
-        jenisSurat: "SRB / Surat Rekomendasi Beasiswa",
-        namaBeasiswa: "Beasiswa Djarum Foundation",
+        jenisSurat: "Surat Rekomendasi Beasiswa",
+        namaBeasiswa: "-",
     };
 
     return (

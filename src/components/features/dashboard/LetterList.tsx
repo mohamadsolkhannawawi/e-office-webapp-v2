@@ -9,13 +9,13 @@ import {
     ChevronLeft,
     ChevronRight,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
 interface Letter {
-    id: number;
+    id: string | number;
     applicant: string;
     subject: string;
     date: string;
@@ -117,7 +117,7 @@ export function LetterList({
                                             className="rounded-full h-8 text-xs font-bold border-slate-100 text-slate-600 hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4"
                                         >
                                             <Eye className="h-3.5 w-3.5" />
-                                            Preview
+                                            Detail
                                         </Button>
                                     </Link>
                                 </td>

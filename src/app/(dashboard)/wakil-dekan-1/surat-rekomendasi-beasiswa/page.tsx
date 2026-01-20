@@ -27,8 +27,10 @@ async function getWD1Applications() {
         const cookie = headersList.get("cookie");
 
         // Step 3 = Wakil Dekan 1
+        const apiUrl =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
         const res = await fetch(
-            "http://localhost:3005/api/surat-rekomendasi/applications?currentStep=3",
+            `${apiUrl}/api/surat-rekomendasi/applications?currentStep=3`,
             {
                 headers: {
                     Cookie: cookie || "",

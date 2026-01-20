@@ -27,8 +27,10 @@ async function getSupervisorApplications() {
         const cookie = headersList.get("cookie");
 
         // Step 1 = Supervisor
+        const apiUrl =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
         const res = await fetch(
-            "http://localhost:3005/api/surat-rekomendasi/applications?currentStep=1",
+            `${apiUrl}/api/surat-rekomendasi/applications?currentStep=1`,
             {
                 headers: {
                     Cookie: cookie || "",

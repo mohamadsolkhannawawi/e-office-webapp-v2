@@ -27,8 +27,10 @@ async function getManajerTUApplications() {
         const cookie = headersList.get("cookie");
 
         // Step 2 = Manajer TU
+        const apiUrl =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
         const res = await fetch(
-            "http://localhost:3005/api/surat-rekomendasi/applications?currentStep=2",
+            `${apiUrl}/api/surat-rekomendasi/applications?currentStep=2`,
             {
                 headers: {
                     Cookie: cookie || "",

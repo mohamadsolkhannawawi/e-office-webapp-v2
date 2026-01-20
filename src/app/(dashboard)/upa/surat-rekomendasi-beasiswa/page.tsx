@@ -27,8 +27,10 @@ async function getUPAApplications() {
         const cookie = headersList.get("cookie");
 
         // Step 4 = UPA
+        const apiUrl =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
         const res = await fetch(
-            "http://localhost:3005/api/surat-rekomendasi/applications?currentStep=4",
+            `${apiUrl}/api/surat-rekomendasi/applications?currentStep=4`,
             {
                 headers: {
                     Cookie: cookie || "",

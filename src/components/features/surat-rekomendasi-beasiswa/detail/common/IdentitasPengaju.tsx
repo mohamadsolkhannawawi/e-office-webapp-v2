@@ -35,19 +35,19 @@ export interface IdentitasPengajuProps {
 }
 
 export function IdentitasPengaju({ data }: IdentitasPengajuProps) {
-    const identitas = data || {
-        namaLengkap: "Ahmad Syaifullah",
-        role: "Mahasiswa",
-        nim: "24060121120000",
-        email: "ahmadsyaifullah@students.undip.ac.id",
-        departemen: "Informatika",
-        programStudi: "Informatika",
-        tempatLahir: "Blora",
-        tanggalLahir: "03/18/2003",
-        noHp: "081234567890",
-        semester: "5",
-        ipk: "3.6",
-        ips: "3.8",
+    const identitas = {
+        namaLengkap: data?.namaLengkap || "N/A",
+        role: data?.role || "Mahasiswa",
+        nim: data?.nim || "Pribadi",
+        email: data?.email || "N/A",
+        departemen: data?.departemen || "-",
+        programStudi: data?.programStudi || "-",
+        tempatLahir: data?.tempatLahir || "-",
+        tanggalLahir: data?.tanggalLahir || "-",
+        noHp: data?.noHp || "-",
+        semester: data?.semester || "-",
+        ipk: data?.ipk || "-",
+        ips: data?.ips || "-",
     };
 
     return (

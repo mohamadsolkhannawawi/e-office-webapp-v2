@@ -70,41 +70,116 @@ export function AdminDetailSurat({
     const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
     const router = useRouter();
 
+    // Determine if this role can take action based on currentStep
+    const roleStepMap: Record<string, number> = {
+        "supervisor-akademik": 1,
+        "manajer-tu": 2,
+        "wakil-dekan-1": 3,
+        upa: 4,
+    };
+    const roleStep = roleStepMap[role] || 0;
+    const currentStep = initialData?.currentStep || 0;
+    const isTerminalStatus =
+        initialData?.status === "COMPLETED" ||
+        initialData?.status === "REJECTED";
+
+    // Can only take action if:
+    // 1. The application is at this role's step
+    // 2. The application is not in a terminal status (COMPLETED/REJECTED)
+    const canTakeAction = currentStep === roleStep && !isTerminalStatus;
+
     const handleAction = (
         type: "approve" | "revise" | "reject" | "publish",
     ) => {
         setModalConfig({ isOpen: true, type });
     };
 
-    const handleConfirmAction = (data: {
+    const handleConfirmAction = async (data: {
         reason?: string;
         targetRole?: string;
     }) => {
-        const messages: Record<string, string> = {
-            approve: "Surat Berhasil Disetujui!",
-            revise: `Revisi diminta ke ${data.targetRole}. Alasan: ${data.reason}`,
-            reject: `Surat Berhasil Ditolak. Alasan: ${data.reason}`,
-            publish: "Surat Berhasil Dipublikasikan!",
-        };
+        try {
+            const messages: Record<string, string> = {
+                approve: "Surat Berhasil Disetujui!",
+                revise: `Revisi diminta ke ${data.targetRole}. Alasan: ${data.reason}`,
+                reject: `Surat Berhasil Ditolak. Alasan: ${data.reason}`,
+                publish: "Surat Berhasil Dipublikasikan!",
+            };
 
-        let redirectPath = "";
-        if (role === "supervisor-akademik") {
-            redirectPath = "/supervisor-akademik/surat/perlu-tindakan";
-        } else if (role === "manajer-tu") {
-            redirectPath = "/manajer-tu/surat/perlu-tindakan";
-        } else if (role === "wakil-dekan-1") {
-            redirectPath = "/wakil-dekan-1/surat/perlu-tindakan";
-        } else if (role === "upa") {
-            redirectPath = "/upa/surat/perlu-tindakan";
+            // Map targetRole to Step (Step 0 = Mahasiswa, 1 = Supervisor, 2 = TU, 3 = WD1)
+            const roleToStep: Record<string, number> = {
+                Mahasiswa: 0,
+                "Supervisor Akademik": 1,
+                "Manajer TU": 2,
+                "Wakil Dekan 1": 3,
+            };
+
+            // Determine action for API call
+            const action =
+                modalConfig.type === "publish" ? "approve" : modalConfig.type;
+
+            // Prepare API payload
+            const payload: {
+                action: "approve" | "reject" | "revision";
+                notes?: string;
+                targetStep?: number;
+                signatureUrl?: string;
+                letterNumber?: string;
+            } = {
+                action:
+                    action === "revise"
+                        ? "revision"
+                        : (action as "approve" | "reject" | "revision"),
+                notes: data.reason,
+                targetStep: data.targetRole
+                    ? roleToStep[data.targetRole]
+                    : undefined,
+            };
+
+            // Add WD1 signature if available
+            if (role === "wakil-dekan-1" && wd1Signature) {
+                payload.signatureUrl = wd1Signature;
+            }
+
+            // Add UPA letter number if available
+            if (role === "upa" && upaLetterNumber) {
+                payload.letterNumber = upaLetterNumber;
+            }
+
+            // Import dynamically to avoid server-side import issues
+            const { verifyApplication } = await import("@/lib/application-api");
+            await verifyApplication(id, payload);
+
+            let redirectPath = "";
+            if (role === "supervisor-akademik") {
+                redirectPath = "/supervisor-akademik/surat/perlu-tindakan";
+            } else if (role === "manajer-tu") {
+                redirectPath = "/manajer-tu/surat/perlu-tindakan";
+            } else if (role === "wakil-dekan-1") {
+                redirectPath = "/wakil-dekan-1/surat/perlu-tindakan";
+            } else if (role === "upa") {
+                redirectPath = "/upa/surat/perlu-tindakan";
+            }
+
+            setPendingRedirect(redirectPath);
+            setStatusModal({
+                isOpen: true,
+                status: "success",
+                type: modalConfig.type,
+                message: messages[modalConfig.type],
+            });
+        } catch (error) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Gagal memproses pengajuan.";
+            setStatusModal({
+                isOpen: true,
+                status: "error",
+                type: modalConfig.type,
+                message: errorMessage,
+            });
         }
-
-        setPendingRedirect(redirectPath);
-        setStatusModal({
-            isOpen: true,
-            status: "success",
-            type: modalConfig.type,
-            message: messages[modalConfig.type],
-        });
     };
 
     const identitasData: IdentitasPengajuProps["data"] = {
@@ -368,137 +443,192 @@ export function AdminDetailSurat({
                                 </Button>
                             </Link>
 
-                            {role !== "upa" ? (
+                            {/* Show action buttons only if this role can take action */}
+                            {canTakeAction ? (
                                 <>
-                                    {role === "wakil-dekan-1" && (
-                                        <div className="space-y-3 mb-3">
-                                            <Button
-                                                onClick={() =>
-                                                    setIsSignatureModalOpen(
-                                                        true,
-                                                    )
-                                                }
-                                                className="w-full bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50 font-bold py-6 rounded-lg flex items-center justify-center gap-2"
-                                            >
-                                                <PenTool className="h-5 w-5" />
-                                                {wd1Signature
-                                                    ? "Ubah Tanda Tangan"
-                                                    : "Tandatangani"}
-                                            </Button>
+                                    {role !== "upa" ? (
+                                        <>
+                                            {role === "wakil-dekan-1" && (
+                                                <div className="space-y-3 mb-3">
+                                                    <Button
+                                                        onClick={() =>
+                                                            setIsSignatureModalOpen(
+                                                                true,
+                                                            )
+                                                        }
+                                                        className="w-full bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50 font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                                    >
+                                                        <PenTool className="h-5 w-5" />
+                                                        {wd1Signature
+                                                            ? "Ubah Tanda Tangan"
+                                                            : "Tandatangani"}
+                                                    </Button>
 
-                                            {wd1Signature && (
-                                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col items-center animate-in zoom-in duration-300">
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">
-                                                        Tanda Tangan Terpilih
-                                                    </p>
-                                                    <div className="bg-white rounded-lg p-2 border border-slate-100 shadow-sm relative w-32 h-16">
-                                                        <Image
-                                                            src={wd1Signature}
-                                                            alt="Signature Preview"
-                                                            fill
-                                                            className="object-contain p-1"
-                                                        />
-                                                    </div>
+                                                    {wd1Signature && (
+                                                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col items-center animate-in zoom-in duration-300">
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">
+                                                                Tanda Tangan
+                                                                Terpilih
+                                                            </p>
+                                                            <div className="bg-white rounded-lg p-2 border border-slate-100 shadow-sm relative w-32 h-16">
+                                                                <Image
+                                                                    src={
+                                                                        wd1Signature
+                                                                    }
+                                                                    alt="Signature Preview"
+                                                                    fill
+                                                                    className="object-contain p-1"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
-                                        </div>
-                                    )}
 
-                                    <Button
-                                        onClick={() => handleAction("approve")}
-                                        disabled={
-                                            role === "wakil-dekan-1" &&
-                                            !wd1Signature
-                                        }
-                                        className={`w-full ${role === "wakil-dekan-1" && !wd1Signature ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
-                                    >
-                                        <Check className="h-5 w-5" />
-                                        Setujui
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleAction("revise")}
-                                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
-                                    >
-                                        <RotateCcw className="h-5 w-5" />
-                                        Revisi
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleAction("reject")}
-                                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
-                                    >
-                                        <XOctagon className="h-5 w-5" />
-                                        Tolak
-                                    </Button>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="space-y-3 mb-3">
-                                        <Button
-                                            onClick={() =>
-                                                setIsNumberingModalOpen(true)
-                                            }
-                                            className="w-full bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50 font-bold py-6 rounded-lg flex items-center justify-center gap-2"
-                                        >
-                                            <Hash className="h-5 w-5" />
-                                            {upaLetterNumber
-                                                ? "Ubah No. Surat"
-                                                : "Beri Nomor Surat"}
-                                        </Button>
+                                            <Button
+                                                onClick={() =>
+                                                    handleAction("approve")
+                                                }
+                                                disabled={
+                                                    role === "wakil-dekan-1" &&
+                                                    !wd1Signature
+                                                }
+                                                className={`w-full ${role === "wakil-dekan-1" && !wd1Signature ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
+                                            >
+                                                <Check className="h-5 w-5" />
+                                                Setujui
+                                            </Button>
+                                            <Button
+                                                onClick={() =>
+                                                    handleAction("revise")
+                                                }
+                                                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                            >
+                                                <RotateCcw className="h-5 w-5" />
+                                                Revisi
+                                            </Button>
+                                            <Button
+                                                onClick={() =>
+                                                    handleAction("reject")
+                                                }
+                                                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                            >
+                                                <XOctagon className="h-5 w-5" />
+                                                Tolak
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="space-y-3 mb-3">
+                                                <Button
+                                                    onClick={() =>
+                                                        setIsNumberingModalOpen(
+                                                            true,
+                                                        )
+                                                    }
+                                                    className="w-full bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50 font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                                >
+                                                    <Hash className="h-5 w-5" />
+                                                    {upaLetterNumber
+                                                        ? "Ubah No. Surat"
+                                                        : "Beri Nomor Surat"}
+                                                </Button>
 
-                                        <Button
-                                            onClick={() =>
-                                                setUpaIsStampApplied(
-                                                    !upaIsStampApplied,
-                                                )
-                                            }
-                                            className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50"} font-bold py-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm`}
-                                        >
-                                            <ShieldCheck className="h-5 w-5" />
-                                            {upaIsStampApplied
-                                                ? "Hapus Stempel"
-                                                : "Bubuhkan Stempel"}
-                                        </Button>
+                                                <Button
+                                                    onClick={() =>
+                                                        setUpaIsStampApplied(
+                                                            !upaIsStampApplied,
+                                                        )
+                                                    }
+                                                    className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50"} font-bold py-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm`}
+                                                >
+                                                    <ShieldCheck className="h-5 w-5" />
+                                                    {upaIsStampApplied
+                                                        ? "Hapus Stempel"
+                                                        : "Bubuhkan Stempel"}
+                                                </Button>
 
-                                        {(upaLetterNumber ||
-                                            upaIsStampApplied) && (
-                                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 animate-in zoom-in duration-300">
-                                                {upaLetterNumber && (
-                                                    <div className="flex flex-col items-center">
-                                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest text-center">
-                                                            Nomor Surat Terpilih
-                                                        </p>
-                                                        <div className="flex items-center gap-2 text-undip-blue font-bold text-sm bg-white px-4 py-2 rounded-lg shadow-sm border border-blue-50 w-full justify-center">
-                                                            <Sparkles className="h-3.5 w-3.5" />
-                                                            {upaLetterNumber}
-                                                        </div>
-                                                    </div>
-                                                )}
+                                                {(upaLetterNumber ||
+                                                    upaIsStampApplied) && (
+                                                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 animate-in zoom-in duration-300">
+                                                        {upaLetterNumber && (
+                                                            <div className="flex flex-col items-center">
+                                                                <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest text-center">
+                                                                    Nomor Surat
+                                                                    Terpilih
+                                                                </p>
+                                                                <div className="flex items-center gap-2 text-undip-blue font-bold text-sm bg-white px-4 py-2 rounded-lg shadow-sm border border-blue-50 w-full justify-center">
+                                                                    <Sparkles className="h-3.5 w-3.5" />
+                                                                    {
+                                                                        upaLetterNumber
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        )}
 
-                                                {upaIsStampApplied && (
-                                                    <div className="flex items-center gap-2 justify-center py-1 border-t border-slate-100 pt-3">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-                                                        <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest text-center">
-                                                            Stempel Digital
-                                                            Aktif
-                                                        </span>
+                                                        {upaIsStampApplied && (
+                                                            <div className="flex items-center gap-2 justify-center py-1 border-t border-slate-100 pt-3">
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                                                                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest text-center">
+                                                                    Stempel
+                                                                    Digital
+                                                                    Aktif
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
+
+                                            <Button
+                                                onClick={() =>
+                                                    handleAction("publish")
+                                                }
+                                                disabled={
+                                                    !upaLetterNumber ||
+                                                    !upaIsStampApplied
+                                                }
+                                                className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
+                                            >
+                                                <Send className="h-5 w-5" />
+                                                Publish
+                                            </Button>
+                                        </>
+                                    )}
+                                </>
+                            ) : (
+                                /* Show status message when action is not allowed */
+                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-3">
+                                    <div
+                                        className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${isTerminalStatus ? (initialData?.status === "COMPLETED" ? "bg-emerald-100" : "bg-red-100") : "bg-undip-blue/10"}`}
+                                    >
+                                        {isTerminalStatus ? (
+                                            initialData?.status ===
+                                            "COMPLETED" ? (
+                                                <Check className="h-6 w-6 text-emerald-600" />
+                                            ) : (
+                                                <XOctagon className="h-6 w-6 text-red-600" />
+                                            )
+                                        ) : (
+                                            <Check className="h-6 w-6 text-undip-blue" />
                                         )}
                                     </div>
-
-                                    <Button
-                                        onClick={() => handleAction("publish")}
-                                        disabled={
-                                            !upaLetterNumber ||
-                                            !upaIsStampApplied
-                                        }
-                                        className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
-                                    >
-                                        <Send className="h-5 w-5" />
-                                        Publish
-                                    </Button>
-                                </>
+                                    <div>
+                                        <p className="font-bold text-slate-700">
+                                            {isTerminalStatus
+                                                ? initialData?.status ===
+                                                  "COMPLETED"
+                                                    ? "Surat Selesai"
+                                                    : "Surat Ditolak"
+                                                : "Sudah Diproses"}
+                                        </p>
+                                        <p className="text-sm text-slate-500 mt-1">
+                                            {isTerminalStatus
+                                                ? `Status akhir: ${initialData?.status === "COMPLETED" ? "Terbit" : "Ditolak"}`
+                                                : `Surat ini sudah Anda proses dan telah diteruskan ke tahap berikutnya.`}
+                                        </p>
+                                    </div>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -506,26 +636,109 @@ export function AdminDetailSurat({
                     {/* Timeline Card */}
                     <RiwayatSurat
                         riwayat={[
-                            ...(initialData?.history?.map((log) => ({
-                                senderRole: log.actor?.name || "Sistem",
-                                receiverRole: "-",
-                                status: log.status || log.action,
-                                date: new Date(
-                                    log.createdAt,
-                                ).toLocaleDateString("id-ID", {
-                                    day: "numeric",
-                                    month: "long",
-                                    year: "numeric",
-                                }),
-                                time: new Date(
-                                    log.createdAt,
-                                ).toLocaleTimeString("id-ID", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    second: "2-digit",
-                                }),
-                                catatan: log.note || "-",
-                            })) || []),
+                            ...(initialData?.history?.map((log) => {
+                                // Convert action + actor to descriptive status
+                                const getDescriptiveStatus = (
+                                    action: string,
+                                    actorName: string,
+                                ) => {
+                                    const actionLower = action?.toLowerCase();
+                                    // Determine actor role from name or other context
+                                    let roleName = "Reviewer";
+                                    if (
+                                        actorName?.includes("Supervisor") ||
+                                        actorName?.toLowerCase().includes("dr.")
+                                    ) {
+                                        roleName = "Supervisor Akademik";
+                                    } else if (
+                                        actorName
+                                            ?.toLowerCase()
+                                            .includes("manajer") ||
+                                        actorName?.toLowerCase().includes("tu")
+                                    ) {
+                                        roleName = "Manajer TU";
+                                    } else if (
+                                        actorName
+                                            ?.toLowerCase()
+                                            .includes("dekan") ||
+                                        actorName?.toLowerCase().includes("wd1")
+                                    ) {
+                                        roleName = "Wakil Dekan 1";
+                                    } else if (
+                                        actorName?.toLowerCase().includes("upa")
+                                    ) {
+                                        roleName = "UPA";
+                                    }
+
+                                    if (actionLower === "approve") {
+                                        return `Disetujui ${roleName}`;
+                                    } else if (actionLower === "revision") {
+                                        return `Revisi dari ${roleName}`;
+                                    } else if (actionLower === "reject") {
+                                        return `Ditolak oleh ${roleName}`;
+                                    } else if (
+                                        actionLower === "submit" ||
+                                        actionLower === "create"
+                                    ) {
+                                        return "Diajukan";
+                                    } else if (actionLower === "publish") {
+                                        return "Diterbitkan";
+                                    }
+                                    return action || "Diproses";
+                                };
+
+                                // Determine receiver based on status change
+                                const getReceiverRole = (
+                                    action: string,
+                                    step: number | undefined,
+                                ) => {
+                                    const actionLower = action?.toLowerCase();
+                                    if (actionLower === "approve") {
+                                        const stepToRole: Record<
+                                            number,
+                                            string
+                                        > = {
+                                            1: "Manajer TU",
+                                            2: "Wakil Dekan 1",
+                                            3: "UPA",
+                                            4: "Selesai",
+                                        };
+                                        return stepToRole[step || 1] || "-";
+                                    } else if (actionLower === "revision") {
+                                        return "Revisi";
+                                    } else if (actionLower === "reject") {
+                                        return "Ditolak";
+                                    }
+                                    return "-";
+                                };
+
+                                return {
+                                    senderRole: log.actor?.name || "Sistem",
+                                    receiverRole: getReceiverRole(
+                                        log.action,
+                                        initialData?.currentStep,
+                                    ),
+                                    status: getDescriptiveStatus(
+                                        log.action,
+                                        log.actor?.name || "",
+                                    ),
+                                    date: new Date(
+                                        log.createdAt,
+                                    ).toLocaleDateString("id-ID", {
+                                        day: "numeric",
+                                        month: "long",
+                                        year: "numeric",
+                                    }),
+                                    time: new Date(
+                                        log.createdAt,
+                                    ).toLocaleTimeString("id-ID", {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        second: "2-digit",
+                                    }),
+                                    catatan: log.note || "-",
+                                };
+                            }) || []),
                             {
                                 senderRole:
                                     initialData?.createdBy?.mahasiswa?.user

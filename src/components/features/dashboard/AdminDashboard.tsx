@@ -99,6 +99,7 @@ interface AdminDashboardProps {
         limit: number;
         totalPages: number;
     };
+    detailBasePath?: string;
 }
 
 export function AdminDashboard({
@@ -115,6 +116,7 @@ export function AdminDashboard({
     },
     recentLetters = [],
     meta,
+    detailBasePath = "perlu-tindakan",
 }: AdminDashboardProps) {
     // Helper for Trend Chart
     const trendData = stats.trend || [];
@@ -327,7 +329,7 @@ export function AdminDashboard({
                 title="Semua Surat"
                 letters={recentLetters}
                 rolePath={roleName.toLowerCase().replace(/ /g, "-")}
-                detailBasePath="perlu-tindakan"
+                detailBasePath={detailBasePath}
                 meta={meta}
             />
         </div>

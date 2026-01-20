@@ -85,6 +85,23 @@ export function SuratPreviewContent({
     const [zoom, setZoom] = useState(100);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
+    // Map stage to step number for canTakeAction logic
+    const stageStepMap: Record<string, number> = {
+        supervisor: 1,
+        manajer: 2,
+        wd1: 3,
+        upa: 4,
+    };
+    const roleStep = stageStepMap[stage] || 0;
+    const currentStep = data?.currentStep || 0;
+    const isTerminalStatus =
+        data?.status === "COMPLETED" || data?.status === "REJECTED";
+
+    // Can only take action if:
+    // 1. The application is at this role's step
+    // 2. The application is not in a terminal status (COMPLETED/REJECTED)
+    const canTakeAction = currentStep === roleStep && !isTerminalStatus;
+
     const handleZoomIn = () => setZoom((prev) => Math.min(prev + 10, 200));
     const handleZoomOut = () => setZoom((prev) => Math.max(prev - 10, 50));
     const resetZoom = () => setZoom(100);
@@ -246,6 +263,7 @@ export function SuratPreviewContent({
                             Mahasiswa: 0,
                             "Supervisor Akademik": 1,
                             "Manajer TU": 2,
+                            "Wakil Dekan 1": 3,
                         };
 
                         const action =
@@ -393,7 +411,49 @@ export function SuratPreviewContent({
                 className={`${isFullscreen ? "w-0 opacity-0 overflow-hidden" : "w-80"} border-l border-gray-200 bg-white overflow-y-auto hidden md:block transition-all duration-500 ease-in-out`}
             >
                 <div className="p-6 space-y-6">
-                    {stage === "upa" ? (
+                    {/* Show status message if action is not allowed */}
+                    {!canTakeAction && stage !== "mahasiswa" ? (
+                        <div className="space-y-4">
+                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                                <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
+                                    Status
+                                </h2>
+                                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
+                                    Informasi Surat
+                                </p>
+                            </div>
+
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-3">
+                                <div
+                                    className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${isTerminalStatus ? (data?.status === "COMPLETED" ? "bg-emerald-100" : "bg-red-100") : "bg-undip-blue/10"}`}
+                                >
+                                    {isTerminalStatus ? (
+                                        data?.status === "COMPLETED" ? (
+                                            <Check className="h-6 w-6 text-emerald-600" />
+                                        ) : (
+                                            <XOctagon className="h-6 w-6 text-red-600" />
+                                        )
+                                    ) : (
+                                        <Check className="h-6 w-6 text-undip-blue" />
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="font-bold text-slate-700">
+                                        {isTerminalStatus
+                                            ? data?.status === "COMPLETED"
+                                                ? "Surat Selesai"
+                                                : "Surat Ditolak"
+                                            : "Sudah Diproses"}
+                                    </p>
+                                    <p className="text-sm text-slate-500 mt-1">
+                                        {isTerminalStatus
+                                            ? `Status akhir: ${data?.status === "COMPLETED" ? "Terbit" : "Ditolak"}`
+                                            : `Surat ini sudah Anda proses dan telah diteruskan ke tahap berikutnya.`}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : stage === "upa" ? (
                         <>
                             <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
                                 <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">

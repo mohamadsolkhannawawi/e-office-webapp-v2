@@ -61,7 +61,8 @@ export function AdminActionModals({
                     { value: "Manajer TU", label: "Manajer TU" },
                 ];
             default:
-                return [{ value: "Mahasiswa", label: "Mahasiswa" }];
+                // Supervisor Akademik can only revise to Mahasiswa
+                return [{ value: "Mahasiswa", label: "Mahasiswa (Pengaju)" }];
         }
     };
 

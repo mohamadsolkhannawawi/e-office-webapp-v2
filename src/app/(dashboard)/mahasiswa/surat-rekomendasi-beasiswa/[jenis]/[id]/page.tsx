@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, Pencil } from "lucide-react";
+import { ArrowLeft, Loader2, Pencil, ChevronRight } from "lucide-react";
 import {
     IdentitasPengaju,
     DetailSuratPengajuan,
@@ -129,7 +129,26 @@ export default function DetailPengajuanPage() {
         (application.status as string) === "DRAFT";
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in duration-500">
+            {/* Breadcrumb */}
+            <nav className="flex items-center text-sm font-medium text-slate-500 mb-4">
+                <Link
+                    href="/mahasiswa"
+                    className="hover:text-undip-blue transition-colors"
+                >
+                    Dashboard
+                </Link>
+                <ChevronRight className="mx-2 h-4 w-4" />
+                <Link
+                    href="/mahasiswa/surat/proses"
+                    className="hover:text-undip-blue transition-colors"
+                >
+                    Persuratan
+                </Link>
+                <ChevronRight className="mx-2 h-4 w-4" />
+                <span className="text-slate-800">Detail Pengajuan</span>
+            </nav>
+
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">

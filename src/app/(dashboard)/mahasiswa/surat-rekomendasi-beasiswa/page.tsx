@@ -7,7 +7,13 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, GraduationCap, Award, BookOpen } from "lucide-react";
+import {
+    ArrowLeft,
+    GraduationCap,
+    Award,
+    BookOpen,
+    ChevronRight,
+} from "lucide-react";
 
 // TODO: Fetch from API
 const jenisBeasiswa = [
@@ -33,7 +39,21 @@ const jenisBeasiswa = [
 
 export default function SuratRekomendasiBeasiswaPage() {
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in duration-500">
+            {/* Breadcrumb */}
+            <nav className="flex items-center text-sm font-medium text-slate-500 mb-4">
+                <Link
+                    href="/mahasiswa"
+                    className="hover:text-undip-blue transition-colors"
+                >
+                    Dashboard
+                </Link>
+                <ChevronRight className="mx-2 h-4 w-4" />
+                <span className="text-slate-800">
+                    Surat Rekomendasi Beasiswa
+                </span>
+            </nav>
+
             {/* Header */}
             <div className="flex items-center gap-4">
                 <Link href="/mahasiswa">

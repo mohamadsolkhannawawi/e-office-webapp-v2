@@ -107,7 +107,12 @@ export default function SuratDraftPage() {
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Breadcrumb */}
             <nav className="flex items-center text-sm font-medium text-slate-500">
-                <span>Draf Surat</span>
+                <Link
+                    href="/mahasiswa"
+                    className="hover:text-undip-blue transition-colors"
+                >
+                    Draf Surat
+                </Link>
                 <ChevronRight className="mx-2 h-4 w-4" />
                 <span className="text-slate-800">
                     Surat Rekomendasi Beasiswa

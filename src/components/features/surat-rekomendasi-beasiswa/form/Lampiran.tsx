@@ -10,7 +10,7 @@ import type { FormDataType, LampiranFile } from "@/types/form";
 import {
     uploadAttachment,
     deleteAttachment,
-    createApplication,
+    createDraftApplication,
 } from "@/lib/attachment-api";
 
 interface LampiranProps {
@@ -138,8 +138,8 @@ export function Lampiran({ data, setData }: LampiranProps) {
         let letterId: string | undefined = data.letterInstanceId;
         if (!letterId) {
             try {
-                const created = await createApplication(
-                    data.namaBeasiswa || "Surat Rekomendasi",
+                const created = await createDraftApplication(
+                    data.namaBeasiswa || "Draft Application",
                     (data as unknown as Record<string, unknown>) || {},
                 );
                 letterId = created.id;
@@ -247,8 +247,8 @@ export function Lampiran({ data, setData }: LampiranProps) {
         let letterId: string | undefined = data.letterInstanceId;
         if (!letterId) {
             try {
-                const created = await createApplication(
-                    data.namaBeasiswa || "Surat Rekomendasi",
+                const created = await createDraftApplication(
+                    data.namaBeasiswa || "Draft Application",
                     (data as unknown as Record<string, unknown>) || {},
                 );
                 letterId = created.id;

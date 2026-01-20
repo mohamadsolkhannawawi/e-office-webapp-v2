@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import {
+    getApplicationById,
+    type ApplicationAttachment,
+} from "@/lib/application-api";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -15,12 +20,16 @@ import type { FormDataType } from "@/types/form";
 
 export default function PengajuanBaruPage() {
     const params = useParams();
+    const searchParams = useSearchParams();
     const jenis = params.jenis as string;
+    const editId = searchParams.get("id");
 
     const [currentStep, setCurrentStep] = useState<number>(1);
-    const [formData, setFormData] = useState<FormDataType>({
+
+    const initialFormData: FormDataType = {
+        // Step 1: Identitas
         namaLengkap: "",
-        role: "",
+        role: "MAHASISWA",
         nim: "",
         email: "",
         departemen: "",
@@ -31,49 +40,103 @@ export default function PengajuanBaruPage() {
         ipk: "",
         ips: "",
         semester: "",
+
+        // Step 2: Detail
         namaBeasiswa: "",
+
+        // Step 3: Lampiran
         lampiranUtama: [],
         lampiranTambahan: [],
-    });
+    };
 
-    // Storage key unik per jenis beasiswa
-    const storageKey = `suratRekomendasiForm_${jenis}`;
+    const [formData, setFormData] = useState<FormDataType>(initialFormData);
 
-    // Load persisted data on mount
+    // ... existing localStorage logic
+
+    // Fetch Data (Profile OR Existing Application)
     useEffect(() => {
-        const raw = localStorage.getItem(storageKey);
-        if (!raw) return;
-
-        const timer = setTimeout(() => {
-            try {
-                const parsed = JSON.parse(raw);
-                if (parsed && typeof parsed === "object") {
-                    if (parsed.formData) {
+        const loadInitialData = async () => {
+            if (editId) {
+                // Edit Mode: Fetch existing application
+                try {
+                    const app = await getApplicationById(editId);
+                    if (app) {
                         setFormData((prev) => ({
                             ...prev,
-                            ...parsed.formData,
+                            // Spread existing formData from DB
+                            ...app.formData,
+                            // Ensure strictly required fields
+                            namaBeasiswa:
+                                app.scholarshipName ||
+                                app.formData.namaBeasiswa ||
+                                "",
+                            letterInstanceId: app.id,
+                            role: "MAHASISWA",
+                            // Map attachments if needed
+                            lampiranUtama: app.attachments
+                                .filter(
+                                    (a: ApplicationAttachment) =>
+                                        a.category === "Utama",
+                                )
+                                .map((a: ApplicationAttachment) => ({
+                                    file: undefined, // Changed from null as File | undefined is expected
+                                    preview: "",
+                                    name: a.filename,
+                                    size: a.fileSize, // Added required size property
+                                    type: a.attachmentType,
+                                    existingId: a.id,
+                                    downloadUrl: a.downloadUrl,
+                                })),
+                            lampiranTambahan: app.attachments
+                                .filter(
+                                    (a: ApplicationAttachment) =>
+                                        a.category === "Tambahan",
+                                )
+                                .map((a: ApplicationAttachment) => ({
+                                    file: undefined,
+                                    preview: "",
+                                    name: a.filename,
+                                    size: a.fileSize, // Added required size property
+                                    type: a.attachmentType,
+                                    existingId: a.id,
+                                    downloadUrl: a.downloadUrl,
+                                })),
+                        }));
+                        // Maybe move to last step or keep at 1?
+                        // Let's keep at 1 to review
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch application for edit:", err);
+                }
+            } else {
+                // New Mode: Fetch Profile
+                try {
+                    const res = await fetch("/api/me", {
+                        credentials: "include",
+                    });
+                    if (res.ok) {
+                        const user = await res.json();
+                        setFormData((prev) => ({
+                            ...prev,
+                            namaLengkap: user.name || prev.namaLengkap,
+                            email: user.email || prev.email,
+                            nim: user.mahasiswa?.nim || prev.nim,
+                            departemen:
+                                user.mahasiswa?.departemen?.name ||
+                                prev.departemen,
+                            programStudi:
+                                user.mahasiswa?.programStudi?.name ||
+                                prev.programStudi,
+                            role: "MAHASISWA",
                         }));
                     }
-                    if (parsed.currentStep) {
-                        setCurrentStep(Number(parsed.currentStep) || 1);
-                    }
+                } catch (err) {
+                    console.error("Failed to fetch profile:", err);
                 }
-            } catch (err) {
-                console.warn("Failed to load persisted form data", err);
             }
-        }, 0);
-
-        return () => clearTimeout(timer);
-    }, [storageKey]);
-
-    useEffect(() => {
-        try {
-            const payload = { formData, currentStep };
-            localStorage.setItem(storageKey, JSON.stringify(payload));
-        } catch (err) {
-            console.warn("Failed to persist form data", err);
-        }
-    }, [formData, currentStep, storageKey]);
+        };
+        loadInitialData();
+    }, [editId]);
 
     // Define interface for window validation functions
     interface ValidationWindow extends Window {
@@ -225,6 +288,8 @@ export default function PengajuanBaruPage() {
                 onBack={handleBack}
                 isNextDisabled={!isStepValid()}
                 letterInstanceId={formData.letterInstanceId}
+                formData={formData}
+                jenis={jenis}
             />
         </div>
     );

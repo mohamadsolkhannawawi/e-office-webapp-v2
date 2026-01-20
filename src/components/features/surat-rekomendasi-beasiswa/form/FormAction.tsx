@@ -15,12 +15,17 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+import { updateApplication } from "@/lib/attachment-api";
+import { FormDataType } from "@/types/form";
+
 interface ActionProps {
     currentStep: number;
     onNext: () => void;
     onBack: () => void;
     isNextDisabled?: boolean;
     letterInstanceId?: string;
+    formData?: FormDataType;
+    jenis?: string;
 }
 
 export function FormAction({
@@ -29,19 +34,38 @@ export function FormAction({
     onBack,
     isNextDisabled,
     letterInstanceId,
+    formData,
+    jenis,
 }: ActionProps) {
     const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-    const handleConfirmAjukan = () => {
-        console.log("Surat diajukan!", letterInstanceId);
+    const handleConfirmAjukan = async () => {
+        if (!letterInstanceId || !formData) {
+            console.error("Missing letterInstanceId or formData");
+            return;
+        }
 
-        localStorage.removeItem("suratRekomendasiForm");
+        setIsSubmitting(true);
+        try {
+            await updateApplication(letterInstanceId, {
+                namaBeasiswa: formData.namaBeasiswa,
+                values: formData as unknown as Record<string, unknown>,
+                status: "PENDING",
+            });
 
-        if (letterInstanceId) {
-            router.push(`/mahasiswa/surat/proses/detail/${letterInstanceId}`);
-        } else {
-            // Fallback default, though letterInstanceId should usually be present
-            router.push("/mahasiswa/surat/proses");
+            console.log("Surat diajukan!", letterInstanceId);
+            localStorage.removeItem("suratRekomendasiForm");
+
+            const targetJenis = jenis || "internal";
+            router.push(
+                `/mahasiswa/surat-rekomendasi-beasiswa/${targetJenis}/${letterInstanceId}`,
+            );
+        } catch (error) {
+            console.error("Failed to submit application:", error);
+            alert("Gagal mengajukan surat. Silakan coba lagi.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 

@@ -80,6 +80,8 @@ export async function getApplications(params?: {
     limit?: number;
     currentStep?: number;
     mode?: string;
+    search?: string;
+    jenisBeasiswa?: string;
 }): Promise<{
     data: ApplicationSummary[];
     meta: { total: number; page: number; limit: number; totalPages: number };

@@ -106,7 +106,11 @@ export default function DetailPengajuanPage() {
     };
 
     const detailSuratData = {
-        jenisSurat: "SRB / Surat Rekomendasi Beasiswa",
+        jenisSurat: `Surat Rekomendasi Beasiswa${
+            application.formData.jenisBeasiswa
+                ? ` (${application.formData.jenisBeasiswa})`
+                : ""
+        }`,
         namaBeasiswa: application.scholarshipName || "-",
         status: application.status,
     };
@@ -129,9 +133,7 @@ export default function DetailPengajuanPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <Link
-                        href={`/mahasiswa/surat-rekomendasi-beasiswa/${jenis}`}
-                    >
+                    <Link href={`/mahasiswa/surat/proses`}>
                         <Button variant="ghost" size="icon">
                             <ArrowLeft className="h-4 w-4" />
                         </Button>
@@ -150,7 +152,7 @@ export default function DetailPengajuanPage() {
                     <Button
                         onClick={() =>
                             router.push(
-                                `/mahasiswa/surat-rekomendasi-beasiswa/${jenis}/baru?id=${id}`,
+                                `/mahasiswa/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
                             )
                         }
                     >

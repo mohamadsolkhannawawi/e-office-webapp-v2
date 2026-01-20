@@ -48,43 +48,28 @@ export default function PengajuanBaruPage() {
         lampiranTambahan: [],
     };
 
-    const [formData, setFormData] = useState<FormDataType>(initialFormData);
-    const [isDataLoaded, setIsDataLoaded] = useState(false);
-
-    // 1. Load from localStorage on mount (only for "New" mode)
-    useEffect(() => {
-        if (!editId) {
+    const [formData, setFormData] = useState<FormDataType>(() => {
+        let base = { ...initialFormData };
+        // Try to restore from localStorage if NOT in edit mode
+        if (typeof window !== "undefined" && !editId) {
             const saved = localStorage.getItem(`srb_form_${jenis}`);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    setFormData(parsed);
+                    base = { ...base, ...parsed };
                 } catch (e) {
                     console.error("Failed to parse saved form data", e);
                 }
             }
         }
-        setIsDataLoaded(true);
-    }, [editId, jenis]);
+        return base;
+    });
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-    // 2. Save to localStorage on change (only for "New" mode)
+    // Consolidated Initialization Logic for Async Data
     useEffect(() => {
-        if (!editId && isDataLoaded) {
-            localStorage.setItem(`srb_form_${jenis}`, JSON.stringify(formData));
-        }
-    }, [formData, editId, jenis, isDataLoaded]);
-
-    // 3. Update URL when letterInstanceId is created (Drafting)
-    useEffect(() => {
-        if (formData.letterInstanceId && !editId) {
-            const newUrl = `${window.location.pathname}?id=${formData.letterInstanceId}`;
-            window.history.replaceState(null, "", newUrl);
-        }
-    }, [formData.letterInstanceId, editId]);
-
-    // Fetch Data (Profile OR Existing Application)
-    useEffect(() => {
-        const loadInitialData = async () => {
+        const fetchAsyncData = async () => {
+            // 1. Fetch specific data based on mode
             if (editId) {
                 // Edit Mode: Fetch existing application
                 try {
@@ -92,10 +77,8 @@ export default function PengajuanBaruPage() {
                     if (data) {
                         setFormData((prev) => ({
                             ...prev,
-                            // Spread existing formData from DB
                             ...data.formData,
                             letterInstanceId: data.id,
-                            // Map attachments correctly
                             lampiranUtama: data.attachments
                                 .filter((a) => a.category === "Utama")
                                 .map((a) => ({
@@ -120,59 +103,79 @@ export default function PengajuanBaruPage() {
                     console.error("Failed to fetch application for edit:", err);
                 }
             } else if (!isAuthLoading && authUser) {
-                // New Mode: Use authUser and fetch extra details
-                // Pre-fill from authContext first
-                setFormData((prev) => ({
-                    ...prev,
-                    namaLengkap: authUser.name || prev.namaLengkap,
-                    email: authUser.email || prev.email,
-                }));
-
-                // Fetch extra details from /api/me
+                // New Mode: Fetch profile details to pre-fill if identity is missing
                 try {
                     const res = await fetch("/api/me", {
                         credentials: "include",
                     });
                     if (res.ok) {
                         const user = await res.json();
-                        setFormData((prev) => ({
-                            ...prev,
-                            // Merge with existing data, but only for identity fields
-                            nim: prev.nim || user.mahasiswa?.nim || "",
-                            departemen:
-                                prev.departemen ||
-                                user.mahasiswa?.departemen?.name ||
-                                "",
-                            programStudi:
-                                prev.programStudi ||
-                                user.mahasiswa?.programStudi?.name ||
-                                "",
-                            tempatLahir:
-                                prev.tempatLahir ||
-                                user.mahasiswa?.tempatLahir ||
-                                "",
-                            tanggalLahir:
-                                prev.tanggalLahir ||
-                                (user.mahasiswa?.tanggalLahir
-                                    ? new Date(user.mahasiswa.tanggalLahir)
-                                          .toISOString()
-                                          .split("T")[0]
-                                    : ""),
-                            // noHp, ipk, ips, semester are NOT pre-filled from DB per request
-                            // and will keep their value from 'prev' (localStorage)
-                            role: "MAHASISWA",
-                        }));
+                        setFormData((prev) => {
+                            // Only update if current state is missing these basic fields
+                            const updated = {
+                                ...prev,
+                                namaLengkap:
+                                    prev.namaLengkap ||
+                                    user.name ||
+                                    authUser.name ||
+                                    "",
+                                email:
+                                    prev.email ||
+                                    user.email ||
+                                    authUser.email ||
+                                    "",
+                                nim: prev.nim || user.mahasiswa?.nim || "",
+                                departemen:
+                                    prev.departemen ||
+                                    user.mahasiswa?.departemen?.name ||
+                                    "",
+                                programStudi:
+                                    prev.programStudi ||
+                                    user.mahasiswa?.programStudi?.name ||
+                                    "",
+                                tempatLahir:
+                                    prev.tempatLahir ||
+                                    user.mahasiswa?.tempatLahir ||
+                                    "",
+                                tanggalLahir:
+                                    prev.tanggalLahir ||
+                                    (user.mahasiswa?.tanggalLahir
+                                        ? new Date(user.mahasiswa.tanggalLahir)
+                                              .toISOString()
+                                              .split("T")[0]
+                                        : ""),
+                                role: "MAHASISWA" as const,
+                            };
+                            return updated;
+                        });
                     }
                 } catch (err) {
                     console.error("Failed to fetch profile details:", err);
                 }
             }
+
+            setIsDataLoaded(true);
         };
 
-        if (isDataLoaded) {
-            loadInitialData();
+        if (!isAuthLoading) {
+            fetchAsyncData();
         }
-    }, [editId, authUser, isAuthLoading, isDataLoaded]);
+    }, [editId, authUser, isAuthLoading, jenis]);
+
+    // Update URL if ID exists (handles draft -> edit transition)
+    useEffect(() => {
+        if (formData.letterInstanceId && !editId) {
+            const newUrl = `${window.location.pathname}?id=${formData.letterInstanceId}`;
+            window.history.replaceState(null, "", newUrl);
+        }
+    }, [formData.letterInstanceId, editId]);
+
+    // Save to localStorage on change (only for "New" mode)
+    useEffect(() => {
+        if (!editId && isDataLoaded) {
+            localStorage.setItem(`srb_form_${jenis}`, JSON.stringify(formData));
+        }
+    }, [formData, editId, jenis, isDataLoaded]);
 
     // Define interface for window validation functions
     interface ValidationWindow extends Window {

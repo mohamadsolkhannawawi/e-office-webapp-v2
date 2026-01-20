@@ -16,6 +16,7 @@ async function getActionRequiredApplications(searchParams: SearchParams) {
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
         const query = new URLSearchParams({
+            mode: "pending",
             currentStep: "3", // Wakil Dekan 1
             status: (searchParams.status as string) || "",
             search: (searchParams.search as string) || "",
@@ -91,7 +92,7 @@ export default async function PerluTindakanPage(props: {
                 title="Perlu Tindakan"
                 letters={letters}
                 rolePath="wakil-dekan-1"
-                detailBasePath="perlu-tindakan"
+                detailBasePath="surat-rekomendasi-beasiswa"
                 meta={meta}
             />
         </div>

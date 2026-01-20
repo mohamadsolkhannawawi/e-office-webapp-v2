@@ -12,14 +12,11 @@ async function getDashboardData(searchParams: SearchParams) {
         const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
-        // 1. Fetch Stats
-        const statsRes = await fetch(
-            `${apiUrl}/api/surat-rekomendasi/applications/stats`,
-            {
-                headers: { Cookie: cookie || "" },
-                cache: "no-store",
-            },
-        );
+        // 1. Fetch Stats (global stats for SRB)
+        const statsRes = await fetch(`${apiUrl}/api/surat-rekomendasi/stats`, {
+            headers: { Cookie: cookie || "" },
+            cache: "no-store",
+        });
         const statsJson = await statsRes.json();
         const statsData = statsJson.data || {
             total: 0,
@@ -38,12 +35,34 @@ async function getDashboardData(searchParams: SearchParams) {
             },
         };
 
-        // 2. Fetch Recent Letters with Filters
+        // 2. Fetch Pending Count (letters awaiting action at step 3)
+        const pendingRes = await fetch(
+            `${apiUrl}/api/surat-rekomendasi/applications?mode=pending&currentStep=3&limit=1`,
+            {
+                headers: { Cookie: cookie || "" },
+                cache: "no-store",
+            },
+        );
+        const pendingJson = await pendingRes.json();
+        const pendingCount = pendingJson.meta?.total || 0;
+
+        // 3. Fetch Processed Count (letters processed by WD1 - step 3)
+        const processedRes = await fetch(
+            `${apiUrl}/api/surat-rekomendasi/applications?mode=processed&currentStep=3&limit=1`,
+            {
+                headers: { Cookie: cookie || "" },
+                cache: "no-store",
+            },
+        );
+        const processedJson = await processedRes.json();
+        const processedCount = processedJson.meta?.total || 0;
+
+        // 4. Fetch Recent Letters for table (all SRB letters)
         const query = new URLSearchParams({
             status: String(searchParams.status || ""),
             search: String(searchParams.search || ""),
             page: String(searchParams.page || "1"),
-            limit: String(searchParams.limit || "5"),
+            limit: String(searchParams.limit || "10"),
             startDate: String(searchParams.startDate || ""),
             endDate: String(searchParams.endDate || ""),
         });
@@ -60,60 +79,61 @@ async function getDashboardData(searchParams: SearchParams) {
         const appsMeta = appsJson.meta || {
             total: 0,
             page: 1,
-            limit: 5,
+            limit: 10,
             totalPages: 0,
         };
 
-        // 3. Fetch Action Required Count (Step 3 - WD1)
-        const actionRes = await fetch(
-            `${apiUrl}/api/surat-rekomendasi/applications?currentStep=3&limit=1`,
-            {
-                headers: { Cookie: cookie || "" },
-                cache: "no-store",
-            },
-        );
-        const actionJson = await actionRes.json();
-        const actionCount = actionJson.meta?.total || 0;
-
         return {
             stats: {
-                actionRequired: actionCount,
-                completedMonth: statsData.totalCompletedThisMonth || 0,
+                actionRequired: pendingCount,
+                completedMonth: processedCount,
                 totalMonth: statsData.totalCreatedThisMonth || 0,
                 trend: statsData.trend,
                 distribution: statsData.distribution,
             },
-            recentLetters: appsData.map((app: ApplicationSummary) => ({
-                id: app.id,
-                applicant:
-                    app.applicantName || app.formData?.namaLengkap || "N/A",
-                subject: app.scholarshipName || "Surat Rekomendasi Beasiswa",
-                date: new Date(app.createdAt).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                }),
-                target:
-                    app.status === "COMPLETED" ? "Selesai" : "Wakil Dekan 1",
-                status:
-                    app.status === "PENDING"
-                        ? "Menunggu Verifikasi"
-                        : app.status === "IN_PROGRESS"
-                          ? "Proses"
-                          : app.status === "COMPLETED"
-                            ? "Selesai"
-                            : app.status === "REJECTED"
-                              ? "Ditolak"
-                              : app.status,
-                statusColor:
-                    app.status === "PENDING" || app.status === "IN_PROGRESS"
-                        ? "bg-amber-500"
-                        : app.status === "COMPLETED"
-                          ? "bg-emerald-500"
-                          : app.status === "REJECTED"
-                            ? "bg-red-500"
-                            : "bg-slate-500",
-            })),
+            recentLetters: appsData.map((app: ApplicationSummary) => {
+                // Determine target and status based on currentStep
+                let target = "Selesai";
+                if (app.status === "PENDING" || app.status === "IN_PROGRESS") {
+                    const stepToRole: Record<number, string> = {
+                        1: "Supervisor Akademik",
+                        2: "Manajer TU",
+                        3: "Wakil Dekan 1",
+                        4: "UPA",
+                    };
+                    target = stepToRole[app.currentStep] || "Diproses";
+                }
+
+                return {
+                    id: app.id,
+                    applicant:
+                        app.applicantName || app.formData?.namaLengkap || "N/A",
+                    subject:
+                        app.scholarshipName || "Surat Rekomendasi Beasiswa",
+                    date: new Date(app.createdAt).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                    }),
+                    target,
+                    status:
+                        app.currentStep === 3
+                            ? "Perlu Tindakan"
+                            : app.status === "COMPLETED"
+                              ? "Selesai"
+                              : app.status === "REJECTED"
+                                ? "Ditolak"
+                                : "Proses",
+                    statusColor:
+                        app.currentStep === 3
+                            ? "bg-amber-500"
+                            : app.status === "COMPLETED"
+                              ? "bg-emerald-500"
+                              : app.status === "REJECTED"
+                                ? "bg-red-500"
+                                : "bg-undip-blue",
+                };
+            }),
             meta: appsMeta,
         };
     } catch (error) {
@@ -152,6 +172,7 @@ export default async function WakilDekanPage(props: {
             stats={data.stats}
             recentLetters={data.recentLetters}
             meta={data.meta}
+            detailBasePath="surat-rekomendasi-beasiswa"
         />
     );
 }

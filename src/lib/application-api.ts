@@ -184,16 +184,13 @@ export async function getStats(): Promise<{
     };
 }> {
     try {
-        const response = await fetch(
-            "/api/surat-rekomendasi/applications/stats",
-            {
-                method: "GET",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+        const response = await fetch("/api/surat-rekomendasi/stats", {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
             },
-        );
+        });
 
         if (!response.ok) {
             throw new Error(`Failed to fetch stats: ${response.status}`);

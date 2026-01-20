@@ -11,7 +11,7 @@ export const AUTH_ROUTES = {
 // Mahasiswa routes
 export const MAHASISWA_ROUTES = {
     DASHBOARD: "/mahasiswa",
-    SURAT_REKOMENDASI_BEASISWA: "/mahasiswa/surat-rekomendasi-beasiswa",
+    SURAT_REKOMENDASI_BEASISWA: "/mahasiswa/surat/surat-rekomendasi-beasiswa",
     RIWAYAT: "/mahasiswa/riwayat",
 } as const;
 

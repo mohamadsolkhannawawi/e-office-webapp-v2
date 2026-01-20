@@ -78,6 +78,12 @@ interface AdminDashboardProps {
         };
     };
     recentLetters?: Letter[];
+    meta?: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
 }
 
 export function AdminDashboard({
@@ -92,6 +98,7 @@ export function AdminDashboard({
         distribution: { pending: 0, inProgress: 0, completed: 0, rejected: 0 },
     },
     recentLetters = [],
+    meta,
 }: AdminDashboardProps) {
     // Helper for Trend Chart
     const trendData = stats.trend || [];
@@ -300,6 +307,7 @@ export function AdminDashboard({
                 letters={recentLetters}
                 rolePath={roleName.toLowerCase().replace(/ /g, "-")}
                 detailBasePath="perlu-tindakan"
+                meta={meta}
             />
         </div>
     );

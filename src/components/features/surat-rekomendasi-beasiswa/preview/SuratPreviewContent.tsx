@@ -43,6 +43,7 @@ interface PreviewData {
     status?: string;
     currentStep?: number;
     applicationId?: string;
+    signatureUrl?: string;
 }
 
 interface SuratPreviewContentProps {
@@ -66,7 +67,9 @@ export function SuratPreviewContent({
         searchParams.get("no") || "",
     );
     const [upaIsStampApplied, setUpaIsStampApplied] = useState(false);
-    const [wd1Signature, setWd1Signature] = useState<string | null>(null);
+    const [wd1Signature, setWd1Signature] = useState<string | null>(
+        data?.signatureUrl || null,
+    );
     const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
     const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
     const [isActionModalOpen, setIsActionModalOpen] = useState(false);
@@ -115,47 +118,23 @@ export function SuratPreviewContent({
     };
 
     const config = useMemo(() => {
-        const defaultNo = "1234/UN7.F8.1/KM/2026";
+        // SINGLE SOURCE OF TRUTH LOGIC:
+        // Use the actual data state (wd1Signature, upaLetterNumber) to decide what to render.
+        // The 'stage' prop primarily controls the SIDEBAR actions/context, not the document content visibility.
+        // Exception: If we are in 'wd1' stage (approval process), we show the signature being drafted (local state) or existing one.
 
-        switch (stage) {
-            case "mahasiswa":
-            case "supervisor":
-            case "manajer":
-                return {
-                    showSignature: false,
-                    signaturePath: null,
-                    showStamp: false,
-                    nomorSurat: "",
-                    data: data,
-                };
-            case "wd1":
-                return {
-                    showSignature: !!wd1Signature,
-                    signaturePath: wd1Signature,
-                    showStamp: false,
-                    nomorSurat: "",
-                    data: data,
-                };
-            case "upa":
-            case "selesai":
-                return {
-                    showSignature: true,
-                    signaturePath:
-                        wd1Signature || "/assets/signature-dummy.png",
-                    showStamp: upaIsStampApplied,
-                    nomorSurat: upaLetterNumber || defaultNo,
-                    data: data,
-                };
-            default:
-                return {
-                    showSignature: false,
-                    signaturePath: null,
-                    showStamp: false,
-                    nomorSurat: "",
-                    data: data,
-                };
-        }
-    }, [stage, upaLetterNumber, upaIsStampApplied, wd1Signature, data]);
+        const hasSignature = !!wd1Signature;
+        const hasStamp = upaIsStampApplied;
+        const hasLetterNumber = !!upaLetterNumber;
+
+        return {
+            showSignature: hasSignature,
+            signaturePath: wd1Signature || "/assets/signature-dummy.png", // Only used if showSignature is true
+            showStamp: hasStamp,
+            nomorSurat: hasLetterNumber ? upaLetterNumber : "",
+            data: data,
+        };
+    }, [upaLetterNumber, upaIsStampApplied, wd1Signature, data]);
 
     const attributes = [
         {

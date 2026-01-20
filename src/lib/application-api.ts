@@ -44,6 +44,7 @@ export interface ApplicationSummary {
     attachmentsCount: number;
     createdAt: string;
     updatedAt: string;
+    applicantName?: string; // Added for convenience
     createdBy?: {
         mahasiswa?: {
             nim: string;
@@ -69,6 +70,14 @@ export interface ApplicationDetail {
     attachments: ApplicationAttachment[];
     createdAt: string;
     updatedAt: string;
+    createdBy?: {
+        mahasiswa?: {
+            nim: string;
+            user?: {
+                name: string;
+            };
+        };
+    };
 }
 
 /**
@@ -149,5 +158,64 @@ export async function getApplicationById(
     } catch (error) {
         console.error("Get application error:", error);
         throw error;
+    }
+}
+
+/**
+ * Fetch application statistics
+ */
+export async function getStats(): Promise<{
+    total: number;
+    pending: number;
+    inProgress: number;
+    completed: number;
+    rejected: number;
+    totalCreatedThisMonth: number;
+    totalCompletedThisMonth: number;
+    trend: { date: string; count: number }[];
+    distribution: {
+        pending: number;
+        inProgress: number;
+        completed: number;
+        rejected: number;
+    };
+}> {
+    try {
+        const response = await fetch(
+            "/api/surat-rekomendasi/applications/stats",
+            {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            },
+        );
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch stats: ${response.status}`);
+        }
+
+        const result = await response.json();
+        return result.data;
+    } catch (error) {
+        console.error("Get stats error:", error);
+        // Return zeros on error to prevent UI crash
+        return {
+            total: 0,
+            pending: 0,
+            inProgress: 0,
+            completed: 0,
+            rejected: 0,
+            totalCreatedThisMonth: 0,
+            totalCompletedThisMonth: 0,
+            trend: [],
+            distribution: {
+                pending: 0,
+                inProgress: 0,
+                completed: 0,
+                rejected: 0,
+            },
+        };
     }
 }

@@ -40,8 +40,8 @@ export default function LoginPage() {
     const redirectToDashboard = React.useCallback(
         (user: AuthUser) => {
             console.log("Redirect helper called with:", user);
-            const roles = user.roles || [];
-            console.log("User roles found:", roles);
+            const roles = (user.roles || []).map((r) => r.toUpperCase());
+            console.log("User roles found (normalized):", roles);
 
             if (roles.includes("MAHASISWA")) {
                 router.push("/mahasiswa");

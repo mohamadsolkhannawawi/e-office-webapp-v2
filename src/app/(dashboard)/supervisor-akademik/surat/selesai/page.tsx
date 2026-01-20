@@ -16,7 +16,8 @@ async function getCompletedApplications(searchParams: SearchParams) {
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
         const query = new URLSearchParams({
-            status: String(searchParams.status || "COMPLETED"),
+            mode: "processed",
+            currentStep: "1",
             search: String(searchParams.search || ""),
             page: String(searchParams.page || "1"),
             limit: String(searchParams.limit || "10"),
@@ -54,20 +55,44 @@ export default async function SelesaiPage(props: {
     const searchParams = await props.searchParams;
     const { data, meta } = await getCompletedApplications(searchParams);
 
-    const letters = data.map((app: ApplicationSummary) => ({
-        id: app.id,
-        applicant: app.applicantName || app.formData?.namaLengkap || "N/A",
-        subject: app.scholarshipName || "Surat Rekomendasi Beasiswa",
-        date: new Date(app.createdAt).toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-        }),
-        target: "Selesai",
-        status: app.status === "COMPLETED" ? "Selesai" : app.status,
-        statusColor:
-            app.status === "REJECTED" ? "bg-red-500" : "bg-emerald-500",
-    }));
+    const letters = data.map((app: ApplicationSummary) => {
+        // For Supervisor's Selesai page, show that it was processed by Supervisor
+        let statusLabel = "Disetujui Supervisor";
+        let statusColor = "bg-undip-blue";
+
+        // Determine current position for target
+        const stepToPosition: Record<number, string> = {
+            2: "Di Manajer TU",
+            3: "Di Wakil Dekan 1",
+            4: "Di UPA",
+        };
+
+        let target = stepToPosition[app.currentStep] || "Selesai Diproses";
+
+        if (app.status === "COMPLETED") {
+            statusLabel = "Selesai";
+            statusColor = "bg-emerald-500";
+            target = "Selesai";
+        } else if (app.status === "REJECTED") {
+            statusLabel = "Ditolak";
+            statusColor = "bg-red-500";
+            target = "Ditolak";
+        }
+
+        return {
+            id: app.id,
+            applicant: app.applicantName || app.formData?.namaLengkap || "N/A",
+            subject: app.scholarshipName || "Surat Rekomendasi Beasiswa",
+            date: new Date(app.createdAt).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+            }),
+            target: target,
+            status: statusLabel,
+            statusColor: statusColor,
+        };
+    });
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">

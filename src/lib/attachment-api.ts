@@ -194,3 +194,82 @@ export async function createApplication(
         throw error;
     }
 }
+
+/**
+ * Create draft application (for file upload purposes)
+ */
+export async function createDraftApplication(
+    namaBeasiswa?: string,
+    values?: Record<string, unknown>,
+): Promise<{ id: string; scholarshipName: string }> {
+    try {
+        const response = await fetch(
+            "/api/surat-rekomendasi/applications/draft",
+            {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    namaBeasiswa,
+                    values,
+                }),
+            },
+        );
+
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(
+                text || `Create draft failed (Status ${response.status})`,
+            );
+        }
+
+        const result = (await response.json()) as {
+            success: boolean;
+            data: { id: string; scholarshipName: string };
+        };
+        return result.data;
+    } catch (error) {
+        console.error("Create draft error:", error);
+        throw error;
+    }
+}
+
+/**
+ * Update application data (finalize draft or update fields)
+ */
+export async function updateApplication(
+    id: string,
+    data: {
+        namaBeasiswa?: string;
+        values?: Record<string, unknown>;
+        status?: string;
+    },
+): Promise<any> {
+    try {
+        const response = await fetch(
+            `/api/surat-rekomendasi/applications/${id}`,
+            {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            },
+        );
+
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(
+                text || `Update application failed (Status ${response.status})`,
+            );
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Update application error:", error);
+        throw error;
+    }
+}

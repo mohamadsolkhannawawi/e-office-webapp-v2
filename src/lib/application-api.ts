@@ -13,6 +13,8 @@ export interface ApplicationFormData {
     noHp: string;
     ipk: string;
     ips: string;
+    namaBeasiswa?: string; // Added optional
+    semester?: string; // Added optional
 }
 
 export interface ApplicationAttachment {
@@ -35,6 +37,14 @@ export interface ApplicationSummary {
     attachmentsCount: number;
     createdAt: string;
     updatedAt: string;
+    createdBy?: {
+        mahasiswa?: {
+            nim: string;
+            user?: {
+                name: string;
+            };
+        };
+    };
 }
 
 export interface ApplicationDetail {

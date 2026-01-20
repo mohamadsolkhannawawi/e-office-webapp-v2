@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, User } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,12 +15,103 @@ import { Separator } from "@/components/ui/separator";
 import logoMain from "@/assets/images/logo-undip-main.png";
 
 import { Navbar } from "@/components/layout/Navbar";
+import { useAuth, type User as AuthUser } from "@/contexts/AuthContext";
+import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const {
+        signIn,
+        user: currentUser,
+        isAuthenticated,
+        isLoading: authLoading,
+        refreshSession, // Add this
+    } = useAuth();
+
+    // AuthClient is already imported from context or lib, but we need it here for direct usage
+    // Import directly at top level is better, let's use the one from @/lib/auth-client
+    const router = useRouter();
+
+    // Redirection helper
+    const redirectToDashboard = React.useCallback(
+        (user: AuthUser) => {
+            console.log("Redirect helper called with:", user);
+            const roles = user.roles || [];
+            console.log("User roles found:", roles);
+
+            if (roles.includes("MAHASISWA")) {
+                router.push("/mahasiswa");
+            } else if (roles.includes("SUPERVISOR")) {
+                router.push("/supervisor-akademik");
+            } else if (roles.includes("MANAJER_TU")) {
+                router.push("/manajer-tu");
+            } else if (roles.includes("WAKIL_DEKAN_1")) {
+                router.push("/wakil-dekan-1");
+            } else if (roles.includes("UPA")) {
+                router.push("/upa");
+            } else {
+                console.warn(
+                    "No matching role found, falling back to /dashboard",
+                );
+                router.push("/dashboard");
+            }
+        },
+        [router],
+    );
+
+    // Auto-redirect if already logged in
+    React.useEffect(() => {
+        if (!authLoading && isAuthenticated && currentUser) {
+            redirectToDashboard(currentUser);
+        }
+    }, [isAuthenticated, currentUser, authLoading, redirectToDashboard]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!email || !password) {
+            toast.error("Email dan password harus diisi");
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            await signIn(email, password);
+            toast.success("Login berhasil!");
+
+            // FETCH LATEST SESSION TO GET ROLES (Manual Handler only intercepts getSession)
+            await refreshSession();
+
+            // Get the updated user from context manually or via a helper if needed.
+            // Since refreshSession updates the context state, we might need to wait for it or fetch directly.
+            // Let's fetch directly to be safe and fast.
+            const sessionData = await authClient.getSession();
+
+            if (sessionData.data?.user) {
+                redirectToDashboard(sessionData.data.user as AuthUser);
+            } else {
+                router.push("/dashboard");
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Login gagal. Periksa email dan password Anda.",
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="flex min-h-screen flex-col bg-bg-light font-sans text-gray-800 antialiased dark:bg-bg-dark dark:text-gray-200">
+            <Toaster position="top-right" />
             <Navbar showProfile={false} />
 
             {/* Main Content */}
@@ -56,22 +149,28 @@ export default function LoginPage() {
                             </p>
                         </div>
 
-                        <form action="#" method="POST" className="space-y-5">
+                        <form onSubmit={handleSubmit} className="space-y-5">
                             <div className="space-y-1">
                                 <Label
-                                    htmlFor="username"
+                                    htmlFor="email"
                                     className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >
-                                    Username atau Email
+                                    Email
                                 </Label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                     <Input
-                                        id="username"
-                                        name="username"
-                                        type="text"
-                                        placeholder="Contoh: budi@students.undip.ac.id"
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) =>
+                                            setEmail(e.target.value)
+                                        }
+                                        placeholder="Contoh: mahasiswa@students.undip.ac.id"
                                         className="h-12 pl-10"
+                                        disabled={isLoading}
+                                        required
                                     />
                                 </div>
                             </div>
@@ -91,8 +190,14 @@ export default function LoginPage() {
                                         type={
                                             showPassword ? "text" : "password"
                                         }
-                                        placeholder="Contoh: 123456"
+                                        value={password}
+                                        onChange={(e) =>
+                                            setPassword(e.target.value)
+                                        }
+                                        placeholder="Masukkan kata sandi"
                                         className="h-12 pl-10 pr-10"
+                                        disabled={isLoading}
+                                        required
                                     />
                                     <button
                                         type="button"
@@ -100,6 +205,7 @@ export default function LoginPage() {
                                             setShowPassword(!showPassword)
                                         }
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                        disabled={isLoading}
                                     >
                                         {showPassword ? (
                                             <EyeOff className="h-5 w-5" />
@@ -120,10 +226,11 @@ export default function LoginPage() {
                             </div>
 
                             <Button
-                                type="button"
+                                type="submit"
                                 className="w-full bg-dark-navy py-6 text-white hover:bg-slate-800"
+                                disabled={isLoading}
                             >
-                                Masuk
+                                {isLoading ? "Memproses..." : "Masuk"}
                             </Button>
 
                             <div className="relative flex items-center py-2">
@@ -142,6 +249,7 @@ export default function LoginPage() {
                                 variant="outline"
                                 type="button"
                                 className="w-full border-gray-300 py-6 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                                disabled={isLoading}
                             >
                                 Masuk dengan SSO UNDIP
                             </Button>

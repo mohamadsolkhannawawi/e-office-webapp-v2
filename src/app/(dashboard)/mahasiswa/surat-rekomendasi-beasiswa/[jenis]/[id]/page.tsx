@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Pencil } from "lucide-react";
 import {
     IdentitasPengaju,
     DetailSuratPengajuan,
@@ -92,10 +92,12 @@ export default function DetailPengajuanPage() {
     // Map application data ke format komponen
     const identitasData = {
         namaLengkap: application.formData.namaLengkap,
-        nimNip: application.formData.nim,
+        nim: application.formData.nim, // Changed from nimNip
+        role: "Mahasiswa", // Added role
         email: application.formData.email,
         departemen: application.formData.departemen,
         programStudi: application.formData.programStudi,
+        semester: application.formData.semester || "-", // Added semester
         tempatLahir: application.formData.tempatLahir,
         tanggalLahir: formatDate(application.formData.tanggalLahir),
         noHp: application.formData.noHp,
@@ -117,6 +119,10 @@ export default function DetailPengajuanPage() {
         category: att.category,
         downloadUrl: att.downloadUrl,
     }));
+
+    const canEdit =
+        (application.status as string) === "REVISION" ||
+        (application.status as string) === "DRAFT";
 
     return (
         <div className="space-y-6">
@@ -140,6 +146,18 @@ export default function DetailPengajuanPage() {
                         </p>
                     </div>
                 </div>
+                {canEdit && (
+                    <Button
+                        onClick={() =>
+                            router.push(
+                                `/mahasiswa/surat-rekomendasi-beasiswa/${jenis}/baru?id=${id}`,
+                            )
+                        }
+                    >
+                        <Pencil className="w-4 h-4 mr-2" />
+                        Perbaiki Pengajuan
+                    </Button>
+                )}
             </div>
 
             {/* Content */}

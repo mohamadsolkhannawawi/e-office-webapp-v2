@@ -2,12 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import {
-    getApplicationById,
-    type ApplicationAttachment,
-} from "@/lib/application-api";
+import { getApplicationById } from "@/lib/application-api";
 
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Stepper } from "@/components/features/surat-rekomendasi-beasiswa/form/Stepper";
@@ -25,6 +23,7 @@ export default function PengajuanBaruPage() {
     const editId = searchParams.get("id");
 
     const [currentStep, setCurrentStep] = useState<number>(1);
+    const { user: authUser, isLoading: isAuthLoading } = useAuth();
 
     const initialFormData: FormDataType = {
         // Step 1: Identitas
@@ -59,57 +58,47 @@ export default function PengajuanBaruPage() {
             if (editId) {
                 // Edit Mode: Fetch existing application
                 try {
-                    const app = await getApplicationById(editId);
-                    if (app) {
+                    const data = await getApplicationById(editId);
+                    if (data) {
                         setFormData((prev) => ({
                             ...prev,
                             // Spread existing formData from DB
-                            ...app.formData,
-                            // Ensure strictly required fields
-                            namaBeasiswa:
-                                app.scholarshipName ||
-                                app.formData.namaBeasiswa ||
-                                "",
-                            letterInstanceId: app.id,
-                            role: "MAHASISWA",
-                            // Map attachments if needed
-                            lampiranUtama: app.attachments
-                                .filter(
-                                    (a: ApplicationAttachment) =>
-                                        a.category === "Utama",
-                                )
-                                .map((a: ApplicationAttachment) => ({
-                                    file: undefined, // Changed from null as File | undefined is expected
-                                    preview: "",
+                            ...data.formData,
+                            letterInstanceId: data.id,
+                            // Map attachments correctly
+                            lampiranUtama: data.attachments
+                                .filter((a) => a.category === "Utama")
+                                .map((a) => ({
+                                    id: a.id,
                                     name: a.filename,
-                                    size: a.fileSize, // Added required size property
-                                    type: a.attachmentType,
-                                    existingId: a.id,
+                                    size: a.fileSize,
+                                    attachmentType: a.attachmentType,
                                     downloadUrl: a.downloadUrl,
                                 })),
-                            lampiranTambahan: app.attachments
-                                .filter(
-                                    (a: ApplicationAttachment) =>
-                                        a.category === "Tambahan",
-                                )
-                                .map((a: ApplicationAttachment) => ({
-                                    file: undefined,
-                                    preview: "",
+                            lampiranTambahan: data.attachments
+                                .filter((a) => a.category === "Tambahan")
+                                .map((a) => ({
+                                    id: a.id,
                                     name: a.filename,
-                                    size: a.fileSize, // Added required size property
-                                    type: a.attachmentType,
-                                    existingId: a.id,
+                                    size: a.fileSize,
+                                    attachmentType: a.attachmentType,
                                     downloadUrl: a.downloadUrl,
                                 })),
                         }));
-                        // Maybe move to last step or keep at 1?
-                        // Let's keep at 1 to review
                     }
                 } catch (err) {
                     console.error("Failed to fetch application for edit:", err);
                 }
-            } else {
-                // New Mode: Fetch Profile
+            } else if (!isAuthLoading && authUser) {
+                // New Mode: Use authUser and fetch extra details
+                // Pre-fill from authContext first
+                setFormData((prev) => ({
+                    ...prev,
+                    namaLengkap: authUser.name || prev.namaLengkap,
+                    email: authUser.email || prev.email,
+                }));
+
+                // Fetch extra details from /api/me
                 try {
                     const res = await fetch("/api/me", {
                         credentials: "include",
@@ -118,8 +107,6 @@ export default function PengajuanBaruPage() {
                         const user = await res.json();
                         setFormData((prev) => ({
                             ...prev,
-                            namaLengkap: user.name || prev.namaLengkap,
-                            email: user.email || prev.email,
                             nim: user.mahasiswa?.nim || prev.nim,
                             departemen:
                                 user.mahasiswa?.departemen?.name ||
@@ -127,16 +114,27 @@ export default function PengajuanBaruPage() {
                             programStudi:
                                 user.mahasiswa?.programStudi?.name ||
                                 prev.programStudi,
+                            noHp: "", // User requested to not pre-fill
+                            tempatLahir:
+                                user.mahasiswa?.tempatLahir || prev.tempatLahir,
+                            tanggalLahir: user.mahasiswa?.tanggalLahir
+                                ? new Date(user.mahasiswa.tanggalLahir)
+                                      .toISOString()
+                                      .split("T")[0]
+                                : prev.tanggalLahir,
+                            ipk: "", // User requested to not pre-fill
+                            ips: "", // User requested to not pre-fill
+                            semester: "", // User requested to not pre-fill
                             role: "MAHASISWA",
                         }));
                     }
                 } catch (err) {
-                    console.error("Failed to fetch profile:", err);
+                    console.error("Failed to fetch profile details:", err);
                 }
             }
         };
         loadInitialData();
-    }, [editId]);
+    }, [editId, authUser, isAuthLoading]);
 
     // Define interface for window validation functions
     interface ValidationWindow extends Window {

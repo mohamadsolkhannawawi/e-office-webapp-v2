@@ -157,6 +157,9 @@ export default function SuratSelesaiPage() {
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-gray-50/50 border-b border-gray-100">
                             <tr>
+                                <th className="px-6 py-4 font-bold text-slate-700 w-12">
+                                    No
+                                </th>
                                 <th className="px-6 py-4 font-bold text-slate-700 w-1/2">
                                     Subjek Surat
                                 </th>
@@ -172,7 +175,7 @@ export default function SuratSelesaiPage() {
                             {isLoading ? (
                                 <tr>
                                     <td
-                                        colSpan={3}
+                                        colSpan={4}
                                         className="px-6 py-12 text-center text-slate-500"
                                     >
                                         <div className="flex justify-center items-center gap-2">
@@ -184,14 +187,14 @@ export default function SuratSelesaiPage() {
                             ) : applications.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={3}
+                                        colSpan={4}
                                         className="px-6 py-12 text-center text-slate-400"
                                     >
                                         Belum ada surat yang selesai.
                                     </td>
                                 </tr>
                             ) : (
-                                applications.map((app) => {
+                                applications.map((app, index) => {
                                     const status = getStatusInfo(app.status);
                                     const StatusIcon = status.icon;
 
@@ -205,6 +208,12 @@ export default function SuratSelesaiPage() {
                                             key={app.id}
                                             className="hover:bg-gray-50/30 transition-colors group"
                                         >
+                                            <td className="px-6 py-4 text-slate-500 text-sm">
+                                                {(pagination.page - 1) *
+                                                    pagination.limit +
+                                                    index +
+                                                    1}
+                                            </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
                                                     <span className="font-bold text-slate-800 group-hover:text-[#007bff] transition-colors">

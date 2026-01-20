@@ -170,6 +170,9 @@ export default function SuratDalamProsesPage() {
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-gray-50/50 border-b border-gray-100">
                             <tr>
+                                <th className="px-6 py-4 font-bold text-slate-700 w-12">
+                                    No
+                                </th>
                                 <th className="px-6 py-4 font-bold text-slate-700 w-1/2">
                                     Subjek Surat
                                 </th>
@@ -185,7 +188,7 @@ export default function SuratDalamProsesPage() {
                             {isLoading ? (
                                 <tr>
                                     <td
-                                        colSpan={3}
+                                        colSpan={4}
                                         className="px-6 py-12 text-center text-slate-500"
                                     >
                                         <div className="flex justify-center items-center gap-2">
@@ -197,20 +200,26 @@ export default function SuratDalamProsesPage() {
                             ) : applications.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={3}
+                                        colSpan={4}
                                         className="px-6 py-12 text-center text-slate-500"
                                     >
                                         Tidak ada surat yang sedang diproses.
                                     </td>
                                 </tr>
                             ) : (
-                                applications.map((app) => {
+                                applications.map((app, index) => {
                                     const statusInfo = getStatusInfo(app);
                                     return (
                                         <tr
                                             key={app.id}
                                             className="hover:bg-gray-50/50 transition-colors group"
                                         >
+                                            <td className="px-6 py-4 text-slate-500 text-sm">
+                                                {(pagination.page - 1) *
+                                                    pagination.limit +
+                                                    index +
+                                                    1}
+                                            </td>
                                             <td className="px-6 py-4 text-slate-700 font-medium">
                                                 {app.scholarshipName ||
                                                     "Pengajuan Surat Rekomendasi Beasiswa"}

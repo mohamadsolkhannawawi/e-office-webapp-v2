@@ -233,6 +233,7 @@ export function LetterList({
                 <table className="w-full text-left">
                     <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-50 text-[11px] uppercase text-slate-400 font-bold tracking-wider">
+                            <th className="px-6 py-4 w-12">No</th>
                             <th className="px-6 py-4">Pengirim / Pemohon</th>
                             <th className="px-6 py-4">Perihal</th>
                             <th className="px-6 py-4">Tanggal Diterima</th>
@@ -242,11 +243,18 @@ export function LetterList({
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 text-sm">
-                        {letters.map((letter) => (
+                        {letters.map((letter, index) => (
                             <tr
                                 key={letter.id}
                                 className="hover:bg-slate-50/30 transition-colors group"
                             >
+                                <td className="px-6 py-4 text-slate-500">
+                                    {meta
+                                        ? (meta.page - 1) * meta.limit +
+                                          index +
+                                          1
+                                        : index + 1}
+                                </td>
                                 <td className="px-6 py-4 font-bold text-slate-700">
                                     {letter.applicant}
                                 </td>

@@ -163,6 +163,9 @@ export default function SuratDraftPage() {
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-gray-50/50 border-b border-gray-100">
                             <tr>
+                                <th className="px-6 py-4 font-bold text-slate-700 w-12 text-center">
+                                    No
+                                </th>
                                 <th className="px-6 py-4 font-bold text-slate-700 w-1/2">
                                     Subjek Surat
                                 </th>
@@ -178,7 +181,7 @@ export default function SuratDraftPage() {
                             {isLoading ? (
                                 <tr>
                                     <td
-                                        colSpan={3}
+                                        colSpan={4}
                                         className="px-6 py-12 text-center text-slate-500"
                                     >
                                         <div className="flex justify-center items-center gap-2">
@@ -190,14 +193,14 @@ export default function SuratDraftPage() {
                             ) : applications.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={3}
+                                        colSpan={4}
                                         className="px-6 py-12 text-center text-slate-400"
                                     >
                                         Tidak ada draft yang tersimpan.
                                     </td>
                                 </tr>
                             ) : (
-                                applications.map((app) => {
+                                applications.map((app, index) => {
                                     const jenis =
                                         app.formData.jenisBeasiswa ||
                                         "internal";
@@ -207,6 +210,12 @@ export default function SuratDraftPage() {
                                             key={app.id}
                                             className="hover:bg-gray-50/30 transition-colors group"
                                         >
+                                            <td className="px-6 py-4 text-center text-slate-500 font-medium">
+                                                {(pagination.page - 1) *
+                                                    pagination.limit +
+                                                    index +
+                                                    1}
+                                            </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">

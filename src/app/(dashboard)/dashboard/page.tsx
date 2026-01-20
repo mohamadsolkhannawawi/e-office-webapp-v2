@@ -1,75 +1,107 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { ShieldAlert, LogOut, RefreshCw } from "lucide-react";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { type User } from "@/contexts/AuthContext";
+
+// Helper to determine redirect path purely from user state
+function getRedirectPath(user: User | null): string | null {
+    if (!user || !user.roles || user.roles.length === 0) return null;
+    const roles = user.roles.map((r: string) => r.toUpperCase());
+
+    if (roles.includes("MAHASISWA")) return "/mahasiswa";
+    if (roles.includes("SUPERVISOR")) return "/supervisor-akademik";
+    if (roles.includes("MANAJER_TU")) return "/manajer-tu";
+    if (roles.includes("WAKIL_DEKAN_1")) return "/wakil-dekan-1";
+    if (roles.includes("UPA")) return "/upa";
+    return null;
+}
 
 export default function DashboardFallbackPage() {
-    const { user, session, isLoading, signOut } = useAuth();
+    const { user, isLoading, signOut } = useAuth();
     const router = useRouter();
 
-    if (isLoading) {
+    // Calculate redirect path during render
+    // If isLoading is false and user is present, we check for a valid role path
+    const redirectPath = !isLoading ? getRedirectPath(user) : null;
+
+    useEffect(() => {
+        // Perform the redirect as a side effect if a path is identified
+        if (redirectPath) {
+            router.replace(redirectPath);
+        }
+    }, [redirectPath, router]);
+
+    const handleLogout = async () => {
+        await signOut();
+        router.push("/login");
+    };
+
+    // Show loading spinner if:
+    // 1. Auth is still loading
+    // 2. We have identified a redirect path and are waiting for the router to push (useEffect)
+    if (isLoading || redirectPath) {
         return (
-            <div className="flex h-screen w-full items-center justify-center">
-                <p>Loading session...</p>
+            <div className="flex h-screen w-full items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="flex flex-col items-center gap-4">
+                    <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+                    <p className="text-muted-foreground animate-pulse">
+                        Memuat sesi...
+                    </p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="container mx-auto p-10">
-            <h1 className="mb-6 text-3xl font-bold text-red-600">
-                Dashboard Fallback
-            </h1>
-            <p className="mb-4 text-gray-700">
-                Anda diarahkan ke halaman ini karena sistem tidak menemukan role
-                spesifik pada akun Anda atau terjadi kesalahan redirect.
-            </p>
-
-            <div className="mb-8 rounded-lg border bg-white p-6 shadow">
-                <h2 className="mb-4 text-xl font-semibold">Debug Info</h2>
-                <div className="space-y-2">
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
+            <Card className="w-full max-w-md border-red-200 shadow-lg dark:border-red-900">
+                <CardHeader className="flex flex-col items-center text-center">
+                    <div className="mb-4 rounded-full bg-red-100 p-3 dark:bg-red-900/30">
+                        <ShieldAlert className="h-10 w-10 text-red-600 dark:text-red-400" />
+                    </div>
+                    <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        Sesi Berakhir
+                    </CardTitle>
+                    <CardDescription className="text-base mt-2">
+                        Sesi Anda telah habis atau akun Anda tidak memiliki
+                        akses ke halaman ini. Ini adalah langkah keamanan untuk
+                        melindungi akun Anda.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="text-center text-sm text-muted-foreground">
                     <p>
-                        <strong>Nama:</strong> {user?.name}
+                        Silakan login kembali untuk melanjutkan aktivitas Anda.
                     </p>
-                    <p>
-                        <strong>Email:</strong> {user?.email}
-                    </p>
-                    <p>
-                        <strong>User ID:</strong> {user?.id}
-                    </p>
-                    <p>
-                        <strong>Roles (Session):</strong>{" "}
-                        {user?.roles?.length
-                            ? user.roles.join(", ")
-                            : "TIDAK ADA ROLE DETECTED"}
-                    </p>
-                    <pre className="mt-4 max-h-60 overflow-auto rounded bg-gray-100 p-4 text-xs">
-                        {JSON.stringify({ user, session }, null, 2)}
-                    </pre>
-                </div>
-            </div>
-
-            <div className="flex gap-4">
-                <Button onClick={() => window.location.reload()}>
-                    Refresh Page
-                </Button>
-                <Button
-                    variant="outline"
-                    onClick={() => {
-                        // Manual redirect test
-                        if (user?.roles?.includes("MAHASISWA")) {
-                            router.push("/mahasiswa");
-                        }
-                    }}
-                >
-                    Try Force Redirect /mahasiswa
-                </Button>
-                <Button variant="destructive" onClick={() => signOut()}>
-                    Logout
-                </Button>
-            </div>
+                    {user && (
+                        <div className="mt-4 rounded bg-gray-100 p-2 text-xs dark:bg-gray-800">
+                            Akun:{" "}
+                            <span className="font-mono">{user.email}</span>
+                        </div>
+                    )}
+                </CardContent>
+                <CardFooter className="flex justify-center pb-8">
+                    <Button
+                        onClick={handleLogout}
+                        className="w-full gap-2 bg-red-600 hover:bg-red-700 text-white"
+                        size="lg"
+                    >
+                        <LogOut className="h-4 w-4" />
+                        Login Kembali
+                    </Button>
+                </CardFooter>
+            </Card>
         </div>
     );
 }

@@ -50,7 +50,10 @@ export function FormAction({
         try {
             await updateApplication(letterInstanceId, {
                 namaBeasiswa: formData.namaBeasiswa,
-                values: formData as unknown as Record<string, unknown>,
+                values: {
+                    ...(formData as unknown as Record<string, unknown>),
+                    jenisBeasiswa: jenis,
+                },
                 status: "PENDING",
             });
 
@@ -103,6 +106,7 @@ export function FormAction({
                             <Button
                                 className="bg-[#007bff] hover:bg-blue-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
                                 disabled={
+                                    isSubmitting ||
                                     !!(
                                         typeof isNextDisabled !== "undefined" &&
                                         isNextDisabled
@@ -128,8 +132,11 @@ export function FormAction({
                                 <AlertDialogAction
                                     onClick={handleConfirmAjukan}
                                     className="bg-[#007bff] hover:bg-blue-700"
+                                    disabled={isSubmitting}
                                 >
-                                    Ya, Ajukan
+                                    {isSubmitting
+                                        ? "Mengajukan..."
+                                        : "Ya, Ajukan"}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

@@ -15,6 +15,7 @@ export interface ApplicationFormData {
     ips: string;
     namaBeasiswa?: string; // Added optional
     semester?: string; // Added optional
+    jenisBeasiswa?: string; // Added optional
 }
 
 export interface ApplicationAttachment {
@@ -31,7 +32,13 @@ export interface ApplicationAttachment {
 export interface ApplicationSummary {
     id: string;
     scholarshipName: string;
-    status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "REJECTED";
+    status:
+        | "PENDING"
+        | "IN_PROGRESS"
+        | "COMPLETED"
+        | "REJECTED"
+        | "REVISION"
+        | "DRAFT";
     currentStep: number;
     formData: ApplicationFormData;
     attachmentsCount: number;
@@ -50,7 +57,13 @@ export interface ApplicationSummary {
 export interface ApplicationDetail {
     id: string;
     scholarshipName: string;
-    status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "REJECTED";
+    status:
+        | "PENDING"
+        | "IN_PROGRESS"
+        | "COMPLETED"
+        | "REJECTED"
+        | "REVISION"
+        | "DRAFT";
     currentStep: number;
     formData: ApplicationFormData;
     attachments: ApplicationAttachment[];
@@ -59,11 +72,32 @@ export interface ApplicationDetail {
 }
 
 /**
- * Fetch all applications
+ * Fetch applications with optional filters
  */
-export async function getApplications(): Promise<ApplicationSummary[]> {
+export async function getApplications(params?: {
+    status?: string;
+    page?: number;
+    limit?: number;
+    currentStep?: number;
+    mode?: string;
+}): Promise<{
+    data: ApplicationSummary[];
+    meta: { total: number; page: number; limit: number; totalPages: number };
+}> {
     try {
-        const response = await fetch("/api/surat-rekomendasi/applications", {
+        const url = new URL(
+            "/api/surat-rekomendasi/applications",
+            window.location.origin,
+        );
+        if (params) {
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    url.searchParams.append(key, String(value));
+                }
+            });
+        }
+
+        const response = await fetch(url.toString(), {
             method: "GET",
             credentials: "include",
             headers: {
@@ -76,7 +110,10 @@ export async function getApplications(): Promise<ApplicationSummary[]> {
         }
 
         const result = await response.json();
-        return result.data || [];
+        return {
+            data: result.data || [],
+            meta: result.meta || {},
+        };
     } catch (error) {
         console.error("Get applications error:", error);
         throw error;

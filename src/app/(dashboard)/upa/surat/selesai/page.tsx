@@ -16,7 +16,8 @@ async function getCompletedApplications(searchParams: SearchParams) {
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
         const query = new URLSearchParams({
-            status: String(searchParams.status || "COMPLETED"),
+            mode: "processed",
+            currentStep: "4", // UPA
             search: String(searchParams.search || ""),
             page: String(searchParams.page || "1"),
             limit: String(searchParams.limit || "10"),
@@ -54,20 +55,30 @@ export default async function SelesaiPage(props: {
     const searchParams = await props.searchParams;
     const { data, meta } = await getCompletedApplications(searchParams);
 
-    const letters = data.map((app: ApplicationSummary) => ({
-        id: app.id,
-        applicant: app.applicantName || app.formData?.namaLengkap || "N/A",
-        subject: app.scholarshipName || "Surat Rekomendasi Beasiswa",
-        date: new Date(app.createdAt).toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-        }),
-        target: "Selesai",
-        status: app.status === "COMPLETED" ? "Selesai" : app.status,
-        statusColor:
-            app.status === "REJECTED" ? "bg-red-500" : "bg-emerald-500",
-    }));
+    const letters = data.map((app: ApplicationSummary) => {
+        // For UPA, processed means COMPLETED (published) since UPA is final step
+        let statusLabel = "Terbit";
+        let statusColor = "bg-emerald-500";
+
+        if (app.status === "REJECTED") {
+            statusLabel = "Ditolak";
+            statusColor = "bg-red-500";
+        }
+
+        return {
+            id: app.id,
+            applicant: app.applicantName || app.formData?.namaLengkap || "N/A",
+            subject: app.scholarshipName || "Surat Rekomendasi Beasiswa",
+            date: new Date(app.createdAt).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+            }),
+            target: "Arsip",
+            status: statusLabel,
+            statusColor: statusColor,
+        };
+    });
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -86,7 +97,7 @@ export default async function SelesaiPage(props: {
                 title="Daftar Surat Selesai"
                 letters={letters}
                 rolePath="upa"
-                detailBasePath="perlu-tindakan"
+                detailBasePath="surat-rekomendasi-beasiswa"
                 meta={meta}
             />
         </div>

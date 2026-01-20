@@ -148,6 +148,7 @@ export default async function SupervisorAkademikPage(props: {
     return (
         <AdminDashboard
             roleName="Supervisor Akademik"
+            rolePath="supervisor-akademik"
             title="Dashboard Persuratan"
             description="Pusat kendali untuk mengelola semua surat Fakultas Sains dan Matematika."
             stats={data.stats}

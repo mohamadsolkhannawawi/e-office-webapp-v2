@@ -145,6 +145,7 @@ export default async function UPAPage(props: {
     return (
         <AdminDashboard
             roleName="UPA"
+            rolePath="upa"
             title="Dashboard Persuratan"
             description="Pusat kendali untuk mengelola semua surat Fakultas Sains dan Matematika."
             stats={data.stats}

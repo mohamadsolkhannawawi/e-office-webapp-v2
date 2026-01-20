@@ -146,6 +146,7 @@ export default async function WakilDekanPage(props: {
     return (
         <AdminDashboard
             roleName="Wakil Dekan 1"
+            rolePath="wakil-dekan-1"
             title="Dashboard Persuratan"
             description="Pusat kendali untuk mengelola semua surat Fakultas Sains dan Matematika."
             stats={data.stats}

@@ -2,8 +2,14 @@
 
 import React from "react";
 import { Inbox, CheckCircle, BarChart, ChevronRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent as CardContentUI,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import { LetterList } from "./LetterList";
+import Link from "next/link";
 
 interface StatCardProps {
     label: string;
@@ -12,6 +18,7 @@ interface StatCardProps {
     icon: React.ReactNode;
     colorClass: string;
     iconBgClass: string;
+    href?: string;
 }
 
 function StatCard({
@@ -21,10 +28,11 @@ function StatCard({
     icon,
     colorClass,
     iconBgClass,
+    href,
 }: StatCardProps) {
-    return (
-        <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
+    const CardContent = (
+        <Card className="border-none shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-300">
+            <CardContentUI className="p-6">
                 <div className="flex justify-between items-start mb-4">
                     <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">
                         {label}
@@ -46,9 +54,15 @@ function StatCard({
                         {subtext}
                     </div>
                 </div>
-            </CardContent>
+            </CardContentUI>
         </Card>
     );
+
+    if (href) {
+        return <Link href={href}>{CardContent}</Link>;
+    }
+
+    return CardContent;
 }
 
 interface Letter {
@@ -63,6 +77,7 @@ interface Letter {
 
 interface AdminDashboardProps {
     roleName: string;
+    rolePath: string;
     title: string;
     description: string;
     stats?: {
@@ -88,6 +103,7 @@ interface AdminDashboardProps {
 
 export function AdminDashboard({
     roleName,
+    rolePath,
     title,
     description,
     stats = {
@@ -167,6 +183,7 @@ export function AdminDashboard({
                     icon={<Inbox />}
                     colorClass="text-undip-blue"
                     iconBgClass="bg-blue-50"
+                    href={`/${rolePath}/surat/perlu-tindakan`}
                 />
                 <StatCard
                     label="Selesai (Bulan Ini)"
@@ -175,6 +192,7 @@ export function AdminDashboard({
                     icon={<CheckCircle />}
                     colorClass="text-emerald-500"
                     iconBgClass="bg-emerald-50"
+                    href={`/${rolePath}/surat/selesai`}
                 />
                 <StatCard
                     label="Total Surat (Bulan Ini)"
@@ -194,7 +212,7 @@ export function AdminDashboard({
                             Tren Volume 30 Hari
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContentUI>
                         <div className="relative h-48 w-full mt-4">
                             <div className="absolute inset-0 flex flex-col justify-between">
                                 {[
@@ -239,7 +257,7 @@ export function AdminDashboard({
                                 <span>Hari ini</span>
                             </div>
                         </div>
-                    </CardContent>
+                    </CardContentUI>
                 </Card>
 
                 <Card className="border-none shadow-sm">
@@ -248,7 +266,7 @@ export function AdminDashboard({
                             Distribusi Status
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="pt-10 flex flex-col justify-center h-full">
+                    <CardContentUI className="pt-10 flex flex-col justify-center h-full">
                         <div className="flex items-end justify-between px-1 mb-2">
                             <span className="text-xs font-bold text-slate-500">
                                 {dist.pending + dist.inProgress}
@@ -297,7 +315,7 @@ export function AdminDashboard({
                                 Ditolak ({Math.round(rejectedPct)}%)
                             </div>
                         </div>
-                    </CardContent>
+                    </CardContentUI>
                 </Card>
             </div>
 

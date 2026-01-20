@@ -145,6 +145,7 @@ export default async function ManajerTUPage(props: {
     return (
         <AdminDashboard
             roleName="Manajer TU"
+            rolePath="manajer-tu"
             title="Dashboard Persuratan"
             description="Pusat kendali untuk mengelola semua surat Fakultas Sains dan Matematika."
             stats={data.stats}

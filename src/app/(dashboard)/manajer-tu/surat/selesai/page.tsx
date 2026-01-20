@@ -16,7 +16,8 @@ async function getCompletedApplications(searchParams: SearchParams) {
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
         const query = new URLSearchParams({
-            status: String(searchParams.status || "COMPLETED"),
+            mode: "processed",
+            currentStep: "2", // Manajer TU
             search: String(searchParams.search || ""),
             page: String(searchParams.page || "1"),
             limit: String(searchParams.limit || "10"),
@@ -54,20 +55,36 @@ export default async function SelesaiPage(props: {
     const searchParams = await props.searchParams;
     const { data, meta } = await getCompletedApplications(searchParams);
 
-    const letters = data.map((app: ApplicationSummary) => ({
-        id: app.id,
-        applicant: app.applicantName || app.formData?.namaLengkap || "N/A",
-        subject: app.scholarshipName || "Surat Rekomendasi Beasiswa",
-        date: new Date(app.createdAt).toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-        }),
-        target: "Selesai",
-        status: app.status === "COMPLETED" ? "Selesai" : app.status,
-        statusColor:
-            app.status === "REJECTED" ? "bg-red-500" : "bg-emerald-500",
-    }));
+    const letters = data.map((app: ApplicationSummary) => {
+        let statusLabel = "Disetujui Manajer TU";
+        let statusColor = "bg-undip-blue";
+
+        if (app.status === "COMPLETED") {
+            statusLabel = "Selesai";
+            statusColor = "bg-emerald-500";
+        } else if (app.status === "REJECTED") {
+            statusLabel = "Ditolak";
+            statusColor = "bg-red-500";
+        } else if (app.currentStep === 3) {
+            statusLabel = "Disetujui → Wakil Dekan 1";
+        } else if (app.currentStep === 4) {
+            statusLabel = "Disetujui → UPA";
+        }
+
+        return {
+            id: app.id,
+            applicant: app.applicantName || app.formData?.namaLengkap || "N/A",
+            subject: app.scholarshipName || "Surat Rekomendasi Beasiswa",
+            date: new Date(app.createdAt).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+            }),
+            target: "Selesai Diproses",
+            status: statusLabel,
+            statusColor: statusColor,
+        };
+    });
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -86,7 +103,7 @@ export default async function SelesaiPage(props: {
                 title="Daftar Surat Selesai"
                 letters={letters}
                 rolePath="manajer-tu"
-                detailBasePath="perlu-tindakan"
+                detailBasePath="surat-rekomendasi-beasiswa"
                 meta={meta}
             />
         </div>

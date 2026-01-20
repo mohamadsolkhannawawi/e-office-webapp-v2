@@ -4,7 +4,9 @@ import { ChevronRight } from "lucide-react";
 import { headers } from "next/headers";
 import { ApplicationSummary } from "@/lib/application-api";
 
-async function getCompletedApplications() {
+type SearchParams = { [key: string]: string | string[] | undefined };
+
+async function getCompletedApplications(searchParams: SearchParams) {
     try {
         const headersList = await headers();
         const cookie = headersList.get("cookie");
@@ -12,28 +14,44 @@ async function getCompletedApplications() {
         const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
-        // Fetch status=COMPLETED
-        // Note: status filter might need to be array if we want REJECTED too?
-        // Let's assume Selesai means COMPLETED for now.
+        const query = new URLSearchParams({
+            status: String(searchParams.status || "COMPLETED"),
+            search: String(searchParams.search || ""),
+            page: String(searchParams.page || "1"),
+            limit: String(searchParams.limit || "10"),
+            startDate: String(searchParams.startDate || ""),
+            endDate: String(searchParams.endDate || ""),
+        });
+
         const res = await fetch(
-            `${apiUrl}/api/surat-rekomendasi/applications?status=COMPLETED`,
+            `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,
             {
                 headers: { Cookie: cookie || "" },
                 cache: "no-store",
             },
         );
 
-        if (!res.ok) return [];
+        if (!res.ok)
+            return {
+                data: [],
+                meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+            };
         const json = await res.json();
-        return json.data || [];
+        return json;
     } catch (err) {
         console.error("Fetch completed error:", err);
-        return [];
+        return {
+            data: [],
+            meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+        };
     }
 }
 
-export default async function SelesaiPage() {
-    const data = await getCompletedApplications();
+export default async function SelesaiPage(props: {
+    searchParams: Promise<SearchParams>;
+}) {
+    const searchParams = await props.searchParams;
+    const { data, meta } = await getCompletedApplications(searchParams);
 
     const letters = data.map((app: ApplicationSummary) => ({
         id: app.id,
@@ -46,7 +64,8 @@ export default async function SelesaiPage() {
         }),
         target: "Selesai",
         status: app.status === "COMPLETED" ? "Selesai" : app.status,
-        statusColor: "bg-emerald-500",
+        statusColor:
+            app.status === "REJECTED" ? "bg-red-500" : "bg-emerald-500",
     }));
 
     return (
@@ -64,6 +83,7 @@ export default async function SelesaiPage() {
                 letters={letters}
                 rolePath="supervisor-akademik"
                 detailBasePath="surat-rekomendasi-beasiswa"
+                meta={meta}
             />
         </div>
     );

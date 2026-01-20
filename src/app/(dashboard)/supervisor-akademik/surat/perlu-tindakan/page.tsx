@@ -4,7 +4,9 @@ import { ChevronRight } from "lucide-react";
 import { headers } from "next/headers";
 import { ApplicationSummary } from "@/lib/application-api";
 
-async function getActionRequiredApplications() {
+type SearchParams = { [key: string]: string | string[] | undefined };
+
+async function getActionRequiredApplications(searchParams: SearchParams) {
     try {
         const headersList = await headers();
         const cookie = headersList.get("cookie");
@@ -12,26 +14,45 @@ async function getActionRequiredApplications() {
         const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
-        // Fetch currentStep=1 (Supervisor)
+        const query = new URLSearchParams({
+            currentStep: "1",
+            status: (searchParams.status as string) || "",
+            search: (searchParams.search as string) || "",
+            page: (searchParams.page as string) || "1",
+            limit: (searchParams.limit as string) || "10",
+            startDate: (searchParams.startDate as string) || "",
+            endDate: (searchParams.endDate as string) || "",
+        });
+
         const res = await fetch(
-            `${apiUrl}/api/surat-rekomendasi/applications?currentStep=1`,
+            `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,
             {
                 headers: { Cookie: cookie || "" },
                 cache: "no-store",
             },
         );
 
-        if (!res.ok) return [];
+        if (!res.ok)
+            return {
+                data: [],
+                meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+            };
         const json = await res.json();
-        return json.data || [];
+        return json;
     } catch (err) {
         console.error("Fetch actionable error:", err);
-        return [];
+        return {
+            data: [],
+            meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+        };
     }
 }
 
-export default async function PerluTindakanPage() {
-    const data = await getActionRequiredApplications();
+export default async function PerluTindakanPage(props: {
+    searchParams: Promise<SearchParams>;
+}) {
+    const searchParams = await props.searchParams;
+    const { data, meta } = await getActionRequiredApplications(searchParams);
 
     const letters = data.map((app: ApplicationSummary) => ({
         id: app.id,
@@ -49,7 +70,7 @@ export default async function PerluTindakanPage() {
                 : app.status === "IN_PROGRESS"
                   ? "Proses"
                   : app.status,
-        statusColor: "bg-amber-500",
+        statusColor: app.status === "REJECTED" ? "bg-red-500" : "bg-amber-500",
     }));
 
     return (
@@ -67,6 +88,7 @@ export default async function PerluTindakanPage() {
                 letters={letters}
                 rolePath="supervisor-akademik"
                 detailBasePath="perlu-tindakan"
+                meta={meta}
             />
         </div>
     );

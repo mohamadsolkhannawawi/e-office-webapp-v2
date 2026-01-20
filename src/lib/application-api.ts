@@ -222,3 +222,40 @@ export async function getStats(): Promise<{
         };
     }
 }
+/**
+ * Verify / Process an application (Approve, Reject, Revision)
+ */
+export async function verifyApplication(
+    applicationId: string,
+    data: {
+        action: "approve" | "reject" | "revision" | "publish";
+        notes?: string;
+        targetStep?: number;
+        signatureUrl?: string;
+        letterNumber?: string;
+    },
+): Promise<{ success: boolean; data: Record<string, unknown> }> {
+    try {
+        const response = await fetch(
+            `/api/surat-rekomendasi/applications/${applicationId}/verify`,
+            {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            },
+        );
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Verification failed");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Verify application error:", error);
+        throw error;
+    }
+}

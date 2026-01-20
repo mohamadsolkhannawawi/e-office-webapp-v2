@@ -1,21 +1,72 @@
-"use client";
-
 import React from "react";
 import { LetterList } from "@/components/features/dashboard/LetterList";
 import { ChevronRight } from "lucide-react";
+import { headers } from "next/headers";
+import { ApplicationSummary } from "@/lib/application-api";
 
-export default function SelesaiPage() {
-    const letters = [
-        {
-            id: 10,
-            applicant: "Maxwell Santosso",
-            subject: "Surat Rekomendasi Beasiswa",
-            date: "12 Agu 2023",
-            target: "Selesai",
-            status: "Selesai",
-            statusColor: "bg-emerald-500",
-        },
-    ];
+type SearchParams = { [key: string]: string | string[] | undefined };
+
+async function getCompletedApplications(searchParams: SearchParams) {
+    try {
+        const headersList = await headers();
+        const cookie = headersList.get("cookie");
+
+        const apiUrl =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
+
+        const query = new URLSearchParams({
+            status: String(searchParams.status || "COMPLETED"),
+            search: String(searchParams.search || ""),
+            page: String(searchParams.page || "1"),
+            limit: String(searchParams.limit || "10"),
+            startDate: String(searchParams.startDate || ""),
+            endDate: String(searchParams.endDate || ""),
+        });
+
+        const res = await fetch(
+            `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,
+            {
+                headers: { Cookie: cookie || "" },
+                cache: "no-store",
+            },
+        );
+
+        if (!res.ok)
+            return {
+                data: [],
+                meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+            };
+        const json = await res.json();
+        return json;
+    } catch (err) {
+        console.error("Fetch completed error:", err);
+        return {
+            data: [],
+            meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+        };
+    }
+}
+
+export default async function SelesaiPage(props: {
+    searchParams: Promise<SearchParams>;
+}) {
+    const searchParams = await props.searchParams;
+    const { data, meta } = await getCompletedApplications(searchParams);
+
+    const letters = data.map((app: ApplicationSummary) => ({
+        id: app.id,
+        applicant: app.applicantName || app.formData?.namaLengkap || "N/A",
+        subject: app.scholarshipName || "Surat Rekomendasi Beasiswa",
+        date: new Date(app.createdAt).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        }),
+        target: "Selesai",
+        status: app.status === "COMPLETED" ? "Selesai" : app.status,
+        statusColor:
+            app.status === "REJECTED" ? "bg-red-500" : "bg-emerald-500",
+    }));
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -32,6 +83,7 @@ export default function SelesaiPage() {
                 letters={letters}
                 rolePath="upa"
                 detailBasePath="perlu-tindakan"
+                meta={meta}
             />
         </div>
     );

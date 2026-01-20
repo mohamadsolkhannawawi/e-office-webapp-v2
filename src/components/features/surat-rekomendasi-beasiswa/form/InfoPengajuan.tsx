@@ -446,6 +446,11 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             >
                                 {mounted ? (
                                     <DatePicker
+                                        className={
+                                            !editableFields.tanggalLahir
+                                                ? "bg-slate-50 text-slate-500 border-slate-200"
+                                                : ""
+                                        }
                                         date={
                                             data.tanggalLahir
                                                 ? new Date(
@@ -491,7 +496,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                 type="text"
                                 inputMode="numeric"
                                 value={data.noHp as string}
-                                placeholder="Contoh: 081234567890"
+                                placeholder="Masukkan No. HP Anda (Contoh: 081234567890)"
                                 onKeyDown={(e) => {
                                     if (
                                         e.key !== "Backspace" &&
@@ -543,7 +548,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                 type="text"
                                 inputMode="decimal"
                                 value={data.ipk as string}
-                                placeholder="Contoh: 3.75"
+                                placeholder="Masukkan IPK Terakhir (Contoh: 3.75)"
                                 onKeyDown={(e) => {
                                     if (
                                         e.key !== "Backspace" &&
@@ -608,7 +613,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                 type="text"
                                 inputMode="decimal"
                                 value={data.ips as string}
-                                placeholder="Contoh: 3.80"
+                                placeholder="Masukkan IPS Terakhir (Contoh: 3.80)"
                                 onKeyDown={(e) => {
                                     if (
                                         e.key !== "Backspace" &&
@@ -673,7 +678,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                 type="text"
                                 inputMode="numeric"
                                 value={data.semester as string}
-                                placeholder="Contoh: 7"
+                                placeholder="Masukkan Semester Saat Ini (Contoh: 7)"
                                 onKeyDown={(e) => {
                                     if (
                                         e.key !== "Backspace" &&

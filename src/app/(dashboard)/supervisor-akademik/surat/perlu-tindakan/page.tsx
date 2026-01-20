@@ -1,30 +1,56 @@
-"use client";
-
 import React from "react";
 import { LetterList } from "@/components/features/dashboard/LetterList";
 import { ChevronRight } from "lucide-react";
+import { headers } from "next/headers";
+import { ApplicationSummary } from "@/lib/application-api";
 
-export default function PerluTindakanPage() {
-    const letters = [
-        {
-            id: 1,
-            applicant: "Ahmad Syaifullah",
-            subject: "Surat Rekomendasi Beasiswa",
-            date: "14 Agu 2023",
-            target: "Supervisor Akademik",
-            status: "Menunggu Verifikasi",
-            statusColor: "bg-amber-500",
-        },
-        {
-            id: 2,
-            applicant: "Heru Budiman",
-            subject: "Surat Rekomendasi Beasiswa",
-            date: "14 Agu 2023",
-            target: "Supervisor Akademik",
-            status: "Menunggu Verifikasi",
-            statusColor: "bg-amber-500",
-        },
-    ];
+async function getActionRequiredApplications() {
+    try {
+        const headersList = await headers();
+        const cookie = headersList.get("cookie");
+
+        const apiUrl =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
+
+        // Fetch currentStep=1 (Supervisor)
+        const res = await fetch(
+            `${apiUrl}/api/surat-rekomendasi/applications?currentStep=1`,
+            {
+                headers: { Cookie: cookie || "" },
+                cache: "no-store",
+            },
+        );
+
+        if (!res.ok) return [];
+        const json = await res.json();
+        return json.data || [];
+    } catch (err) {
+        console.error("Fetch actionable error:", err);
+        return [];
+    }
+}
+
+export default async function PerluTindakanPage() {
+    const data = await getActionRequiredApplications();
+
+    const letters = data.map((app: ApplicationSummary) => ({
+        id: app.id,
+        applicant: app.applicantName || app.formData?.namaLengkap || "N/A",
+        subject: app.scholarshipName || "Surat Rekomendasi Beasiswa",
+        date: new Date(app.createdAt).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        }),
+        target: "Supervisor Akademik",
+        status:
+            app.status === "PENDING"
+                ? "Menunggu Verifikasi"
+                : app.status === "IN_PROGRESS"
+                  ? "Proses"
+                  : app.status,
+        statusColor: "bg-amber-500",
+    }));
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">

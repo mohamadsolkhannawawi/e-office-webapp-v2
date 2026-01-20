@@ -118,8 +118,7 @@ export default async function SupervisorSRBPage() {
                                             ).toLocaleDateString("id-ID")}
                                         </TableCell>
                                         <TableCell className="font-medium">
-                                            {app.createdBy?.mahasiswa?.user
-                                                ?.name ||
+                                            {app.applicantName ||
                                                 app.formData?.namaLengkap ||
                                                 "N/A"}
                                         </TableCell>

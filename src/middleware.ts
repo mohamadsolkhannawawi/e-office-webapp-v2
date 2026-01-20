@@ -165,7 +165,7 @@ export function middleware(request: NextRequest) {
                             targetPath = rolePathMap[firstRole];
                         }
                     }
-                } catch (e) {
+                } catch {
                     // ignore parsing error, fallback to /dashboard
                 }
             }

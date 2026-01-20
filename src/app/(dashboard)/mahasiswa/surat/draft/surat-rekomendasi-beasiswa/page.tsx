@@ -8,7 +8,6 @@ import {
     Loader2,
     Trash2,
     Play,
-    FileEdit,
     FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -177,25 +176,31 @@ export default function SuratDraftPage() {
                                                             }
                                                         </span>
                                                         <span className="text-xs text-slate-500 mt-0.5">
-                                                            {jenis
-                                                                .charAt(0)
-                                                                .toUpperCase() +
-                                                                jenis.slice(
-                                                                    1,
-                                                                )}{" "}
-                                                            scholarship
+                                                            Beasiswa{" "}
+                                                            {jenis ||
+                                                                "internal"}
                                                         </span>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-slate-600">
-                                                {new Date(
-                                                    app.updatedAt,
-                                                ).toLocaleDateString("id-ID", {
-                                                    day: "numeric",
-                                                    month: "long",
-                                                    year: "numeric",
-                                                })}
+                                                {app.updatedAt &&
+                                                !isNaN(
+                                                    new Date(
+                                                        app.updatedAt,
+                                                    ).getTime(),
+                                                )
+                                                    ? new Date(
+                                                          app.updatedAt,
+                                                      ).toLocaleDateString(
+                                                          "id-ID",
+                                                          {
+                                                              day: "numeric",
+                                                              month: "long",
+                                                              year: "numeric",
+                                                          },
+                                                      )
+                                                    : "-"}
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex justify-end gap-2">

@@ -15,7 +15,10 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-import { updateApplication } from "@/lib/attachment-api";
+import {
+    updateApplication,
+    createDraftApplication,
+} from "@/lib/attachment-api";
 import { FormDataType } from "@/types/form";
 
 interface ActionProps {
@@ -40,6 +43,49 @@ export function FormAction({
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = React.useState(false);
 
+    const handleSaveDraft = async () => {
+        if (!formData) return;
+
+        setIsSubmitting(true);
+        try {
+            if (letterInstanceId) {
+                // Update existing
+                await updateApplication(letterInstanceId, {
+                    namaBeasiswa: formData.namaBeasiswa,
+                    values: {
+                        ...(formData as unknown as Record<string, unknown>),
+                        jenisBeasiswa: jenis,
+                    },
+                    status: "DRAFT",
+                });
+                // alert("Draft berhasil diperbarui!");
+            } else {
+                // Create new
+                const res = await createDraftApplication(
+                    formData.namaBeasiswa,
+                    {
+                        ...(formData as unknown as Record<string, unknown>),
+                        jenisBeasiswa: jenis,
+                    },
+                );
+
+                // Update URL to include the new ID so the user stays on this draft
+                const targetJenis = jenis || "internal";
+                localStorage.removeItem(`srb_form_${jenis}`);
+                router.replace(
+                    `/mahasiswa/surat-rekomendasi-beasiswa/${targetJenis}?id=${res.id}`,
+                );
+            }
+            // Optional: Toast notification here if available, or simple alert
+            // alert("Draft tersimpan.");
+        } catch (error) {
+            console.error("Failed to save draft:", error);
+            alert("Gagal menyimpan draft.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const handleConfirmAjukan = async () => {
         if (!letterInstanceId || !formData) {
             console.error("Missing letterInstanceId or formData");
@@ -57,8 +103,7 @@ export function FormAction({
                 status: "PENDING",
             });
 
-            console.log("Surat diajukan!", letterInstanceId);
-            localStorage.removeItem("suratRekomendasiForm");
+            localStorage.removeItem(`srb_form_${jenis}`); // Clear specific local storage
 
             const targetJenis = jenis || "internal";
             router.push(
@@ -97,8 +142,10 @@ export function FormAction({
                 <Button
                     variant="outline"
                     className="text-[#007bff] border-[#007bff]/50 hover:bg-blue-50 h-11 px-6"
+                    onClick={handleSaveDraft}
+                    disabled={isSubmitting}
                 >
-                    Simpan Draft
+                    {isSubmitting ? "Menyimpan..." : "Simpan Draft"}
                 </Button>
                 {currentStep === 4 ? (
                     <AlertDialog>

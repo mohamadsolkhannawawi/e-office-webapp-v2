@@ -130,24 +130,46 @@ export function AdminDetailSurat({
             "N/A",
     };
 
-    const breadcrumbs = {
+    const breadcrumbs: Record<string, { label: string; href?: string }[]> = {
         "supervisor-akademik": [
-            "Surat Masuk",
-            "Perlu Tindakan",
-            "Identitas Pemohon",
+            { label: "Dashboard", href: "/supervisor-akademik" },
+            {
+                label: "Surat Masuk",
+                href: "/supervisor-akademik/surat/perlu-tindakan",
+            },
+            { label: "Identitas Pemohon" },
         ],
-        "manajer-tu": ["Surat Masuk", "Perlu Tindakan", "Identitas Pemohon"],
+        "manajer-tu": [
+            { label: "Dashboard", href: "/manajer-tu" },
+            { label: "Surat Masuk", href: "/manajer-tu/surat/perlu-tindakan" },
+            { label: "Identitas Pemohon" },
+        ],
         "wakil-dekan-1": [
-            "Surat Masuk",
-            "Perlu Tindakan",
-            "Detail Penandatanganan",
+            { label: "Dashboard", href: "/wakil-dekan-1" },
+            {
+                label: "Surat Masuk",
+                href: "/wakil-dekan-1/surat/perlu-tindakan",
+            },
+            { label: "Detail Penandatanganan" },
         ],
-        upa: ["Surat Masuk", "Perlu Tindakan", "Detail Publikasi"],
+        upa: [
+            { label: "Dashboard", href: "/upa" },
+            { label: "Surat Masuk", href: "/upa/surat/perlu-tindakan" },
+            { label: "Detail Publikasi" },
+        ],
     };
 
+    // Determine the list link based on status
+    const isCompleted = initialData?.status === "COMPLETED";
+    const listHref = isCompleted
+        ? `/${role}/surat/selesai`
+        : `/${role}/surat/perlu-tindakan`;
+    const listLabel = isCompleted ? "Surat Selesai" : "Surat Masuk";
+
     const currentBreadcrumb = breadcrumbs[role] || [
-        "Persuratan",
-        "Detail Surat",
+        { label: "Dashboard", href: `/${role}` },
+        { label: listLabel, href: listHref },
+        { label: "Detail Surat" },
     ];
 
     return (
@@ -186,19 +208,28 @@ export function AdminDetailSurat({
             />
 
             {/* Breadcrumb */}
-            <nav className="flex items-center text-sm font-medium text-slate-500">
+            <nav className="flex items-center text-sm font-medium text-slate-500 mb-6">
                 {currentBreadcrumb.map((crumb, index) => (
                     <React.Fragment key={index}>
                         {index > 0 && <ChevronRight className="mx-2 h-4 w-4" />}
-                        <span
-                            className={
-                                index === currentBreadcrumb.length - 1
-                                    ? "text-slate-800"
-                                    : ""
-                            }
-                        >
-                            {crumb}
-                        </span>
+                        {crumb.href && index < currentBreadcrumb.length - 1 ? (
+                            <Link
+                                href={crumb.href}
+                                className="hover:text-undip-blue transition-colors"
+                            >
+                                {crumb.label}
+                            </Link>
+                        ) : (
+                            <span
+                                className={
+                                    index === currentBreadcrumb.length - 1
+                                        ? "text-slate-800"
+                                        : ""
+                                }
+                            >
+                                {crumb.label}
+                            </span>
+                        )}
                     </React.Fragment>
                 ))}
             </nav>

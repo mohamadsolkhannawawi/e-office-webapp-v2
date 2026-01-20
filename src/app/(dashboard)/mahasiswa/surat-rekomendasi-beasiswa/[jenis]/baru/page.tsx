@@ -49,8 +49,38 @@ export default function PengajuanBaruPage() {
     };
 
     const [formData, setFormData] = useState<FormDataType>(initialFormData);
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-    // ... existing localStorage logic
+    // 1. Load from localStorage on mount (only for "New" mode)
+    useEffect(() => {
+        if (!editId) {
+            const saved = localStorage.getItem(`srb_form_${jenis}`);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    setFormData(parsed);
+                } catch (e) {
+                    console.error("Failed to parse saved form data", e);
+                }
+            }
+        }
+        setIsDataLoaded(true);
+    }, [editId, jenis]);
+
+    // 2. Save to localStorage on change (only for "New" mode)
+    useEffect(() => {
+        if (!editId && isDataLoaded) {
+            localStorage.setItem(`srb_form_${jenis}`, JSON.stringify(formData));
+        }
+    }, [formData, editId, jenis, isDataLoaded]);
+
+    // 3. Update URL when letterInstanceId is created (Drafting)
+    useEffect(() => {
+        if (formData.letterInstanceId && !editId) {
+            const newUrl = `${window.location.pathname}?id=${formData.letterInstanceId}`;
+            window.history.replaceState(null, "", newUrl);
+        }
+    }, [formData.letterInstanceId, editId]);
 
     // Fetch Data (Profile OR Existing Application)
     useEffect(() => {
@@ -107,24 +137,29 @@ export default function PengajuanBaruPage() {
                         const user = await res.json();
                         setFormData((prev) => ({
                             ...prev,
-                            nim: user.mahasiswa?.nim || prev.nim,
+                            // Merge with existing data, but only for identity fields
+                            nim: prev.nim || user.mahasiswa?.nim || "",
                             departemen:
+                                prev.departemen ||
                                 user.mahasiswa?.departemen?.name ||
-                                prev.departemen,
+                                "",
                             programStudi:
+                                prev.programStudi ||
                                 user.mahasiswa?.programStudi?.name ||
-                                prev.programStudi,
-                            noHp: "", // User requested to not pre-fill
+                                "",
                             tempatLahir:
-                                user.mahasiswa?.tempatLahir || prev.tempatLahir,
-                            tanggalLahir: user.mahasiswa?.tanggalLahir
-                                ? new Date(user.mahasiswa.tanggalLahir)
-                                      .toISOString()
-                                      .split("T")[0]
-                                : prev.tanggalLahir,
-                            ipk: "", // User requested to not pre-fill
-                            ips: "", // User requested to not pre-fill
-                            semester: "", // User requested to not pre-fill
+                                prev.tempatLahir ||
+                                user.mahasiswa?.tempatLahir ||
+                                "",
+                            tanggalLahir:
+                                prev.tanggalLahir ||
+                                (user.mahasiswa?.tanggalLahir
+                                    ? new Date(user.mahasiswa.tanggalLahir)
+                                          .toISOString()
+                                          .split("T")[0]
+                                    : ""),
+                            // noHp, ipk, ips, semester are NOT pre-filled from DB per request
+                            // and will keep their value from 'prev' (localStorage)
                             role: "MAHASISWA",
                         }));
                     }
@@ -133,8 +168,11 @@ export default function PengajuanBaruPage() {
                 }
             }
         };
-        loadInitialData();
-    }, [editId, authUser, isAuthLoading]);
+
+        if (isDataLoaded) {
+            loadInitialData();
+        }
+    }, [editId, authUser, isAuthLoading, isDataLoaded]);
 
     // Define interface for window validation functions
     interface ValidationWindow extends Window {

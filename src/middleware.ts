@@ -25,7 +25,7 @@ export function middleware(request: NextRequest) {
     const sessionToken = request.cookies.get("better-auth.session_token");
 
     // If trying to access protected route without session, redirect to login
-    if (isProtectedPath && !sessionToken) {
+    if (isProtectedPath && (!sessionToken || !sessionToken.value)) {
         console.log(`[Middleware] Blocking access to ${pathname} - No Session`);
         return NextResponse.redirect(new URL("/login", request.url));
     }
@@ -120,6 +120,15 @@ export function middleware(request: NextRequest) {
     // For now, we'll allow it so the user can see their status or logout.
     // If logged in and accessing /login, redirect to dashboard
     // If logged in and accessing /login, redirect to role-based dashboard if possible
+    // If logged in and trying to access login page, let the page handle it
+    // or we could redirect to a role-based dashboard if we had the role in a cookie.
+    // For now, we'll allow it so the user can see their status or logout.
+    // If logged in and accessing /login, redirect to dashboard
+    // If logged in and accessing /login, redirect to role-based dashboard if possible
+    // REMOVED: Automatic redirect to dashboard here can cause infinite loops or broken pages
+    // if the backend is down (proxy error) but a stale cookie exists.
+    // We let the client-side Login page verify the session and redirect if valid.
+    /*
     if (pathname === "/login" && sessionToken) {
         let targetPath = "/dashboard";
 
@@ -172,6 +181,7 @@ export function middleware(request: NextRequest) {
         }
         return NextResponse.redirect(new URL(targetPath, request.url));
     }
+    */
 
     return NextResponse.next();
 }

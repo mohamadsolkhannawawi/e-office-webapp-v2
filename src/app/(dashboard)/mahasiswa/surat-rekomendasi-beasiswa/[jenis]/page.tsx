@@ -1,183 +1,335 @@
-import { headers } from "next/headers";
-import type { ApplicationSummary } from "@/lib/application-api";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import { getApplicationById } from "@/lib/application-api";
+
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import {
-    ArrowLeft,
-    Plus,
-    FileText,
-    Clock,
-    CheckCircle,
-    XCircle,
-    AlertCircle,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ArrowLeft } from "lucide-react";
+import { Stepper } from "@/components/features/surat-rekomendasi-beasiswa/form/Stepper";
+import { InfoPengajuan } from "@/components/features/surat-rekomendasi-beasiswa/form/InfoPengajuan";
+import { DetailPengajuan } from "@/components/features/surat-rekomendasi-beasiswa/form/DetailPengajuan";
+import { Lampiran } from "@/components/features/surat-rekomendasi-beasiswa/form/Lampiran";
+import { Review } from "@/components/features/surat-rekomendasi-beasiswa/form/Review";
+import { FormAction } from "@/components/features/surat-rekomendasi-beasiswa/form/FormAction";
+import type { FormDataType } from "@/types/form";
 
-interface PageProps {
-    params: Promise<{ jenis: string }>;
-}
+export default function PengajuanBaruPage() {
+    const params = useParams();
+    const searchParams = useSearchParams();
+    const jenis = params.jenis as string;
+    const editId = searchParams.get("id");
 
-async function getApplications() {
-    try {
-        const headersList = await headers();
-        const cookie = headersList.get("cookie");
+    const [currentStep, setCurrentStep] = useState<number>(1);
+    const { user: authUser, isLoading: isAuthLoading } = useAuth();
 
-        const res = await fetch(
-            "http://localhost:3005/api/surat-rekomendasi/applications",
-            {
-                headers: {
-                    Cookie: cookie || "",
-                },
-                cache: "no-store",
-            },
-        );
+    const initialFormData: FormDataType = {
+        // Step 1: Identitas
+        namaLengkap: "",
+        role: "MAHASISWA",
+        nim: "",
+        email: "",
+        departemen: "",
+        programStudi: "",
+        tempatLahir: "",
+        tanggalLahir: "",
+        noHp: "",
+        ipk: "",
+        ips: "",
+        semester: "",
 
-        if (!res.ok) {
-            console.error("Failed to fetch applications:", res.status);
-            return [];
+        // Step 2: Detail
+        namaBeasiswa: "",
+
+        // Step 3: Lampiran
+        lampiranUtama: [],
+        lampiranTambahan: [],
+    };
+
+    const [formData, setFormData] = useState<FormDataType>(() => {
+        let base = { ...initialFormData };
+        // Try to restore from localStorage if NOT in edit mode
+        if (typeof window !== "undefined" && !editId) {
+            const saved = localStorage.getItem(`srb_form_${jenis}`);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    base = { ...base, ...parsed };
+                } catch (e) {
+                    console.error("Failed to parse saved form data", e);
+                }
+            }
+        }
+        return base;
+    });
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+    // Consolidated Initialization Logic for Async Data
+    useEffect(() => {
+        const fetchAsyncData = async () => {
+            // 1. Fetch specific data based on mode
+            if (editId) {
+                // Edit Mode: Fetch existing application
+                try {
+                    const data = await getApplicationById(editId);
+                    if (data) {
+                        setFormData((prev) => ({
+                            ...prev,
+                            ...data.formData,
+                            letterInstanceId: data.id,
+                            lampiranUtama: data.attachments
+                                .filter((a) => a.category === "Utama")
+                                .map((a) => ({
+                                    id: a.id,
+                                    name: a.filename,
+                                    size: a.fileSize,
+                                    attachmentType: a.attachmentType,
+                                    downloadUrl: a.downloadUrl,
+                                })),
+                            lampiranTambahan: data.attachments
+                                .filter((a) => a.category === "Tambahan")
+                                .map((a) => ({
+                                    id: a.id,
+                                    name: a.filename,
+                                    size: a.fileSize,
+                                    attachmentType: a.attachmentType,
+                                    downloadUrl: a.downloadUrl,
+                                })),
+                        }));
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch application for edit:", err);
+                }
+            } else if (!isAuthLoading && authUser) {
+                // New Mode: Fetch profile details to pre-fill if identity is missing
+                try {
+                    const res = await fetch("/api/me", {
+                        credentials: "include",
+                    });
+                    if (res.ok) {
+                        const user = await res.json();
+                        setFormData((prev) => {
+                            // Only update if current state is missing these basic fields
+                            const updated = {
+                                ...prev,
+                                namaLengkap:
+                                    prev.namaLengkap ||
+                                    user.name ||
+                                    authUser.name ||
+                                    "",
+                                email:
+                                    prev.email ||
+                                    user.email ||
+                                    authUser.email ||
+                                    "",
+                                nim: prev.nim || user.mahasiswa?.nim || "",
+                                departemen:
+                                    prev.departemen ||
+                                    user.mahasiswa?.departemen?.name ||
+                                    "",
+                                programStudi:
+                                    prev.programStudi ||
+                                    user.mahasiswa?.programStudi?.name ||
+                                    "",
+                                tempatLahir:
+                                    prev.tempatLahir ||
+                                    user.mahasiswa?.tempatLahir ||
+                                    "",
+                                tanggalLahir:
+                                    prev.tanggalLahir ||
+                                    (user.mahasiswa?.tanggalLahir
+                                        ? new Date(user.mahasiswa.tanggalLahir)
+                                              .toISOString()
+                                              .split("T")[0]
+                                        : ""),
+                                role: "MAHASISWA" as const,
+                            };
+                            return updated;
+                        });
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch profile details:", err);
+                }
+            }
+
+            setIsDataLoaded(true);
+        };
+
+        if (!isAuthLoading) {
+            fetchAsyncData();
+        }
+    }, [editId, authUser, isAuthLoading, jenis]);
+
+    // Update URL if ID exists (handles draft -> edit transition)
+    useEffect(() => {
+        if (formData.letterInstanceId && !editId) {
+            const newUrl = `${window.location.pathname}?id=${formData.letterInstanceId}`;
+            window.history.replaceState(null, "", newUrl);
+        }
+    }, [formData.letterInstanceId, editId]);
+
+    // Save to localStorage on change (only for "New" mode)
+    useEffect(() => {
+        if (!editId && isDataLoaded) {
+            localStorage.setItem(`srb_form_${jenis}`, JSON.stringify(formData));
+        }
+    }, [formData, editId, jenis, isDataLoaded]);
+
+    // Define interface for window validation functions
+    interface ValidationWindow extends Window {
+        __validateInfoPengajuan?: () => boolean;
+        __validateDetailPengajuan?: () => boolean;
+    }
+
+    const handleNext = () => {
+        if (currentStep === 1) {
+            const validateFn = (window as unknown as ValidationWindow)
+                .__validateInfoPengajuan;
+            if (validateFn && typeof validateFn === "function") {
+                const isValid = validateFn();
+                if (!isValid) {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    return;
+                }
+            }
         }
 
-        const json = await res.json();
-        return json.data || [];
-    } catch (err) {
-        console.error("Error fetching applications:", err);
-        return [];
-    }
-}
+        if (currentStep === 2) {
+            const validateFn = (window as unknown as ValidationWindow)
+                .__validateDetailPengajuan;
+            if (validateFn && typeof validateFn === "function") {
+                const isValid = validateFn();
+                if (!isValid) {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    return;
+                }
+            }
+        }
 
-const statusConfig = {
-    DRAFT: {
-        label: "Draft",
-        color: "bg-gray-100 text-gray-800",
-        icon: FileText,
-    },
-    PENDING: {
-        label: "Menunggu",
-        color: "bg-yellow-100 text-yellow-800",
-        icon: Clock,
-    },
-    IN_PROGRESS: {
-        label: "Diproses",
-        color: "bg-blue-100 text-blue-800",
-        icon: FileText,
-    },
-    COMPLETED: {
-        label: "Selesai",
-        color: "bg-green-100 text-green-800",
-        icon: CheckCircle,
-    },
-    REJECTED: {
-        label: "Ditolak",
-        color: "bg-red-100 text-red-800",
-        icon: XCircle,
-    },
-    REVISION: {
-        label: "Revisi",
-        color: "bg-orange-100 text-orange-800",
-        icon: AlertCircle,
-    },
-};
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setCurrentStep((prev) => Math.min(prev + 1, 4));
+    };
 
-export default async function JenisBeasiswaPage({ params }: PageProps) {
-    const { jenis } = await params;
-    const jenisLabel = jenis.charAt(0).toUpperCase() + jenis.slice(1);
-    const applications = await getApplications();
+    const handleBack = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setCurrentStep((prev) => Math.max(prev - 1, 1));
+    };
+
+    const isStepValid = () => {
+        if (currentStep === 1) {
+            return [
+                "namaLengkap",
+                "role",
+                "nim",
+                "email",
+                "departemen",
+                "programStudi",
+                "tempatLahir",
+                "tanggalLahir",
+                "noHp",
+                "ipk",
+                "ips",
+                "semester",
+            ].every((k) => {
+                const v = formData[k as keyof FormDataType];
+                return v !== undefined && v !== null && String(v).trim() !== "";
+            });
+        }
+        if (currentStep === 2) {
+            return (
+                !!formData.namaBeasiswa &&
+                String(formData.namaBeasiswa).trim() !== ""
+            );
+        }
+        if (currentStep === 3) {
+            return (
+                Array.isArray(formData.lampiranUtama) &&
+                formData.lampiranUtama.length > 0
+            );
+        }
+        return true;
+    };
+
+    const getStepTitle = () => {
+        switch (currentStep) {
+            case 1:
+                return {
+                    title: "Identitas Pemohon",
+                    desc: "Data berikut diisi secara otomatis berdasarkan data Anda. Mohon periksa kembali.",
+                };
+            case 2:
+                return {
+                    title: "Detail Pengajuan",
+                    desc: "Lengkapi detail informasi surat rekomendasi yang Anda ajukan.",
+                };
+            case 3:
+                return {
+                    title: "Lampiran Dokumen",
+                    desc: "Unggah dokumen pendukung yang diperlukan untuk pengajuan ini.",
+                };
+            case 4:
+                return {
+                    title: "Review & Ajukan",
+                    desc: "Periksa kembali seluruh data sebelum melakukan pengajuan surat.",
+                };
+            default:
+                return { title: "", desc: "" };
+        }
+    };
+
+    const renderContent = () => {
+        switch (currentStep) {
+            case 1:
+                return <InfoPengajuan data={formData} setData={setFormData} />;
+            case 2:
+                return (
+                    <DetailPengajuan data={formData} setData={setFormData} />
+                );
+            case 3:
+                return <Lampiran data={formData} setData={setFormData} />;
+            case 4:
+                return <Review data={formData} />;
+            default:
+                return <InfoPengajuan data={formData} setData={setFormData} />;
+        }
+    };
+
+    const stepInfo = getStepTitle();
 
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Link href="/mahasiswa/surat-rekomendasi-beasiswa">
-                        <Button variant="ghost" size="icon">
-                            <ArrowLeft className="h-4 w-4" />
-                        </Button>
-                    </Link>
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Beasiswa {jenisLabel}
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Daftar pengajuan surat rekomendasi beasiswa{" "}
-                            {jenisLabel.toLowerCase()}
-                        </p>
-                    </div>
-                </div>
-                <Link
-                    href={`/mahasiswa/surat-rekomendasi-beasiswa/${jenis}/baru`}
-                >
-                    <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Pengajuan Baru
+            <div className="flex items-center gap-4">
+                <Link href="/mahasiswa/surat-rekomendasi-beasiswa">
+                    <Button variant="ghost" size="icon">
+                        <ArrowLeft className="h-4 w-4" />
                     </Button>
                 </Link>
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                        {stepInfo.title}
+                    </h1>
+                    <p className="text-gray-500 mt-1">{stepInfo.desc}</p>
+                </div>
             </div>
 
-            {/* Pengajuan List */}
-            <div className="space-y-4">
-                {applications.length === 0 ? (
-                    <Card>
-                        <CardContent className="flex flex-col items-center justify-center py-12">
-                            <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                            <p className="text-muted-foreground">
-                                Belum ada pengajuan
-                            </p>
-                            <Link
-                                href={`/mahasiswa/surat-rekomendasi-beasiswa/${jenis}/baru`}
-                            >
-                                <Button className="mt-4">
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Buat Pengajuan Pertama
-                                </Button>
-                            </Link>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    applications.map((pengajuan: ApplicationSummary) => {
-                        const status =
-                            statusConfig[
-                                pengajuan.status as keyof typeof statusConfig
-                            ] || statusConfig.PENDING;
-                        const StatusIcon = status.icon;
-                        return (
-                            <Link
-                                key={pengajuan.id}
-                                href={`/mahasiswa/surat-rekomendasi-beasiswa/${jenis}/${pengajuan.id}`}
-                            >
-                                <Card className="cursor-pointer hover:bg-slate-50 transition-colors">
-                                    <CardHeader>
-                                        <div className="flex items-center justify-between">
-                                            <CardTitle className="text-lg">
-                                                {pengajuan.scholarshipName ||
-                                                    pengajuan.formData
-                                                        ?.namaBeasiswa ||
-                                                    "Surat Rekomendasi"}
-                                            </CardTitle>
-                                            <Badge className={status.color}>
-                                                <StatusIcon className="h-3 w-3 mr-1" />
-                                                {status.label}
-                                            </Badge>
-                                        </div>
-                                        <CardDescription>
-                                            Diajukan pada{" "}
-                                            {new Date(
-                                                pengajuan.createdAt,
-                                            ).toLocaleDateString("id-ID")}
-                                        </CardDescription>
-                                    </CardHeader>
-                                </Card>
-                            </Link>
-                        );
-                    })
-                )}
+            <Stepper currentStep={currentStep} />
+
+            <div className="min-h-125 animate-in fade-in zoom-in duration-300">
+                {renderContent()}
             </div>
+
+            <FormAction
+                currentStep={currentStep}
+                onNext={handleNext}
+                onBack={handleBack}
+                isNextDisabled={!isStepValid()}
+                letterInstanceId={formData.letterInstanceId}
+                formData={formData}
+                jenis={jenis}
+            />
         </div>
     );
 }

@@ -63,8 +63,8 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             icon: <FileEdit size={20} />,
             submenu: [
                 {
-                    label: "Draf Rekomendasi",
-                    href: "/mahasiswa/draft/rekomendasi",
+                    label: "Surat Rekomendasi Beasiswa",
+                    href: "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa",
                 },
             ],
         },

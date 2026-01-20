@@ -5,6 +5,7 @@ import {
     Minus,
     Plus,
     Maximize2,
+    Minimize2,
     Info,
     Hash,
     Send,
@@ -12,8 +13,9 @@ import {
     Check,
     PenTool,
     RotateCcw,
-    XCircle,
+    XOctagon,
 } from "lucide-react";
+import { verifyApplication } from "@/lib/application-api";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SuratDocument } from "@/components/features/surat-rekomendasi-beasiswa/preview/SuratDocument";
@@ -25,16 +27,36 @@ import { ActionStatusModal } from "@/components/features/surat-rekomendasi-beasi
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 
+interface PreviewData {
+    nama?: string;
+    nim?: string;
+    tempatLahir?: string;
+    tanggalLahir?: string;
+    noHp?: string;
+    jurusan?: string;
+    programStudi?: string;
+    semester?: string;
+    ipk?: string;
+    ips?: string;
+    keperluan?: string;
+    email?: string;
+    status?: string;
+    currentStep?: number;
+    applicationId?: string;
+}
+
 interface SuratPreviewContentProps {
     defaultStage?: string;
-    backUrl?: string; // Optional custom back URL
-    data?: any; // Data dari backend
+    backUrl?: string;
+    data?: PreviewData;
+    applicationId?: string;
 }
 
 export function SuratPreviewContent({
     defaultStage = "mahasiswa",
     backUrl,
     data,
+    applicationId,
 }: SuratPreviewContentProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -60,6 +82,12 @@ export function SuratPreviewContent({
         message?: string;
     }>({ isOpen: false, status: "success", type: "approve" });
     const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
+    const [zoom, setZoom] = useState(100);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    const handleZoomIn = () => setZoom((prev) => Math.min(prev + 10, 200));
+    const handleZoomOut = () => setZoom((prev) => Math.max(prev - 10, 50));
+    const resetZoom = () => setZoom(100);
 
     const handleBack = () => {
         if (backUrl) {
@@ -123,26 +151,26 @@ export function SuratPreviewContent({
         { label: "Jenis Surat", value: "Surat Rekomendasi Beasiswa" },
         {
             label: "Keperluan",
-            value: data?.keperluan || "Beasiswa Djarum Foundation",
+            value: data?.keperluan || "-",
         },
-        { label: "Nama Lengkap", value: data?.nama || "Ahmad Syaifullah" },
+        { label: "Nama Lengkap", value: data?.nama || "-" },
         { label: "Role", value: "Mahasiswa" },
-        { label: "NIM", value: data?.nim || "24060121120001" },
+        { label: "NIM", value: data?.nim || "-" },
         {
             label: "Email",
-            value: data?.email || "ahmadsyaifullah@students.undip.ac.id",
+            value: data?.email || "-",
         },
-        { label: "Departemen", value: data?.jurusan || "Informatika" },
-        { label: "Program Studi", value: "S1 - Informatika" },
-        { label: "Tempat Lahir", value: data?.tempatLahir || "Blora" },
+        { label: "Departemen", value: data?.jurusan || "-" },
+        { label: "Program Studi", value: data?.programStudi || "-" },
+        { label: "Tempat Lahir", value: data?.tempatLahir || "-" },
         {
             label: "Tanggal Lahir",
-            value: data?.tanggalLahir || "18 Maret 2006",
+            value: data?.tanggalLahir || "-",
         },
-        { label: "No. HP", value: data?.noHp || "0812321312312" },
-        { label: "Semester", value: data?.semester || "8" },
-        { label: "IPK", value: data?.ipk || "3.34" },
-        { label: "IPS", value: data?.ips || "3.34" },
+        { label: "No. HP", value: data?.noHp || "-" },
+        { label: "Semester", value: data?.semester || "-" },
+        { label: "IPK", value: data?.ipk || "-" },
+        { label: "IPS", value: data?.ips || "-" },
     ];
 
     return (
@@ -191,42 +219,85 @@ export function SuratPreviewContent({
                         | "wakil-dekan-1"
                         | "upa"
                 }
-                onConfirm={(data) => {
-                    const messages: Record<string, string> = {
-                        approve: "Surat Berhasil Disetujui!",
-                        revise: `Revisi diminta ke ${data.targetRole}. Alasan: ${data.reason}`,
-                        reject: `Surat Berhasil Ditolak. Alasan: ${data.reason}`,
-                    };
+                onConfirm={async (data) => {
+                    try {
+                        const messages: Record<string, string> = {
+                            approve: "Surat Berhasil Disetujui!",
+                            revise: `Revisi diminta ke ${data.targetRole}. Alasan: ${data.reason}`,
+                            reject: `Surat Berhasil Ditolak. Alasan: ${data.reason}`,
+                            publish: "Surat Berhasil Diterbitkan!",
+                        };
 
-                    let redirectPath = "";
-                    if (stage === "supervisor") {
-                        redirectPath =
-                            "/supervisor-akademik/surat/perlu-tindakan";
-                    } else if (stage === "manajer") {
-                        redirectPath = "/manajer-tu/surat/perlu-tindakan";
-                    } else if (stage === "wd1") {
-                        redirectPath = "/wakil-dekan-1/surat/perlu-tindakan";
-                    } else if (stage === "upa") {
-                        redirectPath = "/upa/surat/perlu-tindakan";
+                        let redirectPath = "";
+                        if (stage === "supervisor") {
+                            redirectPath =
+                                "/supervisor-akademik/surat/perlu-tindakan";
+                        } else if (stage === "manajer") {
+                            redirectPath = "/manajer-tu/surat/perlu-tindakan";
+                        } else if (stage === "wd1") {
+                            redirectPath =
+                                "/wakil-dekan-1/surat/perlu-tindakan";
+                        } else if (stage === "upa") {
+                            redirectPath = "/upa/surat/perlu-tindakan";
+                        }
+
+                        // Map targetRole to Step (Step 0 = Mahasiswa, 1 = Supervisor, 2 = TU, 3 = WD1)
+                        const roleToStep: Record<string, number> = {
+                            Mahasiswa: 0,
+                            "Supervisor Akademik": 1,
+                            "Manajer TU": 2,
+                        };
+
+                        const action =
+                            modalType === "publish" ? "approve" : modalType;
+
+                        await verifyApplication(applicationId || "", {
+                            action:
+                                action === "revise"
+                                    ? "revision"
+                                    : (action as
+                                          | "approve"
+                                          | "reject"
+                                          | "revision"),
+                            notes: data.reason,
+                            targetStep: data.targetRole
+                                ? roleToStep[data.targetRole]
+                                : undefined,
+                            signatureUrl: wd1Signature || undefined,
+                            letterNumber: upaLetterNumber || undefined,
+                        });
+
+                        setPendingRedirect(redirectPath);
+                        setStatusModal({
+                            isOpen: true,
+                            status: "success",
+                            type: modalType,
+                            message: messages[modalType],
+                        });
+                    } catch (error) {
+                        const errorMessage =
+                            error instanceof Error
+                                ? error.message
+                                : "Gagal memproses pengajuan.";
+                        setStatusModal({
+                            isOpen: true,
+                            status: "error",
+                            type: modalType,
+                            message: errorMessage,
+                        });
                     }
-
-                    setPendingRedirect(redirectPath);
-                    setStatusModal({
-                        isOpen: true,
-                        status: "success",
-                        type: modalType,
-                        message: messages[modalType],
-                    });
                 }}
             />
             {/* Left Sidebar: Attributes */}
-            <div className="w-80 border-r border-gray-200 bg-white overflow-y-auto hidden md:block">
+            <div
+                className={`${isFullscreen ? "w-0 opacity-0 overflow-hidden" : "w-80"} border-r border-gray-200 bg-white overflow-y-auto hidden md:block transition-all duration-500 ease-in-out`}
+            >
                 <div className="p-6 space-y-6">
                     <div>
                         <h1 className="text-2xl font-bold text-slate-800">
                             Preview
                         </h1>
-                        <p className="text-xs text-slate-500 mt-1 leading-relaxed lowercase">
+                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                             Pratinjau surat untuk tahap {stage}. Periksa detail
                             sebelum melanjutkan proses.
                         </p>
@@ -261,20 +332,29 @@ export function SuratPreviewContent({
             <div className="flex-1 flex flex-col bg-slate-200 overflow-hidden relative">
                 {/* Toolbar */}
                 <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 shrink-0 shadow-sm">
-                    <div className="flex items-center gap-3">
+                    {/* <div className="flex items-center gap-3">
                         <span className="text-sm font-bold text-slate-600 uppercase tracking-tight">
                             Pratinjau Surat
                         </span>
-                    </div>
+                    </div> */}
 
                     <div className="flex items-center gap-4 bg-slate-100 rounded-lg px-2 py-1">
-                        <button className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200">
+                        <button
+                            onClick={handleZoomOut}
+                            className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200"
+                        >
                             <Minus className="h-4 w-4 text-slate-600" />
                         </button>
-                        <span className="text-xs font-bold text-slate-700 px-3 border-x border-slate-200">
-                            100%
-                        </span>
-                        <button className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200">
+                        <button
+                            onClick={resetZoom}
+                            className="text-xs font-bold text-slate-700 px-3 border-x border-slate-200 hover:text-undip-blue"
+                        >
+                            {zoom}%
+                        </button>
+                        <button
+                            onClick={handleZoomIn}
+                            className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200"
+                        >
                             <Plus className="h-4 w-4 text-slate-600" />
                         </button>
                     </div>
@@ -283,304 +363,234 @@ export function SuratPreviewContent({
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                             Halaman 1/1
                         </span>
-                        <Maximize2 className="h-4 w-4 text-slate-400 cursor-pointer hover:text-undip-blue transition-colors" />
+                        <button
+                            onClick={() => setIsFullscreen(!isFullscreen)}
+                            className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors group"
+                            title={isFullscreen ? "Minimize" : "Maximize"}
+                        >
+                            {isFullscreen ? (
+                                <Minimize2 className="h-4 w-4 text-slate-400 group-hover:text-undip-blue transition-colors" />
+                            ) : (
+                                <Maximize2 className="h-4 w-4 text-slate-400 group-hover:text-undip-blue transition-colors" />
+                            )}
+                        </button>
                     </div>
                 </div>
 
                 {/* Document Area */}
                 <div className="flex-1 overflow-auto p-12 flex justify-center bg-[#F1F5F9]">
-                    <div className="transform scale-95 origin-top transition-transform duration-300">
+                    <div
+                        className="origin-top transition-transform duration-300 shadow-2xl"
+                        style={{ transform: `scale(${zoom / 100})` }}
+                    >
                         <SuratDocument {...config} />
                     </div>
                 </div>
-
-                {/* Floating Footer Back Button */}
-                <div className="absolute bottom-10 right-10 flex justify-end gap-4">
-                    <Button
-                        onClick={handleBack}
-                        variant="outline"
-                        className="bg-white/90 backdrop-blur-md hover:bg-white border-none px-8 py-6 h-14 shadow-xl font-bold text-slate-700 rounded-2xl transition-all hover:scale-105 active:scale-95 flex gap-2 items-center"
-                    >
-                        <ChevronLeft className="h-5 w-5" />
-                        Kembali
-                    </Button>
-                </div>
             </div>
 
-            {/* Right Sidebar: UPA Actions */}
-            {stage === "upa" && (
-                <div className="w-80 border-l border-gray-200 bg-white overflow-y-auto hidden md:block">
-                    <div className="p-6 space-y-6">
-                        <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
-                            <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
-                                Penerbitan
-                            </h2>
-                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
-                                Finalisasi Dokumen
-                            </p>
-                        </div>
-
-                        <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
-                            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
-                                <div className="flex flex-col items-center gap-2 mb-2">
-                                    <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
-                                        <ShieldCheck className="h-6 w-6" />
-                                    </div>
-                                    <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
-                                        Otoritas UPA
-                                    </h3>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
-                                        Tahap 1: Penomoran
-                                    </p>
-                                    <Button
-                                        onClick={() =>
-                                            setIsNumberingModalOpen(true)
-                                        }
-                                        className={`w-full ${upaLetterNumber ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
-                                    >
-                                        <Hash className="h-4 w-4" />
-                                        {upaLetterNumber
-                                            ? "Ubah No. Surat"
-                                            : "Isi No. Surat"}
-                                        {upaLetterNumber && (
-                                            <Check className="h-3 w-3" />
-                                        )}
-                                    </Button>
-
-                                    {upaLetterNumber && (
-                                        <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 animate-in zoom-in duration-300">
-                                            <div className="bg-white border border-emerald-100 rounded-lg py-2 px-3 text-center shadow-inner">
-                                                <span className="text-[10px] font-bold text-emerald-700 font-mono tracking-tight">
-                                                    {upaLetterNumber}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="space-y-3 border-t border-slate-100 pt-5">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
-                                        Tahap 2: Pengesahan
-                                    </p>
-                                    <Button
-                                        onClick={() => {
-                                            const nextValue =
-                                                !upaIsStampApplied;
-                                            setUpaIsStampApplied(nextValue);
-                                            if (nextValue) {
-                                                setIsSuccessStampModalOpen(
-                                                    true,
-                                                );
-                                            }
-                                        }}
-                                        className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
-                                    >
-                                        <ShieldCheck className="h-4 w-4" />
-                                        {upaIsStampApplied
-                                            ? "Hapus Stempel"
-                                            : "Bubuhkan Stempel"}
-                                        {upaIsStampApplied && (
-                                            <Check className="h-3 w-3" />
-                                        )}
-                                    </Button>
-
-                                    {upaIsStampApplied && (
-                                        <div className="flex items-center gap-2 justify-center py-1">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-                                            <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">
-                                                Stempel On-Board
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="space-y-3 border-t border-slate-100 pt-5">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
-                                        Langkah Terakhir
-                                    </p>
-                                    <Button
-                                        disabled={
-                                            !upaLetterNumber ||
-                                            !upaIsStampApplied
-                                        }
-                                        className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg shadow-blue-200"} font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] transition-all relative overflow-hidden group`}
-                                        onClick={() => {
-                                            setStatusModal({
-                                                isOpen: true,
-                                                status: "success",
-                                                type: "publish",
-                                            });
-                                            setPendingRedirect(
-                                                "/upa/surat/penomoran",
-                                            );
-                                        }}
-                                    >
-                                        <Send className="h-4 w-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                        Publish & Terbitkan
-                                    </Button>
-                                    {(!upaLetterNumber ||
-                                        !upaIsStampApplied) && (
-                                        <p className="text-[9px] text-slate-400 text-center leading-tight">
-                                            Nomor dan stempel wajib diisi
-                                            sebelum publikasi.
-                                        </p>
-                                    )}
-                                </div>
+            {/* Right Sidebar: Actions */}
+            <div
+                className={`${isFullscreen ? "w-0 opacity-0 overflow-hidden" : "w-80"} border-l border-gray-200 bg-white overflow-y-auto hidden md:block transition-all duration-500 ease-in-out`}
+            >
+                <div className="p-6 space-y-6">
+                    {stage === "upa" ? (
+                        <>
+                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                                <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
+                                    Penerbitan
+                                </h2>
+                                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
+                                    Finalisasi Dokumen
+                                </p>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {/* Right Sidebar: WD1 Actions */}
-            {stage === "wd1" && (
-                <div className="w-80 border-l border-gray-200 bg-white overflow-y-auto hidden md:block">
-                    <div className="p-6 space-y-6">
-                        <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
-                            <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
-                                Persetujuan
-                            </h2>
-                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
-                                Otorisasi Dokumen
-                            </p>
-                        </div>
-
-                        <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
-                            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
-                                <div className="flex flex-col items-center gap-2 mb-2">
-                                    <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
-                                        <PenTool className="h-6 w-6" />
+                            <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
+                                <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                    <div className="flex flex-col items-center gap-2 mb-2">
+                                        <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
+                                            <ShieldCheck className="h-6 w-6" />
+                                        </div>
+                                        <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
+                                            Otoritas UPA
+                                        </h3>
                                     </div>
-                                    <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
-                                        Wakil Dekan 1
-                                    </h3>
-                                </div>
 
-                                <div className="space-y-3">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
-                                        Langkah 1: Tanda Tangan
-                                    </p>
-                                    <Button
-                                        onClick={() =>
-                                            setIsSignatureModalOpen(true)
-                                        }
-                                        className={`w-full ${wd1Signature ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
-                                    >
-                                        <PenTool className="h-4 w-4" />
-                                        {wd1Signature
-                                            ? "Ubah Tanda Tangan"
-                                            : "Bubuhkan Tanda Tangan"}
-                                        {wd1Signature && (
-                                            <Check className="h-3 w-3" />
-                                        )}
-                                    </Button>
+                                    <div className="space-y-3">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                                            Tahap 1: Penomoran
+                                        </p>
+                                        <Button
+                                            onClick={() =>
+                                                setIsNumberingModalOpen(true)
+                                            }
+                                            className={`w-full ${upaLetterNumber ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
+                                        >
+                                            <Hash className="h-4 w-4" />
+                                            {upaLetterNumber
+                                                ? "Ubah No. Surat"
+                                                : "Isi No. Surat"}
+                                            {upaLetterNumber && (
+                                                <Check className="h-3 w-3" />
+                                            )}
+                                        </Button>
 
-                                    {wd1Signature && (
-                                        <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 animate-in zoom-in duration-300">
-                                            <div className="bg-white border border-emerald-100 rounded-lg py-2 px-3 flex justify-center shadow-inner pt-2">
-                                                <div className="relative w-32 h-16">
-                                                    <Image
-                                                        src={wd1Signature}
-                                                        alt="WD1 Signature"
-                                                        fill
-                                                        className="object-contain mix-blend-multiply"
-                                                    />
+                                        {upaLetterNumber && (
+                                            <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 animate-in zoom-in duration-300">
+                                                <div className="bg-white border border-emerald-100 rounded-lg py-2 px-3 text-center shadow-inner">
+                                                    <span className="text-[10px] font-bold text-emerald-700 font-mono tracking-tight">
+                                                        {upaLetterNumber}
+                                                    </span>
                                                 </div>
                                             </div>
-                                        </div>
-                                    )}
-                                </div>
+                                        )}
+                                    </div>
 
-                                <div className="space-y-3 border-t border-slate-100 pt-5">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
-                                        Langkah Terakhir
-                                    </p>
-                                    <Button
-                                        disabled={!wd1Signature}
-                                        className={`w-full ${!wd1Signature ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg shadow-blue-200"} font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] transition-all relative overflow-hidden group`}
-                                        onClick={() => {
-                                            setStatusModal({
-                                                isOpen: true,
-                                                status: "success",
-                                                type: "approve",
-                                            });
-                                            setPendingRedirect(
-                                                "/wakil-dekan-1/surat/persetujuan",
-                                            );
-                                        }}
-                                    >
-                                        <Send className="h-4 w-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                        Setujui & Teruskan
-                                    </Button>
-                                    {!wd1Signature && (
-                                        <p className="text-[9px] text-slate-400 text-center leading-tight">
-                                            Harap bubuhkan tanda tangan sebelum
-                                            menyetujui.
+                                    <div className="space-y-3 border-t border-slate-100 pt-5">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                                            Tahap 2: Pengesahan
                                         </p>
-                                    )}
+                                        <Button
+                                            onClick={() => {
+                                                const nextValue =
+                                                    !upaIsStampApplied;
+                                                setUpaIsStampApplied(nextValue);
+                                                if (nextValue) {
+                                                    setIsSuccessStampModalOpen(
+                                                        true,
+                                                    );
+                                                }
+                                            }}
+                                            className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
+                                        >
+                                            <ShieldCheck className="h-4 w-4" />
+                                            {upaIsStampApplied
+                                                ? "Hapus Stempel"
+                                                : "Bubuhkan Stempel"}
+                                            {upaIsStampApplied && (
+                                                <Check className="h-3 w-3" />
+                                            )}
+                                        </Button>
+
+                                        {upaIsStampApplied && (
+                                            <div className="flex items-center gap-2 justify-center py-1">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                                                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">
+                                                    Stempel On-Board
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-3 border-t border-slate-100 pt-5">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
+                                            Langkah Terakhir
+                                        </p>
+                                        <Button
+                                            disabled={
+                                                !upaLetterNumber ||
+                                                !upaIsStampApplied
+                                            }
+                                            className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
+                                            onClick={() => {
+                                                setModalType("publish");
+                                                setIsActionModalOpen(true);
+                                            }}
+                                        >
+                                            <Send className="h-5 w-5" />
+                                            Publish & Terbitkan
+                                        </Button>
+                                        {(!upaLetterNumber ||
+                                            !upaIsStampApplied) && (
+                                            <p className="text-[9px] text-slate-400 text-center leading-tight">
+                                                Nomor dan stempel wajib diisi
+                                                sebelum publikasi.
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-            {/* Right Sidebar: Supervisor / Manajer Actions */}
-            {(stage === "supervisor" || stage === "manajer") && (
-                <div className="w-80 border-l border-gray-200 bg-white overflow-y-auto hidden md:block">
-                    <div className="p-6 space-y-6">
-                        <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
-                            <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
-                                {stage === "supervisor"
-                                    ? "Verifikasi"
-                                    : "Persetujuan"}
-                            </h2>
-                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
-                                {stage === "supervisor"
-                                    ? "Supervisor Akademik"
-                                    : "Manajer TU"}
-                            </p>
-                        </div>
+                        </>
+                    ) : stage === "wd1" ? (
+                        <>
+                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                                <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
+                                    Persetujuan
+                                </h2>
+                                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
+                                    Otorisasi Dokumen
+                                </p>
+                            </div>
 
-                        <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
-                            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
-                                <div className="flex flex-col items-center gap-2 mb-2">
-                                    <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
-                                        <ShieldCheck className="h-6 w-6" />
+                            <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
+                                <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                    <div className="flex flex-col items-center gap-2 mb-2">
+                                        <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
+                                            <PenTool className="h-6 w-6" />
+                                        </div>
+                                        <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
+                                            Wakil Dekan 1
+                                        </h3>
                                     </div>
-                                    <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
-                                        Otoritas {stage.toUpperCase()}
-                                    </h3>
-                                </div>
 
-                                <div className="space-y-3 pt-5">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
-                                        Pilih Tindakan
-                                    </p>
+                                    <div className="space-y-3">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                                            Langkah 1: Tanda Tangan
+                                        </p>
+                                        <Button
+                                            onClick={() =>
+                                                setIsSignatureModalOpen(true)
+                                            }
+                                            className={`w-full ${wd1Signature ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
+                                        >
+                                            <PenTool className="h-4 w-4" />
+                                            {wd1Signature
+                                                ? "Ubah Tanda Tangan"
+                                                : "Bubuhkan Tanda Tangan"}
+                                            {wd1Signature && (
+                                                <Check className="h-3 w-3" />
+                                            )}
+                                        </Button>
 
-                                    <Button
-                                        onClick={() => {
-                                            setModalType("approve");
-                                            setIsActionModalOpen(true);
-                                        }}
-                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-lg shadow-emerald-100 transition-all active:scale-95"
-                                    >
-                                        <Check className="h-4 w-4" />
-                                        Setujui & Teruskan
-                                    </Button>
+                                        {wd1Signature && (
+                                            <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 animate-in zoom-in duration-300">
+                                                <div className="bg-white border border-emerald-100 rounded-lg py-2 px-3 flex justify-center shadow-inner pt-2">
+                                                    <div className="relative w-32 h-16">
+                                                        <Image
+                                                            src={wd1Signature}
+                                                            alt="WD1 Signature"
+                                                            fill
+                                                            className="object-contain mix-blend-multiply"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
 
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-3 border-t border-slate-100 pt-5">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
+                                            Langkah Terakhir
+                                        </p>
+                                        <Button
+                                            disabled={!wd1Signature}
+                                            className={`w-full ${!wd1Signature ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
+                                            onClick={() => {
+                                                setModalType("approve");
+                                                setIsActionModalOpen(true);
+                                            }}
+                                        >
+                                            <Check className="h-5 w-5" />
+                                            Setujui
+                                        </Button>
+
                                         <Button
                                             onClick={() => {
                                                 setModalType("revise");
                                                 setIsActionModalOpen(true);
                                             }}
-                                            variant="outline"
-                                            className="bg-white border-orange-200 text-orange-600 hover:bg-orange-50 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] border-2 transition-all active:scale-95"
+                                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
                                         >
-                                            <RotateCcw className="h-4 w-4" />
+                                            <RotateCcw className="h-5 w-5" />
                                             Revisi
                                         </Button>
 
@@ -589,24 +599,111 @@ export function SuratPreviewContent({
                                                 setModalType("reject");
                                                 setIsActionModalOpen(true);
                                             }}
-                                            variant="outline"
-                                            className="bg-white border-red-200 text-red-600 hover:bg-red-50 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] border-2 transition-all active:scale-95"
+                                            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
                                         >
-                                            <XCircle className="h-4 w-4" />
+                                            <XOctagon className="h-5 w-5" />
                                             Tolak
                                         </Button>
                                     </div>
-
-                                    <p className="text-[9px] text-slate-400 text-center leading-tight pt-2">
-                                        Tindakan ini akan mempengaruhi status
-                                        surat pengaju secara langsung.
-                                    </p>
                                 </div>
                             </div>
+                        </>
+                    ) : stage === "supervisor" || stage === "manajer" ? (
+                        <>
+                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                                <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
+                                    {stage === "supervisor"
+                                        ? "Verifikasi"
+                                        : "Persetujuan"}
+                                </h2>
+                                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
+                                    {stage === "supervisor"
+                                        ? "Supervisor Akademik"
+                                        : "Manajer TU"}
+                                </p>
+                            </div>
+
+                            <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
+                                <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                    <div className="flex flex-col items-center gap-2 mb-2">
+                                        <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
+                                            <ShieldCheck className="h-6 w-6" />
+                                        </div>
+                                        <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
+                                            Otoritas {stage.toUpperCase()}
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-3 pt-5 border-t border-slate-100">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
+                                            Pilih Tindakan
+                                        </p>
+
+                                        <Button
+                                            onClick={() => {
+                                                setModalType("approve");
+                                                setIsActionModalOpen(true);
+                                            }}
+                                            className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                        >
+                                            <Check className="h-5 w-5" />
+                                            Setujui
+                                        </Button>
+
+                                        <Button
+                                            onClick={() => {
+                                                setModalType("revise");
+                                                setIsActionModalOpen(true);
+                                            }}
+                                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                        >
+                                            <RotateCcw className="h-5 w-5" />
+                                            Revisi
+                                        </Button>
+
+                                        <Button
+                                            onClick={() => {
+                                                setModalType("reject");
+                                                setIsActionModalOpen(true);
+                                            }}
+                                            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                        >
+                                            <XOctagon className="h-5 w-5" />
+                                            Tolak
+                                        </Button>
+                                        <p className="text-[9px] text-slate-400 text-center leading-tight pt-2">
+                                            Tindakan ini akan mempengaruhi
+                                            status surat pengaju secara
+                                            langsung.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                            <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
+                                Informasi
+                            </h2>
+                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
+                                Status Dokumen
+                            </p>
                         </div>
+                    )}
+
+                    {/* Back Button */}
+                    <div className="pt-2">
+                        <Button
+                            onClick={handleBack}
+                            variant="outline"
+                            className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-6 rounded-lg flex items-center justify-center gap-2 border-none shadow-sm transition-all active:scale-95"
+                        >
+                            <ChevronLeft className="h-5 w-5" />
+                            Kembali
+                        </Button>
                     </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 }

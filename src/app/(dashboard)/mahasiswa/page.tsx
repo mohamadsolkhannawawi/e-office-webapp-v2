@@ -15,7 +15,7 @@ const DASHBOARD_ACTIONS = [
         title: "Surat Rekomendasi Beasiswa",
         description: "Pengajuan surat untuk keperluan beasiswa",
         icon: <GraduationCap className="h-5 w-5" />,
-        href: "/mahasiswa/surat-rekomendasi-beasiswa",
+        href: "/mahasiswa/surat/surat-rekomendasi-beasiswa",
         color: "bg-blue-50 text-undip-blue",
         disabled: false,
     },

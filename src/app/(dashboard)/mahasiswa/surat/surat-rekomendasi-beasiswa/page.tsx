@@ -78,7 +78,7 @@ export default function SuratRekomendasiBeasiswaPage() {
                     return (
                         <Link
                             key={jenis.id}
-                            href={`/mahasiswa/surat-rekomendasi-beasiswa/${jenis.id}`}
+                            href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis.id}`}
                         >
                             <Card className="cursor-pointer hover:bg-slate-50 hover:border-primary transition-all h-full">
                                 <CardHeader>

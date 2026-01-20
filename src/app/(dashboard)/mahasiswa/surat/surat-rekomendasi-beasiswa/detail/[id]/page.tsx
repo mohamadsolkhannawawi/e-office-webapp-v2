@@ -19,7 +19,6 @@ import {
 export default function DetailPengajuanPage() {
     const params = useParams();
     const router = useRouter();
-    const jenis = params.jenis as string;
     const id = params.id as string;
 
     const [application, setApplication] = useState<ApplicationDetail | null>(
@@ -92,12 +91,12 @@ export default function DetailPengajuanPage() {
     // Map application data ke format komponen
     const identitasData = {
         namaLengkap: application.formData.namaLengkap,
-        nim: application.formData.nim, // Changed from nimNip
-        role: "Mahasiswa", // Added role
+        nim: application.formData.nim,
+        role: "Mahasiswa",
         email: application.formData.email,
         departemen: application.formData.departemen,
         programStudi: application.formData.programStudi,
-        semester: application.formData.semester || "-", // Added semester
+        semester: application.formData.semester || "-",
         tempatLahir: application.formData.tempatLahir,
         tanggalLahir: formatDate(application.formData.tanggalLahir),
         noHp: application.formData.noHp,
@@ -127,6 +126,11 @@ export default function DetailPengajuanPage() {
     const canEdit =
         (application.status as string) === "REVISION" ||
         (application.status as string) === "DRAFT";
+
+    // Get jenis for editing from application data
+    const jenis =
+        ((application.formData as unknown as Record<string, unknown>)
+            .jenisBeasiswa as string) || "internal";
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -171,7 +175,7 @@ export default function DetailPengajuanPage() {
                     <Button
                         onClick={() =>
                             router.push(
-                                `/mahasiswa/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
+                                `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
                             )
                         }
                     >

@@ -73,7 +73,7 @@ export function FormAction({
                 const targetJenis = jenis || "internal";
                 localStorage.removeItem(`srb_form_${jenis}`);
                 router.replace(
-                    `/mahasiswa/surat-rekomendasi-beasiswa/${targetJenis}?id=${res.id}`,
+                    `/mahasiswa/surat/surat-rekomendasi-beasiswa/${targetJenis}?id=${res.id}`,
                 );
             }
             // Optional: Toast notification here if available, or simple alert
@@ -105,9 +105,8 @@ export function FormAction({
 
             localStorage.removeItem(`srb_form_${jenis}`); // Clear specific local storage
 
-            const targetJenis = jenis || "internal";
             router.push(
-                `/mahasiswa/surat-rekomendasi-beasiswa/${targetJenis}/${letterInstanceId}`,
+                `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${letterInstanceId}`,
             );
         } catch (error) {
             console.error("Failed to submit application:", error);

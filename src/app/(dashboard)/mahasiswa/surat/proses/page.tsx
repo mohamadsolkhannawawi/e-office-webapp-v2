@@ -239,7 +239,7 @@ export default function SuratDalamProsesPage() {
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex justify-end gap-2">
                                                     <Link
-                                                        href={`/mahasiswa/surat-rekomendasi-beasiswa/beasiswa-biasa/${app.id}`}
+                                                        href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}`}
                                                     >
                                                         <Button
                                                             variant="outline"

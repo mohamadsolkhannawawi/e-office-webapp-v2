@@ -262,7 +262,7 @@ export default function SuratDraftPage() {
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex justify-end gap-2">
                                                     <Link
-                                                        href={`/mahasiswa/surat-rekomendasi-beasiswa/${jenis}?id=${app.id}`}
+                                                        href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${app.id}`}
                                                     >
                                                         <Button
                                                             variant="ghost"

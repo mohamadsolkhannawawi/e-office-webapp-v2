@@ -204,10 +204,6 @@ export default function SuratSelesaiPage() {
                                     const StatusIcon = status.icon;
 
                                     // Extract jenis from values if available, otherwise fallback
-                                    const jenis =
-                                        app.formData.jenisBeasiswa ||
-                                        "internal";
-
                                     return (
                                         <tr
                                             key={app.id}
@@ -250,7 +246,7 @@ export default function SuratSelesaiPage() {
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex justify-end gap-2">
                                                     <Link
-                                                        href={`/mahasiswa/surat-rekomendasi-beasiswa/${jenis}/${app.id}`}
+                                                        href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}`}
                                                     >
                                                         <Button
                                                             variant="ghost"

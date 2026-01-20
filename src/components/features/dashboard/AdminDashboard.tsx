@@ -51,79 +51,84 @@ function StatCard({
     );
 }
 
+interface Letter {
+    id: string | number;
+    applicant: string;
+    subject: string;
+    date: string;
+    target: string;
+    status: string;
+    statusColor: string;
+}
+
 interface AdminDashboardProps {
     roleName: string;
     title: string;
     description: string;
+    stats?: {
+        actionRequired: number;
+        completedMonth: number;
+        totalMonth: number;
+        trend?: { date: string; count: number }[];
+        distribution?: {
+            pending: number;
+            inProgress: number;
+            completed: number;
+            rejected: number;
+        };
+    };
+    recentLetters?: Letter[];
 }
 
 export function AdminDashboard({
     roleName,
     title,
     description,
+    stats = {
+        actionRequired: 0,
+        completedMonth: 0,
+        totalMonth: 0,
+        trend: [],
+        distribution: { pending: 0, inProgress: 0, completed: 0, rejected: 0 },
+    },
+    recentLetters = [],
 }: AdminDashboardProps) {
-    const getNextTarget = (role: string) => {
-        switch (role) {
-            case "Supervisor Akademik":
-                return "Manajer TU";
-            case "Manajer TU":
-                return "Wakil Dekan 1";
-            case "Wakil Dekan 1":
-                return "UPA";
-            case "UPA":
-                return "Selesai";
-            default:
-                return "Manajer TU";
-        }
+    // Helper for Trend Chart
+    const trendData = stats.trend || [];
+    const maxCount = Math.max(...trendData.map((d) => d.count), 5); // Minimum scale 5
+    const chartHeight = 100;
+    const chartWidth = 400;
+
+    const getPoints = () => {
+        if (!trendData.length) return "";
+        const stepX = chartWidth / (trendData.length - 1 || 1);
+        return trendData
+            .map((d, i) => {
+                const x = i * stepX;
+                const y = chartHeight - (d.count / maxCount) * chartHeight;
+                return `${x},${y}`;
+            })
+            .join(" ");
     };
 
-    const letters = [
-        {
-            id: 1,
-            applicant: "Ahmad Syaifullah",
-            subject: "Surat Rekomendasi Beasiswa",
-            date: "14 Agu 2023",
-            target: getNextTarget(roleName),
-            status: "Menunggu Verifikasi",
-            statusColor: "bg-amber-500",
-        },
-        {
-            id: 2,
-            applicant: "Heru Budiman",
-            subject: "Surat Rekomendasi Beasiswa",
-            date: "14 Agu 2023",
-            target: getNextTarget(roleName),
-            status: "Menunggu Verifikasi",
-            statusColor: "bg-amber-500",
-        },
-        {
-            id: 3,
-            applicant: "Maxwell Santosso",
-            subject: "Surat Rekomendasi Beasiswa",
-            date: "12 Agu 2023",
-            target: getNextTarget(roleName),
-            status: "Menunggu Verifikasi",
-            statusColor: "bg-amber-500",
-        },
-        {
-            id: 4,
-            applicant: "Budi Pekerti",
-            subject: "Surat Rekomendasi Beasiswa",
-            date: "11 Agu 2023",
-            target: getNextTarget(roleName),
-            status: "Ditolak",
-            statusColor: "bg-red-500",
-        },
-        {
-            id: 5,
-            applicant: "Solkhan",
-            subject: "Surat Rekomendasi Beasiswa",
-            date: "10 Agu 2023",
-            target: getNextTarget(roleName),
-            status: "Menunggu Verifikasi",
-            statusColor: "bg-amber-500",
-        },
-    ];
+    const points = getPoints();
+    // Beziér curve smoothing could be complex, using polyline for simplicity or smoothed path if needed.
+    // Let's stick to simple polyline or basic smooth approximation logic if time fits, but simple polyline is robust.
+    const pathD = points ? `M${points.replace(/ /g, " L")}` : "";
+
+    // Helper for Distribution
+    const dist = stats.distribution || {
+        pending: 0,
+        inProgress: 0,
+        completed: 0,
+        rejected: 0,
+    };
+    const totalDist =
+        dist.pending + dist.inProgress + dist.completed + dist.rejected || 1;
+
+    const pendingPct = ((dist.pending + dist.inProgress) / totalDist) * 100;
+    const completedPct = (dist.completed / totalDist) * 100;
+    const rejectedPct = (dist.rejected / totalDist) * 100;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -150,7 +155,7 @@ export function AdminDashboard({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <StatCard
                     label="Perlu Tindakan"
-                    value="20"
+                    value={stats.actionRequired.toLocaleString("id-ID")}
                     subtext="surat belum diproses"
                     icon={<Inbox />}
                     colorClass="text-undip-blue"
@@ -158,7 +163,7 @@ export function AdminDashboard({
                 />
                 <StatCard
                     label="Selesai (Bulan Ini)"
-                    value="1,100"
+                    value={stats.completedMonth.toLocaleString("id-ID")}
                     subtext="surat telah diarsipkan"
                     icon={<CheckCircle />}
                     colorClass="text-emerald-500"
@@ -166,7 +171,7 @@ export function AdminDashboard({
                 />
                 <StatCard
                     label="Total Surat (Bulan Ini)"
-                    value="1,234"
+                    value={stats.totalMonth.toLocaleString("id-ID")}
                     subtext="total volume bulan ini"
                     icon={<BarChart />}
                     colorClass="text-sky-500"
@@ -184,52 +189,47 @@ export function AdminDashboard({
                     </CardHeader>
                     <CardContent>
                         <div className="relative h-48 w-full mt-4">
-                            {/* Simple Visual Placeholder for Chart */}
                             <div className="absolute inset-0 flex flex-col justify-between">
-                                {[75, 50, 25, 0].map((val) => (
+                                {[
+                                    maxCount,
+                                    Math.round(maxCount * 0.66),
+                                    Math.round(maxCount * 0.33),
+                                    0,
+                                ].map((val) => (
                                     <div
                                         key={val}
                                         className="flex items-center gap-4 w-full"
                                     >
-                                        <span className="text-[10px] text-slate-400 w-4 text-right">
+                                        <span className="text-[10px] text-slate-400 w-6 text-right">
                                             {val}
                                         </span>
                                         <div className="flex-1 border-t border-dashed border-slate-100"></div>
                                     </div>
                                 ))}
                             </div>
-                            <svg
-                                className="absolute inset-0 pl-8 overflow-visible"
-                                preserveAspectRatio="none"
-                                viewBox="0 0 400 150"
-                            >
-                                <path
-                                    d="M0,120 C50,120 80,60 150,50 C220,40 280,80 320,70 C360,60 380,40 400,30"
-                                    fill="none"
-                                    stroke="#0073B7"
-                                    strokeLinecap="round"
-                                    strokeWidth="3"
-                                    className="drop-shadow-sm"
-                                />
-                                {[40, 150, 280, 400].map((x, i) => {
-                                    const y = [120, 50, 75, 30][i];
-                                    return (
-                                        <circle
-                                            key={i}
-                                            cx={x}
-                                            cy={y}
-                                            fill="#0073B7"
-                                            r="4"
-                                            className="stroke-white stroke-2"
+                            {/* Chart SVG */}
+                            <div className="absolute inset-0 pl-10 pt-2 pb-6 right-2">
+                                <svg
+                                    className="w-full h-full overflow-visible"
+                                    preserveAspectRatio="none"
+                                    viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                                >
+                                    {pathD && (
+                                        <path
+                                            d={pathD}
+                                            fill="none"
+                                            stroke="#0073B7"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            className="drop-shadow-sm"
                                         />
-                                    );
-                                })}
-                            </svg>
-                            <div className="absolute bottom-[-30px] left-8 right-0 flex justify-between text-[10px] text-slate-400 px-1 font-medium">
-                                <span>1-7</span>
-                                <span>8-15</span>
-                                <span>16-23</span>
-                                <span>24-30</span>
+                                    )}
+                                </svg>
+                            </div>
+                            <div className="absolute bottom-[-20px] left-10 right-2 flex justify-between text-[10px] text-slate-400 px-1 font-medium">
+                                <span>30 hari lalu</span>
+                                <span>Hari ini</span>
                             </div>
                         </div>
                     </CardContent>
@@ -244,30 +244,50 @@ export function AdminDashboard({
                     <CardContent className="pt-10 flex flex-col justify-center h-full">
                         <div className="flex items-end justify-between px-1 mb-2">
                             <span className="text-xs font-bold text-slate-500">
-                                10
+                                {dist.pending + dist.inProgress}
                             </span>
                             <span className="text-xs font-bold text-slate-500">
-                                2
+                                {dist.completed}
+                            </span>
+                            <span className="text-xs font-bold text-slate-500">
+                                {dist.rejected}
                             </span>
                         </div>
                         <div className="flex w-full h-4 rounded-full overflow-hidden bg-slate-100 mb-6">
-                            <div
-                                className="bg-slate-400 w-5/6 h-full transition-all"
-                                title="Menunggu Verifikasi"
-                            ></div>
-                            <div
-                                className="bg-red-500 w-1/6 h-full transition-all"
-                                title="Ditolak"
-                            ></div>
+                            {pendingPct > 0 && (
+                                <div
+                                    className="bg-slate-400 h-full"
+                                    style={{ width: `${pendingPct}%` }}
+                                    title="Proses/Pending"
+                                ></div>
+                            )}
+                            {completedPct > 0 && (
+                                <div
+                                    className="bg-emerald-500 h-full"
+                                    style={{ width: `${completedPct}%` }}
+                                    title="Selesai"
+                                ></div>
+                            )}
+                            {rejectedPct > 0 && (
+                                <div
+                                    className="bg-red-500 h-full"
+                                    style={{ width: `${rejectedPct}%` }}
+                                    title="Ditolak"
+                                ></div>
+                            )}
                         </div>
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-tight">
                                 <span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
-                                Menunggu Verifikasi
+                                Proses ({Math.round(pendingPct)}%)
+                            </div>
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                Selesai ({Math.round(completedPct)}%)
                             </div>
                             <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-tight">
                                 <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
-                                Ditolak
+                                Ditolak ({Math.round(rejectedPct)}%)
                             </div>
                         </div>
                     </CardContent>
@@ -277,7 +297,7 @@ export function AdminDashboard({
             {/* Table Section */}
             <LetterList
                 title="Semua Surat"
-                letters={letters}
+                letters={recentLetters}
                 rolePath={roleName.toLowerCase().replace(/ /g, "-")}
                 detailBasePath="perlu-tindakan"
             />

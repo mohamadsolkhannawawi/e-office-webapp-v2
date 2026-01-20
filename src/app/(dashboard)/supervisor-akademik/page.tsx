@@ -1,13 +1,124 @@
-"use client";
-
+import { headers } from "next/headers";
 import { AdminDashboard } from "@/components/features/dashboard";
+import { ApplicationSummary } from "@/lib/application-api";
 
-export default function SupervisorAkademikPage() {
+async function getDashboardData() {
+    try {
+        const headersList = await headers();
+        const cookie = headersList.get("cookie");
+
+        const apiUrl =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
+
+        // 1. Fetch Stats
+        const statsRes = await fetch(
+            `${apiUrl}/api/surat-rekomendasi/applications/stats`,
+            {
+                headers: { Cookie: cookie || "" },
+                cache: "no-store",
+            },
+        );
+        const statsJson = await statsRes.json();
+        const statsData = statsJson.data || {
+            total: 0,
+            pending: 0,
+            inProgress: 0,
+            completed: 0,
+            rejected: 0,
+            totalCreatedThisMonth: 0,
+            totalCompletedThisMonth: 0,
+            trend: [],
+            distribution: {
+                pending: 0,
+                inProgress: 0,
+                completed: 0,
+                rejected: 0,
+            },
+        };
+
+        // 2. Fetch Recent Letters (Limit 5)
+        const appsRes = await fetch(
+            `${apiUrl}/api/surat-rekomendasi/applications?limit=5`,
+            {
+                headers: { Cookie: cookie || "" },
+                cache: "no-store",
+            },
+        );
+        const appsJson = await appsRes.json();
+        const appsData = appsJson.data || [];
+
+        // 3. Fetch Action Required Count (Step 1)
+        const actionRes = await fetch(
+            `${apiUrl}/api/surat-rekomendasi/applications?currentStep=1&limit=1`,
+            {
+                headers: { Cookie: cookie || "" },
+                cache: "no-store",
+            },
+        );
+        const actionJson = await actionRes.json();
+        const actionCount = actionJson.meta?.total || 0;
+
+        return {
+            stats: {
+                actionRequired: actionCount,
+                completedMonth: statsData.totalCompletedThisMonth || 0,
+                totalMonth: statsData.totalCreatedThisMonth || 0,
+                trend: statsData.trend,
+                distribution: statsData.distribution,
+            },
+            recentLetters: appsData.map((app: ApplicationSummary) => ({
+                id: app.id,
+                applicant:
+                    app.applicantName || app.formData?.namaLengkap || "N/A",
+                subject: app.scholarshipName || "Surat Rekomendasi Beasiswa",
+                date: new Date(app.createdAt).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                }),
+                target:
+                    app.status === "COMPLETED"
+                        ? "Selesai"
+                        : "Supervisor Akademik", // Simplified
+                status:
+                    app.status === "PENDING"
+                        ? "Menunggu Verifikasi"
+                        : app.status === "IN_PROGRESS"
+                          ? "Proses"
+                          : app.status === "COMPLETED"
+                            ? "Selesai"
+                            : app.status === "REJECTED"
+                              ? "Ditolak"
+                              : app.status,
+                statusColor:
+                    app.status === "PENDING" || app.status === "IN_PROGRESS"
+                        ? "bg-amber-500"
+                        : app.status === "COMPLETED"
+                          ? "bg-emerald-500"
+                          : app.status === "REJECTED"
+                            ? "bg-red-500"
+                            : "bg-slate-500",
+            })),
+        };
+    } catch (error) {
+        console.error("Dashboard data fetch error:", error);
+        return {
+            stats: { actionRequired: 0, completedMonth: 0, totalMonth: 0 },
+            recentLetters: [],
+        };
+    }
+}
+
+export default async function SupervisorAkademikPage() {
+    const data = await getDashboardData();
+
     return (
         <AdminDashboard
             roleName="Supervisor Akademik"
             title="Dashboard Persuratan"
             description="Pusat kendali untuk mengelola semua surat Fakultas Sains dan Matematika."
+            stats={data.stats}
+            recentLetters={data.recentLetters}
         />
     );
 }

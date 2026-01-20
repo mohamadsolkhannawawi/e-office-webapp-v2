@@ -70,6 +70,9 @@ export interface ApplicationDetail {
     attachments: ApplicationAttachment[];
     createdAt: string;
     updatedAt: string;
+    publishedAt?: string;
+    letterNumber?: string;
+    values?: Record<string, unknown>;
     createdBy?: {
         mahasiswa?: {
             nim: string;

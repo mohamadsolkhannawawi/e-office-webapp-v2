@@ -157,9 +157,12 @@ export function AdminDashboard({
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Breadcrumb */}
             <nav className="flex items-center text-sm font-medium text-slate-500">
-                <span className="hover:text-undip-blue cursor-pointer">
+                <Link
+                    href={`/${rolePath}`}
+                    className="hover:text-undip-blue transition-colors"
+                >
                     Dashboard
-                </span>
+                </Link>
                 <ChevronRight className="mx-2 h-4 w-4" />
                 <span className="text-slate-800">Dashboard Persuratan</span>
             </nav>

@@ -3,6 +3,7 @@ import { LetterList } from "@/components/features/dashboard/LetterList";
 import { ChevronRight } from "lucide-react";
 import { headers } from "next/headers";
 import { ApplicationSummary } from "@/lib/application-api";
+import Link from "next/link";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -71,9 +72,12 @@ export default async function SelesaiPage(props: {
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             <nav className="flex items-center text-sm font-medium text-slate-500">
-                <span className="hover:text-undip-blue cursor-pointer">
+                <Link
+                    href="/supervisor-akademik"
+                    className="hover:text-undip-blue transition-colors"
+                >
                     Surat Masuk
-                </span>
+                </Link>
                 <ChevronRight className="mx-2 h-4 w-4" />
                 <span className="text-slate-800">Selesai</span>
             </nav>

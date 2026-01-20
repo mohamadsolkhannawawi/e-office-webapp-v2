@@ -91,6 +91,9 @@ export async function getApplications(params?: {
     mode?: string;
     search?: string;
     jenisBeasiswa?: string;
+    startDate?: string;
+    endDate?: string;
+    sortOrder?: "asc" | "desc";
 }): Promise<{
     data: ApplicationSummary[];
     meta: { total: number; page: number; limit: number; totalPages: number };

@@ -69,10 +69,15 @@ export default async function ManajerTUPreviewPage({
         ipk: application.formData.ipk,
         ips: application.formData.ips,
         // Prioritize scholarshipName from main object, fallback to formData
-        keperluan:
-            application.scholarshipName ||
-            application.formData.namaBeasiswa ||
-            "Pengajuan Beasiswa",
+        keperluan: (() => {
+            const name =
+                application.scholarshipName ||
+                application.formData.namaBeasiswa ||
+                "Beasiswa";
+            return name.toLowerCase().startsWith("pengajuan")
+                ? name
+                : `Pengajuan ${name}`;
+        })(),
         email: application.formData.email,
         status: application.status,
         currentStep: application.currentStep,

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import type { Session, User as BetterAuthUser } from "better-auth/types";
 
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
 
     // Fetch session on mount
     useEffect(() => {
@@ -85,9 +87,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const signOut = async () => {
-        await authClient.signOut();
-        setUser(null);
-        setSession(null);
+        try {
+            await authClient.signOut();
+            setUser(null);
+            setSession(null);
+            router.push("/login");
+        } catch (error) {
+            console.error("Logout failed:", error);
+            // Fallback: clear state and redirect anyway
+            setUser(null);
+            setSession(null);
+            router.push("/login");
+        }
     };
 
     const value: AuthContextType = {

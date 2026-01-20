@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (data?.user) {
                 console.log(
                     ">>> AUTH CONTEXT USER ROLES:",
-                    (data.user as any).roles,
+                    (data.user as User).roles,
                 );
             }
 

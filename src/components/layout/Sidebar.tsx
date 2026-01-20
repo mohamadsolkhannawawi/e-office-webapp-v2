@@ -12,6 +12,7 @@ import {
     ChevronDown,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
     className?: string;
@@ -155,6 +156,7 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
 };
 
 export function Sidebar({ className = "" }: SidebarProps) {
+    const { signOut } = useAuth();
     const pathname = usePathname();
     const role = useCurrentRole();
     const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
@@ -273,7 +275,10 @@ export function Sidebar({ className = "" }: SidebarProps) {
             </nav>
 
             <div className="p-4 border-t border-gray-100">
-                <button className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                <button
+                    onClick={() => signOut()}
+                    className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                >
                     <LogOut size={20} />
                     Keluar
                 </button>

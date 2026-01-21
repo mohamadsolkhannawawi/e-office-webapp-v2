@@ -1,9 +1,18 @@
 "use client";
 
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FaRegBell } from "react-icons/fa";
+// import { NotificationBell } from "@/components/layout/NotificationBell";
 import logoNavbar from "@/assets/images/logo-undip-navbar.png";
+
+const NotificationBell = dynamic(
+    () =>
+        import("@/components/layout/NotificationBell").then(
+            (mod) => mod.NotificationBell,
+        ),
+    { ssr: false },
+);
 
 interface NavbarProps {
     userName?: string;
@@ -43,12 +52,7 @@ export function Navbar({
             {/* Bagian Kanan: Notifikasi & Profil */}
             {showProfile && (
                 <div className="flex items-center gap-4 text-white">
-                    <button
-                        aria-label="Notifikasi"
-                        className="hover:opacity-80 transition"
-                    >
-                        <FaRegBell size={18} />
-                    </button>
+                    <NotificationBell />
 
                     <div className="flex items-center gap-2 pl-4 border-l border-white/20">
                         <span className="text-sm font-medium hidden sm:block">

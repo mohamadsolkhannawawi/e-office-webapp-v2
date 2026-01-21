@@ -3,11 +3,19 @@
 import Image from "next/image";
 import React from "react";
 
+// Interface untuk konfigurasi pejabat penandatangan
+interface LeadershipConfig {
+    name: string;
+    nip: string;
+    jabatan: string;
+}
+
 interface SuratDocumentProps {
     nomorSurat?: string;
     showSignature?: boolean;
     signaturePath?: string | null;
     showStamp?: boolean;
+    leadershipConfig?: LeadershipConfig;
     data?: {
         nama?: string;
         nim?: string;
@@ -23,15 +31,27 @@ interface SuratDocumentProps {
         tahunAkademik?: string;
         publishedAt?: string;
     };
+    qrCodeUrl?: string; // Add this
 }
+
+// Default values untuk fallback jika config tidak tersedia
+const DEFAULT_LEADERSHIP: LeadershipConfig = {
+    name: "Prof. Dr. Ngadiwiyana, S.Si., M.Si.",
+    nip: "196906201999031002",
+    jabatan: "Wakil Dekan Akademik dan Kemahasiswaan",
+};
 
 export function SuratDocument({
     nomorSurat,
     showSignature = false,
     signaturePath,
     showStamp = false,
+    leadershipConfig,
     data,
+    qrCodeUrl, // Add this
 }: SuratDocumentProps) {
+    // Gunakan config dari database atau fallback ke default
+    const leadership = leadershipConfig || DEFAULT_LEADERSHIP;
     // Calculate Academic Year automatically
     const date = new Date();
     const month = date.getMonth(); // 0-11
@@ -64,7 +84,7 @@ export function SuratDocument({
     const jurusanDisplay = finalData.programStudi || finalData.jurusan;
 
     return (
-        <div className="w-[210mm] min-h-[297mm] bg-white shadow-2xl pt-[2.8cm] pb-[2cm] pl-[3cm] pr-[2.5cm] flex flex-col font-serif text-black border border-gray-100 mx-auto overflow-hidden print:shadow-none print:border-none print:m-0 print:w-[210mm] print:h-[295mm] print:overflow-hidden page-break-after-avoid">
+        <div className="w-[210mm] min-h-[297mm] bg-white shadow-2xl pt-[2.8cm] pb-[2cm] pl-[3cm] pr-[2.5cm] flex flex-col font-serif text-black border border-gray-100 mx-auto overflow-hidden print:shadow-none print:border-none print:m-0 print:w-[210mm] print:h-[295mm] print:overflow-hidden page-break-after-avoid relative">
             {/* Kop Surat */}
             <div className="flex items-start gap-3 border-b-2 border-black pb-3 mb-8">
                 <div className="w-[85px] shrink-0">
@@ -231,9 +251,7 @@ export function SuratDocument({
                                 </span>
                             </div>
                             <p className="text-left mt-[2px]">a.n. Dekan</p>
-                            <p className="text-left">
-                                Wakil Dekan Akademik dan Kemahasiswaan
-                            </p>
+                            <p className="text-left">{leadership.jabatan}</p>
 
                             <div className="h-[85px] flex items-center justify-start relative mt-1 pl-4">
                                 {showSignature && (
@@ -262,15 +280,28 @@ export function SuratDocument({
                             </div>
 
                             <p className="font-bold underline decoration-1 underline-offset-2 text-left">
-                                Prof. Dr. Ngadiwiyana, S.Si., M.Si.
+                                {leadership.name}
                             </p>
                             <p className="text-left mt-[2px]">
-                                NIP. 196906201999031002
+                                NIP. {leadership.nip}
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* QR Code */}
+            {qrCodeUrl && (
+                <div className="absolute bottom-[2cm] left-[3cm] print:bottom-[2cm] print:left-[3cm]">
+                    <Image
+                        src={qrCodeUrl}
+                        alt="QR Code Verification"
+                        width={60}
+                        height={60}
+                        className="object-contain"
+                    />
+                </div>
+            )}
         </div>
     );
 }

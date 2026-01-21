@@ -277,6 +277,7 @@ export function AdminDetailSurat({
                 onClose={() => setIsNumberingModalOpen(false)}
                 onNumberChange={setUpaLetterNumber}
                 onStampApply={setUpaIsStampApplied}
+                applicationId={id}
             />
             <ActionStatusModal
                 isOpen={statusModal.isOpen}

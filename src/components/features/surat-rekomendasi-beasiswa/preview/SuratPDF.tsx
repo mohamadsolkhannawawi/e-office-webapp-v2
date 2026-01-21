@@ -192,6 +192,17 @@ const styles = StyleSheet.create({
     signatureNIP: {
         fontSize: 12,
     },
+    qrCodeContainer: {
+        position: "absolute",
+        bottom: "3cm",
+        left: "3cm",
+        width: 80,
+        height: 80,
+    },
+    qrCodeImage: {
+        width: "100%",
+        height: "100%",
+    },
 });
 
 interface SuratPDFProps {
@@ -199,6 +210,7 @@ interface SuratPDFProps {
     showSignature?: boolean;
     signaturePath?: string | null;
     showStamp?: boolean;
+    qrCodeUrl?: string;
     data?: Record<string, string>;
 }
 
@@ -207,6 +219,7 @@ export const SuratPDF = ({
     showSignature,
     signaturePath,
     showStamp,
+    qrCodeUrl,
     data,
 }: SuratPDFProps) => {
     // Current year logic
@@ -429,6 +442,13 @@ export const SuratPDF = ({
                         NIP. 196906201999031002
                     </Text>
                 </View>
+
+                {/* QR Code */}
+                {qrCodeUrl && (
+                    <View style={styles.qrCodeContainer}>
+                        <Image src={qrCodeUrl} style={styles.qrCodeImage} />
+                    </View>
+                )}
             </Page>
         </Document>
     );

@@ -15,6 +15,12 @@ interface UPANumberingModalProps {
     onClose: () => void;
     onNumberChange: (number: string) => void;
     onStampApply: (applied: boolean) => void;
+    applicationId?: string;
+    onVerificationGenerated?: (data: {
+        code: string;
+        verifyUrl: string;
+        qrImage: string;
+    }) => void;
 }
 
 export function UPANumberingModal({
@@ -22,6 +28,8 @@ export function UPANumberingModal({
     onClose,
     onNumberChange,
     onStampApply,
+    applicationId,
+    onVerificationGenerated,
 }: UPANumberingModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -37,6 +45,8 @@ export function UPANumberingModal({
                     <UPANumberingSection
                         onNumberChange={onNumberChange}
                         onStampApply={onStampApply}
+                        applicationId={applicationId}
+                        onVerificationGenerated={onVerificationGenerated}
                     />
                 </div>
             </DialogContent>

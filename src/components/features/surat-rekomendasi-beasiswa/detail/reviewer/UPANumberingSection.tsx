@@ -5,25 +5,74 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Hash, Sparkles, Check, Info, ShieldCheck } from "lucide-react";
+import {
+    Hash,
+    Sparkles,
+    Check,
+    Info,
+    ShieldCheck,
+    Loader2,
+} from "lucide-react";
+import { previewLetterNumber } from "@/lib/application-api";
 
 interface UPANumberingSectionProps {
     onNumberChange: (number: string) => void;
     onStampApply: (applied: boolean) => void;
+    applicationId?: string;
+    onVerificationGenerated?: (data: {
+        code: string;
+        verifyUrl: string;
+        qrImage: string;
+    }) => void;
 }
 
 export function UPANumberingSection({
     onNumberChange,
     onStampApply,
+    applicationId,
+    onVerificationGenerated,
 }: UPANumberingSectionProps) {
     const [letterNumber, setLetterNumber] = useState("");
+    const [isGenerating, setIsGenerating] = useState(false);
 
-    const generateNumber = () => {
-        const year = new Date().getFullYear();
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        const generated = `${randomNum}/UN7.F5/KM/${year}`;
-        setLetterNumber(generated);
-        onNumberChange(generated);
+    // Auto-fetch preview number on mount
+    useEffect(() => {
+        const fetchPreview = async () => {
+            setIsGenerating(true);
+            const number = await previewLetterNumber("SRB");
+            if (number) {
+                setLetterNumber(number);
+                onNumberChange(number);
+            }
+            setIsGenerating(false);
+        };
+        fetchPreview();
+    }, [onNumberChange]);
+
+    // Re-fetch preview number manually (or generate real one if implemented fully)
+    const generateNumber = async () => {
+        setIsGenerating(true);
+        // If we have applicationId, we generate real number with verification
+        if (applicationId) {
+            const result = await import("@/lib/application-api").then((m) =>
+                m.generateLetterNumber("SRB", applicationId),
+            );
+            if (result) {
+                setLetterNumber(result.letterNumber);
+                onNumberChange(result.letterNumber);
+                if (result.verification && onVerificationGenerated) {
+                    onVerificationGenerated(result.verification);
+                }
+            }
+        } else {
+            // Preview only
+            const number = await previewLetterNumber("SRB");
+            if (number) {
+                setLetterNumber(number);
+                onNumberChange(number);
+            }
+        }
+        setIsGenerating(false);
     };
 
     const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,17 +110,24 @@ export function UPANumberingSection({
                                 variant="ghost"
                                 size="sm"
                                 onClick={generateNumber}
+                                disabled={isGenerating}
                                 className="h-8 text-undip-blue hover:text-sky-700 hover:bg-blue-50 gap-1.5 font-bold text-xs"
                             >
-                                <Sparkles className="h-3.5 w-3.5" />
-                                Generate Otomatis
+                                {isGenerating ? (
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                    <Sparkles className="h-3.5 w-3.5" />
+                                )}
+                                {isGenerating
+                                    ? "Memuat..."
+                                    : "Generate Otomatis"}
                             </Button>
                         </div>
                         <div className="relative group">
                             <Input
                                 value={letterNumber}
                                 onChange={handleNumberChange}
-                                placeholder="Klik generate atau isi manual (Contoh: 1234/UN7.F5/KM/2026)"
+                                placeholder="Contoh: 001/UN7.F8.1/KM/I/2026"
                                 className="h-14 rounded-2xl border-slate-200 focus:ring-undip-blue focus:border-undip-blue pl-12 text-lg font-medium text-slate-700 transition-all group-hover:border-slate-300"
                             />
                             <Hash className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-undip-blue transition-colors" />

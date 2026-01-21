@@ -65,5 +65,6 @@ export function mapApplicationToPreviewData(
                 : undefined,
 
         publishedAt: formatDate(application.publishedAt),
+        qrCodeUrl: application.verification?.qrCodeUrl,
     };
 }

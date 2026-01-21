@@ -16,7 +16,11 @@ import {
     XOctagon,
     Download,
 } from "lucide-react";
-import { verifyApplication } from "@/lib/application-api";
+import {
+    verifyApplication,
+    getLetterConfig,
+    LeadershipConfig,
+} from "@/lib/application-api";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SuratDocument } from "@/components/features/surat-rekomendasi-beasiswa/preview/SuratDocument";
@@ -47,6 +51,7 @@ export interface PreviewData {
     signatureUrl?: string;
     nomorSurat?: string;
     publishedAt?: string;
+    qrCodeUrl?: string;
 }
 
 interface SuratPreviewContentProps {
@@ -75,6 +80,9 @@ export function SuratPreviewContent({
     const [wd1Signature, setWd1Signature] = useState<string | null>(
         data?.signatureUrl || null,
     );
+    const [qrCodeUrl, setQrCodeUrl] = useState<string | undefined>(
+        data?.qrCodeUrl,
+    );
     const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
     const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
     const [isActionModalOpen, setIsActionModalOpen] = useState(false);
@@ -92,6 +100,8 @@ export function SuratPreviewContent({
     const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
     const [zoom, setZoom] = useState(100);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [leadershipConfig, setLeadershipConfig] =
+        useState<LeadershipConfig | null>(null);
 
     useEffect(() => {
         if (searchParams.get("autoPrint") === "true") {
@@ -101,6 +111,17 @@ export function SuratPreviewContent({
             return () => clearTimeout(timer);
         }
     }, [searchParams]);
+
+    // Fetch leadership config on mount
+    useEffect(() => {
+        const fetchLeadershipConfig = async () => {
+            const config = await getLetterConfig("WAKIL_DEKAN_1");
+            if (config) {
+                setLeadershipConfig(config);
+            }
+        };
+        fetchLeadershipConfig();
+    }, []);
 
     // Map stage to step number for canTakeAction logic
     const stageStepMap: Record<string, number> = {
@@ -149,8 +170,17 @@ export function SuratPreviewContent({
             showStamp: hasStamp,
             nomorSurat: hasLetterNumber ? upaLetterNumber : "",
             data: data,
+            leadershipConfig: leadershipConfig || undefined,
+            qrCodeUrl: qrCodeUrl,
         };
-    }, [upaLetterNumber, upaIsStampApplied, wd1Signature, data]);
+    }, [
+        upaLetterNumber,
+        upaIsStampApplied,
+        wd1Signature,
+        data,
+        leadershipConfig,
+        qrCodeUrl,
+    ]);
 
     const attributes = [
         {
@@ -226,6 +256,12 @@ export function SuratPreviewContent({
                 onClose={() => setIsNumberingModalOpen(false)}
                 onNumberChange={setUpaLetterNumber}
                 onStampApply={() => {}} // Stamp is always true in this UI
+                applicationId={applicationId}
+                onVerificationGenerated={(data) => {
+                    if (data.qrImage) {
+                        setQrCodeUrl(data.qrImage);
+                    }
+                }}
             />
             <SuccessStampModal
                 isOpen={isSuccessStampModalOpen}

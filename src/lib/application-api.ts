@@ -81,6 +81,18 @@ export interface ApplicationDetail {
             };
         };
     };
+    history?: Array<{
+        actor: {
+            name: string;
+            role?: {
+                name: string;
+            };
+        };
+        action: string;
+        note?: string;
+        status: string;
+        createdAt: string;
+    }>;
 }
 
 /**

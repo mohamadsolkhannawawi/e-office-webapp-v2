@@ -28,6 +28,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Hash, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getReceiverRole } from "@/utils/status-mapper";
 import { ApplicationDetail } from "@/lib/application-api";
 
 interface AdminDetailSuratProps {
@@ -645,80 +646,8 @@ export function AdminDetailSurat({
                     <RiwayatSurat
                         riwayat={[
                             ...(initialData?.history?.map((log) => {
-                                // Convert action + actor to descriptive status
-                                const getDescriptiveStatus = (
-                                    action: string,
-                                    actorName: string,
-                                ) => {
-                                    const actionLower = action?.toLowerCase();
-                                    // Determine actor role from name or other context
-                                    let roleName = "Reviewer";
-                                    if (
-                                        actorName?.includes("Supervisor") ||
-                                        actorName?.toLowerCase().includes("dr.")
-                                    ) {
-                                        roleName = "Supervisor Akademik";
-                                    } else if (
-                                        actorName
-                                            ?.toLowerCase()
-                                            .includes("manajer") ||
-                                        actorName?.toLowerCase().includes("tu")
-                                    ) {
-                                        roleName = "Manajer TU";
-                                    } else if (
-                                        actorName
-                                            ?.toLowerCase()
-                                            .includes("dekan") ||
-                                        actorName?.toLowerCase().includes("wd1")
-                                    ) {
-                                        roleName = "Wakil Dekan 1";
-                                    } else if (
-                                        actorName?.toLowerCase().includes("upa")
-                                    ) {
-                                        roleName = "UPA";
-                                    }
-
-                                    if (actionLower === "approve") {
-                                        return `Disetujui ${roleName}`;
-                                    } else if (actionLower === "revision") {
-                                        return `Revisi dari ${roleName}`;
-                                    } else if (actionLower === "reject") {
-                                        return `Ditolak oleh ${roleName}`;
-                                    } else if (
-                                        actionLower === "submit" ||
-                                        actionLower === "create"
-                                    ) {
-                                        return "Diajukan";
-                                    } else if (actionLower === "publish") {
-                                        return "Diterbitkan";
-                                    }
-                                    return action || "Diproses";
-                                };
-
                                 // Determine receiver based on status change
-                                const getReceiverRole = (
-                                    action: string,
-                                    step: number | undefined,
-                                ) => {
-                                    const actionLower = action?.toLowerCase();
-                                    if (actionLower === "approve") {
-                                        const stepToRole: Record<
-                                            number,
-                                            string
-                                        > = {
-                                            1: "Manajer TU",
-                                            2: "Wakil Dekan 1",
-                                            3: "UPA",
-                                            4: "Selesai",
-                                        };
-                                        return stepToRole[step || 1] || "-";
-                                    } else if (actionLower === "revision") {
-                                        return "Revisi";
-                                    } else if (actionLower === "reject") {
-                                        return "Ditolak";
-                                    }
-                                    return "-";
-                                };
+                                // Use imported helper
 
                                 return {
                                     senderRole:
@@ -729,12 +658,7 @@ export function AdminDetailSurat({
                                         log.action,
                                         initialData?.currentStep,
                                     ),
-                                    status: getDescriptiveStatus(
-                                        log.action,
-                                        log.actor?.role?.name ||
-                                            log.actor?.name ||
-                                            "",
-                                    ),
+                                    status: log.status, // Pass raw status, let RiwayatSurat handle description
                                     date: new Date(
                                         log.createdAt,
                                     ).toLocaleDateString("id-ID", {

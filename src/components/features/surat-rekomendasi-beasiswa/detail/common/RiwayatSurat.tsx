@@ -12,6 +12,7 @@ import {
     Hash,
     Check,
 } from "lucide-react";
+import { formatRoleName, getStatusConfig } from "@/utils/status-mapper";
 
 interface TimelineItemProps {
     senderRole: string;
@@ -34,17 +35,6 @@ function TimelineItem({
     actionType,
     isLast,
 }: TimelineItemProps) {
-    // Helper to format role names to be more friendly
-    const formatRoleName = (role: string) => {
-        const lower = role.toLowerCase();
-        if (lower.includes("wakil dekan")) return "Wakil Dekan 1";
-        if (lower.includes("manajer")) return "Manajer TU";
-        if (lower.includes("supervisor")) return "Supervisor Akademik";
-        if (lower.includes("upa")) return "Staff UPA";
-        if (lower.includes("mahasiswa")) return "Mahasiswa";
-        return role; // Fallback
-    };
-
     const friendlySender = formatRoleName(senderRole);
     const friendlyReceiver = receiverRole
         ? formatRoleName(receiverRole)
@@ -53,86 +43,24 @@ function TimelineItem({
     // Treat "-" as no note
     const hasCatatan = catatan && catatan !== "-" && catatan.trim() !== "";
 
-    const getStatusConfig = (
-        status: string,
-        actionType?: string,
-        sender?: string,
-    ) => {
-        const s = status.toLowerCase();
-        const a = actionType?.toLowerCase() || "";
+    const config = getStatusConfig(status, actionType, friendlySender);
 
-        // Status: COMPLETED / PUBLISHED
-        if (
-            s === "completed" ||
-            s === "published" ||
-            s.includes("selesai") ||
-            s.includes("terbit")
-        ) {
-            return {
-                label: "Selesai / Terbit",
-                color: "text-emerald-600 bg-emerald-50 border-emerald-100",
-                icon: <CheckCircle2 className="h-3 w-3" />,
-                defaultDesc:
-                    "Dokumen telah selesai, ditandatangani, dan diterbitkan.",
-            };
+    const getIconComponent = (name: string) => {
+        switch (name) {
+            case "CheckCircle2":
+                return <CheckCircle2 className="h-3 w-3" />;
+            case "XCircle":
+                return <XCircle className="h-3 w-3" />;
+            case "RotateCcw":
+                return <RotateCcw className="h-3 w-3" />;
+            case "Check":
+                return <Check className="h-3 w-3" />;
+            case "FileText":
+                return <FileText className="h-3 w-3" />;
+            case "Clock":
+            default:
+                return <Clock className="h-3 w-3" />;
         }
-
-        // Status: REJECTED
-        if (s === "rejected" || s.includes("tolak")) {
-            return {
-                label: "Ditolak",
-                color: "text-red-600 bg-red-50 border-red-100",
-                icon: <XCircle className="h-3 w-3" />,
-                defaultDesc: `Pengajuan ditolak oleh ${sender || "Reviewer"}.`,
-            };
-        }
-
-        // Status: REVISION / REVISED
-        if (s === "revision" || s === "revised" || s.includes("revisi")) {
-            return {
-                label: "Perlu Revisi",
-                color: "text-orange-600 bg-orange-50 border-orange-100",
-                icon: <RotateCcw className="h-3 w-3" />,
-                defaultDesc: `Dokumen dikembalikan oleh ${sender || "Reviewer"} untuk diperbaiki.`,
-            };
-        }
-
-        // Action: APPROVE
-        if (a === "approve") {
-            let desc = `Dokumen telah disetujui oleh ${sender} dan diteruskan ke tahap berikutnya.`;
-
-            if (sender?.toLowerCase().includes("dekan")) {
-                desc =
-                    "Dokumen telah disetujui dan ditandatangani secara digital.";
-            } else if (sender?.toLowerCase().includes("upa")) {
-                desc = "Dokumen telah diterbitkan dan dapat diunduh.";
-            }
-
-            return {
-                label: "Disetujui",
-                color: "text-blue-600 bg-blue-50 border-blue-100",
-                icon: <Check className="h-3 w-3" />,
-                defaultDesc: desc,
-            };
-        }
-
-        // Action: SUBMIT
-        if (a === "submit" || a === "create" || s === "pending") {
-            return {
-                label: "Diajukan",
-                color: "text-blue-600 bg-blue-50 border-blue-100",
-                icon: <FileText className="h-3 w-3" />,
-                defaultDesc: "Pengajuan baru telah berhasil dikirim.",
-            };
-        }
-
-        // Fallback / In Progress
-        return {
-            label: "Diproses",
-            color: "text-slate-600 bg-slate-50 border-slate-100",
-            icon: <Clock className="h-3 w-3" />,
-            defaultDesc: "Dokumen sedang diproses di tahap ini.",
-        };
     };
 
     const getRoleIcon = (role: string) => {
@@ -148,8 +76,6 @@ function TimelineItem({
             return <Hash className="h-3.5 w-3.5 text-sky-600" />;
         return <ShieldCheck className="h-3.5 w-3.5" />;
     };
-
-    const config = getStatusConfig(status, actionType, friendlySender);
 
     return (
         <div className="flex gap-4 relative pb-8 group">
@@ -181,7 +107,7 @@ function TimelineItem({
                         <div
                             className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider w-fit ${config.color}`}
                         >
-                            {config.icon}
+                            {getIconComponent(config.iconName)}
                             {config.label}
                         </div>
                     </div>

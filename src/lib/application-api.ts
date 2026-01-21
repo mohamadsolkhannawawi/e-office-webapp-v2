@@ -72,6 +72,12 @@ export interface ApplicationDetail {
     updatedAt: string;
     publishedAt?: string;
     letterNumber?: string;
+    verification?: {
+        code: string;
+        verifiedCount: number;
+        qrCodeUrl: string;
+        verifyLink: string;
+    };
     values?: Record<string, unknown>;
     createdBy?: {
         mahasiswa?: {
@@ -269,5 +275,358 @@ export async function verifyApplication(
     } catch (error) {
         console.error("Verify application error:", error);
         throw error;
+    }
+}
+
+/**
+ * Interface untuk konfigurasi pejabat penandatangan
+ */
+export interface LeadershipConfig {
+    name: string;
+    nip: string;
+    jabatan: string;
+}
+
+/**
+ * Fetch letter configuration by key (e.g., "WAKIL_DEKAN_1", "KOP_SURAT_FSM")
+ */
+export async function getLetterConfig(
+    key: string,
+): Promise<LeadershipConfig | null> {
+    try {
+        const response = await fetch(`/api/master/letter-config/${key}`, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            console.warn(`Letter config '${key}' not found, using defaults`);
+            return null;
+        }
+
+        const result = await response.json();
+        return result.value as LeadershipConfig;
+    } catch (error) {
+        console.error("Get letter config error:", error);
+        return null;
+    }
+}
+
+/**
+ * Update letter configuration
+ */
+export async function updateLetterConfig(
+    key: string,
+    value: Record<string, unknown>,
+): Promise<boolean> {
+    try {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/master/letter-config/${key}`,
+            {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ value }),
+            },
+        );
+
+        if (!response.ok) {
+            throw new Error(`Failed to update config: ${response.status}`);
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Update letter config error:", error);
+        return false;
+    }
+}
+
+/**
+ * Interface untuk User Signature
+ */
+export interface UserSignature {
+    id: string;
+    url: string;
+    signatureType: "UPLOADED" | "DRAWN" | "TEMPLATE";
+    isDefault: boolean;
+    checksum?: string;
+    createdAt: string;
+}
+
+/**
+ * Fetch all signatures for current user
+ */
+export async function getSignatures(): Promise<UserSignature[]> {
+    try {
+        const response = await fetch("/api/signatures", {
+            method: "GET",
+            credentials: "include",
+        });
+
+        if (!response.ok) {
+            return [];
+        }
+
+        const result = await response.json();
+        return result.data || [];
+    } catch (error) {
+        console.error("Get signatures error:", error);
+        return [];
+    }
+}
+
+/**
+ * Save new signature template
+ */
+export async function saveSignature(data: {
+    url: string;
+    signatureType?: "UPLOADED" | "DRAWN" | "TEMPLATE";
+    isDefault?: boolean;
+}): Promise<UserSignature | null> {
+    try {
+        const response = await fetch("/api/signatures", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to save signature");
+        }
+
+        const result = await response.json();
+        return result.data;
+    } catch (error) {
+        console.error("Save signature error:", error);
+        return null;
+    }
+}
+
+/**
+ * Set signature as default
+ */
+export async function setDefaultSignature(id: string): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/signatures/${id}/default`, {
+            method: "PATCH",
+            credentials: "include",
+        });
+
+        return response.ok;
+    } catch (error) {
+        console.error("Set default signature error:", error);
+        return false;
+    }
+}
+
+/**
+ * Delete signature template
+ */
+export async function deleteSignature(id: string): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/signatures/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+        });
+
+        return response.ok;
+    } catch (error) {
+        console.error("Delete signature error:", error);
+        return false;
+    }
+}
+
+/**
+ * Preview nomor surat berikutnya (tanpa increment)
+ */
+export async function previewLetterNumber(
+    type: string = "SRB",
+): Promise<string | null> {
+    try {
+        const response = await fetch(
+            `/api/master/letter-number/preview?type=${type}`,
+            {
+                method: "GET",
+                credentials: "include",
+            },
+        );
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const result = await response.json();
+        return result.data?.nextNumber || null;
+    } catch (error) {
+        console.error("Preview letter number error:", error);
+        return null;
+    }
+}
+
+/**
+ * Generate nomor surat baru (dengan increment counter)
+ */
+export async function generateLetterNumber(
+    type: string = "SRB",
+    applicationId?: string,
+): Promise<{
+    letterNumber: string;
+    verification?: {
+        code: string;
+        verifyUrl: string;
+        qrImage: string;
+    };
+} | null> {
+    try {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/master/letter-number/generate`,
+            {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ type, applicationId }),
+            },
+        );
+        const json = await response.json();
+        return json.data;
+    } catch (error) {
+        console.error("Generate letter number error:", error);
+        return null;
+    }
+}
+
+/**
+ * Interface untuk Notification
+ */
+export interface Notification {
+    id: string;
+    title: string;
+    message: string;
+    type: string;
+    isRead: boolean;
+    entityId?: string;
+    createdAt: string;
+}
+
+/**
+ * Fetch notifications for current user
+ */
+export async function getNotifications(options?: {
+    limit?: number;
+    unreadOnly?: boolean;
+}): Promise<Notification[]> {
+    try {
+        const params = new URLSearchParams();
+        if (options?.limit) params.set("limit", String(options.limit));
+        if (options?.unreadOnly) params.set("unreadOnly", "true");
+
+        const response = await fetch(`/api/notifications?${params}`, {
+            method: "GET",
+            credentials: "include",
+        });
+
+        if (!response.ok) return [];
+        const result = await response.json();
+        return result.data || [];
+    } catch (error) {
+        console.error("Get notifications error:", error);
+        return [];
+    }
+}
+
+/**
+ * Get unread notification count
+ */
+export async function getUnreadNotificationCount(): Promise<number> {
+    try {
+        const response = await fetch("/api/notifications/count", {
+            method: "GET",
+            credentials: "include",
+        });
+
+        if (!response.ok) return 0;
+        const result = await response.json();
+        return result.data?.unread || 0;
+    } catch (error) {
+        console.error("Get unread count error:", error);
+        return 0;
+    }
+}
+
+/**
+ * Mark notification as read
+ */
+export async function markNotificationAsRead(id: string): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/notifications/${id}/read`, {
+            method: "PATCH",
+            credentials: "include",
+        });
+        return response.ok;
+    } catch (error) {
+        console.error("Mark as read error:", error);
+        return false;
+    }
+}
+
+/**
+ * Mark all notifications as read
+ */
+export async function markAllNotificationsAsRead(): Promise<boolean> {
+    try {
+        const response = await fetch("/api/notifications/read-all", {
+            method: "PATCH",
+            credentials: "include",
+        });
+        return response.ok;
+    } catch (error) {
+        console.error("Mark all as read error:", error);
+        return false;
+    }
+}
+
+/**
+ * Public Verification API
+ */
+export async function verifyLetterPublic(code: string): Promise<{
+    valid: boolean;
+    data?: {
+        letterNumber: string;
+        issuedAt: string;
+        verifiedCount: number;
+        application: {
+            id: string;
+            scholarshipName: string;
+            status: string;
+        };
+    };
+    message?: string;
+} | null> {
+    try {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/public/verification/${code}`,
+            {
+                method: "GET",
+            },
+        );
+
+        if (!response.ok) {
+            return { valid: false, message: "Dokumen tidak ditemukan" };
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Verification error:", error);
+        return null;
     }
 }

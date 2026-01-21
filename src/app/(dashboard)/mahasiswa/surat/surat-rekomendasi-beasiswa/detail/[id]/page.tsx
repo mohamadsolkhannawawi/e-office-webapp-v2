@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import {
     ArrowLeft,
     Loader2,
-    Pencil,
     ChevronRight,
-    FileText,
+    Eye,
+    RotateCcw,
+    Download,
 } from "lucide-react";
 import {
     IdentitasPengaju,
@@ -133,6 +134,10 @@ export default function DetailPengajuanPage() {
         (application.status as string) === "REVISION" ||
         (application.status as string) === "DRAFT";
 
+    const isPublished =
+        (application.status as string) === "COMPLETED" ||
+        (application.status as string) === "PUBLISHED";
+
     // Get jenis for editing from application data
     const jenis =
         ((application.formData as unknown as Record<string, unknown>)
@@ -156,7 +161,7 @@ export default function DetailPengajuanPage() {
     }));
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in fade-in duration-500 pb-10">
             {/* Breadcrumb */}
             <nav className="flex items-center text-sm font-medium text-slate-500 mb-4">
                 <Link
@@ -194,29 +199,6 @@ export default function DetailPengajuanPage() {
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Link href={`/mahasiswa/surat/proses/preview/${id}`}>
-                        <Button
-                            variant="outline"
-                            className="border-slate-200 text-slate-600 hover:bg-slate-50 font-bold"
-                        >
-                            <FileText className="w-4 h-4 mr-2" />
-                            Pratinjau Surat
-                        </Button>
-                    </Link>
-                    {canEdit && (
-                        <Button
-                            onClick={() =>
-                                router.push(
-                                    `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
-                                )
-                            }
-                        >
-                            <Pencil className="w-4 h-4 mr-2" />
-                            Perbaiki Pengajuan
-                        </Button>
-                    )}
-                </div>
             </div>
 
             {/* Content */}
@@ -227,7 +209,50 @@ export default function DetailPengajuanPage() {
                     <LampiranSurat data={lampiranData} />
                 </div>
 
-                <div className="lg:col-span-1">
+                <div className="lg:col-span-1 space-y-6">
+                    {/* Aksi Card */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+                        <h2 className="font-bold text-slate-800 mb-4 uppercase tracking-wider text-sm">
+                            Aksi
+                        </h2>
+                        <div className="space-y-3">
+                            <Link
+                                href={`/mahasiswa/surat/proses/preview/${id}?stage=mahasiswa`}
+                            >
+                                <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
+                                    <Eye className="h-5 w-5" />
+                                    Preview
+                                </Button>
+                            </Link>
+
+                            {canEdit && (
+                                <Button
+                                    onClick={() =>
+                                        router.push(
+                                            `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
+                                        )
+                                    }
+                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                >
+                                    <RotateCcw className="h-5 w-5" />
+                                    Revisi
+                                </Button>
+                            )}
+
+                            {isPublished && (
+                                <Link
+                                    href={`/mahasiswa/surat/proses/preview/${id}?stage=mahasiswa&autoPrint=true`}
+                                    target="_blank"
+                                >
+                                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
+                                        <Download className="h-5 w-5" />
+                                        Download
+                                    </Button>
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+
                     <RiwayatSurat
                         applicationId={application.id}
                         status={application.status}

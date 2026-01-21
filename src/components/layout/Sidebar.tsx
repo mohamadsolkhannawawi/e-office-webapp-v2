@@ -193,7 +193,7 @@ export function Sidebar({ className = "" }: SidebarProps) {
 
     return (
         <aside
-            className={`w-64 bg-white border-r border-gray-200 flex flex-col h-full transition-all duration-200 ${className}`}
+            className={`w-64 bg-white border-r border-gray-200 flex flex-col h-full transition-all duration-200 ${className} print:hidden`}
         >
             <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
                 {menuItems.map((item) => (

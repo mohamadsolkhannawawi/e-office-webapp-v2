@@ -15,7 +15,7 @@ export function Navbar({
     showProfile = true,
 }: NavbarProps) {
     return (
-        <header className="relative z-50 flex h-16 w-full items-center justify-between bg-undip-blue px-4 shadow-md md:px-8">
+        <header className="relative z-50 flex h-16 w-full items-center justify-between bg-undip-blue px-4 shadow-md md:px-8 print:hidden">
             {/* Bagian Kiri: Logo & Nama Instansi */}
             <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-start">

@@ -14,6 +14,7 @@ import {
     PenTool,
     RotateCcw,
     XOctagon,
+    Download,
 } from "lucide-react";
 import { verifyApplication } from "@/lib/application-api";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ import { WD1SignatureModal } from "@/components/features/surat-rekomendasi-beasi
 import { AdminActionModals } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/AdminActionModals";
 import { SuccessStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/SuccessStampModal";
 import { ActionStatusModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/ActionStatusModal";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 
 interface PreviewData {
@@ -44,6 +45,8 @@ interface PreviewData {
     currentStep?: number;
     applicationId?: string;
     signatureUrl?: string;
+    nomorSurat?: string;
+    publishedAt?: string;
 }
 
 interface SuratPreviewContentProps {
@@ -64,9 +67,11 @@ export function SuratPreviewContent({
     const stage = searchParams.get("stage") || defaultStage;
 
     const [upaLetterNumber, setUpaLetterNumber] = useState(
-        searchParams.get("no") || "",
+        searchParams.get("no") || data?.nomorSurat || "",
     );
-    const [upaIsStampApplied, setUpaIsStampApplied] = useState(false);
+    const [upaIsStampApplied, setUpaIsStampApplied] = useState(
+        !!(searchParams.get("no") || data?.nomorSurat),
+    );
     const [wd1Signature, setWd1Signature] = useState<string | null>(
         data?.signatureUrl || null,
     );
@@ -87,6 +92,15 @@ export function SuratPreviewContent({
     const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
     const [zoom, setZoom] = useState(100);
     const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        if (searchParams.get("autoPrint") === "true") {
+            const timer = setTimeout(() => {
+                window.print();
+            }, 1000); // Small delay to ensure rendering is complete
+            return () => clearTimeout(timer);
+        }
+    }, [searchParams]);
 
     // Map stage to step number for canTakeAction logic
     const stageStepMap: Record<string, number> = {
@@ -171,6 +185,23 @@ export function SuratPreviewContent({
 
     return (
         <div className="h-full flex overflow-hidden">
+            <style
+                dangerouslySetInnerHTML={{
+                    __html: `
+                @media print {
+                    @page { 
+                        margin: 0; 
+                        size: A4 portrait;
+                    }
+                    /* Hide browser headers/footers by clearing page margin */
+                    body {
+                        margin: 0;
+                        -webkit-print-color-adjust: exact;
+                    }
+                }
+            `,
+                }}
+            />
             <UPANumberingModal
                 isOpen={isNumberingModalOpen}
                 onClose={() => setIsNumberingModalOpen(false)}
@@ -286,9 +317,7 @@ export function SuratPreviewContent({
                 }}
             />
             {/* Left Sidebar: Attributes */}
-            <div
-                className={`${isFullscreen ? "w-0 opacity-0 overflow-hidden" : "w-80"} border-r border-gray-200 bg-white overflow-y-auto hidden md:block transition-all duration-500 ease-in-out`}
-            >
+            <div className="w-80 border-r border-gray-200 bg-white overflow-y-auto hidden xl:block shrink-0 print:hidden">
                 <div className="p-6 space-y-6">
                     <div>
                         <h1 className="text-2xl font-bold text-slate-800">
@@ -328,7 +357,7 @@ export function SuratPreviewContent({
             {/* Main Content: Document Preview */}
             <div className="flex-1 flex flex-col bg-slate-200 overflow-hidden relative">
                 {/* Toolbar */}
-                <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 shrink-0 shadow-sm">
+                <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 shrink-0 shadow-sm print:hidden">
                     {/* <div className="flex items-center gap-3">
                         <span className="text-sm font-bold text-slate-600 uppercase tracking-tight">
                             Pratinjau Surat
@@ -375,9 +404,9 @@ export function SuratPreviewContent({
                 </div>
 
                 {/* Document Area */}
-                <div className="flex-1 overflow-auto p-12 flex justify-center bg-[#F1F5F9]">
+                <div className="flex-1 overflow-auto p-12 flex justify-center bg-[#F1F5F9] print:bg-white print:p-0 print:block print:overflow-visible">
                     <div
-                        className="origin-top transition-transform duration-300 shadow-2xl"
+                        className="origin-top transition-transform duration-300 shadow-2xl print:shadow-none print:transform-none print:fixed print:top-0 print:left-0 print:z-[9999] print:w-screen print:h-screen print:bg-white"
                         style={{ transform: `scale(${zoom / 100})` }}
                     >
                         <SuratDocument {...config} />
@@ -387,7 +416,7 @@ export function SuratPreviewContent({
 
             {/* Right Sidebar: Actions */}
             <div
-                className={`${isFullscreen ? "w-0 opacity-0 overflow-hidden" : "w-80"} border-l border-gray-200 bg-white overflow-y-auto hidden md:block transition-all duration-500 ease-in-out`}
+                className={`${isFullscreen ? "w-0 opacity-0 overflow-hidden" : "w-80"} border-l border-gray-200 bg-white overflow-y-auto hidden md:block transition-all duration-500 ease-in-out print:hidden`}
             >
                 <div className="p-6 space-y-6">
                     {/* Show status message if action is not allowed */}
@@ -715,6 +744,51 @@ export function SuratPreviewContent({
                                             status surat pengaju secara
                                             langsung.
                                         </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    ) : stage === "mahasiswa" ? (
+                        <>
+                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                                <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
+                                    Unduh Surat
+                                </h2>
+                                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
+                                    Pratinjau & Cetak
+                                </p>
+                            </div>
+
+                            <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
+                                <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                    <div className="flex flex-col items-center gap-2 mb-2">
+                                        <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600">
+                                            <Download className="h-6 w-6" />
+                                        </div>
+                                        <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
+                                            Dokumen Siap
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-3 pt-5 border-t border-slate-100 text-center">
+                                        <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                                            Klik tombol di bawah untuk mencetak
+                                            atau mengunduh surat sebagai PDF.
+                                        </p>
+                                        <Button
+                                            onClick={() => {
+                                                if (
+                                                    typeof window !==
+                                                    "undefined"
+                                                ) {
+                                                    window.print();
+                                                }
+                                            }}
+                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                                        >
+                                            <Download className="h-5 w-5" />
+                                            Unduh PDF
+                                        </Button>
                                     </div>
                                 </div>
                             </div>

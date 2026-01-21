@@ -10,6 +10,7 @@ import {
     User,
     PenTool,
     Hash,
+    Check,
 } from "lucide-react";
 
 interface TimelineItemProps {
@@ -33,40 +34,104 @@ function TimelineItem({
     actionType,
     isLast,
 }: TimelineItemProps) {
-    const getStatusConfig = (status: string) => {
+    // Helper to format role names to be more friendly
+    const formatRoleName = (role: string) => {
+        const lower = role.toLowerCase();
+        if (lower.includes("wakil dekan")) return "Wakil Dekan 1";
+        if (lower.includes("manajer")) return "Manajer TU";
+        if (lower.includes("supervisor")) return "Supervisor Akademik";
+        if (lower.includes("upa")) return "Staff UPA";
+        if (lower.includes("mahasiswa")) return "Mahasiswa";
+        return role; // Fallback
+    };
+
+    const friendlySender = formatRoleName(senderRole);
+    const friendlyReceiver = receiverRole
+        ? formatRoleName(receiverRole)
+        : undefined;
+
+    // Treat "-" as no note
+    const hasCatatan = catatan && catatan !== "-" && catatan.trim() !== "";
+
+    const getStatusConfig = (
+        status: string,
+        actionType?: string,
+        sender?: string,
+    ) => {
         const s = status.toLowerCase();
-        if (s.includes("diajukan"))
-            return {
-                color: "text-blue-600 bg-blue-50 border-blue-100",
-                icon: <FileText className="h-3 w-3" />,
-            };
+        const a = actionType?.toLowerCase() || "";
+
+        // Status: COMPLETED / PUBLISHED
         if (
-            s.includes("disetujui") ||
+            s === "completed" ||
+            s === "published" ||
             s.includes("selesai") ||
-            s.includes("publikasi")
-        )
+            s.includes("terbit")
+        ) {
             return {
+                label: "Selesai / Terbit",
                 color: "text-emerald-600 bg-emerald-50 border-emerald-100",
                 icon: <CheckCircle2 className="h-3 w-3" />,
+                defaultDesc:
+                    "Dokumen telah selesai, ditandatangani, dan diterbitkan.",
             };
-        if (s.includes("ditolak"))
+        }
+
+        // Status: REJECTED
+        if (s === "rejected" || s.includes("tolak")) {
             return {
+                label: "Ditolak",
                 color: "text-red-600 bg-red-50 border-red-100",
                 icon: <XCircle className="h-3 w-3" />,
+                defaultDesc: `Pengajuan ditolak oleh ${sender || "Reviewer"}.`,
             };
-        if (s.includes("revisi"))
+        }
+
+        // Status: REVISION / REVISED
+        if (s === "revision" || s === "revised" || s.includes("revisi")) {
             return {
+                label: "Perlu Revisi",
                 color: "text-orange-600 bg-orange-50 border-orange-100",
                 icon: <RotateCcw className="h-3 w-3" />,
+                defaultDesc: `Dokumen dikembalikan oleh ${sender || "Reviewer"} untuk diperbaiki.`,
             };
-        if (s.includes("verifikasi") || s.includes("menunggu"))
+        }
+
+        // Action: APPROVE
+        if (a === "approve") {
+            let desc = `Dokumen telah disetujui oleh ${sender} dan diteruskan ke tahap berikutnya.`;
+
+            if (sender?.toLowerCase().includes("dekan")) {
+                desc =
+                    "Dokumen telah disetujui dan ditandatangani secara digital.";
+            } else if (sender?.toLowerCase().includes("upa")) {
+                desc = "Dokumen telah diterbitkan dan dapat diunduh.";
+            }
+
             return {
-                color: "text-amber-600 bg-amber-50 border-amber-100",
-                icon: <Clock className="h-3 w-3" />,
+                label: "Disetujui",
+                color: "text-blue-600 bg-blue-50 border-blue-100",
+                icon: <Check className="h-3 w-3" />,
+                defaultDesc: desc,
             };
+        }
+
+        // Action: SUBMIT
+        if (a === "submit" || a === "create" || s === "pending") {
+            return {
+                label: "Diajukan",
+                color: "text-blue-600 bg-blue-50 border-blue-100",
+                icon: <FileText className="h-3 w-3" />,
+                defaultDesc: "Pengajuan baru telah berhasil dikirim.",
+            };
+        }
+
+        // Fallback / In Progress
         return {
+            label: "Diproses",
             color: "text-slate-600 bg-slate-50 border-slate-100",
-            icon: <ShieldCheck className="h-3 w-3" />,
+            icon: <Clock className="h-3 w-3" />,
+            defaultDesc: "Dokumen sedang diproses di tahap ini.",
         };
     };
 
@@ -77,14 +142,14 @@ function TimelineItem({
             return <ShieldCheck className="h-3.5 w-3.5" />;
         if (r.includes("manajer"))
             return <ShieldCheck className="h-3.5 w-3.5 text-undip-blue" />;
-        if (r.includes("dekan"))
+        if (r.includes("dekan") || r.includes("wd1"))
             return <PenTool className="h-3.5 w-3.5 text-indigo-600" />;
         if (r.includes("upa"))
             return <Hash className="h-3.5 w-3.5 text-sky-600" />;
         return <ShieldCheck className="h-3.5 w-3.5" />;
     };
 
-    const config = getStatusConfig(status);
+    const config = getStatusConfig(status, actionType, friendlySender);
 
     return (
         <div className="flex gap-4 relative pb-8 group">
@@ -105,10 +170,10 @@ function TimelineItem({
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-bold text-slate-800 tracking-tight">
-                                {senderRole}
-                                {receiverRole && (
+                                {friendlySender}
+                                {friendlyReceiver && (
                                     <span className="text-slate-400 font-normal ml-2 mr-1">
-                                        → {receiverRole}
+                                        → {friendlyReceiver}
                                     </span>
                                 )}
                             </span>
@@ -117,7 +182,7 @@ function TimelineItem({
                             className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider w-fit ${config.color}`}
                         >
                             {config.icon}
-                            {status}
+                            {config.label}
                         </div>
                     </div>
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest sm:text-right">
@@ -125,7 +190,7 @@ function TimelineItem({
                     </div>
                 </div>
 
-                {catatan ? (
+                {hasCatatan ? (
                     <div className="p-3 bg-slate-50/80 backdrop-blur-sm rounded-xl border border-slate-100 shadow-inner">
                         <p className="text-xs text-slate-600 leading-relaxed italic">
                             &quot;{catatan}&quot;
@@ -133,8 +198,7 @@ function TimelineItem({
                     </div>
                 ) : (
                     <p className="text-[11px] text-slate-400 font-medium">
-                        Melanjutkan dokumen ke tahapan berikutnya tanpa catatan
-                        tambahan.
+                        {config.defaultDesc}
                     </p>
                 )}
             </div>
@@ -188,44 +252,31 @@ export function RiwayatSurat({
                     date: dateStr,
                     time: timeStr,
                     catatan: undefined,
-                    actionType: "SUBMIT",
+                    actionType: "submit",
                 },
             ];
         }
         return [];
     };
 
-    const timeline = riwayat ||
-        generateDefaultTimeline() || [
-            {
-                senderRole: "Supervisor Akademik",
-                receiverRole: "Manajer TU",
-                status: "Disetujui",
-                date: "06 November 2021",
-                time: "09:43:48",
-                catatan: undefined,
-                actionType: "APPROVE",
-            },
-            {
-                senderRole: "Mahasiswa",
-                receiverRole: "Supervisor Akademik",
-                status: "Diajukan",
-                date: "04 November 2021",
-                time: "14:58:12",
-                catatan: undefined,
-                actionType: "SUBMIT",
-            },
-        ];
+    const timeline = [
+        ...(riwayat || []),
+        ...(riwayat?.some(
+            (r) => r.actionType === "submit" || r.actionType === "create",
+        )
+            ? []
+            : generateDefaultTimeline()),
+    ];
 
     return (
         <Card className="border-none shadow-sm bg-white h-fit">
             <CardHeader className="pb-3 border-b border-gray-100">
-                <CardTitle className="text-base font-bold text-gray-800">
+                <CardTitle className=" text-sm uppercase tracking-wider font-bold text-gray-800">
                     Riwayat Surat{" "}
                     <span className="text-blue-600">({timeline.length})</span>
                 </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4">
+            <CardContent className="pt-6">
                 <div className="space-y-0">
                     {timeline.map((item, index) => (
                         <TimelineItem

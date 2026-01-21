@@ -721,14 +721,19 @@ export function AdminDetailSurat({
                                 };
 
                                 return {
-                                    senderRole: log.actor?.name || "Sistem",
+                                    senderRole:
+                                        log.actor?.role?.name ||
+                                        log.actor?.name ||
+                                        "Sistem",
                                     receiverRole: getReceiverRole(
                                         log.action,
                                         initialData?.currentStep,
                                     ),
                                     status: getDescriptiveStatus(
                                         log.action,
-                                        log.actor?.name || "",
+                                        log.actor?.role?.name ||
+                                            log.actor?.name ||
+                                            "",
                                     ),
                                     date: new Date(
                                         log.createdAt,
@@ -744,7 +749,8 @@ export function AdminDetailSurat({
                                         minute: "2-digit",
                                         second: "2-digit",
                                     }),
-                                    catatan: log.note || "-",
+                                    catatan: log.note,
+                                    actionType: log.action,
                                 };
                             }) || []),
                             {

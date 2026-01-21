@@ -66,7 +66,7 @@ export function SuratDocument({
     return (
         <div className="w-[210mm] min-h-[297mm] bg-white shadow-2xl pt-[2.8cm] pb-[2cm] pl-[3cm] pr-[2.5cm] flex flex-col font-serif text-black border border-gray-100 mx-auto overflow-hidden print:shadow-none print:border-none print:m-0 print:w-[210mm] print:h-[295mm] print:overflow-hidden page-break-after-avoid">
             {/* Kop Surat */}
-            <div className="flex items-start gap-3 border-b-[2px] border-black pb-3 mb-8">
+            <div className="flex items-start gap-3 border-b-2 border-black pb-3 mb-8">
                 <div className="w-[85px] shrink-0">
                     <Image
                         src="/assets/undip-logo.png"

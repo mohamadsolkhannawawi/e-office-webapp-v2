@@ -23,6 +23,8 @@ import {
     type ApplicationDetail,
 } from "@/lib/application-api";
 
+import { getReceiverRole } from "@/utils/status-mapper";
+
 export default function DetailPengajuanPage() {
     const params = useParams();
     const router = useRouter();
@@ -145,6 +147,7 @@ export default function DetailPengajuanPage() {
 
     const riwayatData = application.history?.map((h) => ({
         senderRole: h.actor.role?.name || h.actor.name,
+        receiverRole: getReceiverRole(h.action, application.currentStep),
         status: h.status,
         date: new Date(h.createdAt).toLocaleDateString("id-ID", {
             day: "numeric",

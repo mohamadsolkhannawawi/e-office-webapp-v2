@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { SuratPreviewContent } from "@/components/features/surat-rekomendasi-beasiswa/preview/SuratPreviewContent";
+import { mapApplicationToPreviewData } from "@/utils/preview-mapper";
 
 async function getApplication(id: string) {
     try {
@@ -45,32 +46,7 @@ export default async function SupervisorPreviewPage({
     }
 
     // Map application data to preview format
-    const previewData = {
-        nama: application.formData?.namaLengkap || application.applicantName,
-        nim: application.formData?.nim,
-        tempatLahir: application.formData?.tempatLahir,
-        tanggalLahir: application.formData?.tanggalLahir
-            ? new Date(application.formData.tanggalLahir).toLocaleDateString(
-                  "id-ID",
-                  {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                  },
-              )
-            : undefined,
-        noHp: application.formData?.noHp,
-        jurusan: application.formData?.departemen,
-        programStudi: application.formData?.programStudi,
-        semester: application.formData?.semester,
-        ipk: application.formData?.ipk,
-        ips: application.formData?.ips,
-        keperluan: `Pengajuan ${application.scholarshipName || "Beasiswa"}`,
-        email: application.formData?.email,
-        status: application.status,
-        currentStep: application.currentStep,
-        applicationId: application.id,
-    };
+    const previewData = mapApplicationToPreviewData(application);
 
     return (
         <SuratPreviewContent

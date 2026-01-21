@@ -28,7 +28,7 @@ import { ActionStatusModal } from "@/components/features/surat-rekomendasi-beasi
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 
-interface PreviewData {
+export interface PreviewData {
     nama?: string;
     nim?: string;
     tempatLahir?: string;
@@ -112,7 +112,9 @@ export function SuratPreviewContent({
     const roleStep = stageStepMap[stage] || 0;
     const currentStep = data?.currentStep || 0;
     const isTerminalStatus =
-        data?.status === "COMPLETED" || data?.status === "REJECTED";
+        data?.status === "COMPLETED" ||
+        data?.status === "PUBLISHED" ||
+        data?.status === "REJECTED";
 
     // Can only take action if:
     // 1. The application is at this role's step
@@ -153,10 +155,25 @@ export function SuratPreviewContent({
     const attributes = [
         {
             label: "Status Saat Ini",
-            value:
-                stage === "selesai"
-                    ? "Selesai / Terbit"
-                    : `Menunggu Verifikasi (${stage.toUpperCase()})`,
+            value: (() => {
+                if (
+                    data?.status === "COMPLETED" ||
+                    data?.status === "PUBLISHED"
+                )
+                    return "Selesai / Terbit";
+                if (data?.status === "REJECTED") return "Ditolak";
+                if (data?.status === "REVISED") return "Perlu Revisi";
+
+                const stepLabels: Record<number, string> = {
+                    1: "SUPERVISOR AKADEMIK",
+                    2: "MANAJER TU",
+                    3: "WAKIL DEKAN 1",
+                    4: "UPA",
+                };
+
+                const pendingRole = stepLabels[currentStep] || "PROSES";
+                return `Menunggu Verifikasi (${pendingRole})`;
+            })(),
         },
         { label: "Jenis Surat", value: "Surat Rekomendasi Beasiswa" },
         {

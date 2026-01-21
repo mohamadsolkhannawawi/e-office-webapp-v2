@@ -194,8 +194,10 @@ export function SuratPreviewContent({
                         size: A4 portrait;
                     }
                     /* Hide browser headers/footers by clearing page margin */
-                    body {
+                    html, body {
                         margin: 0;
+                        height: 100%;
+                        overflow: hidden !important;
                         -webkit-print-color-adjust: exact;
                     }
                 }
@@ -406,7 +408,7 @@ export function SuratPreviewContent({
                 {/* Document Area */}
                 <div className="flex-1 overflow-auto p-12 flex justify-center bg-[#F1F5F9] print:bg-white print:p-0 print:block print:overflow-visible">
                     <div
-                        className="origin-top transition-transform duration-300 shadow-2xl print:shadow-none print:transform-none print:fixed print:top-0 print:left-0 print:z-[9999] print:w-screen print:h-screen print:bg-white"
+                        className="origin-top transition-transform duration-300 shadow-2xl print:shadow-none print:transform-none print:fixed print:top-0 print:left-0 print:z-9999 print:w-screen print:h-auto print:bg-white"
                         style={{ transform: `scale(${zoom / 100})` }}
                     >
                         <SuratDocument {...config} />

@@ -260,19 +260,18 @@ export default function SuratSelesaiPage() {
 
                                                     {app.status ===
                                                         "COMPLETED" && (
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-9 w-9 p-0 text-slate-600 hover:text-green-600 hover:bg-green-50"
-                                                            title="Download"
-                                                            onClick={() =>
-                                                                alert(
-                                                                    "Fitur download sedang disiapkan",
-                                                                )
-                                                            }
+                                                        <Link
+                                                            href={`/mahasiswa/surat/proses/preview/${app.id}?stage=mahasiswa&autoPrint=true`}
                                                         >
-                                                            <Download className="h-4 w-4" />
-                                                        </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-9 w-9 p-0 text-slate-600 hover:text-green-600 hover:bg-green-50"
+                                                                title="Download"
+                                                            >
+                                                                <Download className="h-4 w-4" />
+                                                            </Button>
+                                                        </Link>
                                                     )}
                                                 </div>
                                             </td>

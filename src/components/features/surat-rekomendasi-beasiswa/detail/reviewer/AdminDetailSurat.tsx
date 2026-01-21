@@ -56,10 +56,18 @@ export function AdminDetailSurat({
         isOpen: boolean;
         type: "approve" | "revise" | "reject" | "publish";
     }>({ isOpen: false, type: "approve" });
-    const [wd1Signature, setWd1Signature] = useState<string | null>(null);
+    const [wd1Signature, setWd1Signature] = useState<string | null>(
+        (typeof initialData?.values?.wd1_signature === "string"
+            ? initialData.values.wd1_signature
+            : null) || null,
+    );
     const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
-    const [upaLetterNumber, setUpaLetterNumber] = useState("");
-    const [upaIsStampApplied, setUpaIsStampApplied] = useState(false);
+    const [upaLetterNumber, setUpaLetterNumber] = useState(
+        initialData?.letterNumber || "",
+    );
+    const [upaIsStampApplied, setUpaIsStampApplied] = useState(
+        !!initialData?.letterNumber,
+    );
     const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
     const [statusModal, setStatusModal] = useState<{
         isOpen: boolean;

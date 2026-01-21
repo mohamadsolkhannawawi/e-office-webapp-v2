@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, Pencil, ChevronRight } from "lucide-react";
+import {
+    ArrowLeft,
+    Loader2,
+    Pencil,
+    ChevronRight,
+    FileText,
+} from "lucide-react";
 import {
     IdentitasPengaju,
     DetailSuratPengajuan,
@@ -132,6 +138,23 @@ export default function DetailPengajuanPage() {
         ((application.formData as unknown as Record<string, unknown>)
             .jenisBeasiswa as string) || "internal";
 
+    const riwayatData = application.history?.map((h) => ({
+        senderRole: h.actor.role?.name || h.actor.name,
+        status: h.status,
+        date: new Date(h.createdAt).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        }),
+        time: new Date(h.createdAt).toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+        }),
+        catatan: h.note,
+        actionType: h.action,
+    }));
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Breadcrumb */}
@@ -171,18 +194,29 @@ export default function DetailPengajuanPage() {
                         </p>
                     </div>
                 </div>
-                {canEdit && (
-                    <Button
-                        onClick={() =>
-                            router.push(
-                                `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
-                            )
-                        }
-                    >
-                        <Pencil className="w-4 h-4 mr-2" />
-                        Perbaiki Pengajuan
-                    </Button>
-                )}
+                <div className="flex items-center gap-3">
+                    <Link href={`/mahasiswa/surat/proses/preview/${id}`}>
+                        <Button
+                            variant="outline"
+                            className="border-slate-200 text-slate-600 hover:bg-slate-50 font-bold"
+                        >
+                            <FileText className="w-4 h-4 mr-2" />
+                            Pratinjau Surat
+                        </Button>
+                    </Link>
+                    {canEdit && (
+                        <Button
+                            onClick={() =>
+                                router.push(
+                                    `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
+                                )
+                            }
+                        >
+                            <Pencil className="w-4 h-4 mr-2" />
+                            Perbaiki Pengajuan
+                        </Button>
+                    )}
+                </div>
             </div>
 
             {/* Content */}
@@ -198,6 +232,7 @@ export default function DetailPengajuanPage() {
                         applicationId={application.id}
                         status={application.status}
                         createdAt={application.createdAt}
+                        riwayat={riwayatData}
                     />
                 </div>
             </div>

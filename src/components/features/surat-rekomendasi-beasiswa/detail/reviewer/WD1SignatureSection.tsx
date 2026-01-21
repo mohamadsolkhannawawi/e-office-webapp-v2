@@ -1,12 +1,28 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Camera, Layout, PenTool, Trash2, Upload, Check } from "lucide-react";
+import {
+    Camera,
+    Layout,
+    PenTool,
+    Trash2,
+    Upload,
+    Check,
+    Star,
+    Loader2,
+} from "lucide-react";
 import SignatureCanvas from "react-signature-canvas";
 import Image from "next/image";
+import {
+    getSignatures,
+    saveSignature,
+    setDefaultSignature,
+    deleteSignature,
+    UserSignature,
+} from "@/lib/application-api";
 
 interface WD1SignatureSectionProps {
     onSignatureChange: (signature: string | null) => void;
@@ -18,14 +34,23 @@ export function WD1SignatureSection({
     const sigCanvas = useRef<SignatureCanvas>(null);
     const [selectedMethod, setSelectedMethod] = useState("upload");
     const [previewImage, setPreviewImage] = useState<string | null>(null);
-    const [selectedTemplate, setSelectedTemplate] = useState<number | null>(
+    const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
         null,
     );
+    const [templates, setTemplates] = useState<UserSignature[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const templates = [
-        { id: 1, src: "/assets/signature-dummy.png" },
-        { id: 2, src: "/assets/signature-dummy.png" }, // Reusing dummy for mock
-    ];
+    // Fetch saved signature templates on mount
+    useEffect(() => {
+        const fetchTemplates = async () => {
+            setIsLoading(true);
+            const data = await getSignatures();
+            setTemplates(data);
+            setIsLoading(false);
+        };
+        fetchTemplates();
+    }, []);
 
     const clearCanvas = () => {
         sigCanvas.current?.clear();
@@ -43,7 +68,7 @@ export function WD1SignatureSection({
         }
     };
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
@@ -56,10 +81,41 @@ export function WD1SignatureSection({
         }
     };
 
-    const selectTemplate = (id: number, src: string) => {
-        setSelectedTemplate(id);
-        setPreviewImage(src);
-        onSignatureChange(src);
+    const selectTemplate = (id: string, url: string) => {
+        setSelectedTemplateId(id);
+        setPreviewImage(url);
+        onSignatureChange(url);
+    };
+
+    const handleSaveAsTemplate = async () => {
+        if (!previewImage) return;
+        setIsSaving(true);
+        const result = await saveSignature({
+            url: previewImage,
+            signatureType: selectedMethod === "canvas" ? "DRAWN" : "UPLOADED",
+            isDefault: templates.length === 0, // Set as default if first template
+        });
+        if (result) {
+            setTemplates((prev) => [result, ...prev]);
+        }
+        setIsSaving(false);
+    };
+
+    const handleSetDefault = async (id: string) => {
+        await setDefaultSignature(id);
+        setTemplates((prev) =>
+            prev.map((t) => ({ ...t, isDefault: t.id === id })),
+        );
+    };
+
+    const handleDeleteTemplate = async (id: string) => {
+        await deleteSignature(id);
+        setTemplates((prev) => prev.filter((t) => t.id !== id));
+        if (selectedTemplateId === id) {
+            setSelectedTemplateId(null);
+            setPreviewImage(null);
+            onSignatureChange(null);
+        }
     };
 
     return (
@@ -179,44 +235,159 @@ export function WD1SignatureSection({
                                 value="template"
                                 className="mt-0 focus-visible:outline-none"
                             >
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                    {templates.map((template) => (
+                                {isLoading ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                        {templates.map((template) => (
+                                            <div
+                                                key={template.id}
+                                                className={`relative aspect-video rounded-xl border-2 transition-all cursor-pointer group flex items-center justify-center p-4 bg-white ${
+                                                    selectedTemplateId ===
+                                                    template.id
+                                                        ? "border-undip-blue shadow-md shadow-blue-50 ring-2 ring-blue-50"
+                                                        : "border-slate-100 hover:border-slate-300"
+                                                }`}
+                                                onClick={() =>
+                                                    selectTemplate(
+                                                        template.id,
+                                                        template.url,
+                                                    )
+                                                }
+                                            >
+                                                <Image
+                                                    src={template.url}
+                                                    alt="Signature Template"
+                                                    width={100}
+                                                    height={50}
+                                                    className="object-contain mix-blend-multiply"
+                                                />
+                                                {template.isDefault && (
+                                                    <div className="absolute top-2 left-2 bg-amber-500 text-white rounded-full p-1 shadow-sm">
+                                                        <Star className="h-3 w-3" />
+                                                    </div>
+                                                )}
+                                                {selectedTemplateId ===
+                                                    template.id && (
+                                                    <div className="absolute top-2 right-2 bg-undip-blue text-white rounded-full p-1 shadow-sm animate-in zoom-in">
+                                                        <Check className="h-3 w-3" />
+                                                    </div>
+                                                )}
+                                                <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                                    {!template.isDefault && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleSetDefault(
+                                                                    template.id,
+                                                                );
+                                                            }}
+                                                            className="p-1 bg-amber-100 text-amber-600 rounded hover:bg-amber-200"
+                                                            title="Set as default"
+                                                        >
+                                                            <Star className="h-3 w-3" />
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteTemplate(
+                                                                template.id,
+                                                            );
+                                                        }}
+                                                        className="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
+                                                        title="Delete"
+                                                    >
+                                                        <Trash2 className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
                                         <div
-                                            key={template.id}
-                                            className={`relative aspect-video rounded-xl border-2 transition-all cursor-pointer group flex items-center justify-center p-4 bg-white ${
-                                                selectedTemplate === template.id
-                                                    ? "border-undip-blue shadow-md shadow-blue-50 ring-2 ring-blue-50"
-                                                    : "border-slate-100 hover:border-slate-300"
-                                            }`}
+                                            className="aspect-video rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-undip-blue hover:text-undip-blue transition-all cursor-pointer"
                                             onClick={() =>
-                                                selectTemplate(
-                                                    template.id,
-                                                    template.src,
-                                                )
+                                                document
+                                                    .getElementById(
+                                                        "template-upload",
+                                                    )
+                                                    ?.click()
                                             }
                                         >
-                                            <Image
-                                                src={template.src}
-                                                alt="Signature Template"
-                                                width={100}
-                                                height={50}
-                                                className="object-contain mix-blend-multiply"
+                                            <input
+                                                id="template-upload"
+                                                type="file"
+                                                className="hidden"
+                                                accept="image/*"
+                                                onChange={async (e) => {
+                                                    const file =
+                                                        e.target.files?.[0];
+                                                    if (file) {
+                                                        const reader =
+                                                            new FileReader();
+                                                        reader.onloadend =
+                                                            async () => {
+                                                                const url =
+                                                                    reader.result as string;
+                                                                setIsSaving(
+                                                                    true,
+                                                                );
+                                                                const result =
+                                                                    await saveSignature(
+                                                                        {
+                                                                            url,
+                                                                            signatureType:
+                                                                                "TEMPLATE",
+                                                                            isDefault:
+                                                                                templates.length ===
+                                                                                0,
+                                                                        },
+                                                                    );
+                                                                if (result) {
+                                                                    setTemplates(
+                                                                        (
+                                                                            prev,
+                                                                        ) => [
+                                                                            result,
+                                                                            ...prev,
+                                                                        ],
+                                                                    );
+                                                                }
+                                                                setIsSaving(
+                                                                    false,
+                                                                );
+                                                            };
+                                                        reader.readAsDataURL(
+                                                            file,
+                                                        );
+                                                    }
+                                                }}
                                             />
-                                            {selectedTemplate ===
-                                                template.id && (
-                                                <div className="absolute top-2 right-2 bg-undip-blue text-white rounded-full p-1 shadow-sm animate-in zoom-in">
-                                                    <Check className="h-3 w-3" />
+                                            {isSaving ? (
+                                                <Loader2 className="h-5 w-5 mb-2 animate-spin" />
+                                            ) : (
+                                                <Upload className="h-5 w-5 mb-2" />
+                                            )}
+                                            <p className="text-[10px] font-bold uppercase">
+                                                Tambah Baru
+                                            </p>
+                                        </div>
+                                        {templates.length === 0 &&
+                                            !isLoading && (
+                                                <div className="col-span-2 text-center py-8 text-slate-400">
+                                                    <p className="text-sm">
+                                                        Belum ada template
+                                                        tersimpan
+                                                    </p>
+                                                    <p className="text-xs mt-1">
+                                                        Upload template baru
+                                                        untuk memulai
+                                                    </p>
                                                 </div>
                                             )}
-                                        </div>
-                                    ))}
-                                    <div className="aspect-video rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-undip-blue hover:text-undip-blue transition-all cursor-pointer">
-                                        <Upload className="h-5 w-5 mb-2" />
-                                        <p className="text-[10px] font-bold uppercase">
-                                            Tambah Baru
-                                        </p>
                                     </div>
-                                </div>
+                                )}
                             </TabsContent>
 
                             <TabsContent

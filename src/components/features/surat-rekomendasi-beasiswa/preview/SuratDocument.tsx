@@ -219,16 +219,15 @@ export function SuratDocument({
                                 <span>Semarang,</span>
                                 <span className="font-bold">
                                     {showSignature &&
-                                        (finalData.publishedAt
-                                            ? new Date(finalData.publishedAt)
-                                            : new Date()
-                                        )
-                                            .toLocaleDateString("id-ID", {
-                                                day: "numeric",
-                                                month: "short",
-                                                year: "numeric",
-                                            })
-                                            .toUpperCase()}
+                                        (finalData.publishedAt ||
+                                            new Date().toLocaleDateString(
+                                                "id-ID",
+                                                {
+                                                    day: "numeric",
+                                                    month: "long",
+                                                    year: "numeric",
+                                                },
+                                            ))}
                                 </span>
                             </div>
                             <p className="text-left mt-[2px]">a.n. Dekan</p>

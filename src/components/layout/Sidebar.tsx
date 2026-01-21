@@ -10,6 +10,8 @@ import {
     FileEdit,
     LogOut,
     ChevronDown,
+    Archive,
+    Settings,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -151,6 +153,16 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
                     href: "/upa/surat/selesai",
                 },
             ],
+        },
+        {
+            label: "Arsip Surat",
+            href: "/upa/arsip",
+            icon: <Archive size={20} />,
+        },
+        {
+            label: "Pengaturan Sistem",
+            href: "/upa/pengaturan",
+            icon: <Settings size={20} />,
         },
     ],
 };

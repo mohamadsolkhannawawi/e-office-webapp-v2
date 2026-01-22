@@ -36,9 +36,9 @@ interface SuratDocumentProps {
 
 // Default values untuk fallback jika config tidak tersedia
 const DEFAULT_LEADERSHIP: LeadershipConfig = {
-    name: "Prof. Dr. Ngadiwiyana, S.Si., M.Si.",
-    nip: "196906201999031002",
-    jabatan: "Wakil Dekan Akademik dan Kemahasiswaan",
+    name: "[Nama Pejabat]",
+    nip: "[NIP]",
+    jabatan: "[Jabatan]",
 };
 
 export function SuratDocument({
@@ -234,7 +234,7 @@ export function SuratDocument({
                 {/* Tanda Tangan */}
                 <div className="mt-12 text-[11.5px] relative">
                     <div className="w-full flex justify-end">
-                        <div className="w-fit">
+                        <div className="w-fit min-w-[220px]">
                             <div className="flex justify-between items-end font-normal">
                                 <span>Semarang,</span>
                                 <span className="font-bold">
@@ -279,7 +279,7 @@ export function SuratDocument({
                                 )}
                             </div>
 
-                            <p className="font-bold underline decoration-1 underline-offset-2 text-left">
+                            <p className="font-bold underline decoration-1 underline-offset-2 text-left whitespace-nowrap">
                                 {leadership.name}
                             </p>
                             <p className="text-left mt-[2px]">

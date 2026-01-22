@@ -212,6 +212,11 @@ interface SuratPDFProps {
     showStamp?: boolean;
     qrCodeUrl?: string;
     data?: Record<string, string>;
+    leadershipConfig?: {
+        name: string;
+        nip: string;
+        jabatan: string;
+    };
 }
 
 export const SuratPDF = ({
@@ -221,6 +226,7 @@ export const SuratPDF = ({
     showStamp,
     qrCodeUrl,
     data,
+    leadershipConfig,
 }: SuratPDFProps) => {
     // Current year logic
     const currentYear = new Date().getFullYear();
@@ -240,6 +246,12 @@ export const SuratPDF = ({
     };
     const finalData = { ...defaultData, ...data };
     const jurusanDisplay = finalData.programStudi || finalData.jurusan;
+
+    const leadership = leadershipConfig || {
+        name: "[Nama Pejabat]",
+        nip: "[NIP]",
+        jabatan: "[Jabatan]",
+    };
 
     return (
         <Document>
@@ -417,7 +429,7 @@ export const SuratPDF = ({
                     <Text style={styles.signatureText}>Semarang,</Text>
                     <Text style={styles.signatureText}>a.n. Dekan</Text>
                     <Text style={styles.signatureText}>
-                        Wakil Dekan Akademik dan Kemahasiswaan
+                        {leadership.jabatan}
                     </Text>
 
                     <View style={styles.signatureImageContainer}>
@@ -435,11 +447,9 @@ export const SuratPDF = ({
                         )}
                     </View>
 
-                    <Text style={styles.signatureName}>
-                        Prof. Dr. Ngadiwiyana, S.Si., M.Si.
-                    </Text>
+                    <Text style={styles.signatureName}>{leadership.name}</Text>
                     <Text style={styles.signatureNIP}>
-                        NIP. 196906201999031002
+                        NIP. {leadership.nip}
                     </Text>
                 </View>
 

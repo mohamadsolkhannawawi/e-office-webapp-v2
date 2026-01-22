@@ -304,13 +304,16 @@ export async function getLetterConfig(
     key: string,
 ): Promise<LeadershipConfig | null> {
     try {
-        const response = await fetch(`/api/master/letter-config/${key}`, {
-            method: "GET",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
+        const response = await fetch(
+            `/api/master/letterConfig/letter-config/${key}`,
+            {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
             },
-        });
+        );
 
         if (!response.ok) {
             console.warn(`Letter config '${key}' not found, using defaults`);
@@ -334,7 +337,7 @@ export async function updateLetterConfig(
 ): Promise<boolean> {
     try {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/master/letter-config/${key}`,
+            `/api/master/letterConfig/letter-config/${key}`,
             {
                 method: "PUT",
                 credentials: "include",

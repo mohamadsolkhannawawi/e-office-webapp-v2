@@ -13,7 +13,7 @@ export default function DashboardLayout({
 
     return (
         <div className="min-h-screen flex flex-col">
-            <Navbar userName={user?.name || "User"} />
+            <Navbar />
             <div className="flex flex-1 overflow-hidden">
                 <Sidebar />
                 <main className="flex-1 p-6 bg-slate-50 overflow-auto lg:p-8">

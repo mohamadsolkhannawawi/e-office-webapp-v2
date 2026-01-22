@@ -63,7 +63,7 @@ export function DetailPengajuan({ data, setData }: DetailPengajuanProps) {
                                 Jenis Surat
                             </Label>
                             <Input
-                                value="Surat Rekomendasi Mahasiswa"
+                                value="Surat Rekomendasi Beasiswa"
                                 readOnly
                                 className="h-11 bg-gray-100 text-gray-500 border-gray-200"
                             />

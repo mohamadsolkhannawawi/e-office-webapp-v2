@@ -10,6 +10,19 @@ import {
 } from "@/components/ui/card";
 import { LetterList } from "./LetterList";
 import Link from "next/link";
+import {
+    BarChart as ReBarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    PieChart,
+    Pie,
+    Cell,
+    Legend,
+} from "recharts";
 
 interface StatCardProps {
     label: string;
@@ -119,27 +132,13 @@ export function AdminDashboard({
     detailBasePath = "perlu-tindakan",
 }: AdminDashboardProps) {
     // Helper for Trend Chart
-    const trendData = stats.trend || [];
-    const maxCount = Math.max(...trendData.map((d) => d.count), 5); // Minimum scale 5
-    const chartHeight = 100;
-    const chartWidth = 400;
-
-    const getPoints = () => {
-        if (!trendData.length) return "";
-        const stepX = chartWidth / (trendData.length - 1 || 1);
-        return trendData
-            .map((d, i) => {
-                const x = i * stepX;
-                const y = chartHeight - (d.count / maxCount) * chartHeight;
-                return `${x},${y}`;
-            })
-            .join(" ");
-    };
-
-    const points = getPoints();
-    // Beziér curve smoothing could be complex, using polyline for simplicity or smoothed path if needed.
-    // Let's stick to simple polyline or basic smooth approximation logic if time fits, but simple polyline is robust.
-    const pathD = points ? `M${points.replace(/ /g, " L")}` : "";
+    const trendData = (stats.trend || []).map((d) => ({
+        ...d,
+        displayDate: new Date(d.date).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+        }),
+    }));
 
     // Helper for Distribution
     const dist = stats.distribution || {
@@ -148,12 +147,16 @@ export function AdminDashboard({
         completed: 0,
         rejected: 0,
     };
-    const totalDist =
-        dist.pending + dist.inProgress + dist.completed + dist.rejected || 1;
 
-    const pendingPct = ((dist.pending + dist.inProgress) / totalDist) * 100;
-    const completedPct = (dist.completed / totalDist) * 100;
-    const rejectedPct = (dist.rejected / totalDist) * 100;
+    const pieData = [
+        {
+            name: "Proses",
+            value: dist.pending + dist.inProgress,
+            color: "#94a3b8",
+        }, // slate-400
+        { name: "Selesai", value: dist.completed, color: "#10b981" }, // emerald-500
+        { name: "Ditolak", value: dist.rejected, color: "#ef4444" }, // red-500
+    ];
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -211,115 +214,104 @@ export function AdminDashboard({
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <Card className="lg:col-span-2 border-none shadow-sm pb-10">
-                    <CardHeader>
+                <Card className="lg:col-span-2 border-none shadow-sm overflow-hidden">
+                    <CardHeader className="pb-2">
                         <CardTitle className="text-base font-bold text-slate-800">
                             Tren Volume 30 Hari
                         </CardTitle>
                     </CardHeader>
                     <CardContentUI>
-                        <div className="relative h-48 w-full mt-4">
-                            <div className="absolute inset-0 flex flex-col justify-between">
-                                {[
-                                    maxCount,
-                                    Math.round(maxCount * 0.66),
-                                    Math.round(maxCount * 0.33),
-                                    0,
-                                ].map((val) => (
-                                    <div
-                                        key={val}
-                                        className="flex items-center gap-4 w-full"
-                                    >
-                                        <span className="text-[10px] text-slate-400 w-6 text-right">
-                                            {val}
-                                        </span>
-                                        <div className="flex-1 border-t border-dashed border-slate-100"></div>
-                                    </div>
-                                ))}
-                            </div>
-                            {/* Chart SVG */}
-                            <div className="absolute inset-0 pl-10 pt-2 pb-6 right-2">
-                                <svg
-                                    className="w-full h-full overflow-visible"
-                                    preserveAspectRatio="none"
-                                    viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-                                >
-                                    {pathD && (
-                                        <path
-                                            d={pathD}
-                                            fill="none"
-                                            stroke="#0073B7"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            className="drop-shadow-sm"
-                                        />
-                                    )}
-                                </svg>
-                            </div>
-                            <div className="absolute bottom-[-20px] left-10 right-2 flex justify-between text-[10px] text-slate-400 px-1 font-medium">
-                                <span>30 hari lalu</span>
-                                <span>Hari ini</span>
-                            </div>
+                        <div className="h-64 w-full mt-4">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <ReBarChart data={trendData}>
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        vertical={false}
+                                        stroke="#f1f5f9"
+                                    />
+                                    <XAxis
+                                        dataKey="displayDate"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: "#94a3b8", fontSize: 10 }}
+                                        dy={10}
+                                        interval="preserveStartEnd"
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        allowDecimals={false}
+                                        tick={{ fill: "#94a3b8", fontSize: 10 }}
+                                    />
+                                    <Tooltip
+                                        cursor={{ fill: "#f8fafc" }}
+                                        contentStyle={{
+                                            borderRadius: "8px",
+                                            border: "none",
+                                            boxShadow:
+                                                "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                                            fontSize: "12px",
+                                        }}
+                                    />
+                                    <Bar
+                                        dataKey="count"
+                                        name="Volume Surat"
+                                        fill="#0073B7"
+                                        radius={[4, 4, 0, 0]}
+                                        barSize={20}
+                                    />
+                                </ReBarChart>
+                            </ResponsiveContainer>
                         </div>
                     </CardContentUI>
                 </Card>
 
-                <Card className="border-none shadow-sm">
-                    <CardHeader>
+                <Card className="border-none shadow-sm overflow-hidden">
+                    <CardHeader className="pb-0">
                         <CardTitle className="text-base font-bold text-slate-800">
                             Distribusi Status
                         </CardTitle>
                     </CardHeader>
-                    <CardContentUI className="pt-10 flex flex-col justify-center h-full">
-                        <div className="flex items-end justify-between px-1 mb-2">
-                            <span className="text-xs font-bold text-slate-500">
-                                {dist.pending + dist.inProgress}
-                            </span>
-                            <span className="text-xs font-bold text-slate-500">
-                                {dist.completed}
-                            </span>
-                            <span className="text-xs font-bold text-slate-500">
-                                {dist.rejected}
-                            </span>
-                        </div>
-                        <div className="flex w-full h-4 rounded-full overflow-hidden bg-slate-100 mb-6">
-                            {pendingPct > 0 && (
-                                <div
-                                    className="bg-slate-400 h-full"
-                                    style={{ width: `${pendingPct}%` }}
-                                    title="Proses/Pending"
-                                ></div>
-                            )}
-                            {completedPct > 0 && (
-                                <div
-                                    className="bg-emerald-500 h-full"
-                                    style={{ width: `${completedPct}%` }}
-                                    title="Selesai"
-                                ></div>
-                            )}
-                            {rejectedPct > 0 && (
-                                <div
-                                    className="bg-red-500 h-full"
-                                    style={{ width: `${rejectedPct}%` }}
-                                    title="Ditolak"
-                                ></div>
-                            )}
-                        </div>
-                        <div className="flex flex-col gap-3">
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-tight">
-                                <span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
-                                Proses ({Math.round(pendingPct)}%)
-                            </div>
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-tight">
-                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                                Selesai ({Math.round(completedPct)}%)
-                            </div>
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-tight">
-                                <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
-                                Ditolak ({Math.round(rejectedPct)}%)
-                            </div>
-                        </div>
+                    <CardContentUI className="h-72">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={pieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {pieData.map((entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={entry.color}
+                                        />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    contentStyle={{
+                                        borderRadius: "8px",
+                                        border: "none",
+                                        boxShadow:
+                                            "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                                        fontSize: "12px",
+                                    }}
+                                />
+                                <Legend
+                                    verticalAlign="bottom"
+                                    align="center"
+                                    iconType="circle"
+                                    formatter={(value) => (
+                                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+                                            {value}
+                                        </span>
+                                    )}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
                     </CardContentUI>
                 </Card>
             </div>

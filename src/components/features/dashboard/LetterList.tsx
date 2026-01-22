@@ -148,18 +148,26 @@ export function LetterList({
         range: { from?: Date; to?: Date } | undefined,
     ) => {
         if (!range) {
+            // Jika range kosong/direset
             setDateRange({});
             router.push(
                 `${pathname}?${createQueryString({ startDate: "", endDate: "" })}`,
             );
             return;
         }
+
         setDateRange(range);
+
+        // Hanya update URL jika kedua tanggal (from & to) sudah dipilih
         if (range.from && range.to) {
+            // Set endDate ke akhir hari (23:59:59.999) agar mencakup semua data di hari tersebut
+            const endDate = new Date(range.to);
+            endDate.setHours(23, 59, 59, 999);
+
             router.push(
                 `${pathname}?${createQueryString({
                     startDate: range.from.toISOString(),
-                    endDate: range.to.toISOString(),
+                    endDate: endDate.toISOString(),
                 })}`,
             );
         }

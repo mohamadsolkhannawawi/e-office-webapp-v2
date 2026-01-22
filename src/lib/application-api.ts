@@ -630,3 +630,80 @@ export async function verifyLetterPublic(code: string): Promise<{
         return null;
     }
 }
+
+/**
+ * Interface untuk User Profile
+ */
+export interface UserProfile {
+    id: string;
+    name: string;
+    email: string;
+    image?: string;
+    mahasiswa?: {
+        id: string;
+        nim: string;
+        noHp: string;
+        tahunMasuk: string;
+        alamat?: string;
+        tempatLahir?: string;
+        tanggalLahir?: string;
+        semester?: number;
+        ipk?: number;
+        ips?: number;
+        departemen?: { name: string };
+        programStudi?: { name: string };
+    };
+    pegawai?: {
+        id: string;
+        nip: string;
+        jabatan: string;
+        noHp?: string;
+        departemen?: { name: string };
+        programStudi?: { name: string };
+    };
+    userRole?: Array<{
+        role: { name: string };
+    }>;
+}
+
+/**
+ * Fetch current user profile
+ */
+export async function getMe(): Promise<UserProfile | null> {
+    try {
+        const response = await fetch("/api/me", {
+            method: "GET",
+            credentials: "include",
+        });
+
+        if (!response.ok) return null;
+        return await response.json();
+    } catch (error) {
+        console.error("Get profile error:", error);
+        return null;
+    }
+}
+
+/**
+ * Update current user profile
+ */
+export async function updateProfile(data: {
+    name: string;
+    noHp?: string;
+}): Promise<boolean> {
+    try {
+        const response = await fetch("/api/me", {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        return response.ok;
+    } catch (error) {
+        console.error("Update profile error:", error);
+        return false;
+    }
+}

@@ -180,7 +180,8 @@ export function AdminActionModals({
                                 <ul className="text-xs text-blue-700 space-y-1.5 list-disc pl-4">
                                     <li>
                                         Nomor Surat Otomatis (Format:
-                                        FSM/KM/2026)
+                                        [Nomor]/UN7.F8.1/KM/[Bulan]/
+                                        {new Date().getFullYear()})
                                     </li>
 
                                     <li>

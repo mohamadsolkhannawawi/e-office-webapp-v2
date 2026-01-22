@@ -155,7 +155,8 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
                 </Card>
 
                 <p className="text-center text-xs text-slate-400">
-                    &copy; 2026 E-Office Fakultas Sains dan Matematika UNDIP
+                    &copy; {new Date().getFullYear()} E-Office Fakultas Sains
+                    dan Matematika UNDIP
                 </p>
             </div>
         </div>

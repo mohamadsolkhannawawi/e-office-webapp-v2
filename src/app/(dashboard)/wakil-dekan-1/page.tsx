@@ -109,7 +109,9 @@ async function getDashboardData(searchParams: SearchParams) {
                     applicant:
                         app.applicantName || app.formData?.namaLengkap || "N/A",
                     subject:
-                        app.scholarshipName || "Surat Rekomendasi Beasiswa",
+                        app.scholarshipName ||
+                        app.letterType?.name ||
+                        "Surat Rekomendasi Beasiswa",
                     date: new Date(app.createdAt).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "short",

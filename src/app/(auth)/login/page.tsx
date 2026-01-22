@@ -261,8 +261,8 @@ export default function LoginPage() {
             {/* Footer */}
             <footer className="flex w-full flex-col items-center justify-between px-6 py-6 text-xs text-gray-500 dark:text-gray-400 md:flex-row">
                 <p className="mb-2 md:mb-0">
-                    © 2025 UP2TI FSM UNDIP. Seluruh Hak Cipta Dilindungi
-                    Undang-Undang.
+                    © {new Date().getFullYear()} UP2TI FSM UNDIP. Seluruh Hak
+                    Cipta Dilindungi Undang-Undang.
                 </p>
                 <div className="flex gap-4">
                     <Link

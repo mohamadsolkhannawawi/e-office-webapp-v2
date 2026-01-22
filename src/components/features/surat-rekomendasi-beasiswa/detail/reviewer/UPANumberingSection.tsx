@@ -127,7 +127,7 @@ export function UPANumberingSection({
                             <Input
                                 value={letterNumber}
                                 onChange={handleNumberChange}
-                                placeholder="Contoh: 001/UN7.F8.1/KM/I/2026"
+                                placeholder={`Contoh: 001/UN7.F8.1/KM/I/${new Date().getFullYear()}`}
                                 className="h-14 rounded-2xl border-slate-200 focus:ring-undip-blue focus:border-undip-blue pl-12 text-lg font-medium text-slate-700 transition-all group-hover:border-slate-300"
                             />
                             <Hash className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-undip-blue transition-colors" />

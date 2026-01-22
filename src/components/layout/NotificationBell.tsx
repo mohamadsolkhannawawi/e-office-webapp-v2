@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Bell, Check, CheckCheck, ExternalLink } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Bell, CheckCheck, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Popover,
@@ -23,18 +23,29 @@ export function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Fetch unread count on mount and periodically
-    const fetchUnreadCount = useCallback(async () => {
-        const count = await getUnreadNotificationCount();
-        setUnreadCount(count);
-    }, []);
-
     useEffect(() => {
-        fetchUnreadCount();
+        let isMounted = true;
+
+        const updateCount = async () => {
+            const count = await getUnreadNotificationCount();
+            if (isMounted) {
+                setUnreadCount(count);
+            }
+        };
+
+        // Initial fetch
+        void updateCount();
+
         // Poll every 30 seconds
-        const interval = setInterval(fetchUnreadCount, 30000);
-        return () => clearInterval(interval);
-    }, [fetchUnreadCount]);
+        const interval = setInterval(() => {
+            void updateCount();
+        }, 30000);
+
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+        };
+    }, []);
 
     // Fetch full notifications when popover opens
     const handleOpenChange = async (open: boolean) => {
@@ -81,9 +92,9 @@ export function NotificationBell() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="relative w-10 h-10 rounded-full hover:bg-slate-100"
+                    className="relative w-10 h-10 rounded-full hover:bg-white/10"
                 >
-                    <Bell className="h-5 w-5 text-slate-600" />
+                    <Bell className="h-5 w-5 text-white" />
                     {unreadCount > 0 && (
                         <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
                             {unreadCount > 9 ? "9+" : unreadCount}

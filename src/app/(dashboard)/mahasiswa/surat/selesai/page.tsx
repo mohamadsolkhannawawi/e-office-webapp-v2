@@ -218,7 +218,10 @@ export default function SuratSelesaiPage() {
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
                                                     <span className="font-bold text-slate-800 group-hover:text-[#007bff] transition-colors">
-                                                        {app.scholarshipName}
+                                                        {app.scholarshipName ||
+                                                            app.letterType
+                                                                ?.name ||
+                                                            "Surat Rekomendasi Beasiswa"}
                                                     </span>
                                                     <span className="text-xs text-slate-500 mt-1">
                                                         Diajukan pada:{" "}

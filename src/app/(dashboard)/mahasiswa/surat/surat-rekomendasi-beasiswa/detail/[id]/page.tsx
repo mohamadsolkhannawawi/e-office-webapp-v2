@@ -101,7 +101,7 @@ export default function DetailPengajuanPage() {
     const identitasData = {
         namaLengkap: application.formData.namaLengkap,
         nim: application.formData.nim,
-        role: "Mahasiswa",
+        role: application.createdBy?.mahasiswa ? "Mahasiswa" : "Pegawai",
         email: application.formData.email,
         departemen: application.formData.departemen,
         programStudi: application.formData.programStudi,
@@ -114,11 +114,17 @@ export default function DetailPengajuanPage() {
     };
 
     const detailSuratData = {
-        jenisSurat: `Surat Rekomendasi Beasiswa${
-            application.formData.jenisBeasiswa
-                ? ` (${application.formData.jenisBeasiswa})`
-                : ""
-        }`,
+        jenisSurat: application.letterType?.name
+            ? `${application.letterType.name}${
+                  application.formData.jenisBeasiswa
+                      ? ` (${application.formData.jenisBeasiswa})`
+                      : ""
+              }`
+            : `Surat Rekomendasi Beasiswa${
+                  application.formData.jenisBeasiswa
+                      ? ` (${application.formData.jenisBeasiswa})`
+                      : ""
+              }`,
         namaBeasiswa: application.scholarshipName || "-",
         status: application.status,
     };

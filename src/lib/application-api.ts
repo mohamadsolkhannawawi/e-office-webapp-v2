@@ -32,6 +32,11 @@ export interface ApplicationAttachment {
 export interface ApplicationSummary {
     id: string;
     scholarshipName: string;
+    letterType?: {
+        id: string;
+        name: string;
+        description?: string;
+    };
     status:
         | "PENDING"
         | "IN_PROGRESS"
@@ -58,6 +63,11 @@ export interface ApplicationSummary {
 export interface ApplicationDetail {
     id: string;
     scholarshipName: string;
+    letterType?: {
+        id: string;
+        name: string;
+        description?: string;
+    };
     status:
         | "PENDING"
         | "IN_PROGRESS"

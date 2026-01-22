@@ -227,7 +227,8 @@ export default function SuratDalamProsesPage() {
                                             </td>
                                             <td className="px-6 py-4 text-slate-700 font-medium">
                                                 {app.scholarshipName ||
-                                                    "Pengajuan Surat Rekomendasi Beasiswa"}
+                                                    app.letterType?.name ||
+                                                    "Surat Rekomendasi Beasiswa"}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span

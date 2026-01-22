@@ -1,55 +1,208 @@
 "use client";
 
-import { ChevronRight, Send } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { ChevronRight, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
     IdentitasPengaju,
     DetailSuratPengajuan,
     RiwayatSurat,
     DetailRevisi,
-    IdentitasPengajuProps,
-    DetailSuratPengajuanProps,
+    LampiranSurat,
 } from "@/components/features/surat-rekomendasi-beasiswa/detail/common";
+import {
+    getApplicationById,
+    type ApplicationDetail,
+} from "@/lib/application-api";
+import { getReceiverRole } from "@/utils/status-mapper";
 
 export default function DetailRevisiPage() {
-    // Dummy data to match the provided HTML/Design
-    const identitasData: IdentitasPengajuProps["data"] = {
-        namaLengkap: "Ahmad Syaifullah",
-        nim: "24060121120001",
-        role: "Mahasiswa",
-        email: "ahmadsyaifullah@students.undip.ac.id",
-        departemen: "Informatika",
-        programStudi: "Informatika",
-        tempatLahir: "Blora",
-        tanggalLahir: "03/18/2006",
-        noHp: "089123141241412412",
-        semester: "7",
-        ipk: "3.9",
-        ips: "3.8",
+    const params = useParams();
+    const router = useRouter();
+    const id = params.id as string;
+
+    const [application, setApplication] = useState<ApplicationDetail | null>(
+        null,
+    );
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!id) return;
+
+        async function fetchApplication() {
+            try {
+                setLoading(true);
+                const data = await getApplicationById(id);
+                setApplication(data);
+            } catch (err) {
+                console.error("Error fetching application:", err);
+                setError(
+                    err instanceof Error
+                        ? err.message
+                        : "Gagal memuat data pengajuan",
+                );
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchApplication();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                    <p className="text-gray-600">Memuat data...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !application) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="text-center">
+                    <p className="text-red-600 mb-4">
+                        {error || "Pengajuan tidak ditemukan"}
+                    </p>
+                    <Button onClick={() => router.back()}>Kembali</Button>
+                </div>
+            </div>
+        );
+    }
+
+    const formatDate = (dateStr?: string) => {
+        if (!dateStr) return "-";
+        try {
+            const date = new Date(dateStr);
+            return new Intl.DateTimeFormat("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+            }).format(date);
+        } catch {
+            return dateStr;
+        }
     };
 
-    const detailSuratData: DetailSuratPengajuanProps["data"] = {
-        jenisSurat: "SRB/ Surat Rekomendasi Beasiswa",
-        keperluan: "Beasiswa Djarum Foundation",
+    const identitasData = {
+        namaLengkap: application.formData.namaLengkap,
+        nim: application.formData.nim,
+        role: application.createdBy?.mahasiswa ? "Mahasiswa" : "Pemohon",
+        email: application.formData.email,
+        departemen: application.formData.departemen,
+        programStudi: application.formData.programStudi,
+        tempatLahir: application.formData.tempatLahir,
+        tanggalLahir: formatDate(application.formData.tanggalLahir),
+        noHp: application.formData.noHp,
+        semester: application.formData.semester || "-",
+        ipk: application.formData.ipk,
+        ips: application.formData.ips,
     };
+
+    const detailSuratData = {
+        jenisSurat: application.letterType?.name
+            ? `${application.letterType.name}${
+                  application.formData.jenisBeasiswa
+                      ? ` (${application.formData.jenisBeasiswa})`
+                      : ""
+              }`
+            : `Surat Rekomendasi Beasiswa${
+                  application.formData.jenisBeasiswa
+                      ? ` (${application.formData.jenisBeasiswa})`
+                      : ""
+              }`,
+        keperluan: application.scholarshipName || "-",
+    };
+
+    const lampiranData = application.attachments.map((att) => ({
+        id: att.id,
+        name: att.filename,
+        type: att.mimeType,
+        size: att.fileSize,
+        category: att.category,
+        downloadUrl: att.downloadUrl,
+    }));
+
+    const riwayatData = application.history?.map((h) => ({
+        senderRole: h.actor.role?.name || h.actor.name,
+        receiverRole: getReceiverRole(h.action, application.currentStep),
+        status: h.status,
+        date: new Date(h.createdAt).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        }),
+        time: new Date(h.createdAt).toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+        }),
+        catatan: h.note,
+        actionType: h.action,
+    }));
+
+    // Find the revisions note
+    // Look for the latest history entry with status REVISION or action revision
+    const latestRevision = application.history
+        ?.filter(
+            (h) =>
+                h.status === "REVISION" ||
+                h.action === "revision" ||
+                h.action === "revise",
+        )
+        .sort(
+            (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime(),
+        )[0];
+
+    const revisionNote = latestRevision?.note || "Harap perbaiki data Anda.";
+    const revisionChecker =
+        latestRevision?.actor?.role?.name ||
+        latestRevision?.actor?.name ||
+        "Reviewer";
+
+    const jenis =
+        ((application.formData as unknown as Record<string, unknown>)
+            .jenisBeasiswa as string) || "internal";
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-10">
             {/* Breadcrumb */}
             <nav className="flex items-center text-sm font-medium text-slate-500">
-                <span>Persuratan</span>
+                <Link
+                    href="/mahasiswa"
+                    className="hover:text-undip-blue transition-colors"
+                >
+                    Dashboard
+                </Link>
                 <ChevronRight className="mx-2 h-4 w-4" />
-                <span className="text-slate-800">Detail Surat</span>
+                <Link
+                    href="/mahasiswa/surat/proses"
+                    className="hover:text-undip-blue transition-colors"
+                >
+                    Persuratan
+                </Link>
+                <ChevronRight className="mx-2 h-4 w-4" />
+                <span className="text-slate-800">Detail Surat (Revisi)</span>
             </nav>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Left Column */}
                 <div className="lg:col-span-8 space-y-6">
                     {/* Detail Revisi Section */}
-                    <DetailRevisi
-                        checker="Supervisor Akademik"
-                        comment="IPK-mu tidak sesuai dengan transkrip nilai"
-                    />
+                    {latestRevision && (
+                        <DetailRevisi
+                            checker={revisionChecker}
+                            comment={revisionNote}
+                        />
+                    )}
 
                     {/* Identitas Pengaju */}
                     <IdentitasPengaju data={identitasData} />
@@ -58,110 +211,28 @@ export default function DetailRevisiPage() {
                     <DetailSuratPengajuan data={detailSuratData} />
 
                     {/* Lampiran */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                            <h2 className="text-lg font-bold text-slate-800">
-                                Lampiran
-                            </h2>
-                        </div>
-                        <div className="p-4 space-y-4">
-                            {/* KTM Lampiran */}
-                            <div className="border border-gray-200 rounded-md overflow-hidden">
-                                <button className="w-full flex justify-between items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors">
-                                    <span className="font-bold text-sm text-slate-700">
-                                        KTM.jpg
-                                    </span>
-                                    <ChevronRight className="h-4 w-4 text-slate-400 rotate-90" />
-                                </button>
-                                <div className="p-8 bg-gray-100 flex justify-center">
-                                    <div className="bg-emerald-600/80 p-12 rounded shadow-inner max-w-sm w-full flex justify-center items-center">
-                                        <div className="bg-white shadow-xl p-6 w-full aspect-3/4 flex flex-col gap-3 rounded-sm">
-                                            <div className="h-3 w-1/3 bg-gray-200 rounded mb-4"></div>
-                                            <div className="space-y-2">
-                                                <div className="h-2 w-full bg-gray-100 rounded"></div>
-                                                <div className="h-2 w-full bg-gray-100 rounded"></div>
-                                                <div className="h-2 w-5/6 bg-gray-100 rounded"></div>
-                                            </div>
-                                            <div className="flex-1"></div>
-                                            <div className="h-12 w-12 bg-gray-100 rounded-full self-end border-2 border-gray-50"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* KHS Lampiran */}
-                            <div className="border border-gray-200 rounded-md overflow-hidden">
-                                <button className="w-full flex justify-between items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors">
-                                    <span className="font-bold text-sm text-slate-700">
-                                        KHS.pdf
-                                    </span>
-                                    <ChevronRight className="h-4 w-4 text-slate-400 rotate-90" />
-                                </button>
-                                <div className="p-8 bg-gray-100 flex justify-center">
-                                    <div className="bg-emerald-600/80 p-12 rounded shadow-inner max-w-sm w-full flex justify-center items-center">
-                                        <div className="bg-white shadow-xl p-8 w-full aspect-3/4 flex flex-col gap-4 rounded-sm">
-                                            <div className="h-3 w-1/2 bg-gray-200 rounded mb-6 mx-auto"></div>
-                                            <div className="space-y-3">
-                                                <div className="h-2 w-full bg-gray-50 rounded"></div>
-                                                <div className="h-2 w-full bg-gray-50 rounded"></div>
-                                                <div className="h-2 w-full bg-gray-50 rounded"></div>
-                                                <div className="h-2 w-full bg-gray-50 rounded"></div>
-                                            </div>
-                                            <div className="flex-1"></div>
-                                            <div className="h-2 w-1/4 bg-gray-200 rounded self-end"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <LampiranSurat data={lampiranData} />
                 </div>
 
                 {/* Right Column */}
                 <div className="lg:col-span-4 space-y-6">
-                    <Button className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-7 rounded shadow-md flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+                    <Button
+                        onClick={() =>
+                            router.push(
+                                `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
+                            )
+                        }
+                        className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-7 rounded shadow-md flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                    >
                         <Send className="h-4 w-4" />
-                        Revisi
+                        Perbaiki Pengajuan
                     </Button>
 
                     <RiwayatSurat
-                        riwayat={[
-                            {
-                                senderRole: "Admin Surat",
-                                status: "Menunggu Verifikasi",
-                                date: "09 Desember 2025",
-                                time: "00:58:49",
-                                catatan: "Tidak ada catatan",
-                            },
-                            {
-                                senderRole: "Supervisor Akademik",
-                                status: "Verifikasi Supervisor Akademik",
-                                date: "09 Desember 2025",
-                                time: "00:58:49",
-                                catatan: "Tidak ada catatan",
-                            },
-                            {
-                                senderRole: "Supervisor Akademik",
-                                status: "Verifikasi Supervisor Akademik",
-                                date: "09 Desember 2025",
-                                time: "00:58:49",
-                                catatan: "Tidak ada catatan",
-                            },
-                            {
-                                senderRole: "Supervisor Akademik",
-                                status: "Verifikasi Supervisor Akademik",
-                                date: "09 Desember 2025",
-                                time: "00:58:49",
-                                catatan: "Tidak ada catatan",
-                            },
-                            {
-                                senderRole: "Mahasiswa",
-                                status: "Surat Diajukan",
-                                date: "09 Desember 2025",
-                                time: "00:58:49",
-                                catatan: "Tidak ada catatan",
-                            },
-                        ]}
+                        applicationId={application.id}
+                        status={application.status}
+                        createdAt={application.createdAt}
+                        riwayat={riwayatData}
                     />
                 </div>
             </div>

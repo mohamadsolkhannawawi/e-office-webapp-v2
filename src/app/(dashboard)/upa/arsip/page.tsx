@@ -87,7 +87,7 @@ export default function ArsipPage() {
             no: index + 1,
             nama: app.formData?.namaLengkap || app.applicantName || "-",
             nim: app.formData?.nim || "-",
-            beasiswa: app.scholarshipName || "-",
+            beasiswa: app.scholarshipName || app.letterType?.name || "-",
             nomorSurat:
                 (app as unknown as { letterNumber?: string }).letterNumber ||
                 "-",
@@ -381,7 +381,9 @@ export default function ArsipPage() {
                                         {app.formData?.nim || "-"}
                                     </TableCell>
                                     <TableCell>
-                                        {app.scholarshipName || "-"}
+                                        {app.scholarshipName ||
+                                            app.letterType?.name ||
+                                            "-"}
                                     </TableCell>
                                     <TableCell className="font-mono text-sm">
                                         {(

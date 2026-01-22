@@ -68,7 +68,10 @@ export default async function SelesaiPage(props: {
         return {
             id: app.id,
             applicant: app.applicantName || app.formData?.namaLengkap || "N/A",
-            subject: app.scholarshipName || "Surat Rekomendasi Beasiswa",
+            subject:
+                app.scholarshipName ||
+                app.letterType?.name ||
+                "Surat Rekomendasi Beasiswa",
             date: new Date(app.createdAt).toLocaleDateString("id-ID", {
                 day: "numeric",
                 month: "short",

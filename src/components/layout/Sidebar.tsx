@@ -12,6 +12,7 @@ import {
     ChevronDown,
     Archive,
     Settings,
+    User,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -70,6 +71,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
                 },
             ],
         },
+        {
+            label: "Profil Saya",
+            href: "/mahasiswa/profile",
+            icon: <User size={20} />,
+        },
     ],
     "supervisor-akademik": [
         {
@@ -90,6 +96,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
                     href: "/supervisor-akademik/surat/selesai",
                 },
             ],
+        },
+        {
+            label: "Profil Saya",
+            href: "/supervisor-akademik/profile",
+            icon: <User size={20} />,
         },
     ],
     "manajer-tu": [
@@ -112,6 +123,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
                 },
             ],
         },
+        {
+            label: "Profil Saya",
+            href: "/manajer-tu/profile",
+            icon: <User size={20} />,
+        },
     ],
     "wakil-dekan-1": [
         {
@@ -132,6 +148,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
                     href: "/wakil-dekan-1/surat/selesai",
                 },
             ],
+        },
+        {
+            label: "Profil Saya",
+            href: "/wakil-dekan-1/profile",
+            icon: <User size={20} />,
         },
     ],
     upa: [
@@ -163,6 +184,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             label: "Pengaturan Sistem",
             href: "/upa/pengaturan",
             icon: <Settings size={20} />,
+        },
+        {
+            label: "Profil Saya",
+            href: "/upa/profile",
+            icon: <User size={20} />,
         },
     ],
 };

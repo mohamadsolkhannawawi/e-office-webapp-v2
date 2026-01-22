@@ -67,7 +67,7 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             submenu: [
                 {
                     label: "Surat Rekomendasi Beasiswa",
-                    href: "/mahasiswa/surat/surat-rekomendasi-beasiswa",
+                    href: "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa",
                 },
             ],
         },

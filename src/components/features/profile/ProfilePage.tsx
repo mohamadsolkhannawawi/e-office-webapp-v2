@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 import {
     User,
     Mail,
@@ -18,6 +19,7 @@ import {
     Hash,
     Briefcase,
     GraduationCap,
+    ChevronLeft,
 } from "lucide-react";
 import { getMe, updateProfile, UserProfile } from "@/lib/application-api";
 import toast from "react-hot-toast";
@@ -33,9 +35,7 @@ interface ProfileFormData {
     alamat?: string;
     tempatLahir?: string;
     tanggalLahir?: string;
-    semester?: number;
-    ipk?: number;
-    ips?: number;
+
     // Relations
     departemen?: string;
     programStudi?: string;
@@ -80,9 +80,7 @@ export function ProfilePage({ backUrl }: ProfilePageProps) {
                               year: "numeric",
                           })
                         : undefined,
-                    semester: data.mahasiswa?.semester || undefined,
-                    ipk: data.mahasiswa?.ipk || undefined,
-                    ips: data.mahasiswa?.ips || undefined,
+
                     departemen:
                         data.mahasiswa?.departemen?.name ||
                         data.pegawai?.departemen?.name,
@@ -151,7 +149,18 @@ export function ProfilePage({ backUrl }: ProfilePageProps) {
     const isMahasiswa = !!userData?.mahasiswa;
 
     return (
-        <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="max-w-3xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {backUrl && (
+                <Link
+                    href={backUrl}
+                    className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-undip-blue transition-colors group w-fit"
+                >
+                    <div className="p-1.5 bg-white rounded-lg border border-slate-200 group-hover:border-blue-200 shadow-sm transition-all">
+                        <ChevronLeft size={16} />
+                    </div>
+                    Kembali ke Dashboard
+                </Link>
+            )}
             {/* Header Section */}
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                 <Avatar className="w-28 h-28 border-4 border-blue-50 shadow-xl ring-1 ring-slate-100">
@@ -321,7 +330,7 @@ export function ProfilePage({ backUrl }: ProfilePageProps) {
                                         Alamat Lengkap
                                     </Label>
                                     <p className="text-sm font-bold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed italic">
-                                        "{formData.alamat}"
+                                        {formData.alamat}
                                     </p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -398,42 +407,6 @@ export function ProfilePage({ backUrl }: ProfilePageProps) {
                                     </div>
                                 )}
                             </div>
-
-                            {/* Academic Metrics for Mahasiswa */}
-                            {isMahasiswa && (
-                                <div className="pt-4 border-t border-slate-100">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                                Semester
-                                            </span>
-                                            <span className="text-xl font-black text-slate-900">
-                                                {formData.semester || "-"}
-                                            </span>
-                                        </div>
-                                        <div className="flex gap-4">
-                                            <div className="flex flex-col text-right">
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                                    IPK
-                                                </span>
-                                                <span className="text-xl font-black text-emerald-600">
-                                                    {formData.ipk?.toFixed(2) ||
-                                                        "-"}
-                                                </span>
-                                            </div>
-                                            <div className="flex flex-col text-right">
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                                    IPS
-                                                </span>
-                                                <span className="text-xl font-black text-blue-600">
-                                                    {formData.ips?.toFixed(2) ||
-                                                        "-"}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </CardContent>
                     </Card>
 

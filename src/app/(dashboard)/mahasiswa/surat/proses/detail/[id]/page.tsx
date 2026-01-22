@@ -32,13 +32,15 @@ const EditNoteIcon = () => (
 export default function DetailSuratProsesPage() {
     const identitasData: IdentitasPengajuProps["data"] = {
         namaLengkap: "Ahmad Syaifullah",
-        nimNip: "24060121120001",
+        nim: "24060121120001",
+        role: "Mahasiswa",
         email: "ahmadsyaifullah@students.undip.ac.id",
         departemen: "Informatika",
         programStudi: "Informatika",
         tempatLahir: "Blora",
         tanggalLahir: "03/18/2006",
         noHp: "089123141241412412",
+        semester: "7",
         ipk: "3.9",
         ips: "3.8",
     };
@@ -152,35 +154,35 @@ export default function DetailSuratProsesPage() {
                     <RiwayatSurat
                         riwayat={[
                             {
-                                role: "Admin Surat",
+                                senderRole: "Admin Surat",
                                 status: "Menunggu Verifikasi",
                                 date: "09 Desember 2025",
                                 time: "00:58:49",
                                 catatan: "Tidak ada catatan",
                             },
                             {
-                                role: "Supervisor Akademik",
+                                senderRole: "Supervisor Akademik",
                                 status: "Verifikasi Supervisor Akademik",
                                 date: "09 Desember 2025",
                                 time: "00:58:49",
                                 catatan: "Tidak ada catatan",
                             },
                             {
-                                role: "Supervisor Akademik",
+                                senderRole: "Supervisor Akademik",
                                 status: "Verifikasi Supervisor Akademik",
                                 date: "09 Desember 2025",
                                 time: "00:58:49",
                                 catatan: "Tidak ada catatan",
                             },
                             {
-                                role: "Supervisor Akademik",
+                                senderRole: "Supervisor Akademik",
                                 status: "Verifikasi Supervisor Akademik",
                                 date: "09 Desember 2025",
                                 time: "00:58:49",
                                 catatan: "Tidak ada catatan",
                             },
                             {
-                                role: "Mahasiswa",
+                                senderRole: "Mahasiswa",
                                 status: "Surat Diajukan",
                                 date: "09 Desember 2025",
                                 time: "00:58:49",

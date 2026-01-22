@@ -105,10 +105,10 @@ export default function DetailPengajuanPage() {
         email: application.formData.email,
         departemen: application.formData.departemen,
         programStudi: application.formData.programStudi,
-        semester: application.formData.semester || "-",
         tempatLahir: application.formData.tempatLahir,
         tanggalLahir: formatDate(application.formData.tanggalLahir),
         noHp: application.formData.noHp,
+        semester: application.formData.semester || "-",
         ipk: application.formData.ipk,
         ips: application.formData.ips,
     };

@@ -180,37 +180,7 @@ export function RiwayatSurat({
         return [];
     };
 
-    const timeline = riwayat ||
-        generateDefaultTimeline() || [
-            {
-                role: "Admin Surat",
-                status: "Diajukan",
-                date: "06 November 2021",
-                time: "09:43:48",
-                catatan: undefined,
-            },
-            {
-                role: "Supervisor Akademik",
-                status: "Verifikasi Supervisor Akademik",
-                date: "05 November 2021",
-                time: "07:12:34",
-                catatan: "Sudah diverifikasi oleh Supervisor Akademik",
-            },
-            {
-                role: "Supervisor Akademik",
-                status: "Disetujui",
-                date: "05 November 2021",
-                time: "07:12:34",
-                catatan: undefined,
-            },
-            {
-                role: "Mahasiswa",
-                status: "Diajukan",
-                date: "04 November 2021",
-                time: "14:58:12",
-                catatan: undefined,
-            },
-        ];
+    const timeline = riwayat || generateDefaultTimeline();
 
     return (
         <Card className="border-none shadow-sm bg-white h-fit">

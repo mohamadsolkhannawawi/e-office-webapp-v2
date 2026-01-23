@@ -75,40 +75,66 @@ export async function uploadMockFile(
 export async function fillStep1Identitas(page: Page) {
     // Wait for the form to be visible
     const container = page.locator('section[aria-label="Informasi Identitas"]');
-    await expect(container).toBeVisible();
+    await expect(container).toBeVisible({ timeout: 10000 });
 
-    // Fill Tempat Lahir
-    await page.fill('input[name="tempatLahir"]', "Semarang");
+    // For SRB form, let's just use specific fills and ensure we click edit if needed
+    // The current UI has buttons like "Koreksi Data"
 
-    // Fill Tanggal Lahir (DatePicker interaction)
-    // 1. Click default trigger button
+    // 1. Tempat Lahir
+    const tempatLahir = page.locator('input[name="tempatLahir"]');
+    if ((await tempatLahir.getAttribute("readonly")) !== null) {
+        await page
+            .locator('label:has-text("Tempat Lahir")')
+            .locator('button:has-text("Koreksi Data")')
+            .click();
+    }
+    await tempatLahir.fill("Semarang");
+
+    // 2. Tanggal Lahir (DatePicker)
     const dateTrigger = container.locator("button[data-empty]");
-    // Usually it has text "Pilih tanggal lahir" or similar.
-    // If it's already filled (from API), it won't match "Pilih tanggal lahir" easily unless we check value.
-    // But let's assume we need to fill it for robustness or overwrite it.
-
-    // We can also check if it's already filled by checking text content.
-    const dateText = await dateTrigger.textContent();
-    if (!dateText?.match(/\d{2}\/\d{2}\/\d{4}/)) {
-        await dateTrigger.click();
-        // Wait for calendar
-        await expect(page.locator(".rdp")).toBeVisible(); // react-day-picker class
-        // Click a date, e.g., 15th
-        await page.click('.rdp-day:has-text("15")');
-        // Wait for popover to close or verify value
+    if ((await dateTrigger.count()) > 0) {
+        // Only click if it says "Pilih tanggal lahir" or is empty
+        const dateText = await dateTrigger.textContent();
+        if (!dateText?.match(/\d{2}\/\d{2}\/\d{4}/)) {
+            await dateTrigger.click();
+            await expect(page.locator(".rdp")).toBeVisible();
+            await page.click('.rdp-day:has-text("15")');
+        }
+    } else {
+        // Check if we need to click "Koreksi Data" first
+        const dateEdit = page
+            .locator('label:has-text("Tanggal Lahir")')
+            .locator('button:has-text("Koreksi Data")');
+        if (await dateEdit.isVisible()) {
+            await dateEdit.click();
+            // Now the DatePicker should be clickable
+            await page.locator('button[aria-haspopup="dialog"]').click();
+            await page.click('.rdp-day:has-text("15")');
+        }
     }
 
-    // Fill No HP
-    await page.fill('input[name="noHp"]', "081234567890");
+    // 3. No HP (Always editable usually, but let's be safe)
+    const noHp = page.locator('input[name="noHp"]');
+    await noHp.scrollIntoViewIfNeeded();
+    await noHp.fill("081234567890");
 
-    // Fill Semester
-    await page.fill('input[name="semester"]', "6");
+    // 4. Semester
+    const semester = page.locator('input[name="semester"]');
+    await semester.fill("6");
 
-    // Fill IPK
-    await page.fill('input[name="ipk"]', "3.75");
+    // 5. IPK
+    const ipk = page.locator('input[name="ipk"]');
+    await ipk.fill("3.75");
 
-    // Fill IPS
-    await page.fill('input[name="ips"]', "3.80");
+    // 6. IPS
+    const ips = page.locator('input[name="ips"]');
+    await ips.fill("3.80");
+
+    // Verify all filled
+    await expect(noHp).toHaveValue("081234567890");
+    await expect(semester).toHaveValue("6");
+    await expect(ipk).toHaveValue("3.75");
+    await expect(ips).toHaveValue("3.80");
 
     // Allow UI to settle
     await page.waitForTimeout(500);

@@ -17,24 +17,26 @@ interface AuthContextType {
     isAuthenticated: boolean;
     signIn: (
         email: string,
-        password: string,
+        password: string
     ) => Promise<{ user: User; session: Session } | undefined>;
     signOut: () => Promise<void>;
     refreshSession: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
-    undefined,
+    undefined
 );
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const router = useRouter();
 
-    // Fetch session on mount
+    // Fetch session on mount (client-side only)
     useEffect(() => {
+        setMounted(true);
         refreshSession();
     }, []);
 
@@ -47,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (data?.user) {
                 console.log(
                     ">>> AUTH CONTEXT USER ROLES:",
-                    (data.user as User).roles,
+                    (data.user as User).roles
                 );
             }
 

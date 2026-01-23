@@ -27,7 +27,7 @@ interface UploadError {
 export async function uploadAttachment(
     letterInstanceId: string,
     file: File,
-    category: "Utama" | "Tambahan"
+    category: "Utama" | "Tambahan",
 ): Promise<UploadAttachmentResponse | null> {
     try {
         const formData = new FormData();
@@ -39,17 +39,26 @@ export async function uploadAttachment(
             {
                 method: "POST",
                 body: formData,
-                // Don't set Content-Type header, let browser set it with boundary
-                // include credentials so cookies (session) are sent to backend
+                // Jangan atur header Content-Type, biarkan browser mengaturnya dengan boundary
+                // Sertakan kredensial agar cookie (sesi) dikirim ke backend
                 credentials: "include",
-            }
+            },
         );
 
         if (!response.ok) {
-            const error = (await response.json()) as UploadError;
-            throw new Error(
-                error.error || `Upload failed with status ${response.status}`
-            );
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const error = (await response.json()) as UploadError;
+                throw new Error(
+                    error.error ||
+                        `Upload failed with status ${response.status}`,
+                );
+            } else {
+                const text = await response.text();
+                throw new Error(
+                    text || `Upload failed with status ${response.status}`,
+                );
+            }
         }
 
         return (await response.json()) as UploadAttachmentResponse;
@@ -72,14 +81,23 @@ export async function deleteAttachment(attachmentId: string): Promise<boolean> {
                 headers: {
                     "Content-Type": "application/json",
                 },
-            }
+            },
         );
 
         if (!response.ok) {
-            const error = (await response.json()) as UploadError;
-            throw new Error(
-                error.error || `Delete failed with status ${response.status}`
-            );
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const error = (await response.json()) as UploadError;
+                throw new Error(
+                    error.error ||
+                        `Delete failed with status ${response.status}`,
+                );
+            } else {
+                const text = await response.text();
+                throw new Error(
+                    text || `Delete failed with status ${response.status}`,
+                );
+            }
         }
 
         return true;
@@ -93,7 +111,7 @@ export async function deleteAttachment(attachmentId: string): Promise<boolean> {
  * Get all attachments for a letter instance
  */
 export async function getAttachments(
-    letterInstanceId: string
+    letterInstanceId: string,
 ): Promise<UploadAttachmentResponse["data"][]> {
     try {
         const response = await fetch(
@@ -104,12 +122,21 @@ export async function getAttachments(
                 headers: {
                     "Content-Type": "application/json",
                 },
-            }
+            },
         );
 
         if (!response.ok) {
-            const error = (await response.json()) as UploadError;
-            throw new Error(error.error || `Failed to fetch attachments`);
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const error = (await response.json()) as UploadError;
+                throw new Error(error.error || `Failed to fetch attachments`);
+            } else {
+                const text = await response.text();
+                throw new Error(
+                    text ||
+                        `Failed to fetch attachments (Status ${response.status})`,
+                );
+            }
         }
 
         const result = (await response.json()) as {
@@ -128,7 +155,7 @@ export async function getAttachments(
  */
 export async function createApplication(
     namaBeasiswa: string,
-    values: Record<string, unknown>
+    values: Record<string, unknown>,
 ): Promise<{ id: string; scholarshipName: string }> {
     try {
         const response = await fetch("/api/surat-rekomendasi/applications", {
@@ -144,8 +171,17 @@ export async function createApplication(
         });
 
         if (!response.ok) {
-            const error = (await response.json()) as UploadError;
-            throw new Error(error.error || `Create application failed`);
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const error = (await response.json()) as UploadError;
+                throw new Error(error.error || `Create application failed`);
+            } else {
+                const text = await response.text();
+                throw new Error(
+                    text ||
+                        `Create application failed (Status ${response.status})`,
+                );
+            }
         }
 
         const result = (await response.json()) as {
@@ -155,6 +191,85 @@ export async function createApplication(
         return result.data;
     } catch (error) {
         console.error("Create application error:", error);
+        throw error;
+    }
+}
+
+/**
+ * Create draft application (for file upload purposes)
+ */
+export async function createDraftApplication(
+    namaBeasiswa?: string,
+    values?: Record<string, unknown>,
+): Promise<{ id: string; scholarshipName: string }> {
+    try {
+        const response = await fetch(
+            "/api/surat-rekomendasi/applications/draft",
+            {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    namaBeasiswa,
+                    values,
+                }),
+            },
+        );
+
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(
+                text || `Create draft failed (Status ${response.status})`,
+            );
+        }
+
+        const result = (await response.json()) as {
+            success: boolean;
+            data: { id: string; scholarshipName: string };
+        };
+        return result.data;
+    } catch (error) {
+        console.error("Create draft error:", error);
+        throw error;
+    }
+}
+
+/**
+ * Update application data (finalize draft or update fields)
+ */
+export async function updateApplication(
+    id: string,
+    data: {
+        namaBeasiswa?: string;
+        values?: Record<string, unknown>;
+        status?: string;
+    },
+): Promise<any> {
+    try {
+        const response = await fetch(
+            `/api/surat-rekomendasi/applications/${id}`,
+            {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            },
+        );
+
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(
+                text || `Update application failed (Status ${response.status})`,
+            );
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Update application error:", error);
         throw error;
     }
 }

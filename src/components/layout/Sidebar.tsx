@@ -1,112 +1,326 @@
 "use client";
 
+import React from "react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Mail, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import {
+    LayoutDashboard,
+    Mail,
+    FileEdit,
+    LogOut,
+    ChevronDown,
+    Archive,
+    Settings,
+    User,
+} from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
-  className?: string;
+    className?: string;
 }
 
 interface MenuItem {
-  label: string;
-  href: string;
-  icon: React.ReactNode;
-  submenu?: { label: string; href: string }[];
+    label: string;
+    href?: string;
+    icon: React.ReactNode;
+    submenu?: { label: string; href: string }[];
 }
 
+// TODO: Get role from auth context
+function useCurrentRole(): string {
+    const pathname = usePathname();
+    if (pathname.startsWith("/mahasiswa")) return "mahasiswa";
+    if (pathname.startsWith("/supervisor-akademik"))
+        return "supervisor-akademik";
+    if (pathname.startsWith("/manajer-tu")) return "manajer-tu";
+    if (pathname.startsWith("/wakil-dekan-1")) return "wakil-dekan-1";
+    if (pathname.startsWith("/upa")) return "upa";
+    return "mahasiswa";
+}
+
+const roleMenuConfig: Record<string, MenuItem[]> = {
+    mahasiswa: [
+        {
+            label: "Dasbor",
+            href: "/mahasiswa",
+            icon: <LayoutDashboard size={20} />,
+        },
+        {
+            label: "Surat Saya",
+            icon: <Mail size={20} />,
+            submenu: [
+                {
+                    label: "Dalam Proses",
+                    href: "/mahasiswa/surat/proses",
+                },
+                {
+                    label: "Selesai",
+                    href: "/mahasiswa/surat/selesai",
+                },
+            ],
+        },
+        {
+            label: "Draft Surat",
+            icon: <FileEdit size={20} />,
+            submenu: [
+                {
+                    label: "Surat Rekomendasi Beasiswa",
+                    href: "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa",
+                },
+            ],
+        },
+        {
+            label: "Profil Saya",
+            href: "/mahasiswa/profile",
+            icon: <User size={20} />,
+        },
+    ],
+    "supervisor-akademik": [
+        {
+            label: "Dasbor",
+            href: "/supervisor-akademik",
+            icon: <LayoutDashboard size={20} />,
+        },
+        {
+            label: "Surat Masuk",
+            icon: <Mail size={20} />,
+            submenu: [
+                {
+                    label: "Perlu Tindakan",
+                    href: "/supervisor-akademik/surat/perlu-tindakan",
+                },
+                {
+                    label: "Selesai",
+                    href: "/supervisor-akademik/surat/selesai",
+                },
+            ],
+        },
+        {
+            label: "Profil Saya",
+            href: "/supervisor-akademik/profile",
+            icon: <User size={20} />,
+        },
+    ],
+    "manajer-tu": [
+        {
+            label: "Dasbor",
+            href: "/manajer-tu",
+            icon: <LayoutDashboard size={20} />,
+        },
+        {
+            label: "Surat Masuk",
+            icon: <Mail size={20} />,
+            submenu: [
+                {
+                    label: "Perlu Tindakan",
+                    href: "/manajer-tu/surat/perlu-tindakan",
+                },
+                {
+                    label: "Selesai",
+                    href: "/manajer-tu/surat/selesai",
+                },
+            ],
+        },
+        {
+            label: "Profil Saya",
+            href: "/manajer-tu/profile",
+            icon: <User size={20} />,
+        },
+    ],
+    "wakil-dekan-1": [
+        {
+            label: "Dasbor",
+            href: "/wakil-dekan-1",
+            icon: <LayoutDashboard size={20} />,
+        },
+        {
+            label: "Surat Masuk",
+            icon: <Mail size={20} />,
+            submenu: [
+                {
+                    label: "Perlu Tindakan",
+                    href: "/wakil-dekan-1/surat/perlu-tindakan",
+                },
+                {
+                    label: "Selesai",
+                    href: "/wakil-dekan-1/surat/selesai",
+                },
+            ],
+        },
+        {
+            label: "Profil Saya",
+            href: "/wakil-dekan-1/profile",
+            icon: <User size={20} />,
+        },
+    ],
+    upa: [
+        {
+            label: "Dasbor",
+            href: "/upa",
+            icon: <LayoutDashboard size={20} />,
+        },
+        {
+            label: "Surat Masuk",
+            icon: <Mail size={20} />,
+            submenu: [
+                {
+                    label: "Perlu Tindakan",
+                    href: "/upa/surat/perlu-tindakan",
+                },
+                {
+                    label: "Selesai",
+                    href: "/upa/surat/selesai",
+                },
+            ],
+        },
+        {
+            label: "Arsip Surat",
+            href: "/upa/arsip",
+            icon: <Archive size={20} />,
+        },
+        {
+            label: "Pengaturan Sistem",
+            href: "/upa/pengaturan",
+            icon: <Settings size={20} />,
+        },
+        {
+            label: "Profil Saya",
+            href: "/upa/profile",
+            icon: <User size={20} />,
+        },
+    ],
+};
+
 export function Sidebar({ className = "" }: SidebarProps) {
-  const pathname = usePathname();
-  const [expandedMenu, setExpandedMenu] = useState<string | null>("surat-masuk");
+    const { signOut } = useAuth();
+    const pathname = usePathname();
+    const role = useCurrentRole();
+    const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
 
-  const menuItems: MenuItem[] = [
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-      icon: <Home size={18} />,
-    },
-    {
-      label: "Surat Masuk",
-      href: "/surat-masuk",
-      icon: <Mail size={18} />,
-      submenu: [
-        { label: "Penerima", href: "/surat-masuk/penerima" },
-        { label: "Disposisi", href: "/surat-masuk/disposisi" },
-        { label: "Tembusan", href: "/surat-masuk/tembusan" },
-        { label: "Arsip", href: "/surat-masuk/arsip" },
-      ],
-    },
-  ];
+    const menuItems = useMemo(() => {
+        return roleMenuConfig[role] || roleMenuConfig.mahasiswa;
+    }, [role]);
 
-  const toggleMenu = (label: string) => {
-    setExpandedMenu(expandedMenu === label ? null : label);
-  };
+    const toggleMenu = (label: string) => {
+        setExpandedMenu(expandedMenu === label ? null : label);
+    };
 
-  return (
-    <aside
-      className={`w-64 bg-white border-r border-gray-200 h-[calc(100vh-60px)] sticky top-15 overflow-y-auto ${className}`}
-    >
-      <nav className="p-4 space-y-1">
-        {menuItems.map((item) => (
-          <div key={item.label}>
-            {/* Menu Item */}
-            {item.submenu ? (
-              <button
-                onClick={() => toggleMenu(item.label)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  expandedMenu === item.label
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  {item.icon}
-                  <span>{item.label}</span>
-                </div>
-                <ChevronRight
-                  size={16}
-                  className={`transition-transform ${
-                    expandedMenu === item.label ? "rotate-90" : ""
-                  }`}
-                />
-              </button>
-            ) : (
-              <Link
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  pathname === item.href
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </Link>
-            )}
+    // Auto-expand menu if child is active
+    useEffect(() => {
+        menuItems.forEach((item) => {
+            if (item.submenu) {
+                const isActive = item.submenu.some(
+                    (sub) => pathname === sub.href,
+                );
+                if (isActive) {
+                    setExpandedMenu(item.label);
+                }
+            }
+        });
+    }, [pathname, menuItems]);
 
-            {/* Submenu */}
-            {item.submenu && expandedMenu === item.label && (
-              <div className="ml-4 mt-1 space-y-1">
-                {item.submenu.map((subitem) => (
-                  <Link
-                    key={subitem.label}
-                    href={subitem.href}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                      pathname === subitem.href
-                        ? "bg-blue-50 text-blue-600 font-medium"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    }`}
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-current" />
-                    <span>{subitem.label}</span>
-                  </Link>
+    const isActive = (href?: string) => {
+        if (!href) return false;
+        if (href === `/${role}`) {
+            return pathname === href;
+        }
+        return pathname.startsWith(href);
+    };
+
+    return (
+        <aside
+            className={`w-64 bg-white border-r border-gray-200 flex flex-col h-full transition-all duration-200 ${className} print:hidden`}
+        >
+            <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+                {menuItems.map((item) => (
+                    <div key={item.label}>
+                        {item.submenu ? (
+                            <div className="space-y-1">
+                                <button
+                                    onClick={() => toggleMenu(item.label)}
+                                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md group transition-colors ${
+                                        expandedMenu === item.label
+                                            ? "bg-gray-50 text-undip-blue"
+                                            : "text-slate-600 hover:bg-gray-100"
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span
+                                            className={`${
+                                                expandedMenu === item.label
+                                                    ? "text-undip-blue"
+                                                    : "text-slate-400 group-hover:text-slate-600"
+                                            }`}
+                                        >
+                                            {item.icon}
+                                        </span>
+                                        <span className="font-medium text-sm">
+                                            {item.label}
+                                        </span>
+                                    </div>
+                                    <ChevronDown
+                                        size={18}
+                                        className={`text-slate-400 transition-transform duration-200 ${
+                                            expandedMenu === item.label
+                                                ? "rotate-180"
+                                                : ""
+                                        }`}
+                                    />
+                                </button>
+                                {expandedMenu === item.label && (
+                                    <div className="ml-9 mt-1 space-y-1">
+                                        {item.submenu.map((sub) => (
+                                            <Link
+                                                key={sub.label}
+                                                href={sub.href}
+                                                className={`block px-3 py-2 text-sm rounded-md transition-colors ${
+                                                    pathname === sub.href
+                                                        ? "text-undip-blue font-medium bg-blue-50/50"
+                                                        : "text-slate-500 hover:text-slate-900 hover:bg-gray-50"
+                                                }`}
+                                            >
+                                                {sub.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <Link
+                                href={item.href || "#"}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-md group font-medium transition-colors text-sm ${
+                                    isActive(item.href)
+                                        ? "bg-gray-100 text-undip-blue"
+                                        : "text-slate-700 hover:bg-gray-100"
+                                }`}
+                            >
+                                <span
+                                    className={`${
+                                        isActive(item.href)
+                                            ? "text-undip-blue"
+                                            : "text-slate-500 group-hover:text-undip-blue"
+                                    }`}
+                                >
+                                    {item.icon}
+                                </span>
+                                {item.label}
+                            </Link>
+                        )}
+                    </div>
                 ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </nav>
-    </aside>
-  );
+            </nav>
+
+            <div className="p-4 border-t border-gray-100">
+                <button
+                    onClick={() => signOut()}
+                    className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                >
+                    <LogOut size={20} />
+                    Keluar
+                </button>
+            </div>
+        </aside>
+    );
 }

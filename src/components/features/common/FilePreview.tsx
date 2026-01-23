@@ -1,9 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
-import { FileText, Image as ImageIcon, X, ChevronRight, ChevronDown } from "lucide-react";
+import {
+    FileText,
+    Image as ImageIcon,
+    X,
+    ChevronRight,
+    ChevronDown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export interface FilePreviewItem {
@@ -28,7 +35,7 @@ export function FilePreview({
     readonly = false,
 }: FilePreviewProps) {
     const [expandedPreviews, setExpandedPreviews] = useState<Set<number>>(
-        showPreviewByDefault ? new Set(files.map((_, i) => i)) : new Set()
+        showPreviewByDefault ? new Set(files.map((_, i) => i)) : new Set(),
     );
     const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
 
@@ -48,7 +55,9 @@ export function FilePreview({
         return "";
     };
 
-    const getFileType = (file: FilePreviewItem): "pdf" | "image" | "unknown" => {
+    const getFileType = (
+        file: FilePreviewItem,
+    ): "pdf" | "image" | "unknown" => {
         const name = file.name.toLowerCase();
         const type = file.type?.toLowerCase() || "";
 
@@ -154,21 +163,28 @@ export function FilePreview({
                                         <div
                                             className="cursor-pointer max-w-full"
                                             onClick={() => {
-                                                const imgIndex = imageFiles.findIndex(
-                                                    (img) => img.index === index
-                                                );
+                                                const imgIndex =
+                                                    imageFiles.findIndex(
+                                                        (img) =>
+                                                            img.index === index,
+                                                    );
                                                 setLightboxIndex(imgIndex);
                                             }}
                                         >
-                                            <img
+                                            <Image
                                                 src={fileUrl}
                                                 alt={file.name}
-                                                className="max-w-full h-auto rounded border border-gray-200"
+                                                width={0}
+                                                height={0}
+                                                sizes="100vw"
+                                                className="w-full h-auto rounded border border-gray-200"
+                                                unoptimized
                                             />
                                         </div>
                                     ) : (
                                         <div className="text-center text-gray-500 py-8">
-                                            Preview tidak tersedia untuk tipe file ini
+                                            Preview tidak tersedia untuk tipe
+                                            file ini
                                         </div>
                                     )}
                                 </div>

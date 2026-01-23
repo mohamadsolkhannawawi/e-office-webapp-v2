@@ -98,27 +98,31 @@ bun run lint
 ```
 e-office-webapp-v2/
 ├── src/
-│   ├── app/                    # App Router (Pages & Layouts)
+│   ├── app/                    # App Router (Pages, Layouts, & API Routes)
+│   │   ├── (auth)/             # Authentication Pages (Login)
 │   │   ├── (dashboard)/        # Protected Routes (Role-Based)
-│   │   │   ├── mahasiswa/      # Dashboard Mahasiswa
-│   │   │   ├── supervisor/     # Dashboard Supervisor Akademik
-│   │   │   ├── manajer-tu/     # Dashboard Manajer TU
-│   │   │   ├── wakil-dekan-1/  # Dashboard Wakil Dekan 1
-│   │   │   └── upa/            # Dashboard UPA
+│   │   │   ├── mahasiswa/
+│   │   │   ├── supervisor/
+│   │   │   ├── manajer-tu/
+│   │   │   ├── wakil-dekan-1/
+│   │   │   └── upa/
 │   │   └── (preview)/          # Document Preview Routes
 │   ├── components/
 │   │   ├── ui/                 # Reusable UI Components (Shadcn-like)
 │   │   ├── layout/             # Navbar, Sidebar, Shell
 │   │   └── features/           # Feature-specific Components
-│   │       ├── dashboard/      # Dashboard Widgets
-│   │       └── surat-rekomendasi-beasiswa/ # Fitur Surat Rekomendasi
-│   ├── lib/                    # Utility functions & API clients
-│   ├── types/                  # TypeScript Data Types
-│   └── constants/              # App Constants (Roles, Routes)
+│   ├── constants/              # Roles, Routes, & App Constants
+│   ├── contexts/               # React Contexts (Auth, etc.)
+│   ├── hooks/                  # Custom React Hooks
+│   ├── lib/                    # API Clients & Utilities (Axios, etc.)
+│   ├── types/                  # TypeScript Interfaces & Types
+│   └── utils/                  # Helper Functions & Validations
 ├── public/                     # Static Assets
+├── tests/                      # Playwright E2E Tests
 ├── .env.local                  # Environment Variables
 ├── next.config.ts              # Next.js Configuration
 ├── package.json                # Project Dependencies
+├── playwright.config.ts        # E2E Test Configuration
 └── tsconfig.json               # TypeScript Configuration
 ```
 

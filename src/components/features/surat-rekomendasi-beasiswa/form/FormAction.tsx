@@ -69,11 +69,10 @@ export function FormAction({
                     },
                 );
 
-                // Update URL to include the new ID so the user stays on this draft
-                const targetJenis = jenis || "internal";
-                localStorage.removeItem(`srb_form_${jenis}`);
-                router.replace(
-                    `/mahasiswa/surat/surat-rekomendasi-beasiswa/${targetJenis}?id=${res.id}`,
+                // Update URL or Redirect
+                // User requested to see it in draft list, so let's redirect to draft list for clarity
+                router.push(
+                    "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa",
                 );
             }
             // Optional: Toast notification here if available, or simple alert
@@ -138,14 +137,38 @@ export function FormAction({
             </Button>
 
             <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                    variant="outline"
-                    className="text-[#007bff] border-[#007bff]/50 hover:bg-blue-50 h-11 px-6"
-                    onClick={handleSaveDraft}
-                    disabled={isSubmitting}
-                >
-                    {isSubmitting ? "Menyimpan..." : "Simpan Draft"}
-                </Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button
+                            variant="outline"
+                            className="text-[#007bff] border-[#007bff]/50 hover:bg-blue-50 h-11 px-6"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? "Menyimpan..." : "Simpan Draft"}
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                Simpan sebagai Draft?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Data yang Anda isi akan disimpan dan dapat
+                                dilanjutkan nanti melalui menu Draft Surat.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={handleSaveDraft}
+                                className="bg-[#007bff] hover:bg-blue-700"
+                            >
+                                Ya, Simpan
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
                 {currentStep === 4 ? (
                     <AlertDialog>
                         <AlertDialogTrigger asChild>

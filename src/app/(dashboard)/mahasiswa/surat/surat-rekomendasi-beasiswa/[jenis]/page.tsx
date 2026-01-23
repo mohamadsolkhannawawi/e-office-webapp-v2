@@ -48,26 +48,25 @@ export default function PengajuanBaruPage() {
         lampiranTambahan: [],
     };
 
-    const [formData, setFormData] = useState<FormDataType>(() => {
-        let base = { ...initialFormData };
-        // Try to restore from localStorage if NOT in edit mode
-        if (typeof window !== "undefined" && !editId) {
+    const [formData, setFormData] = useState<FormDataType>(initialFormData);
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+    // Consolidated Initialization Logic for Async Data
+    useEffect(() => {
+        // Restore from localStorage on mount if NOT in edit mode
+        if (!editId) {
             const saved = localStorage.getItem(`srb_form_${jenis}`);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    base = { ...base, ...parsed };
+                    setFormData((prev) => ({ ...prev, ...parsed }));
                 } catch (e) {
                     console.error("Failed to parse saved form data", e);
                 }
             }
         }
-        return base;
-    });
-    const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-    // Consolidated Initialization Logic for Async Data
-    useEffect(() => {
+        // Rest of initialization
         const fetchAsyncData = async () => {
             // 1. Fetch specific data based on mode
             if (editId) {

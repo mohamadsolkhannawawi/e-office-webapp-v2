@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { loginAs, uploadMockFile, USERS } from "./utils";
+import { loginAs, uploadMockFile, USERS, fillStep1Identitas } from "./utils";
 import path from "path";
 
 test.describe("Surat Rekomendasi Beasiswa - Happy Path", () => {
@@ -22,7 +22,6 @@ test.describe("Surat Rekomendasi Beasiswa - Happy Path", () => {
 
             // Step 1: Identitas (Auto-filled but check validation)
             await expect(page.locator("text=Identitas Pemohon")).toBeVisible();
-            const { fillStep1Identitas } = await import("./utils");
             await fillStep1Identitas(page);
             await page.click('button:has-text("Lanjut")');
 

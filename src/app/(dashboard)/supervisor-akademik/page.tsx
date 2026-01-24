@@ -35,31 +35,8 @@ async function getDashboardData(searchParams: SearchParams) {
             },
         };
 
-        // 2. Fetch Pending Count (letters awaiting action at step 1)
-        const pendingRes = await fetch(
-            `${apiUrl}/api/surat-rekomendasi/applications?mode=pending&currentStep=1&limit=1`,
-            {
-                headers: { Cookie: cookie || "" },
-                cache: "no-store",
-            },
-        );
-        const pendingJson = await pendingRes.json();
-        const pendingCount = pendingJson.meta?.total || 0;
-
-        // 3. Fetch Processed Count (letters processed by Supervisor - step 1)
-        const processedRes = await fetch(
-            `${apiUrl}/api/surat-rekomendasi/applications?mode=processed&currentStep=1&limit=1`,
-            {
-                headers: { Cookie: cookie || "" },
-                cache: "no-store",
-            },
-        );
-        const processedJson = await processedRes.json();
-        const processedCount = processedJson.meta?.total || 0;
-
-        // 4. Fetch Recent Letters for table (all SRB letters relevant to this step)
+        // 2. Fetch Recent Letters for table (automatically scoped by backend for reviewer role)
         const query = new URLSearchParams({
-            // Show all SRB letters in the global table
             status: String(searchParams.status || ""),
             search: String(searchParams.search || ""),
             page: String(searchParams.page || "1"),
@@ -86,8 +63,8 @@ async function getDashboardData(searchParams: SearchParams) {
 
         return {
             stats: {
-                actionRequired: pendingCount,
-                completedMonth: processedCount, // Use processed count for "Selesai" card
+                actionRequired: statsData.pending || 0,
+                completedMonth: statsData.totalCompletedThisMonth || 0,
                 totalMonth: statsData.totalCreatedThisMonth || 0,
                 trend: statsData.trend,
                 distribution: statsData.distribution,
@@ -120,7 +97,7 @@ async function getDashboardData(searchParams: SearchParams) {
                     }),
                     target,
                     status:
-                        app.status === "PENDING" || app.currentStep === 1
+                        app.currentStep === 1
                             ? "Perlu Tindakan"
                             : app.status === "COMPLETED"
                               ? "Selesai"
@@ -128,7 +105,7 @@ async function getDashboardData(searchParams: SearchParams) {
                                 ? "Ditolak"
                                 : "Proses",
                     statusColor:
-                        app.status === "PENDING" || app.currentStep === 1
+                        app.currentStep === 1
                             ? "bg-amber-500"
                             : app.status === "COMPLETED"
                               ? "bg-emerald-500"

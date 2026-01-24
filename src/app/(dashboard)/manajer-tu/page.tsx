@@ -35,29 +35,7 @@ async function getDashboardData(searchParams: SearchParams) {
             },
         };
 
-        // 2. Fetch Pending Count (letters awaiting action at step 2)
-        const pendingRes = await fetch(
-            `${apiUrl}/api/surat-rekomendasi/applications?mode=pending&currentStep=2&limit=1`,
-            {
-                headers: { Cookie: cookie || "" },
-                cache: "no-store",
-            },
-        );
-        const pendingJson = await pendingRes.json();
-        const pendingCount = pendingJson.meta?.total || 0;
-
-        // 3. Fetch Processed Count (letters processed by Manajer TU - step 2)
-        const processedRes = await fetch(
-            `${apiUrl}/api/surat-rekomendasi/applications?mode=processed&currentStep=2&limit=1`,
-            {
-                headers: { Cookie: cookie || "" },
-                cache: "no-store",
-            },
-        );
-        const processedJson = await processedRes.json();
-        const processedCount = processedJson.meta?.total || 0;
-
-        // 4. Fetch Recent Letters for table (all SRB letters)
+        // 2. Fetch Recent Letters for table (automatically scoped by backend for reviewer role)
         const query = new URLSearchParams({
             status: String(searchParams.status || ""),
             search: String(searchParams.search || ""),
@@ -85,8 +63,8 @@ async function getDashboardData(searchParams: SearchParams) {
 
         return {
             stats: {
-                actionRequired: pendingCount,
-                completedMonth: processedCount,
+                actionRequired: statsData.pending || 0,
+                completedMonth: statsData.totalCompletedThisMonth || 0,
                 totalMonth: statsData.totalCreatedThisMonth || 0,
                 trend: statsData.trend,
                 distribution: statsData.distribution,

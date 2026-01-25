@@ -70,9 +70,28 @@ async function getDashboardData(searchParams: SearchParams) {
                 distribution: statsData.distribution,
             },
             recentLetters: appsData.map((app: ApplicationSummary) => {
-                // Determine target and status based on currentStep
+                // Determine target and status based on currentStep and status
                 let target = "Selesai";
-                if (app.status === "PENDING" || app.status === "IN_PROGRESS") {
+                let status = "Proses";
+                let statusColor = "bg-undip-blue";
+
+                if (app.status === "COMPLETED") {
+                    target = "Selesai";
+                    status = "Selesai";
+                    statusColor = "bg-emerald-500";
+                } else if (app.status === "REJECTED") {
+                    target = "Ditolak";
+                    status = "Ditolak";
+                    statusColor = "bg-red-500";
+                } else if (app.status === "REVISION") {
+                    // Surat sedang direvisi di Mahasiswa
+                    target = "Revisi di Mahasiswa";
+                    status = "Proses";
+                    statusColor = "bg-undip-blue";
+                } else if (
+                    app.status === "PENDING" ||
+                    app.status === "IN_PROGRESS"
+                ) {
                     const stepToRole: Record<number, string> = {
                         1: "Supervisor Akademik",
                         2: "Manajer TU",
@@ -80,6 +99,15 @@ async function getDashboardData(searchParams: SearchParams) {
                         4: "UPA",
                     };
                     target = stepToRole[app.currentStep] || "Diproses";
+
+                    // Only show "Perlu Tindakan" if currentStep is 1 (at Supervisor)
+                    if (app.currentStep === 1) {
+                        status = "Perlu Tindakan";
+                        statusColor = "bg-amber-500";
+                    } else {
+                        status = "Proses";
+                        statusColor = "bg-undip-blue";
+                    }
                 }
 
                 return {
@@ -96,22 +124,8 @@ async function getDashboardData(searchParams: SearchParams) {
                         year: "numeric",
                     }),
                     target,
-                    status:
-                        app.currentStep === 1
-                            ? "Perlu Tindakan"
-                            : app.status === "COMPLETED"
-                              ? "Selesai"
-                              : app.status === "REJECTED"
-                                ? "Ditolak"
-                                : "Proses",
-                    statusColor:
-                        app.currentStep === 1
-                            ? "bg-amber-500"
-                            : app.status === "COMPLETED"
-                              ? "bg-emerald-500"
-                              : app.status === "REJECTED"
-                                ? "bg-red-500"
-                                : "bg-undip-blue",
+                    status,
+                    statusColor,
                 };
             }),
             meta: appsMeta,

@@ -93,10 +93,31 @@ export function AdminDetailSurat({
         initialData?.status === "COMPLETED" ||
         initialData?.status === "REJECTED";
 
+    // Check if there's a resubmission after this role's revision
+    const hasResubmittedAfterRevision =
+        initialData?.history?.some((h, idx, arr) => {
+            // Check if this is a resubmit action
+            if (h.action !== "resubmit") return false;
+
+            // Find if there was a previous revision action from this role
+            const previousRevisionFromThisRole = arr.find((prevH, prevIdx) => {
+                return (
+                    prevIdx > idx && // Earlier in the history (desc order)
+                    prevH.action === "revision" &&
+                    prevH.role?.name === initialData.history?.[0]?.role?.name
+                ); // Same role
+            });
+
+            return !!previousRevisionFromThisRole;
+        }) || false;
+
     // Can only take action if:
     // 1. The application is at this role's step
     // 2. The application is not in a terminal status (COMPLETED/REJECTED)
-    const canTakeAction = currentStep === roleStep && !isTerminalStatus;
+    // 3. OR if this role previously revised and mahasiswa has resubmitted
+    const canTakeAction =
+        (currentStep === roleStep && !isTerminalStatus) ||
+        (hasResubmittedAfterRevision && currentStep === roleStep);
 
     const handleAction = (
         type: "approve" | "revise" | "reject" | "publish",

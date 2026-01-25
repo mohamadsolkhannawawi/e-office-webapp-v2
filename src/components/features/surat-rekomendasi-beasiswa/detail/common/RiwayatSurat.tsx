@@ -80,7 +80,7 @@ function TimelineItem({
     return (
         <div className="flex gap-4 relative pb-8 group">
             {!isLast && (
-                <div className="absolute left-[11px] top-8 w-0.5 h-[calc(100%-24px)] bg-slate-100 group-hover:bg-blue-100 transition-colors" />
+                <div className="absolute left-2.75 top-8 w-0.5 h-[calc(100%-24px)] bg-slate-100 group-hover:bg-blue-100 transition-colors" />
             )}
 
             <div className="relative shrink-0 mt-1">

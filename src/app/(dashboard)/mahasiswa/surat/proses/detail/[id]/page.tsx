@@ -10,6 +10,7 @@ import {
     DetailSuratPengajuan,
     RiwayatSurat,
     LampiranSurat,
+    DetailRevisi,
 } from "@/components/features/surat-rekomendasi-beasiswa/detail/common";
 import {
     getApplicationById,
@@ -71,7 +72,7 @@ export default function DetailSuratProsesPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center min-h-100">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
                     <p className="text-gray-600">Memuat data...</p>
@@ -82,7 +83,7 @@ export default function DetailSuratProsesPage() {
 
     if (error || !application) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center min-h-100">
                 <div className="text-center">
                     <p className="text-red-600 mb-4">
                         {error || "Pengajuan tidak ditemukan"}
@@ -175,6 +176,14 @@ export default function DetailSuratProsesPage() {
         ((application.formData as unknown as Record<string, unknown>)
             .jenisBeasiswa as string) || "internal";
 
+    // Cari histori revisi terakhir
+    let revisiHistory = null;
+    if (application.history && Array.isArray(application.history)) {
+        revisiHistory = [...application.history]
+            .reverse()
+            .find((h) => h.status === "REVISION");
+    }
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-10">
             {/* Breadcrumb */}
@@ -199,6 +208,18 @@ export default function DetailSuratProsesPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Left Column */}
                 <div className="lg:col-span-8 space-y-6">
+                    {/* Tampilkan alasan revisi jika status REVISION */}
+                    {application.status === "REVISION" && revisiHistory && (
+                        <DetailRevisi
+                            checker={
+                                revisiHistory.actor?.role?.name ||
+                                revisiHistory.actor?.name ||
+                                "-"
+                            }
+                            comment={revisiHistory.note || "-"}
+                            revisionDate={revisiHistory.createdAt}
+                        />
+                    )}
                     {/* Identitas Pengaju */}
                     <IdentitasPengaju data={identitasData} />
 

@@ -185,9 +185,28 @@ export function RiwayatSurat({
         return [];
     };
 
+    // Filter: jika ada entry Mahasiswa→- Diajukan (submit/create), dan setelahnya ada Mahasiswa→Supervisor Akademik (atau role lain), maka hide yang initial submission
+    let filteredRiwayat = riwayat || [];
+    if (filteredRiwayat.length > 1) {
+        const first = filteredRiwayat[0];
+        const second = filteredRiwayat[1];
+        if (
+            first.senderRole.toLowerCase().includes("mahasiswa") &&
+            (!first.receiverRole || first.receiverRole === "-") &&
+            (first.status === "Diajukan" ||
+                first.actionType === "submit" ||
+                first.actionType === "create") &&
+            second.senderRole.toLowerCase().includes("mahasiswa") &&
+            second.receiverRole &&
+            second.receiverRole !== "-"
+        ) {
+            filteredRiwayat = filteredRiwayat.slice(1);
+        }
+    }
+
     const timeline = [
-        ...(riwayat || []),
-        ...(riwayat?.some(
+        ...filteredRiwayat,
+        ...(filteredRiwayat.some(
             (r) => r.actionType === "submit" || r.actionType === "create",
         )
             ? []

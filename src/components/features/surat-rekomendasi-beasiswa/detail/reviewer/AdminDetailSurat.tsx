@@ -16,6 +16,7 @@ import {
     IdentitasPengaju,
     DetailSuratPengajuan,
     RiwayatSurat,
+    LampiranSurat,
     IdentitasPengajuProps,
     DetailSuratPengajuanProps,
 } from "@/components/features/surat-rekomendasi-beasiswa/detail/common";
@@ -214,6 +215,15 @@ export function AdminDetailSurat({
             "N/A",
     };
 
+    const lampiranData =
+        initialData?.attachments?.map((att) => ({
+            name: att.filename,
+            type: att.mimeType,
+            size: att.fileSize,
+            category: att.category,
+            downloadUrl: att.downloadUrl,
+        })) || [];
+
     const breadcrumbs: Record<string, { label: string; href?: string }[]> = {
         "supervisor-akademik": [
             { label: "Dashboard", href: "/supervisor-akademik" },
@@ -329,95 +339,7 @@ export function AdminDetailSurat({
                     <DetailSuratPengajuan data={detailSuratData} />
 
                     {/* Lampiran Section */}
-                    <div>
-                        <h2 className="text-xl font-bold text-slate-800 mb-4">
-                            Lampiran
-                        </h2>
-                        <div className="space-y-4">
-                            {initialData?.attachments?.map((att) => (
-                                <div
-                                    key={att.id}
-                                    className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden"
-                                >
-                                    <Link
-                                        href={att.downloadUrl || "#"}
-                                        target="_blank"
-                                    >
-                                        <button className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-50">
-                                            <div className="flex items-center gap-3">
-                                                <span className="font-bold text-slate-800">
-                                                    {att.category || "Lampiran"}
-                                                </span>
-                                                <span className="text-slate-400 text-sm">
-                                                    - {att.filename}
-                                                </span>
-                                            </div>
-                                            <ChevronRight className="h-5 w-5 text-slate-400 rotate-90" />
-                                        </button>
-                                    </Link>
-                                    <div className="px-4 pb-4 pt-4 bg-slate-50">
-                                        {att.mimeType?.startsWith(
-                                            "application/pdf",
-                                        ) ||
-                                        att.filename
-                                            ?.toLowerCase()
-                                            .endsWith(".pdf") ? (
-                                            <div className="w-full border border-gray-200 rounded-lg overflow-hidden bg-white">
-                                                <iframe
-                                                    src={att.downloadUrl}
-                                                    className="w-full h-[500px]"
-                                                    title={att.filename}
-                                                />
-                                            </div>
-                                        ) : att.mimeType?.startsWith(
-                                              "image/",
-                                          ) ||
-                                          att.filename?.match(
-                                              /\.(jpg|jpeg|png|gif)$/i,
-                                          ) ? (
-                                            <div className="w-full border border-gray-200 rounded-lg overflow-hidden bg-white">
-                                                <div className="relative w-full h-auto min-h-[300px]">
-                                                    <Image
-                                                        src={
-                                                            att.downloadUrl ||
-                                                            ""
-                                                        }
-                                                        alt={att.filename}
-                                                        width={0}
-                                                        height={0}
-                                                        sizes="100vw"
-                                                        className="w-full h-auto object-contain"
-                                                        unoptimized
-                                                    />
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="flex flex-col items-center justify-center py-10 text-slate-500">
-                                                <p className="text-sm">
-                                                    Preview tidak tersedia.
-                                                </p>
-                                                <Link
-                                                    href={
-                                                        att.downloadUrl || "#"
-                                                    }
-                                                    target="_blank"
-                                                    className="text-undip-blue hover:underline text-xs mt-2"
-                                                >
-                                                    Download File
-                                                </Link>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                            {(!initialData?.attachments ||
-                                initialData.attachments.length === 0) && (
-                                <p className="text-slate-400 italic">
-                                    Tidak ada lampiran.
-                                </p>
-                            )}
-                        </div>
-                    </div>
+                    <LampiranSurat data={lampiranData} />
                 </div>
 
                 {/* Right Column */}

@@ -89,6 +89,17 @@ export function getStatusConfig(
         };
     }
 
+    // Action: RESUBMIT
+    if (a === "resubmit") {
+        return {
+            label: "Revisi Selesai",
+            color: "text-green-600 bg-green-50 border-green-100",
+            iconName: "FileText",
+            defaultDesc:
+                "Revisi telah selesai dan pengajuan disubmit ulang untuk ditinjau kembali.",
+        };
+    }
+
     // Action: SUBMIT
     if (a === "submit" || a === "create" || s === "pending") {
         return {
@@ -124,6 +135,15 @@ export function getReceiverRole(action: string, currentStep?: number): string {
         return "Revisi";
     } else if (actionLower === "reject") {
         return "Ditolak";
+    } else if (actionLower === "resubmit") {
+        // Determine receiver based on current step after resubmit
+        const stepToRole: Record<number, string> = {
+            1: "Supervisor Akademik",
+            2: "Manajer TU",
+            3: "Wakil Dekan 1",
+            4: "Staff UPA",
+        };
+        return stepToRole[currentStep || 1] || "-";
     }
 
     return "-";

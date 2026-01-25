@@ -56,27 +56,39 @@ export default async function SelesaiPage(props: {
     const { data, meta } = await getCompletedApplications(searchParams);
 
     const letters = data.map((app: ApplicationSummary) => {
-        // For Supervisor's Selesai page, show that it was processed by Supervisor
-        let statusLabel = "Disetujui Supervisor";
+        // Use same logic as dashboard
+        let target = "Selesai";
+        let status = "Proses";
         let statusColor = "bg-undip-blue";
 
-        // Determine current position for target
-        const stepToPosition: Record<number, string> = {
-            2: "Di Manajer TU",
-            3: "Di Wakil Dekan 1",
-            4: "Di UPA",
-        };
-
-        let target = stepToPosition[app.currentStep] || "Selesai Diproses";
-
         if (app.status === "COMPLETED") {
-            statusLabel = "Selesai";
-            statusColor = "bg-emerald-500";
             target = "Selesai";
+            status = "Selesai";
+            statusColor = "bg-emerald-500";
         } else if (app.status === "REJECTED") {
-            statusLabel = "Ditolak";
-            statusColor = "bg-red-500";
             target = "Ditolak";
+            status = "Ditolak";
+            statusColor = "bg-red-500";
+        } else if (app.status === "REVISION") {
+            target = "Revisi di Mahasiswa";
+            status = "Proses";
+            statusColor = "bg-undip-blue";
+        } else if (app.status === "PENDING" || app.status === "IN_PROGRESS") {
+            const stepToRole: Record<number, string> = {
+                1: "Supervisor Akademik",
+                2: "Manajer TU",
+                3: "Wakil Dekan 1",
+                4: "UPA",
+            };
+            target = stepToRole[app.currentStep] || "Diproses";
+
+            if (app.currentStep === 1) {
+                status = "Perlu Tindakan";
+                statusColor = "bg-amber-500";
+            } else {
+                status = "Proses";
+                statusColor = "bg-undip-blue";
+            }
         }
 
         return {
@@ -91,9 +103,9 @@ export default async function SelesaiPage(props: {
                 month: "short",
                 year: "numeric",
             }),
-            target: target,
-            status: statusLabel,
-            statusColor: statusColor,
+            target,
+            status,
+            statusColor,
         };
     });
 

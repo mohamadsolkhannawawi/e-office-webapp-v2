@@ -117,7 +117,7 @@ export default function DetailRevisiPage() {
                       ? ` (${application.formData.jenisBeasiswa})`
                       : ""
               }`,
-        keperluan: application.scholarshipName || "-",
+        keperluan: "-", // Remove scholarshipName (judul revisi) from here
     };
 
     const lampiranData = application.attachments.map((att) => ({
@@ -194,7 +194,7 @@ export default function DetailRevisiPage() {
                     Persuratan
                 </Link>
                 <ChevronRight className="mx-2 h-4 w-4" />
-                <span className="text-slate-800">Detail Surat (Revisi)</span>
+                <span className="text-slate-800">Detail Pengajuan</span>
             </nav>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -206,14 +206,52 @@ export default function DetailRevisiPage() {
                             checker={revisionChecker}
                             comment={revisionNote}
                             revisionDate={revisionDate}
+                            title={application.scholarshipName}
                         />
+                    )}
+
+                    {/* Detail Surat Pengajuan */}
+                    <DetailSuratPengajuan data={detailSuratData} />
+
+                    {/* Ringkasan Revisi/Ditolak */}
+                    {(application.status === "REVISION" ||
+                        application.status === "REJECTED") && (
+                        <div
+                            className={`rounded-lg border p-4 mt-2 mb-4 ${application.status === "REVISION" ? "border-orange-300 bg-orange-50" : "border-red-300 bg-red-50"}`}
+                        >
+                            <div className="font-bold text-base mb-1">
+                                {application.scholarshipName}
+                            </div>
+                            <div className="text-sm mb-1">
+                                {application.status === "REVISION" ? (
+                                    <>
+                                        <span className="font-semibold text-orange-700">
+                                            Revised by:{" "}
+                                        </span>
+                                        <span className="text-orange-900">
+                                            {revisionChecker}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="font-semibold text-red-700">
+                                            Rejected by:{" "}
+                                        </span>
+                                        <span className="text-red-900">
+                                            {revisionChecker}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+                            <div className="text-sm text-slate-700">
+                                <span className="font-medium">Reason: </span>
+                                <span>{revisionNote}</span>
+                            </div>
+                        </div>
                     )}
 
                     {/* Identitas Pengaju */}
                     <IdentitasPengaju data={identitasData} />
-
-                    {/* Detail Surat Pengajuan */}
-                    <DetailSuratPengajuan data={detailSuratData} />
 
                     {/* Lampiran */}
                     <LampiranSurat data={lampiranData} />

@@ -54,7 +54,7 @@ export default function DetailRevisiPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center min-h-100">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
                     <p className="text-gray-600">Memuat data...</p>
@@ -65,7 +65,7 @@ export default function DetailRevisiPage() {
 
     if (error || !application) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center min-h-100">
                 <div className="text-center">
                     <p className="text-red-600 mb-4">
                         {error || "Pengajuan tidak ditemukan"}
@@ -129,23 +129,26 @@ export default function DetailRevisiPage() {
         downloadUrl: att.downloadUrl,
     }));
 
-    const riwayatData = application.history?.map((h) => ({
-        senderRole: h.actor.role?.name || h.actor.name,
-        receiverRole: getReceiverRole(h.action, application.currentStep),
-        status: h.status,
-        date: new Date(h.createdAt).toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-        }),
-        time: new Date(h.createdAt).toLocaleTimeString("id-ID", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-        }),
-        catatan: h.note,
-        actionType: h.action,
-    }));
+    const riwayatData = application.history?.map((h) => {
+        const createdDate = new Date(h.createdAt);
+        return {
+            senderRole: h.actor.role?.name || h.actor.name,
+            receiverRole: getReceiverRole(h.action, application.currentStep),
+            status: h.status,
+            date: createdDate.toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+            }),
+            time: createdDate.toLocaleTimeString("id-ID", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+            }),
+            catatan: h.note,
+            actionType: h.action,
+        };
+    });
 
     // Find the revisions note
     // Look for the latest history entry with status REVISION or action revision
@@ -167,6 +170,7 @@ export default function DetailRevisiPage() {
         latestRevision?.actor?.role?.name ||
         latestRevision?.actor?.name ||
         "Reviewer";
+    const revisionDate = latestRevision?.createdAt;
 
     const jenis =
         ((application.formData as unknown as Record<string, unknown>)
@@ -201,6 +205,7 @@ export default function DetailRevisiPage() {
                         <DetailRevisi
                             checker={revisionChecker}
                             comment={revisionNote}
+                            revisionDate={revisionDate}
                         />
                     )}
 

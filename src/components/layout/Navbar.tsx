@@ -6,6 +6,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
 // import { NotificationBell } from "@/components/layout/NotificationBell";
 import logoNavbar from "@/assets/images/logo-undip-navbar.png";
 
@@ -21,12 +23,14 @@ interface NavbarProps {
     userName?: string;
     userImage?: string;
     showProfile?: boolean;
+    onMenuClick?: () => void;
 }
 
 export function Navbar({
     userName: propUserName,
     userImage: propUserImage,
     showProfile: propShowProfile = true,
+    onMenuClick,
 }: NavbarProps) {
     const { user } = useAuth();
     const pathname = usePathname();
@@ -52,7 +56,18 @@ export function Navbar({
         <header className="relative z-50 flex h-16 w-full items-center justify-between bg-undip-blue px-4 shadow-md md:px-8 print:hidden">
             {/* Bagian Kiri: Logo & Nama Instansi */}
             <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-start">
+                {/* Hamburger Button - Only visible on mobile/tablet */}
+                {onMenuClick && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onMenuClick}
+                        className="lg:hidden text-white hover:bg-white/10 -ml-2"
+                    >
+                        <Menu className="h-6 w-6" />
+                    </Button>
+                )}
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-start">
                     <Image
                         src={logoNavbar}
                         alt="UNDIP Logo Small"
@@ -62,13 +77,13 @@ export function Navbar({
                     />
                 </div>
                 <div className="flex flex-col leading-tight text-white">
-                    <span className="text-xs font-medium opacity-90">
+                    <span className="text-[9px] sm:text-xs font-medium opacity-90">
                         Fakultas
                     </span>
-                    <span className="text-sm font-bold tracking-wide">
+                    <span className="text-[11px] sm:text-sm font-bold tracking-wide">
                         SAINS DAN MATEMATIKA
                     </span>
-                    <span className="text-[10px] font-medium opacity-80">
+                    <span className="text-[8px] sm:text-[10px] font-medium opacity-80">
                         UNIVERSITAS DIPONEGORO
                     </span>
                 </div>

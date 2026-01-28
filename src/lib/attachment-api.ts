@@ -219,10 +219,24 @@ export async function createDraftApplication(
         );
 
         if (!response.ok) {
-            const text = await response.text();
-            throw new Error(
-                text || `Create draft failed (Status ${response.status})`,
-            );
+            let errorMessage = `Create draft failed (Status ${response.status})`;
+            try {
+                const text = await response.text();
+                console.error("Create draft API response (text):", text);
+                
+                if (text) {
+                    try {
+                        const errorData = JSON.parse(text);
+                        errorMessage = errorData.error || errorMessage;
+                        console.error("Create draft API error (JSON):", errorData);
+                    } catch {
+                        errorMessage = text;
+                    }
+                }
+            } catch (e) {
+                console.error("Create draft API error (parsing):", e);
+            }
+            throw new Error(errorMessage);
         }
 
         const result = (await response.json()) as {

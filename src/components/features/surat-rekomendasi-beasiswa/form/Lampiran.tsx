@@ -437,20 +437,20 @@ export function Lampiran({ data, setData }: LampiranProps) {
             <Card className="border-none shadow-sm bg-white">
                 <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">
-                        <Label className="text-sm font-bold text-gray-800">
+                        <p className="font-bold text-gray-800">
                             Lampiran Utama{" "}
                             <span className="text-red-500">*</span>
-                        </Label>
-                        <p className="text-xs text-gray-500 -mt-2">
+                        </p>
+                        <p className="text-gray-500 -mt-2">
                             Wajib. Unggah minimal 2 dokumen pendukung utama (KTM
                             & KHS). Format: PDF, JPG, PNG. Maks: 5MB/file.
                             <br />
-                            <span className="text-red-500 font-semibold italic">
+                            <span className="text-xs text-red-500 font-semibold italic">
                                 Catatan: Pastikan mengunggah KTM dan KHS
                                 terbaru.
                             </span>
                             <br />
-                            <span className="text-red-500">
+                            <span className="text-xs text-red-500">
                                 Maksimal 5 file.
                             </span>
                         </p>
@@ -528,12 +528,12 @@ export function Lampiran({ data, setData }: LampiranProps) {
             </Card>
 
             <Card className="mt-6 border-none shadow-sm bg-white">
-                <CardContent className="p-6">
+                <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <Label className="text-sm font-bold text-gray-800">
+                            <p className="font-bold text-gray-800">
                                 Ringkasan Lampiran Utama
-                            </Label>
+                            </p>
                             <div className="flex items-center gap-2">
                                 <div className="text-xs text-gray-600">
                                     Tampilkan:
@@ -695,14 +695,14 @@ export function Lampiran({ data, setData }: LampiranProps) {
             <Card className="mt-8 border-none shadow-sm bg-white">
                 <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">
-                        <Label className="text-sm font-bold text-gray-800">
+                        <p className="font-bold text-gray-800">
                             Lampiran Tambahan
-                        </Label>
-                        <p className="text-xs text-gray-500 -mt-2">
+                        </p>
+                        <p className="text-gray-500 -mt-2">
                             Opsional. Tambahkan dokumen pendukung lainnya jika
                             diperlukan.
                             <br />
-                            <span className="text-red-500">
+                            <span className="text-xs text-red-500">
                                 Maksimal 3 file.
                             </span>
                         </p>
@@ -781,12 +781,12 @@ export function Lampiran({ data, setData }: LampiranProps) {
             </Card>
 
             <Card className="mt-6 border-none shadow-sm bg-white">
-                <CardContent className="p-6">
+                <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <Label className="text-sm font-bold text-gray-800">
+                            <p className="font-bold text-gray-800">
                                 Ringkasan Lampiran Tambahan
-                            </Label>
+                            </p>
                             <div className="flex items-center gap-2">
                                 <div className="text-xs text-gray-600">
                                     Tampilkan:

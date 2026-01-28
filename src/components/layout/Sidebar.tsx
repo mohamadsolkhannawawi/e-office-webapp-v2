@@ -19,6 +19,8 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
     className?: string;
+    isOpen?: boolean;
+    onClose?: () => void;
 }
 
 interface MenuItem {
@@ -193,7 +195,7 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
     ],
 };
 
-export function Sidebar({ className = "" }: SidebarProps) {
+export function Sidebar({ className = "", isOpen = false, onClose }: SidebarProps) {
     const { signOut } = useAuth();
     const pathname = usePathname();
     const role = useCurrentRole();
@@ -229,10 +231,29 @@ export function Sidebar({ className = "" }: SidebarProps) {
         return pathname.startsWith(href);
     };
 
+    const handleLinkClick = () => {
+        if (onClose) {
+            onClose();
+        }
+    };
+
     return (
-        <aside
-            className={`w-64 bg-white border-r border-gray-200 flex flex-col h-full transition-all duration-200 ${className} print:hidden`}
-        >
+        <>
+            {/* Overlay for mobile */}
+            {isOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                    onClick={onClose}
+                />
+            )}
+            
+            {/* Sidebar */}
+            <aside
+                className={`w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 print:hidden
+                    fixed lg:static top-16 lg:top-0 bottom-0 left-0 z-50 lg:h-full
+                    ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    ${className}`}
+            >
             <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
                 {menuItems.map((item) => (
                     <div key={item.label}>
@@ -275,6 +296,7 @@ export function Sidebar({ className = "" }: SidebarProps) {
                                             <Link
                                                 key={sub.label}
                                                 href={sub.href}
+                                                onClick={handleLinkClick}
                                                 className={`block px-3 py-2 text-sm rounded-md transition-colors ${
                                                     pathname === sub.href
                                                         ? "text-undip-blue font-medium bg-blue-50/50"
@@ -290,6 +312,7 @@ export function Sidebar({ className = "" }: SidebarProps) {
                         ) : (
                             <Link
                                 href={item.href || "#"}
+                                onClick={handleLinkClick}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-md group font-medium transition-colors text-sm ${
                                     isActive(item.href)
                                         ? "bg-gray-100 text-undip-blue"
@@ -322,5 +345,6 @@ export function Sidebar({ className = "" }: SidebarProps) {
                 </button>
             </div>
         </aside>
+        </>
     );
 }

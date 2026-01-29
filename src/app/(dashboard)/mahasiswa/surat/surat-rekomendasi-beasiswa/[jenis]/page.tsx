@@ -300,18 +300,19 @@ export default function PengajuanBaruPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center gap-4">
-                <Link href="/mahasiswa/surat/surat-rekomendasi-beasiswa">
-                    <Button variant="ghost" size="icon">
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                </Link>
-                <div>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="order-2 sm:order-1">
                     <h1 className="text-2xl font-bold text-gray-900">
                         {stepInfo.title}
                     </h1>
                     <p className="text-gray-500 mt-1">{stepInfo.desc}</p>
                 </div>
+                <Link href="/mahasiswa/surat/surat-rekomendasi-beasiswa" className="order-1 sm:order-2 self-start sm:self-auto">
+                    <Button className="bg-red-600 text-white hover:bg-slate-200 hover:bg-red-700 px-3 py-2 rounded-md inline-flex items-center gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="text-sm font-semibold">Kembali</span>
+                    </Button>
+                </Link>
             </div>
 
             <Stepper currentStep={currentStep} />

@@ -140,17 +140,17 @@ export function WD1SignatureSection({
                         className="w-full"
                         onValueChange={setSelectedMethod}
                     >
-                        <TabsList className="w-full h-14 bg-slate-50 p-1 rounded-none border-b border-slate-100">
+                        <TabsList className="w-full h-auto bg-slate-50 p-1 rounded-none border-b border-slate-100 flex flex-col sm:flex-row gap-2 sm:gap-0">
                             <TabsTrigger
                                 value="upload"
-                                className="flex-1 h-full rounded-none data-[state=active]:bg-white data-[state=active]:text-undip-blue data-[state=active]:shadow-none border-r border-slate-100 gap-2 font-bold text-sm"
+                                className="flex-1 h-full rounded-none data-[state=active]:bg-white data-[state=active]:text-undip-blue data-[state=active]:shadow-none border-b sm:border-r border-slate-100 gap-2 font-bold text-sm"
                             >
                                 <Camera className="h-4 w-4" />
                                 Kamera/File
                             </TabsTrigger>
                             <TabsTrigger
                                 value="template"
-                                className="flex-1 h-full rounded-none data-[state=active]:bg-white data-[state=active]:text-undip-blue data-[state=active]:shadow-none border-r border-slate-100 gap-2 font-bold text-sm"
+                                className="flex-1 h-full rounded-none data-[state=active]:bg-white data-[state=active]:text-undip-blue data-[state=active]:shadow-none border-b sm:border-r border-slate-100 gap-2 font-bold text-sm"
                             >
                                 <Layout className="h-4 w-4" />
                                 Template

@@ -129,26 +129,25 @@ export default function SuratDalamProsesPage() {
                 <span className="text-slate-800">Surat Dalam Proses</span>
             </nav>
 
-            {/* Page Title Card */}
-            <div className="bg-white rounded-lg shadow-sm p-5 transition-all duration-200">
-                <h1 className="text-xl font-bold text-slate-800">
-                    Surat Dalam Proses
-                </h1>
-            </div>
+            {/* Page Title */}
+            <h1 className="text-2xl font-bold text-slate-800">Surat Dalam Proses</h1>
+            <p className="text-sm text-slate-500 -mt-4">
+                Daftar surat rekomendasi beasiswa yang sedang dalam proses
+            </p>
 
             {/* Filter Bar */}
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="relative w-full sm:w-64">
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
+                <div className="relative w-full sm:w-1/2">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
                         placeholder="Cari surat..."
-                        className="pl-9 bg-white border-gray-200"
+                        className="pl-9 bg-white border-gray-200 w-full"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <Select value={jenisFilter} onValueChange={setJenisFilter}>
-                    <SelectTrigger className="w-full sm:w-48 bg-white border-gray-200">
+                    <SelectTrigger className="w-full sm:w-1/2 bg-white border-gray-200 text-slate-700">
                         <div className="flex items-center gap-2">
                             <Filter className="h-4 w-4" />
                             <SelectValue placeholder="Filter Jenis Surat" />

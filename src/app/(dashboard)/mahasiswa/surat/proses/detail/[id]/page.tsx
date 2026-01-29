@@ -241,7 +241,7 @@ export default function DetailSuratProsesPage() {
                             <Link
                                 href={`/mahasiswa/surat/proses/preview/${id}?stage=mahasiswa`}
                             >
-                                <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-medium py-6 rounded-lg flex items-center justify-center gap-2">
+                                <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-medium py-6 rounded-lg flex items-center justify-center gap-2 mb-3">
                                     <Eye className="h-4 w-4" />
                                     Preview
                                 </Button>

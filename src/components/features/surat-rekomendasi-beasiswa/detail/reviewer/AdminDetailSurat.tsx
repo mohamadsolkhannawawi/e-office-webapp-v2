@@ -479,7 +479,7 @@ export function AdminDetailSurat({
                                                             true,
                                                         )
                                                     }
-                                                    className="w-full bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50 font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                                    className="w-full bg-yellow-400 border-2 border-yellow-400 text-black hover:bg-yellow-500 font-bold py-6 rounded-lg flex items-center justify-center gap-2"
                                                 >
                                                     <Hash className="h-5 w-5" />
                                                     {upaLetterNumber
@@ -493,7 +493,7 @@ export function AdminDetailSurat({
                                                             !upaIsStampApplied,
                                                         )
                                                     }
-                                                    className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50"} font-bold py-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm`}
+                                                    className={`w-full ${upaIsStampApplied ? "bg-red-600 border-red-200 text-white hover:bg-red-700" : "bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50"} font-bold py-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm`}
                                                 >
                                                     <ShieldCheck className="h-5 w-5" />
                                                     {upaIsStampApplied

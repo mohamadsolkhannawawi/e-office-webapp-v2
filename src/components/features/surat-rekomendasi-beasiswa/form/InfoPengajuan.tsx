@@ -67,7 +67,7 @@ function FormField({
                         className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-md ${
                             isEditable
                                 ? "text-amber-600 bg-amber-50 font-bold border border-amber-100"
-                                : "text-slate-400 hover:text-undip-blue hover:bg-slate-50"
+                                : "text-amber-600 hover:text-amber-700 hover:bg-slate-50"
                         }`}
                     >
                         <Edit2 size={10} />
@@ -428,7 +428,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-md ${
                                         editableFields.tanggalLahir
                                             ? "text-amber-600 bg-amber-50 font-bold border border-amber-100"
-                                            : "text-slate-400 hover:text-undip-blue hover:bg-slate-50"
+                                            : "text-amber-600 hover:text-amber-700 hover:bg-slate-50"
                                     }`}
                                 >
                                     <Edit2 size={10} />

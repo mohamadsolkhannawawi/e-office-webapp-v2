@@ -82,7 +82,7 @@ export function LampiranSurat({ data }: LampiranSuratProps) {
             </CardHeader>
             <CardContent className="pt-4">
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <Label className="text-sm font-bold text-gray-800">
                             Ringkasan Lampiran
                         </Label>

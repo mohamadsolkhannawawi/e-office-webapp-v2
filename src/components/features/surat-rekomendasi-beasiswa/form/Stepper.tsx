@@ -30,11 +30,11 @@ export function Stepper({ currentStep }: StepperProps) {
                   {/* Lingkaran Angka */}
                   <div
                     className={`z-10 flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold transition-all duration-300 border-2 
-                      ${isActive 
-                        ? 'bg-blue-600 border-blue-600 text-white ring-4 ring-blue-100' // Step Aktif
-                        : isCompleted 
-                          ? 'bg-blue-600 border-blue-600 text-white' // Step Selesai
-                          : 'bg-white border-gray-300 text-gray-400' // Step Belum
+                        ${isActive 
+                          ? 'bg-undip-blue border-undip-blue text-white ring-4 ring-undip-blue/20' // Step Aktif
+                          : isCompleted 
+                            ? 'bg-undip-blue border-undip-blue text-white' // Step Selesai
+                            : 'bg-white border-gray-300 text-gray-400' // Step Belum
                       }`}
                   >
                     {isCompleted ? (
@@ -48,7 +48,7 @@ export function Stepper({ currentStep }: StepperProps) {
                   {/* Label di Bawah */}
                   <div 
                     className={`absolute top-10 w-32 text-center text-xs font-medium transition-colors duration-300
-                      ${isActive || isCompleted ? 'text-blue-600' : 'text-gray-400'}`}
+                      ${isActive || isCompleted ? 'text-undip-blue' : 'text-gray-400'}`}
                   >
                     {step.label}
                   </div>
@@ -60,7 +60,7 @@ export function Stepper({ currentStep }: StepperProps) {
                   <div className="flex-1 h-0.5 mx-2 bg-gray-200 relative">
                     {/* Garis Progress Berwarna (Overlay) */}
                     <div 
-                      className={`absolute top-0 left-0 h-full bg-blue-600 transition-all duration-500 ease-in-out
+                      className={`absolute top-0 left-0 h-full bg-undip-blue transition-all duration-500 ease-in-out
                         ${isCompleted ? 'w-full' : 'w-0'}`} 
                     />
                   </div>

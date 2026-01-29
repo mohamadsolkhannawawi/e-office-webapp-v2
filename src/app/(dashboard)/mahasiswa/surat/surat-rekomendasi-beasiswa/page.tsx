@@ -55,20 +55,21 @@ export default function SuratRekomendasiBeasiswaPage() {
             </nav>
 
             {/* Header */}
-            <div className="flex items-center gap-4">
-                <Link href="/mahasiswa">
-                    <Button variant="ghost" size="icon">
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                </Link>
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="order-2 sm:order-1">
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                         Surat Rekomendasi Beasiswa
                     </h1>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mt-1">
                         Pilih jenis beasiswa yang ingin Anda ajukan
                     </p>
                 </div>
+                <Link href="/mahasiswa" className="order-1 sm:order-2 self-start sm:self-auto">
+                    <Button className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-md inline-flex items-center gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="text-sm font-semibold">Kembali</span>
+                    </Button>
+                </Link>
             </div>
 
             {/* Jenis Beasiswa Grid */}

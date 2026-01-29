@@ -1,14 +1,17 @@
 import { treaty } from "@elysiajs/eden";
-import type { App } from "@backend/autogen.routes.ts";
 
 /**
  * API client configured to:
  * - Send cookies automatically (credentials: "include")
- * - Use relative URLs for Next.js Rewrite proxy
+ * - Connect to backend API
+ *
+ * Note: Using untyped client as backend is deployed separately
  */
-export const client = treaty<App>("http://localhost:3000", {
-    credentials: "include", // Enable sending cookies with requests
-    fetch: {
-        credentials: "include", // Also set in fetch options
+export const client = treaty(
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+    {
+        fetch: {
+            credentials: "include", // Enable sending cookies with requests
+        },
     },
-});
+);

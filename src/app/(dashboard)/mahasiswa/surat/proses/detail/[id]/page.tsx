@@ -150,8 +150,13 @@ export default function DetailSuratProsesPage() {
     }));
 
     const riwayatData = application.history?.map((h) => ({
-        senderRole: h.actor.role?.name || h.actor.name,
-        receiverRole: getReceiverRole(h.action, application.currentStep),
+        senderRole: h.role?.name || h.actor.name || "Pengguna",
+        receiverRole: getReceiverRole(
+            h.action,
+            application.currentStep,
+            h.note,
+            h.role?.name || h.actor.name,
+        ),
         status: h.status,
         date: new Date(h.createdAt).toLocaleDateString("id-ID", {
             day: "numeric",
@@ -168,8 +173,9 @@ export default function DetailSuratProsesPage() {
     }));
 
     const canEdit =
-        (application.status as string) === "REVISION" ||
-        (application.status as string) === "DRAFT";
+        (application.status as string) === "DRAFT" ||
+        ((application.status as string) === "REVISION" &&
+            application.currentStep === 0);
 
     // Get jenis for editing from application data
     const jenis =
@@ -208,18 +214,20 @@ export default function DetailSuratProsesPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Left Column */}
                 <div className="lg:col-span-8 space-y-6">
-                    {/* Tampilkan alasan revisi jika status REVISION */}
-                    {application.status === "REVISION" && revisiHistory && (
-                        <DetailRevisi
-                            checker={
-                                revisiHistory.actor?.role?.name ||
-                                revisiHistory.actor?.name ||
-                                "-"
-                            }
-                            comment={revisiHistory.note || "-"}
-                            revisionDate={revisiHistory.createdAt}
-                        />
-                    )}
+                    {/* Tampilkan alasan revisi jika status REVISION dan revisi ditujukan ke mahasiswa (currentStep === 0) */}
+                    {application.status === "REVISION" &&
+                        application.currentStep === 0 &&
+                        revisiHistory && (
+                            <DetailRevisi
+                                checker={
+                                    revisiHistory.actor?.role?.name ||
+                                    revisiHistory.actor?.name ||
+                                    "-"
+                                }
+                                comment={revisiHistory.note || "-"}
+                                revisionDate={revisiHistory.createdAt}
+                            />
+                        )}
                     {/* Identitas Pengaju */}
                     <IdentitasPengaju data={identitasData} />
 

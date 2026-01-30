@@ -186,6 +186,7 @@ export function NotificationBell() {
         const isWakilDekan =
             userRoles.includes("WAKIL_DEKAN_1") ||
             userRoles.includes("WAKIL_DEKAN_2");
+        const isUpa = userRoles.includes("UPA");
 
         const notificationType = notification.type;
         const entityId = notification.letterInstanceId || notification.entityId;
@@ -205,9 +206,11 @@ export function NotificationBell() {
                 if (isSupervisor) {
                     path = `/supervisor-akademik/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
                 } else if (isManager) {
-                    path = `/manager-tu/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                    path = `/manajer-tu/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
                 } else if (isWakilDekan) {
-                    path = `/wakil-dekan/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                    path = `/wakil-dekan-1/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                } else if (isUpa) {
+                    path = `/upa/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
                 } else {
                     path = `/mahasiswa/surat/proses/detail/${entityId}`;
                 }
@@ -232,8 +235,14 @@ export function NotificationBell() {
             case "APPLICATION_SUBMITTED":
             default:
                 // Default routing based on role
-                if (isSupervisor || isManager || isWakilDekan) {
+                if (isSupervisor) {
                     path = `/supervisor-akademik/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                } else if (isManager) {
+                    path = `/manajer-tu/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                } else if (isWakilDekan) {
+                    path = `/wakil-dekan-1/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                } else if (isUpa) {
+                    path = `/upa/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
                 } else {
                     path = `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
                 }

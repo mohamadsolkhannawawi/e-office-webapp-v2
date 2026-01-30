@@ -196,6 +196,42 @@ export async function getApplicationById(
 }
 
 /**
+ * Fetch application or create new draft if not found
+ * This endpoint auto-creates a draft application if the ID doesn't exist
+ */
+export async function getApplicationByIdOrCreate(
+    applicationId: string,
+): Promise<ApplicationDetail & { isNewDraft?: boolean }> {
+    try {
+        const response = await fetch(
+            `/api/surat-rekomendasi/applications/${applicationId}/or-create`,
+            {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            },
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Failed to fetch or create application: ${response.status}`,
+            );
+        }
+
+        const result = await response.json();
+        return {
+            ...result.data,
+            isNewDraft: result.isNewDraft || false,
+        };
+    } catch (error) {
+        console.error("Get or create application error:", error);
+        throw error;
+    }
+}
+
+/**
  * Fetch application statistics
  */
 export async function getStats(): Promise<{

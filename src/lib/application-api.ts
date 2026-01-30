@@ -436,7 +436,11 @@ export async function saveSignature(data: {
     url: string;
     signatureType?: "UPLOADED" | "DRAWN" | "TEMPLATE";
     isDefault?: boolean;
-}): Promise<UserSignature | null> {
+}): Promise<{
+    success: boolean;
+    data: UserSignature | null;
+    error?: string;
+}> {
     try {
         const response = await fetch("/api/signatures", {
             method: "POST",
@@ -448,14 +452,32 @@ export async function saveSignature(data: {
         });
 
         if (!response.ok) {
-            throw new Error("Failed to save signature");
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage =
+                errorData.message ||
+                `Failed to save signature (${response.status})`;
+            console.error("Save signature error:", errorMessage);
+            return {
+                success: false,
+                data: null,
+                error: errorMessage,
+            };
         }
 
         const result = await response.json();
-        return result.data;
+        return {
+            success: true,
+            data: result.data,
+        };
     } catch (error) {
+        const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
         console.error("Save signature error:", error);
-        return null;
+        return {
+            success: false,
+            data: null,
+            error: errorMessage,
+        };
     }
 }
 

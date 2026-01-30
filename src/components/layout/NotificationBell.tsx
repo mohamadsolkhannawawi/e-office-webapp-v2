@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Bell, CheckCheck, ExternalLink } from "lucide-react";
+import { Bell, CheckCheck, Check, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Popover,
@@ -13,15 +13,19 @@ import {
     getUnreadNotificationCount,
     markNotificationAsRead,
     markAllNotificationsAsRead,
+    deleteNotification,
+    deleteAllNotifications,
     Notification,
 } from "@/lib/application-api";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function NotificationBell() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [userRoles, setUserRoles] = useState<string[]>([]);
+    const router = useRouter();
 
     useEffect(() => {
         let isMounted = true;
@@ -33,8 +37,26 @@ export function NotificationBell() {
             }
         };
 
+        const fetchUserRoles = async () => {
+            try {
+                // Fetch user roles from session/auth
+                const response = await fetch("/api/auth/get-session", {
+                    credentials: "include",
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (isMounted && data.user) {
+                        setUserRoles(data.user.roles || []);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch user roles:", error);
+            }
+        };
+
         // Initial fetch
         void updateCount();
+        void fetchUserRoles();
 
         // Poll every 30 seconds
         const interval = setInterval(() => {
@@ -59,17 +81,81 @@ export function NotificationBell() {
     };
 
     const handleMarkAsRead = async (id: string) => {
-        await markNotificationAsRead(id);
-        setNotifications((prev) =>
-            prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
-        );
-        setUnreadCount((prev) => Math.max(0, prev - 1));
+        try {
+            console.log("📌 Marking notification as read:", id);
+            const result = await markNotificationAsRead(id);
+            if (result) {
+                setNotifications((prev) =>
+                    prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
+                );
+                setUnreadCount((prev) => Math.max(0, prev - 1));
+                console.log("✅ Successfully marked as read:", id);
+            } else {
+                console.error("❌ Failed to mark notification as read:", id);
+            }
+        } catch (error) {
+            console.error("Error marking notification as read:", error);
+        }
     };
 
     const handleMarkAllAsRead = async () => {
-        await markAllNotificationsAsRead();
-        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-        setUnreadCount(0);
+        try {
+            console.log("📌 Marking all notifications as read");
+            const result = await markAllNotificationsAsRead();
+            if (result) {
+                setNotifications((prev) =>
+                    prev.map((n) => ({ ...n, isRead: true })),
+                );
+                setUnreadCount(0);
+                console.log("✅ Successfully marked all as read");
+            } else {
+                console.error("❌ Failed to mark all notifications as read");
+            }
+        } catch (error) {
+            console.error("Error marking all notifications as read:", error);
+        }
+    };
+
+    const handleDelete = async (notificationId: string) => {
+        try {
+            console.log("🗑️ Deleting notification:", notificationId);
+            const result = await deleteNotification(notificationId);
+            if (result) {
+                setNotifications((prev) =>
+                    prev.filter((n) => n.id !== notificationId),
+                );
+                // Recalculate unread count
+                const newCount = await getUnreadNotificationCount();
+                setUnreadCount(newCount);
+                console.log(
+                    "✅ Successfully deleted notification:",
+                    notificationId,
+                );
+            } else {
+                console.error(
+                    "❌ Failed to delete notification:",
+                    notificationId,
+                );
+            }
+        } catch (error) {
+            console.error("Error deleting notification:", error);
+        }
+    };
+
+    const handleDeleteAll = async () => {
+        try {
+            console.log("🗑️ Deleting all notifications");
+            const result = await deleteAllNotifications();
+            if (result) {
+                setNotifications([]);
+                setUnreadCount(0);
+                console.log("✅ Successfully deleted all notifications");
+            } else {
+                console.error("❌ Failed to delete all notifications");
+            }
+        } catch (error) {
+            console.error("Error deleting all notifications:", error);
+        }
     };
 
     const getTimeAgo = (dateString: string) => {
@@ -84,6 +170,85 @@ export function NotificationBell() {
         if (diffMins < 60) return `${diffMins} menit lalu`;
         if (diffHours < 24) return `${diffHours} jam lalu`;
         return `${diffDays} hari lalu`;
+    };
+
+    const handleNotificationClick = async (notification: Notification) => {
+        // Mark as read if not already
+        if (!notification.isRead) {
+            await handleMarkAsRead(notification.id);
+        }
+
+        // Determine route based on user role and notification type
+        let path = "";
+
+        const isSupervisor = userRoles.includes("SUPERVISOR");
+        const isManager = userRoles.includes("MANAJER_TU");
+        const isWakilDekan =
+            userRoles.includes("WAKIL_DEKAN_1") ||
+            userRoles.includes("WAKIL_DEKAN_2");
+
+        const notificationType = notification.type;
+        const entityId = notification.letterInstanceId || notification.entityId;
+
+        if (!entityId) {
+            console.error(
+                "No entityId or letterInstanceId in notification:",
+                notification,
+            );
+            return;
+        }
+
+        // Route based on notification type and user role
+        switch (notificationType) {
+            case "NEW_TASK":
+                // NEW_TASK = need action (approval pending)
+                if (isSupervisor) {
+                    path = `/supervisor-akademik/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                } else if (isManager) {
+                    path = `/manager-tu/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                } else if (isWakilDekan) {
+                    path = `/wakil-dekan/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                } else {
+                    path = `/mahasiswa/surat/proses/detail/${entityId}`;
+                }
+                break;
+
+            case "APPLICATION_REVISION":
+                // Revision request - go to revision detail page
+                path = `/mahasiswa/surat/proses/detail/${entityId}`;
+                break;
+
+            case "APPLICATION_PUBLISHED":
+                // Letter published - go to published letter detail
+                path = `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                break;
+
+            case "APPLICATION_REJECTED":
+                // Rejection - go to revision/process detail
+                path = `/mahasiswa/surat/proses/detail/${entityId}`;
+                break;
+
+            case "APPLICATION_APPROVED":
+            case "APPLICATION_SUBMITTED":
+            default:
+                // Default routing based on role
+                if (isSupervisor || isManager || isWakilDekan) {
+                    path = `/supervisor-akademik/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                } else {
+                    path = `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+                }
+        }
+
+        console.log("🔗 Navigating to:", path, {
+            notificationType,
+            userRoles,
+            entityId,
+        });
+
+        if (path) {
+            router.push(path);
+            setIsOpen(false);
+        }
     };
 
     return (
@@ -111,15 +276,27 @@ export function NotificationBell() {
                     <h3 className="font-bold text-slate-800 text-sm">
                         Notifikasi
                     </h3>
-                    {unreadCount > 0 && (
-                        <button
-                            onClick={handleMarkAllAsRead}
-                            className="text-xs text-undip-blue hover:underline font-medium flex items-center gap-1"
-                        >
-                            <CheckCheck className="h-3 w-3" />
-                            Tandai semua
-                        </button>
-                    )}
+                    <div className="flex gap-2">
+                        {unreadCount > 0 && (
+                            <button
+                                onClick={handleMarkAllAsRead}
+                                className="text-xs text-undip-blue hover:underline font-medium flex items-center gap-1"
+                            >
+                                <CheckCheck className="h-3 w-3" />
+                                Tandai semua
+                            </button>
+                        )}
+                        {notifications.length > 0 && (
+                            <button
+                                onClick={handleDeleteAll}
+                                className="text-xs text-red-600 hover:underline font-medium flex items-center gap-1"
+                                title="Hapus semua notifikasi"
+                            >
+                                <Trash2 className="h-3 w-3" />
+                                Hapus Semua
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Notification List */}
@@ -139,16 +316,19 @@ export function NotificationBell() {
                         notifications.map((notification) => (
                             <div
                                 key={notification.id}
-                                className={`px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer ${
+                                className={`px-4 py-3 border-b border-slate-50 ${
                                     !notification.isRead ? "bg-blue-50/50" : ""
                                 }`}
-                                onClick={() => {
-                                    if (!notification.isRead) {
-                                        handleMarkAsRead(notification.id);
-                                    }
-                                }}
                             >
-                                <div className="flex items-start gap-3">
+                                {/* Notifikasi Content */}
+                                <div
+                                    className="flex items-start gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                                    onClick={() =>
+                                        handleNotificationClick(notification)
+                                    }
+                                    role="button"
+                                    tabIndex={0}
+                                >
                                     <div
                                         className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
                                             !notification.isRead
@@ -167,15 +347,40 @@ export function NotificationBell() {
                                             {getTimeAgo(notification.createdAt)}
                                         </p>
                                     </div>
-                                    {notification.entityId && (
-                                        <Link
-                                            href={`#`}
-                                            className="p-1 text-slate-400 hover:text-undip-blue"
-                                            title="Lihat detail"
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-2 mt-2 pt-2 border-t border-slate-200">
+                                    {!notification.isRead && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleMarkAsRead(
+                                                    notification.id,
+                                                );
+                                            }}
+                                            className="flex-1 h-7 text-xs bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                                            title="Tandai sudah dibaca"
                                         >
-                                            <ExternalLink className="h-3.5 w-3.5" />
-                                        </Link>
+                                            <Check className="h-3 w-3 mr-1" />
+                                            Baca
+                                        </Button>
                                     )}
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDelete(notification.id);
+                                        }}
+                                        className="flex-1 h-7 text-xs bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+                                        title="Hapus notifikasi"
+                                    >
+                                        <Trash2 className="h-3 w-3 mr-1" />
+                                        Hapus
+                                    </Button>
                                 </div>
                             </div>
                         ))

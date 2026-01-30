@@ -43,11 +43,7 @@ export default function SuratDalamProsesPage() {
                     search: search || undefined,
                     jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
                 });
-                // Filter out REJECTED status - they should appear in "Selesai" page instead
-                const filteredData = data.filter(
-                    (app) => app.status !== "REJECTED",
-                );
-                setApplications(filteredData);
+                setApplications(data);
                 setPagination({
                     page: meta.page,
                     limit: meta.limit,
@@ -79,6 +75,7 @@ export default function SuratDalamProsesPage() {
 
     const getStatusInfo = (app: ApplicationSummary) => {
         const roles = {
+            0: "Mahasiswa",
             1: "Supervisor Akademik",
             2: "Manajer TU",
             3: "Wakil Dekan 1",
@@ -94,13 +91,23 @@ export default function SuratDalamProsesPage() {
             };
         }
         if (app.status === "REVISION") {
-            // Use lastRevisionFromRole if available, otherwise fall back to currentStep logic
-            const revisionFromRole =
-                app.lastRevisionFromRole || getRoleName(app.currentStep + 1);
-            return {
-                label: `Revisi dari ${revisionFromRole}`,
-                color: "text-orange-600 bg-orange-50",
-            };
+            // Check if revision is directed to mahasiswa (currentStep === 0)
+            if (app.currentStep === 0) {
+                // Revisi untuk mahasiswa
+                const revisionFromRole =
+                    app.lastRevisionFromRole ||
+                    getRoleName(app.currentStep + 1);
+                return {
+                    label: `Revisi dari ${revisionFromRole}`,
+                    color: "text-orange-600 bg-orange-50",
+                };
+            } else {
+                // Revisi untuk role lain, tampilkan sebagai sedang diproses
+                return {
+                    label: `Sedang Diproses di ${getRoleName(app.currentStep)}`,
+                    color: "text-blue-600 bg-blue-50",
+                };
+            }
         }
         if (app.status === "PENDING" || app.status === "IN_PROGRESS") {
             return {

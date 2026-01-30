@@ -43,7 +43,11 @@ export default function SuratDalamProsesPage() {
                     search: search || undefined,
                     jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
                 });
-                setApplications(data);
+                // Filter out REJECTED status - they should appear in "Selesai" page instead
+                const filteredData = data.filter(
+                    (app) => app.status !== "REJECTED",
+                );
+                setApplications(filteredData);
                 setPagination({
                     page: meta.page,
                     limit: meta.limit,
@@ -90,12 +94,11 @@ export default function SuratDalamProsesPage() {
             };
         }
         if (app.status === "REVISION") {
-            // Logic: If I am at step 0 (Mahasiswa), it came from Step 1.
-            // If I am at step 1 (Supervisor), it came from Step 2.
-            // Usually revision sends back to previous step.
-            // Let's assume revision comes from the step ABOVE the current one.
+            // Use lastRevisionFromRole if available, otherwise fall back to currentStep logic
+            const revisionFromRole =
+                app.lastRevisionFromRole || getRoleName(app.currentStep + 1);
             return {
-                label: `Revisi dari ${getRoleName(app.currentStep + 1)}`,
+                label: `Revisi dari ${revisionFromRole}`,
                 color: "text-orange-600 bg-orange-50",
             };
         }
@@ -130,7 +133,9 @@ export default function SuratDalamProsesPage() {
             </nav>
 
             {/* Page Title */}
-            <h1 className="text-2xl font-bold text-slate-800">Surat Dalam Proses</h1>
+            <h1 className="text-2xl font-bold text-slate-800">
+                Surat Dalam Proses
+            </h1>
             <p className="text-sm text-slate-500 -mt-4">
                 Daftar surat rekomendasi beasiswa yang sedang dalam proses
             </p>

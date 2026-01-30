@@ -101,6 +101,7 @@ interface AdminDashboardProps {
         distribution?: {
             pending: number;
             inProgress: number;
+            revision?: number;
             completed: number;
             rejected: number;
         };

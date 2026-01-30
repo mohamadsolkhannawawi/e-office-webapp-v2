@@ -56,19 +56,19 @@ export default async function SelesaiPage(props: {
     const { data, meta } = await getCompletedApplications(searchParams);
 
     const letters = data.map((app: ApplicationSummary) => {
-        let statusLabel = "Disetujui Manajer TU";
+        let statusLabel = "Proses";
         let statusColor = "bg-undip-blue";
 
         if (app.status === "COMPLETED") {
-            statusLabel = "Selesai";
+            statusLabel = app.lastActorRole
+                ? `Diterbitkan oleh ${app.lastActorRole}`
+                : "Selesai";
             statusColor = "bg-emerald-500";
         } else if (app.status === "REJECTED") {
-            statusLabel = "Ditolak";
+            statusLabel = app.lastActorRole
+                ? `Ditolak oleh ${app.lastActorRole}`
+                : "Ditolak";
             statusColor = "bg-red-500";
-        } else if (app.currentStep === 3) {
-            statusLabel = "Disetujui → Wakil Dekan 1";
-        } else if (app.currentStep === 4) {
-            statusLabel = "Disetujui → UPA";
         }
 
         return {

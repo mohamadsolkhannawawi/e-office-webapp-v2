@@ -121,8 +121,9 @@ export function AdminDetailSurat({
     // 2. The application is not in a terminal status (COMPLETED/REJECTED)
     // 3. OR if this role previously revised and mahasiswa has resubmitted
     const canTakeAction =
-        (currentStep === roleStep && !isTerminalStatus) ||
-        (hasResubmittedAfterRevision && currentStep === roleStep);
+        !isTerminalStatus &&
+        (currentStep === roleStep ||
+            (hasResubmittedAfterRevision && currentStep === roleStep));
 
     const handleAction = (
         type: "approve" | "revise" | "reject" | "publish",

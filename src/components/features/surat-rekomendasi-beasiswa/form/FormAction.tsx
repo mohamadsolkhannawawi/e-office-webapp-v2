@@ -141,7 +141,7 @@ export function FormAction({
                     <AlertDialogTrigger asChild>
                         <Button
                             variant="outline"
-                            className="text-[#007bff] border-[#007bff]/50 hover:bg-blue-50 h-11 px-6"
+                            className="text-white bg-orange-500 border-orange-500 hover:bg-orange-600 hover:text-white h-11 px-6"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? "Menyimpan..." : "Simpan Draft"}
@@ -161,7 +161,7 @@ export function FormAction({
                             <AlertDialogCancel>Batal</AlertDialogCancel>
                             <AlertDialogAction
                                 onClick={handleSaveDraft}
-                                className="bg-[#007bff] hover:bg-blue-700"
+                                className="bg-undip-blue hover:bg-sky-700"
                             >
                                 Ya, Simpan
                             </AlertDialogAction>
@@ -173,7 +173,7 @@ export function FormAction({
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button
-                                className="bg-[#007bff] hover:bg-blue-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
+                                className="bg-undip-blue hover:bg-sky-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
                                 disabled={
                                     isSubmitting ||
                                     !!(
@@ -213,7 +213,7 @@ export function FormAction({
                 ) : (
                     <Button
                         onClick={handleAjukanSurat}
-                        className="bg-[#007bff] hover:bg-blue-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
+                        className="bg-undip-blue hover:bg-sky-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
                         disabled={
                             !!(
                                 typeof isNextDisabled !== "undefined" &&

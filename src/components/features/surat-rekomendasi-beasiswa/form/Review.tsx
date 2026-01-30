@@ -19,8 +19,8 @@ function SummaryRow({
     value: React.ReactNode;
 }) {
     return (
-        <div className="flex flex-row items-start py-3 border-b border-gray-100 last:border-0 gap-48">
-            <span className="text-sm text-gray-500 font-medium w-40 sm:w-52 shrink-0">
+        <div className="flex flex-col sm:flex-row items-start py-3 border-b border-gray-100 last:border-0 gap-2 sm:gap-48">
+            <span className="text-sm text-gray-500 font-medium w-full sm:w-40 sm:w-52 shrink-0">
                 {label}
             </span>
 

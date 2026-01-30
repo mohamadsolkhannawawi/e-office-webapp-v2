@@ -46,6 +46,7 @@ export interface ApplicationSummary {
         | "DRAFT";
     currentStep: number;
     lastRevisionFromRole?: string; // Role that requested the latest revision
+    lastActorRole?: string; // Role that made the final decision (approve/reject)
     formData: ApplicationFormData;
     attachmentsCount: number;
     createdAt: string;
@@ -108,9 +109,9 @@ export interface ApplicationDetail {
     history?: Array<{
         actor: {
             name: string;
-            role?: {
-                name: string;
-            };
+        };
+        role?: {
+            name: string;
         };
         action: string;
         note?: string;

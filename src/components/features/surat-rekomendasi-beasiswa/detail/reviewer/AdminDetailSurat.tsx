@@ -603,12 +603,14 @@ export function AdminDetailSurat({
 
                                 return {
                                     senderRole:
-                                        log.actor?.role?.name ||
+                                        log.role?.name ||
                                         log.actor?.name ||
                                         "Sistem",
                                     receiverRole: getReceiverRole(
                                         log.action,
                                         initialData?.currentStep,
+                                        log.note,
+                                        log.role?.name || log.actor?.name,
                                     ),
                                     status: log.status, // Pass raw status, let RiwayatSurat handle description
                                     date: new Date(

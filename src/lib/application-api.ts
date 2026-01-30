@@ -37,6 +37,7 @@ export interface ApplicationSummary {
         name: string;
         description?: string;
     };
+    letterNumber?: string;
     status:
         | "PENDING"
         | "IN_PROGRESS"

@@ -132,8 +132,13 @@ export default function DetailRevisiPage() {
     const riwayatData = application.history?.map((h) => {
         const createdDate = new Date(h.createdAt);
         return {
-            senderRole: h.actor.role?.name || h.actor.name,
-            receiverRole: getReceiverRole(h.action, application.currentStep),
+            senderRole: h.role?.name || h.actor.name,
+            receiverRole: getReceiverRole(
+                h.action,
+                application.currentStep,
+                h.note,
+                h.role?.name || h.actor.name,
+            ),
             status: h.status,
             date: createdDate.toLocaleDateString("id-ID", {
                 day: "numeric",

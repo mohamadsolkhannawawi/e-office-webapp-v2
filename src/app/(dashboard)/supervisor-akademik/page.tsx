@@ -1,6 +1,13 @@
 import { headers } from "next/headers";
 import { AdminDashboard } from "@/components/features/dashboard";
 import { ApplicationSummary } from "@/lib/application-api";
+import {
+    CheckCircle,
+    XCircle,
+    RotateCw,
+    AlertCircle,
+    Clock,
+} from "lucide-react";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -80,27 +87,31 @@ async function getDashboardData(searchParams: SearchParams) {
                 let target = "Selesai";
                 let status = "Proses";
                 let statusColor = "bg-undip-blue";
+                let statusIcon: React.ReactNode = null;
 
                 if (app.status === "COMPLETED") {
                     target = "Selesai";
                     status = app.lastActorRole
-                        ? `✓ Diterbitkan oleh ${app.lastActorRole}`
-                        : "✓ Selesai";
+                        ? `Diterbitkan oleh ${app.lastActorRole}`
+                        : "Selesai";
                     statusColor = "bg-emerald-500 text-white";
+                    statusIcon = <CheckCircle className="w-4 h-4" />;
                 } else if (app.status === "REJECTED") {
                     target = "Ditolak";
                     status = app.lastActorRole
-                        ? `✕ Ditolak oleh ${app.lastActorRole}`
-                        : "✕ Ditolak";
+                        ? `Ditolak oleh ${app.lastActorRole}`
+                        : "Ditolak";
                     statusColor = "bg-red-500 text-white";
+                    statusIcon = <XCircle className="w-4 h-4" />;
                 } else if (app.status === "REVISION") {
                     // Target adalah step berikutnya dari currentStep saat ini
                     const nextStep = app.currentStep + 1;
                     target = stepToRole[nextStep] || "Selesai";
                     status = app.lastRevisionFromRole
-                        ? `⟲ Revisi dari ${app.lastRevisionFromRole}`
-                        : "⟲ Revisi Diperlukan";
+                        ? `Revisi dari ${app.lastRevisionFromRole}`
+                        : "Revisi Diperlukan";
                     statusColor = "bg-sky-500 text-white";
+                    statusIcon = <RotateCw className="w-4 h-4" />;
                 } else if (
                     app.status === "PENDING" ||
                     app.status === "IN_PROGRESS"
@@ -108,11 +119,13 @@ async function getDashboardData(searchParams: SearchParams) {
                     target = stepToRole[app.currentStep] || "Diproses";
 
                     if (app.currentStep === 1) {
-                        status = "⚠ Menunggu Tindakan Anda";
+                        status = "Menunggu Tindakan Anda";
                         statusColor = "bg-amber-500 text-white";
+                        statusIcon = <AlertCircle className="w-4 h-4" />;
                     } else {
-                        status = `⏳ Diproses di ${stepToRole[app.currentStep]}`;
+                        status = `Diproses di ${stepToRole[app.currentStep]}`;
                         statusColor = "bg-blue-500 text-white";
+                        statusIcon = <Clock className="w-4 h-4" />;
                     }
                 }
 
@@ -132,6 +145,7 @@ async function getDashboardData(searchParams: SearchParams) {
                     target,
                     status,
                     statusColor,
+                    statusIcon,
                 };
             }),
             meta: appsMeta,

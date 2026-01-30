@@ -61,7 +61,9 @@ export default async function SelesaiPage(props: {
         let statusColor = "bg-emerald-500";
 
         if (app.status === "REJECTED") {
-            statusLabel = "Ditolak";
+            statusLabel = app.lastActorRole
+                ? `Ditolak oleh ${app.lastActorRole}`
+                : "Ditolak";
             statusColor = "bg-red-500";
         }
 

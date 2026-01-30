@@ -15,6 +15,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import {
     Select,
@@ -29,6 +39,12 @@ export default function SuratDraftPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [jenisFilter, setJenisFilter] = useState<string>("ALL");
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [selectedDeleteId, setSelectedDeleteId] = useState<string | null>(
+        null,
+    );
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 10,
@@ -77,30 +93,44 @@ export default function SuratDraftPage() {
         }
     };
 
-    const handleDeleteDraft = async (id: string) => {
-        const confirm = window.confirm(
-            "Apakah Anda yakin ingin menghapus draft ini?",
-        );
-        if (!confirm) return;
+    const handleDeleteDraft = async () => {
+        if (!selectedDeleteId) return;
 
+        setIsDeleting(true);
         try {
-            // Simplified delete call, assuming standard API
             const res = await fetch(
-                `/api/surat-rekomendasi/applications/${id}`,
+                `/api/surat-rekomendasi/applications/${selectedDeleteId}`,
                 {
                     method: "DELETE",
                     credentials: "include",
                 },
             );
             if (res.ok) {
+                setIsDeleteDialogOpen(false);
+                setSelectedDeleteId(null);
+                setIsDeleting(false);
                 fetchApplications(pagination.page);
             } else {
-                alert("Gagal menghapus draft.");
+                const errorData = await res.json();
+                setDeleteError(
+                    errorData.error ||
+                        "Gagal menghapus draft. Silakan coba lagi.",
+                );
+                setIsDeleting(false);
             }
         } catch (error) {
             console.error("Delete draft error:", error);
-            alert("Terjadi kesalahan saat menghapus draft.");
+            setDeleteError(
+                "Terjadi kesalahan saat menghapus draft. Silakan coba lagi.",
+            );
+            setIsDeleting(false);
         }
+    };
+
+    const openDeleteDialog = (id: string) => {
+        setSelectedDeleteId(id);
+        setDeleteError(null);
+        setIsDeleteDialogOpen(true);
     };
 
     return (
@@ -119,10 +149,56 @@ export default function SuratDraftPage() {
                 </span>
             </nav>
             {/* Page Title */}
-            <h1 className="text-2xl font-bold text-slate-800">Draft Surat Rekomendasi Beasiswa</h1>
+            <h1 className="text-2xl font-bold text-slate-800">
+                Draft Surat Rekomendasi Beasiswa
+            </h1>
             <p className="text-sm text-slate-500 -mt-4">
                 Lanjutkan pengajuan surat yang telah Anda simpan sebelumnya.
             </p>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-lg">
+                            Hapus Draft Surat
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-slate-600">
+                            Apakah Anda yakin ingin menghapus draft ini?
+                            Tindakan ini tidak dapat dibatalkan.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    {deleteError && (
+                        <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-sm text-red-700 font-medium">
+                                {deleteError}
+                            </p>
+                        </div>
+                    )}
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>
+                            Batal
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeleteDraft}
+                            disabled={isDeleting}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Menghapus...
+                                </>
+                            ) : (
+                                "Hapus Draft"
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
             {/* Filter Bar */}
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
@@ -276,7 +352,7 @@ export default function SuratDraftPage() {
                                                         className="h-9 w-9 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50"
                                                         title="Hapus Draft"
                                                         onClick={() =>
-                                                            handleDeleteDraft(
+                                                            openDeleteDialog(
                                                                 app.id,
                                                             )
                                                         }

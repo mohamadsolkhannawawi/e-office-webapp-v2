@@ -28,6 +28,7 @@ import { UPANumberingModal } from "@/components/features/surat-rekomendasi-beasi
 import { WD1SignatureModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/WD1SignatureModal";
 import { AdminActionModals } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/AdminActionModals";
 import { SuccessStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/SuccessStampModal";
+import { SignatureImage } from "@/components/ui/signature-image";
 import { ActionStatusModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/ActionStatusModal";
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
@@ -686,14 +687,11 @@ export function SuratPreviewContent({
                                         {wd1Signature && (
                                             <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 animate-in zoom-in duration-300">
                                                 <div className="bg-white border border-emerald-100 rounded-lg py-2 px-3 flex justify-center shadow-inner pt-2">
-                                                    <div className="relative w-32 h-16">
-                                                        <Image
-                                                            src={wd1Signature}
-                                                            alt="WD1 Signature"
-                                                            fill
-                                                            className="object-contain mix-blend-multiply"
-                                                        />
-                                                    </div>
+                                                    <SignatureImage
+                                                        src={wd1Signature}
+                                                        alt="WD1 Signature"
+                                                        className="object-contain mix-blend-multiply w-32 h-16"
+                                                    />
                                                 </div>
                                             </div>
                                         )}

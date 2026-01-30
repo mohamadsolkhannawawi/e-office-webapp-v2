@@ -104,7 +104,7 @@ export function AdminDetailSurat({
                 return (
                     prevIdx > idx && // Earlier in the history (desc order)
                     prevH.action === "revision" &&
-                    prevH.role?.name === initialData.history?.[0]?.role?.name
+                    prevH.actor?.role?.name === h.actor?.role?.name
                 ); // Same role
             });
 

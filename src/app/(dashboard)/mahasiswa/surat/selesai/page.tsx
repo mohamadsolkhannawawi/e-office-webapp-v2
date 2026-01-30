@@ -16,8 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
-import { formatRoleName } from "@/utils/status-mapper";
-
+import { Card } from "@/components/ui/card";
 import {
     Select,
     SelectContent,
@@ -42,8 +41,6 @@ export default function SuratSelesaiPage() {
         async (page = 1, search = searchTerm, jenis = jenisFilter) => {
             setIsLoading(true);
             try {
-                // Fetch both COMPLETED and REJECTED
-                // We'll rely on the backend to handle this if we pass a special status or multiple
                 const { data, meta } = await getApplications({
                     status: "FINISHED",
                     page,
@@ -87,7 +84,7 @@ export default function SuratSelesaiPage() {
             return {
                 label: `Diterbitkan${roleText ? " oleh" : ""}${roleText}`,
                 color: "text-green-600 bg-green-50",
-                icon: CheckCircle,
+                icon: <CheckCircle className="h-3.5 w-3.5" />,
             };
         }
         if (status === "REJECTED") {
@@ -95,13 +92,13 @@ export default function SuratSelesaiPage() {
             return {
                 label: `Ditolak${roleText ? " oleh" : ""}${roleText}`,
                 color: "text-red-600 bg-red-50",
-                icon: XCircle,
+                icon: <XCircle className="h-3.5 w-3.5" />,
             };
         }
         return {
             label: status,
             color: "text-slate-600 bg-slate-50",
-            icon: CheckCircle,
+            icon: <CheckCircle className="h-3.5 w-3.5" />,
         };
     };
 
@@ -125,64 +122,83 @@ export default function SuratSelesaiPage() {
                 Surat-surat rekomendasi beasiswa yang telah selesai diproses.
             </p>
 
-            {/* Filter Bar */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                <div className="relative w-full sm:w-1/2">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                        placeholder="Cari surat selesai..."
-                        className="pl-9 bg-white border-gray-200 w-full"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <Select value={jenisFilter} onValueChange={setJenisFilter}>
-                    <SelectTrigger className="w-full sm:w-1/2 bg-white border-gray-200 text-slate-700">
-                        <div className="flex items-center gap-2">
-                            <Filter className="h-4 w-4" />
-                            <SelectValue placeholder="Filter Jenis Surat" />
+            {/* Filters Card */}
+            <Card className="border-none shadow-sm overflow-hidden bg-white">
+                <div className="p-6 border-b border-slate-50 flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-slate-400" />
+                        <span className="text-sm font-semibold text-slate-600">
+                            Filter
+                        </span>
+                    </div>
+                    <div className="flex flex-wrap gap-3 items-center">
+                        {/* Search */}
+                        <div className="relative flex-1 min-w-50">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input
+                                placeholder="Cari surat selesai..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full"
+                            />
                         </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">Semua Jenis</SelectItem>
-                        <SelectItem value="internal">
-                            Beasiswa Internal
-                        </SelectItem>
-                        <SelectItem value="external">
-                            Beasiswa Eksternal
-                        </SelectItem>
-                        <SelectItem value="akademik">
-                            Beasiswa Akademik
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
 
-            {/* Table Container */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                        {/* Filter Jenis */}
+                        <Select
+                            value={jenisFilter}
+                            onValueChange={setJenisFilter}
+                        >
+                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
+                                <div className="flex items-center gap-2">
+                                    <Filter className="h-4 w-4" />
+                                    <SelectValue placeholder="Jenis Surat" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Semua Jenis</SelectItem>
+                                <SelectItem value="internal">
+                                    Beasiswa Internal
+                                </SelectItem>
+                                <SelectItem value="external">
+                                    Beasiswa Eksternal
+                                </SelectItem>
+                                <SelectItem value="akademik">
+                                    Beasiswa Akademik
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </Card>
+
+            {/* Table Card */}
+            <Card className="border-none shadow-sm overflow-hidden bg-white">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm border-collapse">
-                        <thead className="bg-gray-50/50 border-b border-gray-100">
+                        <thead className="bg-slate-50/50 border-b border-slate-100">
                             <tr>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-12">
+                                <th className="px-6 py-4 font-semibold text-slate-700 w-12">
                                     No
                                 </th>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-1/2">
+                                <th className="px-6 py-4 font-semibold text-slate-700 min-w-50">
                                     Subjek Surat
                                 </th>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-1/4">
-                                    Status Surat
+                                <th className="px-6 py-4 font-semibold text-slate-700 min-w-50">
+                                    Tanggal Pengajuan
                                 </th>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-1/4 text-right">
+                                <th className="px-6 py-4 font-semibold text-slate-700 min-w-50">
+                                    Status
+                                </th>
+                                <th className="px-6 py-4 font-semibold text-slate-700 w-24 text-right">
                                     Aksi
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-slate-100">
                             {isLoading ? (
                                 <tr>
                                     <td
-                                        colSpan={4}
+                                        colSpan={5}
                                         className="px-6 py-12 text-center text-slate-500"
                                     >
                                         <div className="flex justify-center items-center gap-2">
@@ -194,7 +210,7 @@ export default function SuratSelesaiPage() {
                             ) : applications.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={4}
+                                        colSpan={5}
                                         className="px-6 py-12 text-center text-slate-400"
                                     >
                                         Belum ada surat yang selesai.
@@ -208,46 +224,38 @@ export default function SuratSelesaiPage() {
                                     );
                                     const StatusIcon = status.icon;
 
-                                    // Extract jenis from values if available, otherwise fallback
                                     return (
                                         <tr
                                             key={app.id}
-                                            className="hover:bg-gray-50/30 transition-colors group"
+                                            className="hover:bg-slate-50/50 transition-colors group"
                                         >
-                                            <td className="px-6 py-4 text-slate-500 text-sm">
+                                            <td className="px-6 py-4 text-slate-500 text-sm font-medium">
                                                 {(pagination.page - 1) *
                                                     pagination.limit +
                                                     index +
                                                     1}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-800 group-hover:text-[#007bff] transition-colors">
-                                                        {app.scholarshipName ||
-                                                            app.letterType
-                                                                ?.name ||
-                                                            "Surat Rekomendasi Beasiswa"}
-                                                    </span>
-                                                    <span className="text-xs text-slate-500 mt-1">
-                                                        Diajukan pada:{" "}
-                                                        {new Date(
-                                                            app.createdAt,
-                                                        ).toLocaleDateString(
-                                                            "id-ID",
-                                                            {
-                                                                day: "numeric",
-                                                                month: "long",
-                                                                year: "numeric",
-                                                            },
-                                                        )}
-                                                    </span>
-                                                </div>
+                                                <span className="font-semibold text-slate-800 group-hover:text-undip-blue transition-colors">
+                                                    {app.scholarshipName ||
+                                                        app.letterType?.name ||
+                                                        "Surat Rekomendasi Beasiswa"}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600 text-sm">
+                                                {new Date(
+                                                    app.createdAt,
+                                                ).toLocaleDateString("id-ID", {
+                                                    day: "numeric",
+                                                    month: "long",
+                                                    year: "numeric",
+                                                })}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div
-                                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${status.color}`}
+                                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${status.color}`}
                                                 >
-                                                    <StatusIcon className="h-3.5 w-3.5" />
+                                                    {status.icon}
                                                     {status.label}
                                                 </div>
                                             </td>
@@ -259,7 +267,7 @@ export default function SuratSelesaiPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="h-9 w-9 p-0 text-slate-600 hover:text-[#007bff] hover:bg-blue-50"
+                                                            className="h-9 w-9 p-0 text-slate-600 hover:text-undip-blue hover:bg-blue-50"
                                                             title="Detail"
                                                         >
                                                             <Eye className="h-4 w-4" />
@@ -293,8 +301,8 @@ export default function SuratSelesaiPage() {
 
                 {/* Pagination */}
                 {!isLoading && pagination.totalPages > 1 && (
-                    <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
-                        <p className="text-xs text-slate-500 italic">
+                    <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                        <p className="text-xs text-slate-500">
                             Menampilkan{" "}
                             {(pagination.page - 1) * pagination.limit + 1} -{" "}
                             {Math.min(
@@ -315,27 +323,9 @@ export default function SuratSelesaiPage() {
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
-                            <div className="flex items-center gap-1">
-                                {[...Array(pagination.totalPages)].map(
-                                    (_, i) => (
-                                        <Button
-                                            key={i}
-                                            variant={
-                                                pagination.page === i + 1
-                                                    ? "default"
-                                                    : "outline"
-                                            }
-                                            size="sm"
-                                            className={`h-8 w-8 p-0 ${pagination.page === i + 1 ? "bg-[#007bff] hover:bg-blue-600" : ""}`}
-                                            onClick={() =>
-                                                handlePageChange(i + 1)
-                                            }
-                                        >
-                                            {i + 1}
-                                        </Button>
-                                    ),
-                                )}
-                            </div>
+                            <span className="text-xs text-slate-600 px-2">
+                                {pagination.page} / {pagination.totalPages}
+                            </span>
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -352,7 +342,7 @@ export default function SuratSelesaiPage() {
                         </div>
                     </div>
                 )}
-            </div>
+            </Card>
         </div>
     );
 }

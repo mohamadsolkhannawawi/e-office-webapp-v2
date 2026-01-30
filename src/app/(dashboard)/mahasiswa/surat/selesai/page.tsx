@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
+import { formatRoleName } from "@/utils/status-mapper";
 
 import {
     Select,
@@ -80,17 +81,19 @@ export default function SuratSelesaiPage() {
         }
     };
 
-    const getStatusInfo = (status: string) => {
+    const getStatusInfo = (status: string, app?: ApplicationSummary) => {
         if (status === "COMPLETED") {
+            const roleText = app?.lastActorRole ? ` ${app.lastActorRole}` : "";
             return {
-                label: "Diterima",
+                label: `Diterbitkan${roleText ? " oleh" : ""}${roleText}`,
                 color: "text-green-600 bg-green-50",
                 icon: CheckCircle,
             };
         }
         if (status === "REJECTED") {
+            const roleText = app?.lastActorRole ? ` ${app.lastActorRole}` : "";
             return {
-                label: "Ditolak",
+                label: `Ditolak${roleText ? " oleh" : ""}${roleText}`,
                 color: "text-red-600 bg-red-50",
                 icon: XCircle,
             };
@@ -199,7 +202,10 @@ export default function SuratSelesaiPage() {
                                 </tr>
                             ) : (
                                 applications.map((app, index) => {
-                                    const status = getStatusInfo(app.status);
+                                    const status = getStatusInfo(
+                                        app.status,
+                                        app,
+                                    );
                                     const StatusIcon = status.icon;
 
                                     // Extract jenis from values if available, otherwise fallback

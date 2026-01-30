@@ -39,6 +39,7 @@ interface Letter {
     target: string;
     status: string;
     statusColor: string;
+    statusIcon?: React.ReactNode;
 }
 
 interface LetterListProps {
@@ -178,7 +179,7 @@ export function LetterList({
             <div className="p-6 border-b border-slate-50 flex flex-col gap-4">
                 <h2 className="text-xl font-bold text-slate-800">{title}</h2>
                 <div className="flex flex-wrap gap-3 items-center">
-                    <div className="relative flex-1 min-w-[200px]">
+                    <div className="relative flex-1 min-w-50">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <Input
                             className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full"
@@ -195,7 +196,7 @@ export function LetterList({
                         <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
-                                className="h-10 border-slate-100 text-slate-600 gap-2 w-full sm:w-[200px]"
+                                className="h-10 border-slate-100 text-slate-600 gap-2 w-full sm:w-50"
                             >
                                 <Calendar className="h-4 w-4" />
                                 {dateRange.from && dateRange.to
@@ -224,7 +225,7 @@ export function LetterList({
                         defaultValue={searchParams.get("sortOrder") || "desc"}
                         onValueChange={handleSortChange}
                     >
-                        <SelectTrigger className="w-full sm:w-[200px] h-10 border-slate-100 text-slate-600">
+                        <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
                             <div className="flex items-center gap-2">
                                 <Filter className="h-4 w-4" />
                                 <SelectValue placeholder="Urutkan" />
@@ -241,7 +242,9 @@ export function LetterList({
                         <thead>
                             <tr className="bg-undip-blue border-b border-slate-50 text-[11px] uppercase text-white font-bold tracking-wider">
                                 <th className="px-6 py-4 w-12">No</th>
-                                <th className="px-6 py-4">Pengirim / Pemohon</th>
+                                <th className="px-6 py-4">
+                                    Pengirim / Pemohon
+                                </th>
                                 <th className="px-6 py-4">Perihal</th>
                                 <th className="px-6 py-4">Tanggal Diterima</th>
                                 <th className="px-6 py-4">Tujuan Saat Ini</th>
@@ -258,8 +261,8 @@ export function LetterList({
                                     <td className="px-6 py-4 text-slate-500">
                                         {meta
                                             ? (meta.page - 1) * meta.limit +
-                                            index +
-                                            1
+                                              index +
+                                              1
                                             : index + 1}
                                     </td>
                                     <td className="px-6 py-4 font-bold text-slate-700">
@@ -276,9 +279,16 @@ export function LetterList({
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <div
-                                                className={`w-2 h-2 rounded-full ${letter.statusColor}`}
-                                            ></div>
+                                            {letter.statusIcon && (
+                                                <div className="text-slate-500">
+                                                    {letter.statusIcon}
+                                                </div>
+                                            )}
+                                            {!letter.statusIcon && (
+                                                <div
+                                                    className={`w-2 h-2 rounded-full ${letter.statusColor}`}
+                                                ></div>
+                                            )}
                                             <span
                                                 className={`text-[11px] font-bold uppercase ${letter.statusColor === "bg-red-500" ? "text-red-500" : "text-slate-500"}`}
                                             >
@@ -304,10 +314,9 @@ export function LetterList({
                             ))}
                         </tbody>
                     </table>
-                </div>           
+                </div>
             </div>
 
-            
             {/* Pagination */}
             {meta && meta.totalPages > 1 && (
                 <div className="bg-slate-50/30 px-6 py-4 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">

@@ -26,7 +26,7 @@ import { WD1SignatureModal } from "./WD1SignatureModal";
 import { UPANumberingModal } from "./UPANumberingModal";
 import { ActionStatusModal } from "./ActionStatusModal";
 import { useState } from "react";
-import Image from "next/image";
+import { SignatureImage } from "@/components/ui/signature-image";
 import { Hash, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getReceiverRole } from "@/utils/status-mapper";
@@ -424,13 +424,12 @@ export function AdminDetailSurat({
                                                                 Terpilih
                                                             </p>
                                                             <div className="bg-white rounded-lg p-2 border border-slate-100 shadow-sm relative w-32 h-16">
-                                                                <Image
+                                                                <SignatureImage
                                                                     src={
                                                                         wd1Signature
                                                                     }
                                                                     alt="Signature Preview"
-                                                                    fill
-                                                                    className="object-contain p-1"
+                                                                    className="object-contain p-1 w-full h-full"
                                                                 />
                                                             </div>
                                                         </div>

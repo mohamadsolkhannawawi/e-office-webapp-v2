@@ -19,24 +19,21 @@ async function getDashboardData(searchParams: SearchParams) {
         const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
-        // 1. Fetch Stats (global stats for SRB)
+        // 1. Fetch Stats (role-based stats for Manajer TU)
         const statsRes = await fetch(`${apiUrl}/api/surat-rekomendasi/stats`, {
             headers: { Cookie: cookie || "" },
             cache: "no-store",
         });
         const statsJson = await statsRes.json();
         const statsData = statsJson.data || {
-            total: 0,
-            pending: 0,
-            inProgress: 0,
-            completed: 0,
-            rejected: 0,
-            totalCreatedThisMonth: 0,
-            totalCompletedThisMonth: 0,
+            perluTindakan: 0,
+            selesaiBulanIni: 0,
+            totalBulanIni: 0,
             trend: [],
             distribution: {
                 pending: 0,
                 inProgress: 0,
+                revision: 0,
                 completed: 0,
                 rejected: 0,
             },
@@ -70,11 +67,17 @@ async function getDashboardData(searchParams: SearchParams) {
 
         return {
             stats: {
-                actionRequired: statsData.pending || 0,
-                completedMonth: statsData.totalCompletedThisMonth || 0,
-                totalMonth: statsData.totalCreatedThisMonth || 0,
-                trend: statsData.trend,
-                distribution: statsData.distribution,
+                actionRequired: statsData.perluTindakan || 0,
+                completedMonth: statsData.selesaiBulanIni || 0,
+                totalMonth: statsData.totalBulanIni || 0,
+                trend: statsData.trend || [],
+                distribution: statsData.distribution || {
+                    pending: 0,
+                    inProgress: 0,
+                    revision: 0,
+                    completed: 0,
+                    rejected: 0,
+                },
             },
             recentLetters: appsData.map((app: ApplicationSummary) => {
                 const stepToRole: Record<number, string> = {

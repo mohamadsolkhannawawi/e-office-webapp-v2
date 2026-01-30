@@ -53,7 +53,14 @@ function TimelineItem({
         catatanTrim !== "-" &&
         catatanTrim !== "initial submission";
 
-    const config = getStatusConfig(status, actionType, friendlySender);
+    // For initial submission, always use "PENDING" status to show "Diajukan"
+    const displayStatus = isInitialSubmission ? "PENDING" : status;
+    const config = getStatusConfig(
+        displayStatus,
+        actionType,
+        friendlySender,
+        isInitialSubmission ? undefined : friendlyReceiver, // Don't show receiver for initial submission
+    );
 
     const getIconComponent = (name: string) => {
         switch (name) {

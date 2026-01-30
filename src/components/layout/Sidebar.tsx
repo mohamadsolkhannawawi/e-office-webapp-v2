@@ -13,6 +13,7 @@ import {
     Archive,
     Settings,
     User,
+    PenTool,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -150,6 +151,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
                     href: "/wakil-dekan-1/surat/selesai",
                 },
             ],
+        },
+        {
+            label: "Manajemen Tanda Tangan",
+            href: "/wakil-dekan-1/manajemen-tanda-tangan",
+            icon: <PenTool size={20} />,
         },
         {
             label: "Profil Saya",

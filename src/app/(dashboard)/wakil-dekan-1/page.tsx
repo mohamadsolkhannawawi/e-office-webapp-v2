@@ -112,7 +112,10 @@ async function getDashboardData(searchParams: SearchParams) {
                         : "Revisi Diperlukan";
                     statusColor = "bg-sky-500 text-white";
                     statusIcon = <RotateCw className="w-4 h-4" />;
-                } else if (app.status === "PENDING" || app.status === "IN_PROGRESS") {
+                } else if (
+                    app.status === "PENDING" ||
+                    app.status === "IN_PROGRESS"
+                ) {
                     target = stepToRole[app.currentStep] || "Diproses";
 
                     if (app.currentStep === 3) {

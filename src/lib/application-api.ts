@@ -564,6 +564,7 @@ export interface Notification {
     type: string;
     isRead: boolean;
     entityId?: string;
+    letterInstanceId?: string;
     createdAt: string;
 }
 
@@ -640,6 +641,38 @@ export async function markAllNotificationsAsRead(): Promise<boolean> {
         return response.ok;
     } catch (error) {
         console.error("Mark all as read error:", error);
+        return false;
+    }
+}
+
+/**
+ * Delete notification by id
+ */
+export async function deleteNotification(id: string): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/notifications/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+        });
+        return response.ok;
+    } catch (error) {
+        console.error("Delete notification error:", error);
+        return false;
+    }
+}
+
+/**
+ * Delete all notifications
+ */
+export async function deleteAllNotifications(): Promise<boolean> {
+    try {
+        const response = await fetch("/api/notifications/delete-all", {
+            method: "DELETE",
+            credentials: "include",
+        });
+        return response.ok;
+    } catch (error) {
+        console.error("Delete all notifications error:", error);
         return false;
     }
 }

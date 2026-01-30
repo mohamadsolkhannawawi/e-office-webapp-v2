@@ -17,11 +17,22 @@ export interface StatusConfig {
 // Helper to format role names to be more friendly and polite
 export function formatRoleName(role: string): string {
     const lower = role.toLowerCase();
-    if (lower.includes("wakil dekan")) return "Wakil Dekan 1";
-    if (lower.includes("manajer")) return "Manajer TU";
-    if (lower.includes("supervisor")) return "Supervisor Akademik";
-    if (lower.includes("upa")) return "Staff UPA";
-    if (lower.includes("mahasiswa")) return "Mahasiswa";
+    // Handle constant-style names (e.g., WAKIL_DEKAN_1, SUPERVISOR_AKADEMIK)
+    if (
+        lower.includes("wakil") &&
+        (lower.includes("dekan") || lower.includes("wd1"))
+    )
+        return "Wakil Dekan 1";
+    if (
+        lower.includes("manajer") ||
+        (lower.includes("tu") && !lower.includes("status"))
+    )
+        return "Manajer TU";
+    if (lower.includes("supervisor") || lower.includes("spv"))
+        return "Supervisor Akademik";
+    if (lower.includes("upa") || lower.includes("staff")) return "Staff UPA";
+    if (lower.includes("mahasiswa") || lower.includes("mhs"))
+        return "Mahasiswa";
     return role; // Fallback
 }
 
@@ -30,6 +41,7 @@ export function getStatusConfig(
     status: string,
     actionType?: string,
     sender?: string,
+    receiver?: string,
 ): StatusConfig {
     const s = status.toLowerCase();
     const a = actionType?.toLowerCase() || "";
@@ -51,6 +63,16 @@ export function getStatusConfig(
         };
     }
 
+    // Status: PENDING / SUBMITTED / DIAJUKAN
+    if (s === "pending" || s.includes("diajukan") || s === "submitted") {
+        return {
+            label: "Diajukan",
+            color: "text-slate-600 bg-slate-50 border-slate-100",
+            iconName: "FileText",
+            defaultDesc: "Dokumen sedang menunggu review di tahap berikutnya.",
+        };
+    }
+
     // Status: REJECTED
     if (s === "rejected" || s.includes("tolak")) {
         return {
@@ -63,11 +85,20 @@ export function getStatusConfig(
 
     // Status: REVISION / REVISED
     if (s === "revision" || s === "revised" || s.includes("revisi")) {
+        // Only append receiver name if it's not "-" (unknown receiver)
+        const label =
+            receiver && receiver !== "-"
+                ? `Revisi ke ${receiver}`
+                : "Perlu Revisi";
+        const defaultDesc =
+            receiver && receiver !== "-"
+                ? `Dokumen dikembalikan oleh ${senderRole} untuk diperbaiki oleh ${receiver}.`
+                : `Dokumen dikembalikan oleh ${senderRole} untuk diperbaiki.`;
         return {
-            label: "Perlu Revisi",
+            label,
             color: "text-orange-600 bg-orange-50 border-orange-100",
             iconName: "RotateCcw",
-            defaultDesc: `Dokumen dikembalikan oleh ${senderRole} untuk diperbaiki.`,
+            defaultDesc,
         };
     }
 
@@ -119,31 +150,91 @@ export function getStatusConfig(
     };
 }
 
-// Helper to determine receiver role based on action and current step
-export function getReceiverRole(action: string, currentStep?: number): string {
+// Helper to determine receiver role based on action, sender role, and notes
+export function getReceiverRole(
+    action: string,
+    currentStep?: number,
+    catatan?: string,
+    senderRole?: string,
+): string {
     const actionLower = action?.toLowerCase() || "";
 
+    // Infer step from sender role if available
+    let inferredStep: number | null = null;
+    if (senderRole) {
+        const senderLower = senderRole.toLowerCase();
+        if (senderLower.includes("supervisor")) inferredStep = 1;
+        else if (senderLower.includes("manajer") || senderLower.includes("tu"))
+            inferredStep = 2;
+        else if (
+            senderLower.includes("wakil") ||
+            senderLower.includes("dekan") ||
+            senderLower.includes("wd1")
+        )
+            inferredStep = 3;
+        else if (senderLower.includes("upa")) inferredStep = 4;
+    }
+
+    const stepForMapping = inferredStep ?? currentStep ?? 1;
+
     if (actionLower === "approve") {
+        // Step mapping: Backend uses 1-based steps
+        // Step 1 (SPV) approves -> goes to Step 2 (Manajer TU)
+        // Step 2 (TU) approves -> goes to Step 3 (Wakil Dekan 1)
+        // Step 3 (WD1) approves -> goes to Step 4 (UPA/Publish)
+        // Step 4 (UPA) approves -> COMPLETED
         const stepToRole: Record<number, string> = {
-            1: "Manajer TU",
-            2: "Wakil Dekan 1",
-            3: "Staff UPA",
-            4: "Selesai",
+            1: "Manajer TU", // SPV (step 1) approves -> TU (step 2)
+            2: "Wakil Dekan 1", // TU (step 2) approves -> WD1 (step 3)
+            3: "Staff UPA", // WD1 (step 3) approves -> UPA (step 4)
+            4: "Selesai", // UPA (step 4) publishes -> COMPLETED
         };
-        return stepToRole[currentStep || 1] || "-";
+        return stepToRole[stepForMapping] || "-";
     } else if (actionLower === "revision") {
-        return "Revisi";
+        // Try to extract target role from catatan if available
+        if (catatan) {
+            // First try to extract from [ke RoleName] format (appended by backend)
+            const bracketMatch = catatan.match(/\[ke\s+([^\]]+)\]/i);
+            if (bracketMatch && bracketMatch[1]) {
+                return bracketMatch[1].trim();
+            }
+
+            // Check for role abbreviations in the note - use first occurrence
+            const catatanLower = catatan.toLowerCase();
+
+            // Look for patterns like "Revisi WD1 - SPV - MHS..." and get the SECOND role mentioned
+            // (first is who's making the revision, second is who it goes to)
+            const parts = catatanLower.split("-").map((p) => p.trim());
+            if (parts.length >= 2) {
+                // Skip first part (who's making revision) and check second part
+                for (let i = 1; i < parts.length; i++) {
+                    const part = parts[i];
+                    if (part.includes("spv")) return "Supervisor Akademik";
+                    if (part.includes("tu")) return "Manajer TU";
+                    if (part.includes("wd1")) return "Wakil Dekan 1";
+                    if (part.includes("mhs")) return "Mahasiswa";
+                }
+            }
+
+            // Fallback: check anywhere in the note
+            if (catatanLower.includes("spv")) return "Supervisor Akademik";
+            if (catatanLower.includes("tu")) return "Manajer TU";
+            if (catatanLower.includes("wd1")) return "Wakil Dekan 1";
+            if (catatanLower.includes("mhs")) return "Mahasiswa";
+        }
+        return "-";
     } else if (actionLower === "reject") {
         return "Ditolak";
     } else if (actionLower === "resubmit") {
-        // Determine receiver based on current step after resubmit
+        // After revision is completed, document goes back to the role at the specified step
+        // Using 1-based step numbering matching backend
         const stepToRole: Record<number, string> = {
-            1: "Supervisor Akademik",
-            2: "Manajer TU",
-            3: "Wakil Dekan 1",
-            4: "Staff UPA",
+            1: "Supervisor Akademik", // Resubmitted to SPV
+            2: "Manajer TU", // Resubmitted to TU
+            3: "Wakil Dekan 1", // Resubmitted to WD1
+            4: "Staff UPA", // Resubmitted to UPA
         };
-        return stepToRole[currentStep || 1] || "-";
+        return stepToRole[stepForMapping] || "-";
     }
 
     return "-";

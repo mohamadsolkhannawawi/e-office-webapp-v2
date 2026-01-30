@@ -3,6 +3,7 @@
 import Image from "next/image";
 import React from "react";
 import { SignatureImage } from "@/components/ui/signature-image";
+/* eslint-disable @next/next/no-img-element */
 
 // Interface untuk konfigurasi pejabat penandatangan
 interface LeadershipConfig {
@@ -16,6 +17,7 @@ interface SuratDocumentProps {
     showSignature?: boolean;
     signaturePath?: string | null;
     showStamp?: boolean;
+    stampUrl?: string | null;
     leadershipConfig?: LeadershipConfig;
     data?: {
         nama?: string;
@@ -32,7 +34,7 @@ interface SuratDocumentProps {
         tahunAkademik?: string;
         publishedAt?: string;
     };
-    qrCodeUrl?: string; // Add this
+    qrCodeUrl?: string;
 }
 
 // Default values untuk fallback jika config tidak tersedia
@@ -47,9 +49,10 @@ export function SuratDocument({
     showSignature = false,
     signaturePath,
     showStamp = false,
+    stampUrl,
     leadershipConfig,
     data,
-    qrCodeUrl, // Add this
+    qrCodeUrl,
 }: SuratDocumentProps) {
     // Gunakan config dari database atau fallback ke default
     const leadership = leadershipConfig || DEFAULT_LEADERSHIP;
@@ -267,13 +270,13 @@ export function SuratDocument({
                                         />
                                     </div>
                                 )}
-                                {showStamp && (
+                                {showStamp && stampUrl && (
                                     <div className="absolute -left-5 top-2.5 w-27.5 h-27.5 opacity-70 pointer-events-none">
-                                        <Image
-                                            src="/assets/stamp-dummy.png"
+                                        <img
+                                            src={stampUrl}
                                             alt="Stamp"
-                                            fill
-                                            className="object-contain mix-blend-multiply"
+                                            className="w-full h-full object-contain mix-blend-multiply"
+                                            loading="lazy"
                                         />
                                     </div>
                                 )}

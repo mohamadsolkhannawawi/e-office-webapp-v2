@@ -144,6 +144,7 @@ export function AdminDashboard({
     const dist = stats.distribution || {
         pending: 0,
         inProgress: 0,
+        revision: 0,
         completed: 0,
         rejected: 0,
     };
@@ -151,11 +152,14 @@ export function AdminDashboard({
     const pieData = [
         {
             name: "Proses",
-            value: dist.pending + dist.inProgress,
+            value:
+                (dist.pending || 0) +
+                (dist.inProgress || 0) +
+                (dist.revision || 0),
             color: "#94a3b8",
         }, // slate-400
-        { name: "Selesai", value: dist.completed, color: "#10b981" }, // emerald-500
-        { name: "Ditolak", value: dist.rejected, color: "#ef4444" }, // red-500
+        { name: "Selesai", value: dist.completed || 0, color: "#10b981" }, // emerald-500
+        { name: "Ditolak", value: dist.rejected || 0, color: "#ef4444" }, // red-500
     ];
 
     return (
@@ -196,7 +200,7 @@ export function AdminDashboard({
                 <StatCard
                     label="Selesai (Bulan Ini)"
                     value={stats.completedMonth.toLocaleString("id-ID")}
-                    subtext="surat telah diarsipkan"
+                    subtext="surat telah dikerjakan"
                     icon={<CheckCircle />}
                     colorClass="text-emerald-500"
                     iconBgClass="bg-emerald-50"

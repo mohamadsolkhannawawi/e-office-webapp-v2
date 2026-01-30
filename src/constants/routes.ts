@@ -40,6 +40,8 @@ export const WAKIL_DEKAN_ROUTES = {
 export const UPA_ROUTES = {
     DASHBOARD: "/upa",
     MANAJEMEN_BEASISWA: "/upa/manajemen-beasiswa",
+    MANAJEMEN_PENOMORAN: "/upa/manajemen-penomoran",
+    MANAJEMEN_STEMPEL: "/upa/manajemen-stempel",
     LAPORAN: "/upa/laporan",
 } as const;
 

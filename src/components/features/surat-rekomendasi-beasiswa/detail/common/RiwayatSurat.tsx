@@ -204,36 +204,34 @@ export function RiwayatSurat({
     };
 
     // Filter dan modifikasi: jika ada entry Mahasiswa→- Diajukan (submit/create), dan setelahnya ada Mahasiswa→Supervisor Akademik (atau role lain), maka hide yang initial submission
-    let filteredRiwayat = (riwayat || []).map((item, idx) => {
-        // Jika pengajuan awal (receiverRole kosong atau '-') maka set ke Supervisor Akademik
-        if (
-            idx === 0 &&
-            item.senderRole.toLowerCase().includes("mahasiswa") &&
-            (!item.receiverRole || item.receiverRole === "-") &&
-            (item.status === "Diajukan" ||
-                item.actionType === "submit" ||
-                item.actionType === "create")
-        ) {
-            return { ...item, receiverRole: "Supervisor Akademik" };
-        }
-        return item;
-    });
-    if (filteredRiwayat.length > 1) {
-        const first = filteredRiwayat[0];
-        const second = filteredRiwayat[1];
-        if (
-            first.senderRole.toLowerCase().includes("mahasiswa") &&
-            first.receiverRole === "Supervisor Akademik" &&
-            (first.status === "Diajukan" ||
-                first.actionType === "submit" ||
-                first.actionType === "create") &&
-            second.senderRole.toLowerCase().includes("mahasiswa") &&
-            second.receiverRole &&
-            second.receiverRole !== "-"
-        ) {
-            filteredRiwayat = filteredRiwayat.slice(1);
-        }
-    }
+    let filteredRiwayat = (riwayat || [])
+        .filter((item) => {
+            // Jika entry adalah Mahasiswa → "-" dengan Diajukan status, skip it (remove dari timeline)
+            if (
+                item.senderRole.toLowerCase().includes("mahasiswa") &&
+                (!item.receiverRole || item.receiverRole === "-") &&
+                (item.status === "Diajukan" ||
+                    item.actionType === "submit" ||
+                    item.actionType === "create")
+            ) {
+                return false; // Filter out this entry
+            }
+            return true;
+        })
+        .map((item, idx) => {
+            // Jika pengajuan awal (receiverRole kosong atau '-') maka set ke Supervisor Akademik
+            if (
+                idx === 0 &&
+                item.senderRole.toLowerCase().includes("mahasiswa") &&
+                (!item.receiverRole || item.receiverRole === "-") &&
+                (item.status === "Diajukan" ||
+                    item.actionType === "submit" ||
+                    item.actionType === "create")
+            ) {
+                return { ...item, receiverRole: "Supervisor Akademik" };
+            }
+            return item;
+        });
 
     const timeline = [
         ...filteredRiwayat,

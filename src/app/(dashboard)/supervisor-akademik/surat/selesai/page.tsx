@@ -22,13 +22,18 @@ async function getCompletedApplications(searchParams: SearchParams) {
         const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
+        // Get current month range
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startDate = startOfMonth.toISOString().split("T")[0];
+
         const query = new URLSearchParams({
             mode: "processed",
             currentStep: "1",
             search: String(searchParams.search || ""),
             page: String(searchParams.page || "1"),
             limit: String(searchParams.limit || "10"),
-            startDate: String(searchParams.startDate || ""),
+            startDate: String(searchParams.startDate || startDate),
             endDate: String(searchParams.endDate || ""),
         });
 

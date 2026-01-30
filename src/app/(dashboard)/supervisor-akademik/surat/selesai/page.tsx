@@ -63,11 +63,15 @@ export default async function SelesaiPage(props: {
 
         if (app.status === "COMPLETED") {
             target = "Selesai";
-            status = "Selesai";
+            status = app.lastActorRole
+                ? `Diterbitkan oleh ${app.lastActorRole}`
+                : "Selesai";
             statusColor = "bg-emerald-500";
         } else if (app.status === "REJECTED") {
             target = "Ditolak";
-            status = "Ditolak";
+            status = app.lastActorRole
+                ? `Ditolak oleh ${app.lastActorRole}`
+                : "Ditolak";
             statusColor = "bg-red-500";
         } else if (app.status === "REVISION") {
             target = "Revisi di Mahasiswa";

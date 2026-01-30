@@ -183,6 +183,16 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             icon: <Archive size={20} />,
         },
         {
+            label: "Manajemen Penomoran",
+            href: "/upa/manajemen-penomoran",
+            icon: <FileEdit size={20} />,
+        },
+        {
+            label: "Manajemen Stempel",
+            href: "/upa/manajemen-stempel",
+            icon: <Archive size={20} />,
+        },
+        {
             label: "Pengaturan Sistem",
             href: "/upa/pengaturan",
             icon: <Settings size={20} />,
@@ -195,7 +205,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
     ],
 };
 
-export function Sidebar({ className = "", isOpen = false, onClose }: SidebarProps) {
+export function Sidebar({
+    className = "",
+    isOpen = false,
+    onClose,
+}: SidebarProps) {
     const { signOut } = useAuth();
     const pathname = usePathname();
     const role = useCurrentRole();
@@ -241,110 +255,110 @@ export function Sidebar({ className = "", isOpen = false, onClose }: SidebarProp
         <>
             {/* Overlay for mobile */}
             {isOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/50 z-40 lg:hidden"
                     onClick={onClose}
                 />
             )}
-            
+
             {/* Sidebar */}
             <aside
                 className={`w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 print:hidden
                     fixed lg:static top-16 lg:top-0 bottom-0 left-0 z-50 lg:h-full
-                    ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
                     ${className}`}
             >
-            <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
-                {menuItems.map((item) => (
-                    <div key={item.label}>
-                        {item.submenu ? (
-                            <div className="space-y-1">
-                                <button
-                                    onClick={() => toggleMenu(item.label)}
-                                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md group transition-colors ${
-                                        expandedMenu === item.label
-                                            ? "bg-gray-50 text-undip-blue"
-                                            : "text-slate-600 hover:bg-gray-100"
-                                    }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span
-                                            className={`${
-                                                expandedMenu === item.label
-                                                    ? "text-undip-blue"
-                                                    : "text-slate-400 group-hover:text-slate-600"
-                                            }`}
-                                        >
-                                            {item.icon}
-                                        </span>
-                                        <span className="font-medium text-sm">
-                                            {item.label}
-                                        </span>
-                                    </div>
-                                    <ChevronDown
-                                        size={18}
-                                        className={`text-slate-400 transition-transform duration-200 ${
+                <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+                    {menuItems.map((item) => (
+                        <div key={item.label}>
+                            {item.submenu ? (
+                                <div className="space-y-1">
+                                    <button
+                                        onClick={() => toggleMenu(item.label)}
+                                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md group transition-colors ${
                                             expandedMenu === item.label
-                                                ? "rotate-180"
-                                                : ""
+                                                ? "bg-gray-50 text-undip-blue"
+                                                : "text-slate-600 hover:bg-gray-100"
                                         }`}
-                                    />
-                                </button>
-                                {expandedMenu === item.label && (
-                                    <div className="ml-9 mt-1 space-y-1">
-                                        {item.submenu.map((sub) => (
-                                            <Link
-                                                key={sub.label}
-                                                href={sub.href}
-                                                onClick={handleLinkClick}
-                                                className={`block px-3 py-2 text-sm rounded-md transition-colors ${
-                                                    pathname === sub.href
-                                                        ? "text-undip-blue font-medium bg-blue-50/50"
-                                                        : "text-slate-500 hover:text-slate-900 hover:bg-gray-50"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span
+                                                className={`${
+                                                    expandedMenu === item.label
+                                                        ? "text-undip-blue"
+                                                        : "text-slate-400 group-hover:text-slate-600"
                                                 }`}
                                             >
-                                                {sub.label}
-                                            </Link>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <Link
-                                href={item.href || "#"}
-                                onClick={handleLinkClick}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-md group font-medium transition-colors text-sm ${
-                                    isActive(item.href)
-                                        ? "bg-gray-100 text-undip-blue"
-                                        : "text-slate-700 hover:bg-gray-100"
-                                }`}
-                            >
-                                <span
-                                    className={`${
+                                                {item.icon}
+                                            </span>
+                                            <span className="font-medium text-sm">
+                                                {item.label}
+                                            </span>
+                                        </div>
+                                        <ChevronDown
+                                            size={18}
+                                            className={`text-slate-400 transition-transform duration-200 ${
+                                                expandedMenu === item.label
+                                                    ? "rotate-180"
+                                                    : ""
+                                            }`}
+                                        />
+                                    </button>
+                                    {expandedMenu === item.label && (
+                                        <div className="ml-9 mt-1 space-y-1">
+                                            {item.submenu.map((sub) => (
+                                                <Link
+                                                    key={sub.label}
+                                                    href={sub.href}
+                                                    onClick={handleLinkClick}
+                                                    className={`block px-3 py-2 text-sm rounded-md transition-colors ${
+                                                        pathname === sub.href
+                                                            ? "text-undip-blue font-medium bg-blue-50/50"
+                                                            : "text-slate-500 hover:text-slate-900 hover:bg-gray-50"
+                                                    }`}
+                                                >
+                                                    {sub.label}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <Link
+                                    href={item.href || "#"}
+                                    onClick={handleLinkClick}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-md group font-medium transition-colors text-sm ${
                                         isActive(item.href)
-                                            ? "text-undip-blue"
-                                            : "text-slate-500 group-hover:text-undip-blue"
+                                            ? "bg-gray-100 text-undip-blue"
+                                            : "text-slate-700 hover:bg-gray-100"
                                     }`}
                                 >
-                                    {item.icon}
-                                </span>
-                                {item.label}
-                            </Link>
-                        )}
-                    </div>
-                ))}
-            </nav>
+                                    <span
+                                        className={`${
+                                            isActive(item.href)
+                                                ? "text-undip-blue"
+                                                : "text-slate-500 group-hover:text-undip-blue"
+                                        }`}
+                                    >
+                                        {item.icon}
+                                    </span>
+                                    {item.label}
+                                </Link>
+                            )}
+                        </div>
+                    ))}
+                </nav>
 
-            <div className="p-4 border-t border-gray-100">
-                <button
-                    onClick={() => signOut()}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                >
-                    <LogOut size={20} />
-                    Keluar
-                </button>
-            </div>
-        </aside>
+                <div className="p-4 border-t border-gray-100">
+                    <button
+                        onClick={() => signOut()}
+                        className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    >
+                        <LogOut size={20} />
+                        Keluar
+                    </button>
+                </div>
+            </aside>
         </>
     );
 }

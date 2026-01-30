@@ -64,6 +64,11 @@ export function mapApplicationToPreviewData(
                 ? application.values.wd1_signature
                 : undefined,
 
+        // Stamp Logic:
+        // Include stamp ID and URL if available
+        stampId: application.stampId || undefined,
+        stampUrl: application.stamp?.url || undefined,
+
         publishedAt: formatDate(application.publishedAt),
         qrCodeUrl: application.verification?.qrCodeUrl,
     };

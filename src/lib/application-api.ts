@@ -82,6 +82,13 @@ export interface ApplicationDetail {
     updatedAt: string;
     publishedAt?: string;
     letterNumber?: string;
+    stampId?: string;
+    stampUrl?: string;
+    stamp?: {
+        id: string;
+        url: string;
+        stampType: string;
+    };
     verification?: {
         code: string;
         verifiedCount: number;
@@ -297,6 +304,7 @@ export async function verifyApplication(
         targetStep?: number;
         signatureUrl?: string;
         letterNumber?: string;
+        stampId?: string;
     },
 ): Promise<{ success: boolean; data: Record<string, unknown> }> {
     try {
@@ -515,6 +523,148 @@ export async function deleteSignature(id: string): Promise<boolean> {
     }
 }
 
+/* ===================== STAMP INTERFACES & FUNCTIONS ===================== */
+
+export interface UserStamp {
+    id: string;
+    url: string;
+    stampType: "UPLOADED" | "DRAWN" | "TEMPLATE";
+    isDefault: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+/**
+ * Fetch all stamps for current user (UPA)
+ */
+export async function getStamps(): Promise<UserStamp[]> {
+    try {
+        const response = await fetch("/api/stamps", {
+            method: "GET",
+            credentials: "include",
+        });
+
+        if (!response.ok) {
+            return [];
+        }
+
+        const result = await response.json();
+        return result.data || [];
+    } catch (error) {
+        console.error("Get stamps error:", error);
+        return [];
+    }
+}
+
+/**
+ * Save new stamp template
+ */
+export async function saveStamp(data: {
+    url: string;
+    stampType?: "UPLOADED" | "DRAWN" | "TEMPLATE";
+}): Promise<{
+    success: boolean;
+    data: UserStamp | null;
+    error?: string;
+}> {
+    try {
+        const response = await fetch("/api/stamps", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage =
+                errorData.message ||
+                `Failed to save stamp (${response.status})`;
+            console.error("Save stamp error:", errorMessage);
+            return {
+                success: false,
+                data: null,
+                error: errorMessage,
+            };
+        }
+
+        const result = await response.json();
+        return {
+            success: true,
+            data: result.data,
+        };
+    } catch (error) {
+        const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
+        console.error("Save stamp error:", error);
+        return {
+            success: false,
+            data: null,
+            error: errorMessage,
+        };
+    }
+}
+
+/**
+ * Set stamp as default
+ */
+export async function setDefaultStamp(id: string): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/stamps/${id}/default`, {
+            method: "PATCH",
+            credentials: "include",
+        });
+
+        return response.ok;
+    } catch (error) {
+        console.error("Set default stamp error:", error);
+        return false;
+    }
+}
+
+/**
+ * Delete stamp template
+ */
+export async function deleteStamp(id: string): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/stamps/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+        });
+
+        return response.ok;
+    } catch (error) {
+        console.error("Delete stamp error:", error);
+        return false;
+    }
+}
+
+/**
+ * Apply stamp to letter
+ */
+export async function applyStampToLetter(
+    applicationId: string,
+    stampId: string,
+): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/stamps/apply/${applicationId}`, {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ stampId }),
+        });
+
+        return response.ok;
+    } catch (error) {
+        console.error("Apply stamp error:", error);
+        return false;
+    }
+}
+
 /**
  * Preview nomor surat berikutnya (tanpa increment)
  */
@@ -557,17 +707,25 @@ export async function generateLetterNumber(
     };
 } | null> {
     try {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/master/letter-number/generate`,
-            {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ type, applicationId }),
+        const response = await fetch(`/api/master/letter-number/generate`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
             },
-        );
+            body: JSON.stringify({ type, applicationId }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(
+                "Generate letter number error:",
+                response.status,
+                errorText,
+            );
+            return null;
+        }
+
         const json = await response.json();
         return json.data;
     } catch (error) {

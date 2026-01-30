@@ -45,6 +45,7 @@ export interface ApplicationSummary {
         | "REVISION"
         | "DRAFT";
     currentStep: number;
+    lastRevisionFromRole?: string; // Role that requested the latest revision
     formData: ApplicationFormData;
     attachmentsCount: number;
     createdAt: string;

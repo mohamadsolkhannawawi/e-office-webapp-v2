@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import SignatureCanvas from "react-signature-canvas";
 import Image from "next/image";
+import { SignatureImage } from "@/components/ui/signature-image";
+import toast from "react-hot-toast";
 import {
     getSignatures,
     saveSignature,
@@ -71,11 +73,27 @@ export function WD1SignatureSection({
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            // Validate file size (max 5MB)
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                toast.error("Ukuran file terlalu besar. Maksimal 5MB.");
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.startsWith("image/")) {
+                toast.error("File harus berupa gambar (JPG, PNG, GIF, etc)");
+                return;
+            }
+
             const reader = new FileReader();
             reader.onloadend = () => {
                 const result = reader.result as string;
                 setPreviewImage(result);
                 onSignatureChange(result);
+            };
+            reader.onerror = () => {
+                toast.error("Gagal membaca file");
             };
             reader.readAsDataURL(file);
         }
@@ -90,31 +108,74 @@ export function WD1SignatureSection({
     const handleSaveAsTemplate = async () => {
         if (!previewImage) return;
         setIsSaving(true);
-        const result = await saveSignature({
-            url: previewImage,
-            signatureType: selectedMethod === "canvas" ? "DRAWN" : "UPLOADED",
-            isDefault: templates.length === 0, // Set as default if first template
-        });
-        if (result) {
-            setTemplates((prev) => [result, ...prev]);
+        const toastId = toast.loading("Menyimpan tanda tangan...");
+
+        try {
+            const result = await saveSignature({
+                url: previewImage,
+                signatureType:
+                    selectedMethod === "canvas" ? "DRAWN" : "UPLOADED",
+                isDefault: templates.length === 0, // Set as default if first template
+            });
+
+            if (result.success && result.data) {
+                setTemplates((prev) => [result.data!, ...prev]);
+                toast.success("Tanda tangan berhasil disimpan", {
+                    id: toastId,
+                });
+            } else {
+                toast.error(result.error || "Gagal menyimpan tanda tangan", {
+                    id: toastId,
+                });
+            }
+        } catch (error) {
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Terjadi kesalahan saat menyimpan";
+            console.error("Save template error:", error);
+            toast.error(errorMessage, { id: toastId });
+        } finally {
+            setIsSaving(false);
         }
-        setIsSaving(false);
     };
 
     const handleSetDefault = async (id: string) => {
-        await setDefaultSignature(id);
-        setTemplates((prev) =>
-            prev.map((t) => ({ ...t, isDefault: t.id === id })),
-        );
+        try {
+            const success = await setDefaultSignature(id);
+            if (success) {
+                setTemplates((prev) =>
+                    prev.map((t) => ({ ...t, isDefault: t.id === id })),
+                );
+                toast.success("Template dijadikan default");
+            } else {
+                toast.error("Gagal mengatur template default");
+            }
+        } catch (error) {
+            console.error("Set default error:", error);
+            toast.error("Terjadi kesalahan saat mengatur default");
+        }
     };
 
     const handleDeleteTemplate = async (id: string) => {
-        await deleteSignature(id);
-        setTemplates((prev) => prev.filter((t) => t.id !== id));
-        if (selectedTemplateId === id) {
-            setSelectedTemplateId(null);
-            setPreviewImage(null);
-            onSignatureChange(null);
+        try {
+            const success = await deleteSignature(id);
+            if (success) {
+                setTemplates((prev) => prev.filter((t) => t.id !== id));
+                toast.success("Template berhasil dihapus");
+
+                // Clear selection if deleted template was selected
+                if (selectedTemplateId === id) {
+                    setSelectedTemplateId(null);
+                    setPreviewImage(null);
+                    onSignatureChange(null);
+                }
+            } else {
+                toast.error("Gagal menghapus template");
+            }
+        } catch (error) {
+            console.error("Delete template error:", error);
+            toast.error("Terjadi kesalahan saat menghapus template");
         }
     };
 
@@ -207,11 +268,10 @@ export function WD1SignatureSection({
                                                     Pratinjau Unggahan
                                                 </p>
                                                 <div className="relative w-48 h-24 bg-white rounded-lg border border-slate-200 p-2 overflow-hidden shadow-sm">
-                                                    <Image
+                                                    <SignatureImage
                                                         src={previewImage}
                                                         alt="Uploaded Signature"
-                                                        fill
-                                                        className="object-contain p-2 mix-blend-multiply"
+                                                        className="object-contain p-2 mix-blend-multiply w-full h-full"
                                                     />
                                                 </div>
                                                 <Button
@@ -257,12 +317,10 @@ export function WD1SignatureSection({
                                                     )
                                                 }
                                             >
-                                                <Image
+                                                <SignatureImage
                                                     src={template.url}
                                                     alt="Signature Template"
-                                                    width={100}
-                                                    height={50}
-                                                    className="object-contain mix-blend-multiply"
+                                                    className="object-contain mix-blend-multiply w-24 h-12"
                                                 />
                                                 {template.isDefault && (
                                                     <div className="absolute top-2 left-2 bg-amber-500 text-white rounded-full p-1 shadow-sm">
@@ -333,30 +391,71 @@ export function WD1SignatureSection({
                                                                 setIsSaving(
                                                                     true,
                                                                 );
-                                                                const result =
-                                                                    await saveSignature(
+                                                                const toastId =
+                                                                    toast.loading(
+                                                                        "Mengunggah template...",
+                                                                    );
+
+                                                                try {
+                                                                    const result =
+                                                                        await saveSignature(
+                                                                            {
+                                                                                url,
+                                                                                signatureType:
+                                                                                    "TEMPLATE",
+                                                                                isDefault:
+                                                                                    templates.length ===
+                                                                                    0,
+                                                                            },
+                                                                        );
+                                                                    if (
+                                                                        result.success &&
+                                                                        result.data
+                                                                    ) {
+                                                                        setTemplates(
+                                                                            (
+                                                                                prev,
+                                                                            ) => [
+                                                                                result.data!,
+                                                                                ...prev,
+                                                                            ],
+                                                                        );
+                                                                        toast.success(
+                                                                            "Template berhasil diunggah",
+                                                                            {
+                                                                                id: toastId,
+                                                                            },
+                                                                        );
+                                                                    } else {
+                                                                        toast.error(
+                                                                            result.error ||
+                                                                                "Gagal mengunggah template",
+                                                                            {
+                                                                                id: toastId,
+                                                                            },
+                                                                        );
+                                                                    }
+                                                                } catch (error) {
+                                                                    const errorMessage =
+                                                                        error instanceof
+                                                                        Error
+                                                                            ? error.message
+                                                                            : "Terjadi kesalahan";
+                                                                    console.error(
+                                                                        "Template upload error:",
+                                                                        error,
+                                                                    );
+                                                                    toast.error(
+                                                                        errorMessage,
                                                                         {
-                                                                            url,
-                                                                            signatureType:
-                                                                                "TEMPLATE",
-                                                                            isDefault:
-                                                                                templates.length ===
-                                                                                0,
+                                                                            id: toastId,
                                                                         },
                                                                     );
-                                                                if (result) {
-                                                                    setTemplates(
-                                                                        (
-                                                                            prev,
-                                                                        ) => [
-                                                                            result,
-                                                                            ...prev,
-                                                                        ],
+                                                                } finally {
+                                                                    setIsSaving(
+                                                                        false,
                                                                     );
                                                                 }
-                                                                setIsSaving(
-                                                                    false,
-                                                                );
                                                             };
                                                         reader.readAsDataURL(
                                                             file,

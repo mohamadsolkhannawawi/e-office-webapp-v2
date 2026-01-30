@@ -204,7 +204,7 @@ export function RiwayatSurat({
     };
 
     // Filter dan modifikasi: jika ada entry Mahasiswa→- Diajukan (submit/create), dan setelahnya ada Mahasiswa→Supervisor Akademik (atau role lain), maka hide yang initial submission
-    let filteredRiwayat = (riwayat || [])
+    const filteredRiwayat = (riwayat || [])
         .filter((item) => {
             // Jika entry adalah Mahasiswa → "-" dengan Diajukan status, skip it (remove dari timeline)
             if (
@@ -252,19 +252,22 @@ export function RiwayatSurat({
             </CardHeader>
             <CardContent className="pt-6">
                 <div className="space-y-0">
-                    {timeline.map((item, index) => (
-                        <TimelineItem
-                            key={index}
-                            senderRole={item.senderRole}
-                            receiverRole={item.receiverRole}
-                            status={item.status}
-                            date={item.date}
-                            time={item.time}
-                            catatan={item.catatan}
-                            actionType={item.actionType}
-                            isLast={index === timeline.length - 1}
-                        />
-                    ))}
+                    {timeline
+                        .slice()
+                        .reverse()
+                        .map((item, index) => (
+                            <TimelineItem
+                                key={index}
+                                senderRole={item.senderRole}
+                                receiverRole={item.receiverRole}
+                                status={item.status}
+                                date={item.date}
+                                time={item.time}
+                                catatan={item.catatan}
+                                actionType={item.actionType}
+                                isLast={index === timeline.length - 1}
+                            />
+                        ))}
                 </div>
             </CardContent>
         </Card>

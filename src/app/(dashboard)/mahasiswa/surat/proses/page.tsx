@@ -8,10 +8,17 @@ import {
     ChevronLeft,
     Loader2,
     Search,
+    Clock,
+    AlertCircle,
+    RotateCw,
+    CheckCircle,
+    XCircle,
+    Eye,
 } from "lucide-react";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import {
     Select,
     SelectContent,
@@ -75,6 +82,7 @@ export default function SuratDalamProsesPage() {
 
     const getStatusInfo = (app: ApplicationSummary) => {
         const roles = {
+            0: "Mahasiswa",
             1: "Supervisor Akademik",
             2: "Manajer TU",
             3: "Wakil Dekan 1",
@@ -87,32 +95,72 @@ export default function SuratDalamProsesPage() {
             return {
                 label: `Ditolak oleh ${getRoleName(app.currentStep)}`,
                 color: "text-red-600 bg-red-50",
+                icon: <XCircle className="h-3.5 w-3.5" />,
             };
         }
         if (app.status === "REVISION") {
-            // Logic: If I am at step 0 (Mahasiswa), it came from Step 1.
-            // If I am at step 1 (Supervisor), it came from Step 2.
-            // Usually revision sends back to previous step.
-            // Let's assume revision comes from the step ABOVE the current one.
-            return {
-                label: `Revisi dari ${getRoleName(app.currentStep + 1)}`,
-                color: "text-orange-600 bg-orange-50",
-            };
+            if (app.currentStep === 0) {
+                const revisionFromRole =
+                    app.lastRevisionFromRole ||
+                    getRoleName(app.currentStep + 1);
+                return {
+                    label: `Revisi dari ${revisionFromRole}`,
+                    color: "text-orange-600 bg-orange-50",
+                    icon: <RotateCw className="h-3.5 w-3.5" />,
+                };
+            } else {
+                return {
+                    label: `Sedang Diproses di ${getRoleName(app.currentStep)}`,
+                    color: "text-blue-600 bg-blue-50",
+                    icon: <Clock className="h-3.5 w-3.5" />,
+                };
+            }
         }
         if (app.status === "PENDING" || app.status === "IN_PROGRESS") {
             return {
                 label: `Menunggu Verifikasi ${getRoleName(app.currentStep)}`,
                 color: "text-blue-600 bg-blue-50",
+                icon: <AlertCircle className="h-3.5 w-3.5" />,
             };
         }
         if (app.status === "COMPLETED") {
             return {
                 label: "Selesai",
                 color: "text-green-600 bg-green-50",
+                icon: <CheckCircle className="h-3.5 w-3.5" />,
             };
         }
 
-        return { label: app.status, color: "text-slate-600 bg-slate-50" };
+        return {
+            label: app.status,
+            color: "text-slate-600 bg-slate-50",
+            icon: <Clock className="h-3.5 w-3.5" />,
+        };
+    };
+
+    const getTargetInfo = (app: ApplicationSummary) => {
+        const roles = {
+            0: "Mahasiswa",
+            1: "Supervisor Akademik",
+            2: "Manajer TU",
+            3: "Wakil Dekan 1",
+            4: "UPA",
+        };
+        const getRoleName = (step: number) =>
+            roles[step as keyof typeof roles] || "Petugas";
+
+        if (app.status === "REVISION" && app.currentStep === 0) {
+            return "Revisi Mahasiswa";
+        }
+        if (app.status === "REJECTED") {
+            return "Ditolak";
+        }
+        if (app.status === "COMPLETED") {
+            return "Selesai";
+        }
+
+        const nextStep = Math.min(app.currentStep + 1, 4);
+        return `Ke ${getRoleName(nextStep)}`;
     };
 
     return (
@@ -130,69 +178,90 @@ export default function SuratDalamProsesPage() {
             </nav>
 
             {/* Page Title */}
-            <h1 className="text-2xl font-bold text-slate-800">Surat Dalam Proses</h1>
+            <h1 className="text-2xl font-bold text-slate-800">
+                Surat Dalam Proses
+            </h1>
             <p className="text-sm text-slate-500 -mt-4">
                 Daftar surat rekomendasi beasiswa yang sedang dalam proses
             </p>
 
-            {/* Filter Bar */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                <div className="relative w-full sm:w-1/2">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                        placeholder="Cari surat..."
-                        className="pl-9 bg-white border-gray-200 w-full"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <Select value={jenisFilter} onValueChange={setJenisFilter}>
-                    <SelectTrigger className="w-full sm:w-1/2 bg-white border-gray-200 text-slate-700">
-                        <div className="flex items-center gap-2">
-                            <Filter className="h-4 w-4" />
-                            <SelectValue placeholder="Filter Jenis Surat" />
+            {/* Filters Card */}
+            <Card className="border-none shadow-sm overflow-hidden bg-white">
+                <div className="p-6 border-b border-slate-50 flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-slate-400" />
+                        <span className="text-sm font-semibold text-slate-600">
+                            Filter
+                        </span>
+                    </div>
+                    <div className="flex flex-wrap gap-3 items-center">
+                        {/* Search */}
+                        <div className="relative flex-1 min-w-50">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input
+                                placeholder="Cari surat..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full"
+                            />
                         </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">Semua Jenis</SelectItem>
-                        <SelectItem value="internal">
-                            Beasiswa Internal
-                        </SelectItem>
-                        <SelectItem value="external">
-                            Beasiswa Eksternal
-                        </SelectItem>
-                        <SelectItem value="akademik">
-                            Beasiswa Akademik
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
 
-            {/* Table Container */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                        {/* Filter Jenis */}
+                        <Select
+                            value={jenisFilter}
+                            onValueChange={setJenisFilter}
+                        >
+                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
+                                <div className="flex items-center gap-2">
+                                    <Filter className="h-4 w-4" />
+                                    <SelectValue placeholder="Jenis Surat" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Semua Jenis</SelectItem>
+                                <SelectItem value="internal">
+                                    Beasiswa Internal
+                                </SelectItem>
+                                <SelectItem value="external">
+                                    Beasiswa Eksternal
+                                </SelectItem>
+                                <SelectItem value="akademik">
+                                    Beasiswa Akademik
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </Card>
+
+            {/* Table Card */}
+            <Card className="border-none shadow-sm overflow-hidden bg-white">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm border-collapse">
-                        <thead className="bg-gray-50/50 border-b border-gray-100">
+                        <thead className="bg-slate-50/50 border-b border-slate-100">
                             <tr>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-12">
+                                <th className="px-6 py-4 font-semibold text-slate-700 w-12">
                                     No
                                 </th>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-1/2">
+                                <th className="px-6 py-4 font-semibold text-slate-700 min-w-50">
                                     Subjek Surat
                                 </th>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-1/4">
-                                    Status Surat
+                                <th className="px-6 py-4 font-semibold text-slate-700 min-w-50">
+                                    Status
                                 </th>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-1/4 text-right">
+                                <th className="px-6 py-4 font-semibold text-slate-700 min-w-50">
+                                    Target Selanjutnya
+                                </th>
+                                <th className="px-6 py-4 font-semibold text-slate-700 w-24 text-right">
                                     Aksi
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-slate-100">
                             {isLoading ? (
                                 <tr>
                                     <td
-                                        colSpan={4}
+                                        colSpan={5}
                                         className="px-6 py-12 text-center text-slate-500"
                                     >
                                         <div className="flex justify-center items-center gap-2">
@@ -204,7 +273,7 @@ export default function SuratDalamProsesPage() {
                             ) : applications.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={4}
+                                        colSpan={5}
                                         className="px-6 py-12 text-center text-slate-500"
                                     >
                                         Tidak ada surat yang sedang diproses.
@@ -213,50 +282,54 @@ export default function SuratDalamProsesPage() {
                             ) : (
                                 applications.map((app, index) => {
                                     const statusInfo = getStatusInfo(app);
+                                    const target = getTargetInfo(app);
                                     return (
                                         <tr
                                             key={app.id}
-                                            className="hover:bg-gray-50/50 transition-colors group"
+                                            className="hover:bg-slate-50/50 transition-colors group"
                                         >
-                                            <td className="px-6 py-4 text-slate-500 text-sm">
+                                            <td className="px-6 py-4 text-slate-500 text-sm font-medium">
                                                 {(pagination.page - 1) *
                                                     pagination.limit +
                                                     index +
                                                     1}
                                             </td>
-                                            <td className="px-6 py-4 text-slate-700 font-medium">
-                                                {app.scholarshipName ||
-                                                    app.letterType?.name ||
-                                                    "Surat Rekomendasi Beasiswa"}
-                                            </td>
                                             <td className="px-6 py-4">
-                                                <span
-                                                    className={`font-bold ${statusInfo.color}`}
-                                                >
-                                                    {statusInfo.label}
+                                                <span className="font-semibold text-slate-800 group-hover:text-undip-blue transition-colors">
+                                                    {app.scholarshipName ||
+                                                        app.letterType?.name ||
+                                                        "Surat Rekomendasi Beasiswa"}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <Link
-                                                        href={
-                                                            app.status ===
-                                                            "REVISION"
-                                                                ? `/mahasiswa/surat/proses/detail/${app.id}`
-                                                                : `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}`
-                                                        }
-                                                    >
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="border-gray-200 text-slate-600 hover:bg-gray-50 text-xs px-4 h-8"
-                                                        >
-                                                            Detail
-                                                        </Button>
-                                                    </Link>
-                                                    {/* Show distinct action for revisions if we can detect them */}
-                                                    {/* Current logic doesn't explicitly separate revision rows yet without different status filter */}
+                                            <td className="px-6 py-4">
+                                                <div
+                                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${statusInfo.color}`}
+                                                >
+                                                    {statusInfo.icon}
+                                                    {statusInfo.label}
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600 text-sm">
+                                                {target}
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <Link
+                                                    href={
+                                                        app.status ===
+                                                        "REVISION"
+                                                            ? `/mahasiswa/surat/proses/detail/${app.id}`
+                                                            : `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}`
+                                                    }
+                                                >
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-9 w-9 p-0 text-slate-600 hover:text-undip-blue hover:bg-blue-50"
+                                                        title="Detail"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                </Link>
                                             </td>
                                         </tr>
                                     );
@@ -265,54 +338,51 @@ export default function SuratDalamProsesPage() {
                         </tbody>
                     </table>
                 </div>
-            </div>
 
-            {/* Pagination */}
-            {!isLoading && applications.length > 0 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 px-1 gap-4">
-                    <span>
-                        Menampilkan{" "}
-                        {(pagination.page - 1) * pagination.limit + 1} sampai{" "}
-                        {Math.min(
-                            pagination.page * pagination.limit,
-                            pagination.total,
-                        )}{" "}
-                        dari {pagination.total} entri
-                    </span>
-                    <div className="flex items-center gap-1">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={pagination.page <= 1}
-                            onClick={() =>
-                                handlePageChange(pagination.page - 1)
-                            }
-                            className="text-xs h-8 px-2"
-                        >
-                            <ChevronLeft className="h-4 w-4 mr-1" />
-                            Previous
-                        </Button>
-                        <Button
-                            size="sm"
-                            className="bg-undip-blue hover:bg-sky-700 text-xs h-8 w-8 p-0"
-                        >
-                            {pagination.page}
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={pagination.page >= pagination.totalPages}
-                            onClick={() =>
-                                handlePageChange(pagination.page + 1)
-                            }
-                            className="text-xs h-8 px-2"
-                        >
-                            Next
-                            <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
+                {/* Pagination */}
+                {!isLoading && pagination.totalPages > 1 && (
+                    <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                        <p className="text-xs text-slate-500">
+                            Menampilkan{" "}
+                            {(pagination.page - 1) * pagination.limit + 1} -{" "}
+                            {Math.min(
+                                pagination.page * pagination.limit,
+                                pagination.total,
+                            )}{" "}
+                            dari {pagination.total} surat
+                        </p>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                                onClick={() =>
+                                    handlePageChange(pagination.page - 1)
+                                }
+                                disabled={pagination.page === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <span className="text-xs text-slate-600 px-2">
+                                {pagination.page} / {pagination.totalPages}
+                            </span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                                onClick={() =>
+                                    handlePageChange(pagination.page + 1)
+                                }
+                                disabled={
+                                    pagination.page === pagination.totalPages
+                                }
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </Card>
         </div>
     );
 }

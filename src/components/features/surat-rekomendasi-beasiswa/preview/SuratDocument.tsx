@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import React from "react";
+import { SignatureImage } from "@/components/ui/signature-image";
+/* eslint-disable @next/next/no-img-element */
 
 // Interface untuk konfigurasi pejabat penandatangan
 interface LeadershipConfig {
@@ -15,6 +17,7 @@ interface SuratDocumentProps {
     showSignature?: boolean;
     signaturePath?: string | null;
     showStamp?: boolean;
+    stampUrl?: string | null;
     leadershipConfig?: LeadershipConfig;
     data?: {
         nama?: string;
@@ -31,7 +34,7 @@ interface SuratDocumentProps {
         tahunAkademik?: string;
         publishedAt?: string;
     };
-    qrCodeUrl?: string; // Add this
+    qrCodeUrl?: string;
 }
 
 // Default values untuk fallback jika config tidak tersedia
@@ -46,9 +49,10 @@ export function SuratDocument({
     showSignature = false,
     signaturePath,
     showStamp = false,
+    stampUrl,
     leadershipConfig,
     data,
-    qrCodeUrl, // Add this
+    qrCodeUrl,
 }: SuratDocumentProps) {
     // Gunakan config dari database atau fallback ke default
     const leadership = leadershipConfig || DEFAULT_LEADERSHIP;
@@ -87,7 +91,7 @@ export function SuratDocument({
         <div className="w-[210mm] min-h-[297mm] bg-white shadow-2xl pt-[2.8cm] pb-[2cm] pl-[3cm] pr-[2.5cm] flex flex-col font-serif text-black border border-gray-100 mx-auto overflow-hidden print:shadow-none print:border-none print:m-0 print:w-[210mm] print:h-[295mm] print:overflow-hidden page-break-after-avoid relative">
             {/* Kop Surat */}
             <div className="flex items-start gap-3 border-b-2 border-black pb-3 mb-8">
-                <div className="w-[85px] shrink-0">
+                <div className="w-21.25 shrink-0">
                     <Image
                         src="/assets/undip-logo.png"
                         alt="Logo UNDIP"
@@ -103,14 +107,14 @@ export function SuratDocument({
                     <p className="text-blue-900 text-[11px] tracking-tight font-semibold">
                         DAN TEKNOLOGI
                     </p>
-                    <p className="text-blue-900 text-[15.5px] font-bold mt-[2px]">
+                    <p className="text-blue-900 text-[15.5px] font-bold mt-0.5">
                         UNIVERSITAS DIPONEGORO
                     </p>
                     <p className="text-blue-900 text-[14.5px] font-bold uppercase">
                         FAKULTAS SAINS DAN MATEMATIKA
                     </p>
                 </div>
-                <div className="text-right text-[8.5px] font-normal leading-[1.3] w-[160px]">
+                <div className="text-right text-[8.5px] font-normal leading-[1.3] w-40">
                     <p className="text-slate-700">Jalan Prof. Jacub Rais</p>
                     <p className="text-slate-700">
                         Kampus Universitas Diponegoro
@@ -144,13 +148,13 @@ export function SuratDocument({
                 </div>
 
                 {/* Isi Surat */}
-                <div className="text-[11.5px] space-y-[14px] leading-[1.6]">
+                <div className="text-[11.5px] space-y-3.5 leading-[1.6]">
                     <p className="text-justify">
                         Dekan Fakultas Sains dan Matematika Universitas
                         Diponegoro dengan ini menerangkan :
                     </p>
 
-                    <div className="grid grid-cols-[145px_10px_1fr] gap-x-0 gap-y-[3px] pl-12 text-[11.5px]">
+                    <div className="grid grid-cols-[145px_10px_1fr] gap-x-0 gap-y-0.75 pl-12 text-[11.5px]">
                         <span>Nama</span>
                         <span>:</span>
                         <span>{finalData.nama}</span>
@@ -176,7 +180,7 @@ export function SuratDocument({
                         Universitas Diponegoro
                     </p>
 
-                    <div className="grid grid-cols-[145px_10px_1fr] gap-x-0 gap-y-[3px] pl-12 text-[11.5px]">
+                    <div className="grid grid-cols-[145px_10px_1fr] gap-x-0 gap-y-0.75 pl-12 text-[11.5px]">
                         <span>Jurusan</span>
                         <span>:</span>
                         <span>{jurusanDisplay}</span>
@@ -205,7 +209,7 @@ export function SuratDocument({
                         Serta menerangkan bahwa mahasiswa yang bersangkutan:
                     </p>
 
-                    <div className="space-y-[3px] text-[11.5px] pl-12">
+                    <div className="space-y-0.75 text-[11.5px] pl-12">
                         <p className="flex">
                             <span className="inline-block w-6">-</span>
                             <span className="flex-1">
@@ -234,7 +238,7 @@ export function SuratDocument({
                 {/* Tanda Tangan */}
                 <div className="mt-12 text-[11.5px] relative">
                     <div className="w-full flex justify-end">
-                        <div className="w-fit min-w-[220px]">
+                        <div className="w-fit min-w-55">
                             <div className="flex justify-between items-end font-normal">
                                 <span>Semarang,</span>
                                 <span className="font-bold">
@@ -250,30 +254,29 @@ export function SuratDocument({
                                             ))}
                                 </span>
                             </div>
-                            <p className="text-left mt-[2px]">a.n. Dekan</p>
+                            <p className="text-left mt-0.5">a.n. Dekan</p>
                             <p className="text-left">{leadership.jabatan}</p>
 
-                            <div className="h-[85px] flex items-center justify-start relative mt-1 pl-4">
+                            <div className="h-21.25 flex items-center justify-start relative mt-1 pl-4">
                                 {showSignature && (
-                                    <div className="relative w-[150px] h-[70px]">
-                                        <Image
+                                    <div className="relative w-37.5 h-17.5">
+                                        <SignatureImage
                                             src={
                                                 signaturePath ||
                                                 "/assets/signature-dummy.png"
                                             }
                                             alt="Signature"
-                                            fill
-                                            className="object-contain mix-blend-multiply opacity-90"
+                                            className="object-contain mix-blend-multiply opacity-90 w-full h-full"
                                         />
                                     </div>
                                 )}
-                                {showStamp && (
-                                    <div className="absolute left-[-20px] top-[10px] w-[110px] h-[110px] opacity-70 pointer-events-none">
-                                        <Image
-                                            src="/assets/stamp-dummy.png"
+                                {showStamp && stampUrl && (
+                                    <div className="absolute -left-5 top-2.5 w-27.5 h-27.5 opacity-70 pointer-events-none">
+                                        <img
+                                            src={stampUrl}
                                             alt="Stamp"
-                                            fill
-                                            className="object-contain mix-blend-multiply"
+                                            className="w-full h-full object-contain mix-blend-multiply"
+                                            loading="lazy"
                                         />
                                     </div>
                                 )}
@@ -282,7 +285,7 @@ export function SuratDocument({
                             <p className="font-bold underline decoration-1 underline-offset-2 text-left whitespace-nowrap">
                                 {leadership.name}
                             </p>
-                            <p className="text-left mt-[2px]">
+                            <p className="text-left mt-0.5">
                                 NIP. {leadership.nip}
                             </p>
                         </div>

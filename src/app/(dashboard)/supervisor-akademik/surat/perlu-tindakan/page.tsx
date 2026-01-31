@@ -1,6 +1,13 @@
 import React from "react";
 import { LetterList } from "@/components/features/dashboard/LetterList";
-import { ChevronRight } from "lucide-react";
+import {
+    ChevronRight,
+    CheckCircle,
+    XCircle,
+    RotateCw,
+    AlertCircle,
+    Clock,
+} from "lucide-react";
 import { headers } from "next/headers";
 import { ApplicationSummary } from "@/lib/application-api";
 import Link from "next/link";
@@ -57,38 +64,52 @@ export default async function PerluTindakanPage(props: {
     const { data, meta } = await getActionRequiredApplications(searchParams);
 
     const letters = data.map((app: ApplicationSummary) => {
-        // Use same logic as dashboard
+        const stepToRole: Record<number, string> = {
+            1: "Supervisor Akademik",
+            2: "Manajer TU",
+            3: "Wakil Dekan 1",
+            4: "UPA",
+        };
+
         let target = "Supervisor Akademik";
         let status = "Perlu Tindakan";
         let statusColor = "bg-amber-500";
+        let statusIcon: React.ReactNode = null;
 
         if (app.status === "COMPLETED") {
             target = "Selesai";
-            status = "Selesai";
-            statusColor = "bg-emerald-500";
+            status = app.lastActorRole
+                ? `Diterbitkan oleh ${app.lastActorRole}`
+                : "Selesai";
+            statusColor = "bg-emerald-500 text-white";
+            statusIcon = <CheckCircle className="w-4 h-4" />;
         } else if (app.status === "REJECTED") {
             target = "Ditolak";
-            status = "Ditolak";
-            statusColor = "bg-red-500";
+            status = app.lastActorRole
+                ? `Ditolak oleh ${app.lastActorRole}`
+                : "Ditolak";
+            statusColor = "bg-red-500 text-white";
+            statusIcon = <XCircle className="w-4 h-4" />;
         } else if (app.status === "REVISION") {
-            target = "Revisi di Mahasiswa";
-            status = "Proses";
-            statusColor = "bg-undip-blue";
+            // Target adalah step berikutnya dari currentStep saat ini
+            const nextStep = app.currentStep + 1;
+            target = stepToRole[nextStep] || "Selesai";
+            status = app.lastRevisionFromRole
+                ? `Revisi dari ${app.lastRevisionFromRole}`
+                : "Revisi Diperlukan";
+            statusColor = "bg-sky-500 text-white";
+            statusIcon = <RotateCw className="w-4 h-4" />;
         } else if (app.status === "PENDING" || app.status === "IN_PROGRESS") {
-            const stepToRole: Record<number, string> = {
-                1: "Supervisor Akademik",
-                2: "Manajer TU",
-                3: "Wakil Dekan 1",
-                4: "UPA",
-            };
             target = stepToRole[app.currentStep] || "Diproses";
 
             if (app.currentStep === 1) {
-                status = "Perlu Tindakan";
-                statusColor = "bg-amber-500";
+                status = "Menunggu Tindakan Anda";
+                statusColor = "bg-amber-500 text-white";
+                statusIcon = <AlertCircle className="w-4 h-4" />;
             } else {
-                status = "Proses";
-                statusColor = "bg-undip-blue";
+                status = `Diproses di ${stepToRole[app.currentStep]}`;
+                statusColor = "bg-blue-500 text-white";
+                statusIcon = <Clock className="w-4 h-4" />;
             }
         }
 
@@ -106,6 +127,8 @@ export default async function PerluTindakanPage(props: {
             }),
             target,
             status,
+            statusColor,
+            statusIcon,
             statusColor,
         };
     });

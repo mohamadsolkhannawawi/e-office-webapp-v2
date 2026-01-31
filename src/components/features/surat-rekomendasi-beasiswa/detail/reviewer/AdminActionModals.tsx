@@ -32,6 +32,9 @@ interface ActionModalProps {
     }) => void;
     type: "approve" | "revise" | "reject" | "publish";
     role: "supervisor-akademik" | "manajer-tu" | "wakil-dekan-1" | "upa";
+    data?: {
+        nomorSurat?: string;
+    };
 }
 
 export function AdminActionModals({
@@ -40,6 +43,7 @@ export function AdminActionModals({
     onConfirm,
     type,
     role,
+    data,
 }: ActionModalProps) {
     const getRevisionRoles = () => {
         switch (role) {
@@ -78,7 +82,7 @@ export function AdminActionModals({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px] rounded-2xl border-none shadow-2xl p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-125 rounded-2xl border-none shadow-2xl p-0 overflow-hidden">
                 <div className="p-8">
                     <DialogHeader className="mb-6">
                         <div className="flex items-center gap-4">
@@ -159,7 +163,7 @@ export function AdminActionModals({
                                     {type === "revise" ? "Revisi" : "Penolakan"}
                                 </Label>
                                 <Textarea
-                                    className="min-h-[120px] rounded-xl border-slate-200 focus:ring-undip-blue resize-none"
+                                    className="min-h-30 rounded-xl border-slate-200 focus:ring-undip-blue resize-none"
                                     placeholder={`Tuliskan alasan ${type === "revise" ? "revisi" : "penolakan"} Anda di sini...`}
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
@@ -173,22 +177,49 @@ export function AdminActionModals({
                         )}
 
                         {type === "publish" && (
-                            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-3">
-                                <p className="text-sm text-blue-800 font-medium">
-                                    Data yang akan ditambahkan:
-                                </p>
-                                <ul className="text-xs text-blue-700 space-y-1.5 list-disc pl-4">
-                                    <li>
-                                        Nomor Surat Otomatis (Format:
-                                        [Nomor]/UN7.F8.1/KM/[Bulan]/
-                                        {new Date().getFullYear()})
-                                    </li>
+                            <div className="space-y-5">
+                                {/* Header - Nama Surat */}
+                                <div className="border-l-4 border-undip-blue pl-4">
+                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                        Dokumen yang Akan Diterbitkan
+                                    </p>
+                                    <p className="text-lg font-bold text-slate-800 mt-1">
+                                        Surat Rekomendasi Beasiswa
+                                    </p>
+                                </div>
 
-                                    <li>
-                                        Status &quot;Publikasi&quot; (Mahasiswa
-                                        dapat mengunduh)
-                                    </li>
-                                </ul>
+                                {/* Nomor Surat */}
+                                <div className="bg-linear-to-br from-blue-50 to-blue-50/30 p-5 rounded-2xl border border-blue-200/50">
+                                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-3">
+                                        Nomor Surat
+                                    </p>
+                                    <p className="text-2xl font-bold text-undip-blue font-mono">
+                                        {data?.nomorSurat || "---"}
+                                    </p>
+                                    <p className="text-xs text-blue-600 mt-3 leading-relaxed">
+                                        Format: [Nomor]/UN7.F8.1/KM/[Bulan]/
+                                        {new Date().getFullYear()}
+                                    </p>
+                                </div>
+
+                                {/* Status Publikasi */}
+                                <div className="bg-linear-to-br from-green-50 to-green-50/30 p-5 rounded-2xl border border-green-200/50">
+                                    <div className="flex items-start gap-3">
+                                        <div className="mt-1">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5"></div>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-semibold text-green-800">
+                                                Dokumen akan dipublikasikan
+                                            </p>
+                                            <p className="text-xs text-green-700 mt-2 leading-relaxed">
+                                                Setelah publikasi, mahasiswa
+                                                akan dapat mengunduh surat ini
+                                                dari portal akademik.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>

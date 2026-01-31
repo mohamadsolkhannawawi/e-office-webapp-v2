@@ -37,6 +37,7 @@ export interface ApplicationSummary {
         name: string;
         description?: string;
     };
+    letterNumber?: string;
     status:
         | "PENDING"
         | "IN_PROGRESS"
@@ -45,6 +46,8 @@ export interface ApplicationSummary {
         | "REVISION"
         | "DRAFT";
     currentStep: number;
+    lastRevisionFromRole?: string; // Role that requested the latest revision
+    lastActorRole?: string; // Role that made the final decision (approve/reject)
     formData: ApplicationFormData;
     attachmentsCount: number;
     createdAt: string;
@@ -82,6 +85,13 @@ export interface ApplicationDetail {
     updatedAt: string;
     publishedAt?: string;
     letterNumber?: string;
+    stampId?: string;
+    stampUrl?: string;
+    stamp?: {
+        id: string;
+        url: string;
+        stampType: string;
+    };
     verification?: {
         code: string;
         verifiedCount: number;
@@ -100,9 +110,9 @@ export interface ApplicationDetail {
     history?: Array<{
         actor: {
             name: string;
-            role?: {
-                name: string;
-            };
+        };
+        role?: {
+            name: string;
         };
         action: string;
         note?: string;
@@ -196,6 +206,42 @@ export async function getApplicationById(
 }
 
 /**
+ * Fetch application or create new draft if not found
+ * This endpoint auto-creates a draft application if the ID doesn't exist
+ */
+export async function getApplicationByIdOrCreate(
+    applicationId: string,
+): Promise<ApplicationDetail & { isNewDraft?: boolean }> {
+    try {
+        const response = await fetch(
+            `/api/surat-rekomendasi/applications/${applicationId}/or-create`,
+            {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            },
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Failed to fetch or create application: ${response.status}`,
+            );
+        }
+
+        const result = await response.json();
+        return {
+            ...result.data,
+            isNewDraft: result.isNewDraft || false,
+        };
+    } catch (error) {
+        console.error("Get or create application error:", error);
+        throw error;
+    }
+}
+
+/**
  * Fetch application statistics
  */
 export async function getStats(): Promise<{
@@ -261,6 +307,7 @@ export async function verifyApplication(
         targetStep?: number;
         signatureUrl?: string;
         letterNumber?: string;
+        stampId?: string;
     },
 ): Promise<{ success: boolean; data: Record<string, unknown> }> {
     try {
@@ -400,7 +447,11 @@ export async function saveSignature(data: {
     url: string;
     signatureType?: "UPLOADED" | "DRAWN" | "TEMPLATE";
     isDefault?: boolean;
-}): Promise<UserSignature | null> {
+}): Promise<{
+    success: boolean;
+    data: UserSignature | null;
+    error?: string;
+}> {
     try {
         const response = await fetch("/api/signatures", {
             method: "POST",
@@ -412,14 +463,32 @@ export async function saveSignature(data: {
         });
 
         if (!response.ok) {
-            throw new Error("Failed to save signature");
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage =
+                errorData.message ||
+                `Failed to save signature (${response.status})`;
+            console.error("Save signature error:", errorMessage);
+            return {
+                success: false,
+                data: null,
+                error: errorMessage,
+            };
         }
 
         const result = await response.json();
-        return result.data;
+        return {
+            success: true,
+            data: result.data,
+        };
     } catch (error) {
+        const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
         console.error("Save signature error:", error);
-        return null;
+        return {
+            success: false,
+            data: null,
+            error: errorMessage,
+        };
     }
 }
 
@@ -453,6 +522,148 @@ export async function deleteSignature(id: string): Promise<boolean> {
         return response.ok;
     } catch (error) {
         console.error("Delete signature error:", error);
+        return false;
+    }
+}
+
+/* ===================== STAMP INTERFACES & FUNCTIONS ===================== */
+
+export interface UserStamp {
+    id: string;
+    url: string;
+    stampType: "UPLOADED" | "DRAWN" | "TEMPLATE";
+    isDefault: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+/**
+ * Fetch all stamps for current user (UPA)
+ */
+export async function getStamps(): Promise<UserStamp[]> {
+    try {
+        const response = await fetch("/api/stamps", {
+            method: "GET",
+            credentials: "include",
+        });
+
+        if (!response.ok) {
+            return [];
+        }
+
+        const result = await response.json();
+        return result.data || [];
+    } catch (error) {
+        console.error("Get stamps error:", error);
+        return [];
+    }
+}
+
+/**
+ * Save new stamp template
+ */
+export async function saveStamp(data: {
+    url: string;
+    stampType?: "UPLOADED" | "DRAWN" | "TEMPLATE";
+}): Promise<{
+    success: boolean;
+    data: UserStamp | null;
+    error?: string;
+}> {
+    try {
+        const response = await fetch("/api/stamps", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage =
+                errorData.message ||
+                `Failed to save stamp (${response.status})`;
+            console.error("Save stamp error:", errorMessage);
+            return {
+                success: false,
+                data: null,
+                error: errorMessage,
+            };
+        }
+
+        const result = await response.json();
+        return {
+            success: true,
+            data: result.data,
+        };
+    } catch (error) {
+        const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
+        console.error("Save stamp error:", error);
+        return {
+            success: false,
+            data: null,
+            error: errorMessage,
+        };
+    }
+}
+
+/**
+ * Set stamp as default
+ */
+export async function setDefaultStamp(id: string): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/stamps/${id}/default`, {
+            method: "PATCH",
+            credentials: "include",
+        });
+
+        return response.ok;
+    } catch (error) {
+        console.error("Set default stamp error:", error);
+        return false;
+    }
+}
+
+/**
+ * Delete stamp template
+ */
+export async function deleteStamp(id: string): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/stamps/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+        });
+
+        return response.ok;
+    } catch (error) {
+        console.error("Delete stamp error:", error);
+        return false;
+    }
+}
+
+/**
+ * Apply stamp to letter
+ */
+export async function applyStampToLetter(
+    applicationId: string,
+    stampId: string,
+): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/stamps/apply/${applicationId}`, {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ stampId }),
+        });
+
+        return response.ok;
+    } catch (error) {
+        console.error("Apply stamp error:", error);
         return false;
     }
 }
@@ -499,17 +710,25 @@ export async function generateLetterNumber(
     };
 } | null> {
     try {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/master/letter-number/generate`,
-            {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ type, applicationId }),
+        const response = await fetch(`/api/master/letter-number/generate`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
             },
-        );
+            body: JSON.stringify({ type, applicationId }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(
+                "Generate letter number error:",
+                response.status,
+                errorText,
+            );
+            return null;
+        }
+
         const json = await response.json();
         return json.data;
     } catch (error) {
@@ -528,6 +747,7 @@ export interface Notification {
     type: string;
     isRead: boolean;
     entityId?: string;
+    letterInstanceId?: string;
     createdAt: string;
 }
 
@@ -604,6 +824,38 @@ export async function markAllNotificationsAsRead(): Promise<boolean> {
         return response.ok;
     } catch (error) {
         console.error("Mark all as read error:", error);
+        return false;
+    }
+}
+
+/**
+ * Delete notification by id
+ */
+export async function deleteNotification(id: string): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/notifications/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+        });
+        return response.ok;
+    } catch (error) {
+        console.error("Delete notification error:", error);
+        return false;
+    }
+}
+
+/**
+ * Delete all notifications
+ */
+export async function deleteAllNotifications(): Promise<boolean> {
+    try {
+        const response = await fetch("/api/notifications/delete-all", {
+            method: "DELETE",
+            credentials: "include",
+        });
+        return response.ok;
+    } catch (error) {
+        console.error("Delete all notifications error:", error);
         return false;
     }
 }

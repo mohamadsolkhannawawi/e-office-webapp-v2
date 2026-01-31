@@ -1,6 +1,13 @@
 import { headers } from "next/headers";
 import { AdminDashboard } from "@/components/features/dashboard";
 import { ApplicationSummary } from "@/lib/application-api";
+import {
+    CheckCircle,
+    XCircle,
+    RotateCw,
+    AlertCircle,
+    Clock,
+} from "lucide-react";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -12,24 +19,21 @@ async function getDashboardData(searchParams: SearchParams) {
         const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
-        // 1. Fetch Stats (global stats for SRB)
+        // 1. Fetch Stats (role-based stats for Supervisor Akademik)
         const statsRes = await fetch(`${apiUrl}/api/surat-rekomendasi/stats`, {
             headers: { Cookie: cookie || "" },
             cache: "no-store",
         });
         const statsJson = await statsRes.json();
         const statsData = statsJson.data || {
-            total: 0,
-            pending: 0,
-            inProgress: 0,
-            completed: 0,
-            rejected: 0,
-            totalCreatedThisMonth: 0,
-            totalCompletedThisMonth: 0,
+            perluTindakan: 0,
+            selesaiBulanIni: 0,
+            totalBulanIni: 0,
             trend: [],
             distribution: {
                 pending: 0,
                 inProgress: 0,
+                revision: 0,
                 completed: 0,
                 rejected: 0,
             },
@@ -63,50 +67,68 @@ async function getDashboardData(searchParams: SearchParams) {
 
         return {
             stats: {
-                actionRequired: statsData.pending || 0,
-                completedMonth: statsData.totalCompletedThisMonth || 0,
-                totalMonth: statsData.totalCreatedThisMonth || 0,
-                trend: statsData.trend,
-                distribution: statsData.distribution,
+                actionRequired: statsData.perluTindakan || 0,
+                completedMonth: statsData.selesaiBulanIni || 0,
+                totalMonth: statsData.totalBulanIni || 0,
+                trend: statsData.trend || [],
+                distribution: statsData.distribution || {
+                    pending: 0,
+                    inProgress: 0,
+                    revision: 0,
+                    completed: 0,
+                    rejected: 0,
+                },
             },
             recentLetters: appsData.map((app: ApplicationSummary) => {
-                // Determine target and status based on currentStep and status
+                const stepToRole: Record<number, string> = {
+                    1: "Supervisor Akademik",
+                    2: "Manajer TU",
+                    3: "Wakil Dekan 1",
+                    4: "UPA",
+                };
+
                 let target = "Selesai";
                 let status = "Proses";
                 let statusColor = "bg-undip-blue";
+                let statusIcon: React.ReactNode = null;
 
                 if (app.status === "COMPLETED") {
                     target = "Selesai";
-                    status = "Selesai";
-                    statusColor = "bg-emerald-500";
+                    status = app.lastActorRole
+                        ? `Diterbitkan oleh ${app.lastActorRole}`
+                        : "Selesai";
+                    statusColor = "bg-emerald-500 text-white";
+                    statusIcon = <CheckCircle className="w-4 h-4" />;
                 } else if (app.status === "REJECTED") {
                     target = "Ditolak";
-                    status = "Ditolak";
-                    statusColor = "bg-red-500";
+                    status = app.lastActorRole
+                        ? `Ditolak oleh ${app.lastActorRole}`
+                        : "Ditolak";
+                    statusColor = "bg-red-500 text-white";
+                    statusIcon = <XCircle className="w-4 h-4" />;
                 } else if (app.status === "REVISION") {
-                    // Surat sedang direvisi di Mahasiswa
-                    target = "Revisi di Mahasiswa";
-                    status = "Proses";
-                    statusColor = "bg-undip-blue";
+                    // Target adalah step berikutnya dari currentStep saat ini
+                    const nextStep = app.currentStep + 1;
+                    target = stepToRole[nextStep] || "Selesai";
+                    status = app.lastRevisionFromRole
+                        ? `Revisi dari ${app.lastRevisionFromRole}`
+                        : "Revisi Diperlukan";
+                    statusColor = "bg-sky-500 text-white";
+                    statusIcon = <RotateCw className="w-4 h-4" />;
                 } else if (
                     app.status === "PENDING" ||
                     app.status === "IN_PROGRESS"
                 ) {
-                    const stepToRole: Record<number, string> = {
-                        1: "Supervisor Akademik",
-                        2: "Manajer TU",
-                        3: "Wakil Dekan 1",
-                        4: "UPA",
-                    };
                     target = stepToRole[app.currentStep] || "Diproses";
 
-                    // Only show "Perlu Tindakan" if currentStep is 1 (at Supervisor)
                     if (app.currentStep === 1) {
-                        status = "Perlu Tindakan";
-                        statusColor = "bg-amber-500";
+                        status = "Menunggu Tindakan Anda";
+                        statusColor = "bg-amber-500 text-white";
+                        statusIcon = <AlertCircle className="w-4 h-4" />;
                     } else {
-                        status = "Proses";
-                        statusColor = "bg-undip-blue";
+                        status = `Diproses di ${stepToRole[app.currentStep]}`;
+                        statusColor = "bg-blue-500 text-white";
+                        statusIcon = <Clock className="w-4 h-4" />;
                     }
                 }
 
@@ -126,6 +148,7 @@ async function getDashboardData(searchParams: SearchParams) {
                     target,
                     status,
                     statusColor,
+                    statusIcon,
                 };
             }),
             meta: appsMeta,

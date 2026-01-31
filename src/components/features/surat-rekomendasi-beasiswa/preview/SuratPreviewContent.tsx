@@ -25,12 +25,13 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SuratDocument } from "@/components/features/surat-rekomendasi-beasiswa/preview/SuratDocument";
 import { UPANumberingModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPANumberingModal";
+import { UPAStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPAStampModal";
 import { WD1SignatureModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/WD1SignatureModal";
 import { AdminActionModals } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/AdminActionModals";
 import { SuccessStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/SuccessStampModal";
+import { SignatureImage } from "@/components/ui/signature-image";
 import { ActionStatusModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/ActionStatusModal";
 import React, { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 
 export interface PreviewData {
     nama?: string;
@@ -52,6 +53,8 @@ export interface PreviewData {
     nomorSurat?: string;
     publishedAt?: string;
     qrCodeUrl?: string;
+    stampId?: string;
+    stampUrl?: string;
 }
 
 interface SuratPreviewContentProps {
@@ -74,9 +77,13 @@ export function SuratPreviewContent({
     const [upaLetterNumber, setUpaLetterNumber] = useState(
         searchParams.get("no") || data?.nomorSurat || "",
     );
-    const [upaIsStampApplied, setUpaIsStampApplied] = useState(
-        !!(searchParams.get("no") || data?.nomorSurat),
+    const [upaStampId, setUpaStampId] = useState<string | null>(
+        data?.stampId || null,
     );
+    const [upaStampUrl, setUpaStampUrl] = useState<string | null>(
+        data?.stampUrl || null,
+    );
+    const [upaIsStampApplied, setUpaIsStampApplied] = useState(!!data?.stampId);
     const [wd1Signature, setWd1Signature] = useState<string | null>(
         data?.signatureUrl || null,
     );
@@ -84,6 +91,7 @@ export function SuratPreviewContent({
         data?.qrCodeUrl,
     );
     const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
+    const [isStampModalOpen, setIsStampModalOpen] = useState(false);
     const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
     const [isActionModalOpen, setIsActionModalOpen] = useState(false);
     const [modalType, setModalType] = useState<
@@ -112,7 +120,8 @@ export function SuratPreviewContent({
         }
     }, [searchParams]);
 
-    // Fetch leadership config on mount
+    // Fetch leadership config on mount - ALWAYS fetch WAKIL_DEKAN_1 for signature
+    // Signature section is exclusively for Wakil Dekan 1, regardless of current stage
     useEffect(() => {
         const fetchLeadershipConfig = async () => {
             const config = await getLetterConfig("WAKIL_DEKAN_1");
@@ -168,6 +177,7 @@ export function SuratPreviewContent({
             showSignature: hasSignature,
             signaturePath: wd1Signature || "/assets/signature-dummy.png", // Only used if showSignature is true
             showStamp: hasStamp,
+            stampUrl: upaStampUrl || null,
             nomorSurat: hasLetterNumber ? upaLetterNumber : "",
             data: data,
             leadershipConfig: leadershipConfig || undefined,
@@ -176,6 +186,7 @@ export function SuratPreviewContent({
     }, [
         upaLetterNumber,
         upaIsStampApplied,
+        upaStampUrl,
         wd1Signature,
         data,
         leadershipConfig,
@@ -262,6 +273,20 @@ export function SuratPreviewContent({
                         setQrCodeUrl(data.qrImage);
                     }
                 }}
+                appliedLetterNumber={upaLetterNumber}
+            />
+            <UPAStampModal
+                isOpen={isStampModalOpen}
+                onClose={() => setIsStampModalOpen(false)}
+                onStampChange={(stampData) => {
+                    if (stampData) {
+                        setUpaStampId(stampData.stampId);
+                        setUpaStampUrl(stampData.stampUrl);
+                        setUpaIsStampApplied(true);
+                    }
+                }}
+                applicationId={applicationId || ""}
+                appliedStampId={upaStampId}
             />
             <SuccessStampModal
                 isOpen={isSuccessStampModalOpen}
@@ -301,6 +326,9 @@ export function SuratPreviewContent({
                         | "wakil-dekan-1"
                         | "upa"
                 }
+                data={{
+                    nomorSurat: upaLetterNumber,
+                }}
                 onConfirm={async (data) => {
                     try {
                         const messages: Record<string, string> = {
@@ -348,6 +376,7 @@ export function SuratPreviewContent({
                                 : undefined,
                             signatureUrl: wd1Signature || undefined,
                             letterNumber: upaLetterNumber || undefined,
+                            stampId: upaStampId || undefined,
                         });
 
                         setPendingRedirect(redirectPath);
@@ -582,21 +611,14 @@ export function SuratPreviewContent({
                                             Tahap 2: Pengesahan
                                         </p>
                                         <Button
-                                            onClick={() => {
-                                                const nextValue =
-                                                    !upaIsStampApplied;
-                                                setUpaIsStampApplied(nextValue);
-                                                if (nextValue) {
-                                                    setIsSuccessStampModalOpen(
-                                                        true,
-                                                    );
-                                                }
-                                            }}
+                                            onClick={() =>
+                                                setIsStampModalOpen(true)
+                                            }
                                             className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
                                         >
                                             <ShieldCheck className="h-4 w-4" />
                                             {upaIsStampApplied
-                                                ? "Hapus Stempel"
+                                                ? "Ubah Stempel"
                                                 : "Bubuhkan Stempel"}
                                             {upaIsStampApplied && (
                                                 <Check className="h-3 w-3" />
@@ -686,14 +708,11 @@ export function SuratPreviewContent({
                                         {wd1Signature && (
                                             <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 animate-in zoom-in duration-300">
                                                 <div className="bg-white border border-emerald-100 rounded-lg py-2 px-3 flex justify-center shadow-inner pt-2">
-                                                    <div className="relative w-32 h-16">
-                                                        <Image
-                                                            src={wd1Signature}
-                                                            alt="WD1 Signature"
-                                                            fill
-                                                            className="object-contain mix-blend-multiply"
-                                                        />
-                                                    </div>
+                                                    <SignatureImage
+                                                        src={wd1Signature}
+                                                        alt="WD1 Signature"
+                                                        className="object-contain mix-blend-multiply w-32 h-16"
+                                                    />
                                                 </div>
                                             </div>
                                         )}

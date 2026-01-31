@@ -13,10 +13,15 @@ import {
     ShieldCheck,
     Loader2,
 } from "lucide-react";
-import { previewLetterNumber } from "@/lib/application-api";
+import {
+    previewLetterNumber,
+    generateLetterNumber,
+} from "@/lib/application-api";
+import { toast } from "react-hot-toast";
 
 interface UPANumberingSectionProps {
     onNumberChange: (number: string) => void;
+    onNumberSave?: (number: string) => void;
     onStampApply: (applied: boolean) => void;
     applicationId?: string;
     onVerificationGenerated?: (data: {
@@ -24,16 +29,20 @@ interface UPANumberingSectionProps {
         verifyUrl: string;
         qrImage: string;
     }) => void;
+    appliedLetterNumber?: string;
 }
 
 export function UPANumberingSection({
     onNumberChange,
+    onNumberSave,
     onStampApply,
     applicationId,
     onVerificationGenerated,
+    appliedLetterNumber,
 }: UPANumberingSectionProps) {
     const [letterNumber, setLetterNumber] = useState("");
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     // Auto-fetch preview number on mount
     useEffect(() => {
@@ -42,42 +51,98 @@ export function UPANumberingSection({
             const number = await previewLetterNumber("SRB");
             if (number) {
                 setLetterNumber(number);
-                onNumberChange(number);
+                // Only update if no applied number yet
+                if (!appliedLetterNumber) {
+                    onNumberChange(number);
+                }
             }
             setIsGenerating(false);
         };
         fetchPreview();
-    }, [onNumberChange]);
+    }, [appliedLetterNumber]);
 
     // Re-fetch preview number manually (or generate real one if implemented fully)
-    const generateNumber = async () => {
+    const handleGenerateNumber = async () => {
         setIsGenerating(true);
-        // If we have applicationId, we generate real number with verification
-        if (applicationId) {
-            const result = await import("@/lib/application-api").then((m) =>
-                m.generateLetterNumber("SRB", applicationId),
-            );
-            if (result) {
-                setLetterNumber(result.letterNumber);
-                onNumberChange(result.letterNumber);
-                if (result.verification && onVerificationGenerated) {
-                    onVerificationGenerated(result.verification);
+        try {
+            // If we have applicationId, we generate real number with verification
+            if (applicationId) {
+                const result = await generateLetterNumber("SRB", applicationId);
+                if (result) {
+                    setLetterNumber(result.letterNumber);
+                    onNumberChange(result.letterNumber);
+                    if (result.verification && onVerificationGenerated) {
+                        onVerificationGenerated(result.verification);
+                    }
+                    toast.success("Nomor surat berhasil digenerate!");
+                } else {
+                    toast.error(
+                        "Gagal generate nomor surat. Silakan coba lagi.",
+                    );
+                }
+            } else {
+                // Preview only
+                const number = await previewLetterNumber("SRB");
+                if (number) {
+                    setLetterNumber(number);
+                    onNumberChange(number);
                 }
             }
-        } else {
-            // Preview only
-            const number = await previewLetterNumber("SRB");
-            if (number) {
-                setLetterNumber(number);
-                onNumberChange(number);
-            }
+        } catch (error) {
+            console.error("Error generating number:", error);
+            toast.error("Terjadi kesalahan saat generate nomor surat.");
+        } finally {
+            setIsGenerating(false);
         }
-        setIsGenerating(false);
     };
 
     const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLetterNumber(e.target.value);
-        onNumberChange(e.target.value);
+    };
+
+    const handleSaveNumber = async () => {
+        if (!letterNumber.trim()) {
+            toast.error("Nomor surat tidak boleh kosong");
+            return;
+        }
+
+        setIsSaving(true);
+        const toastId = toast.loading("Menyimpan nomor surat...");
+
+        try {
+            if (applicationId) {
+                const result = await generateLetterNumber("SRB", applicationId);
+                if (result) {
+                    onNumberChange(letterNumber);
+                    if (onNumberSave) {
+                        onNumberSave(letterNumber);
+                    }
+                    if (result.verification && onVerificationGenerated) {
+                        onVerificationGenerated(result.verification);
+                    }
+                    toast.success("Nomor surat berhasil disimpan", {
+                        id: toastId,
+                    });
+                } else {
+                    toast.error("Gagal menyimpan nomor surat", {
+                        id: toastId,
+                    });
+                }
+            } else {
+                onNumberChange(letterNumber);
+                if (onNumberSave) {
+                    onNumberSave(letterNumber);
+                }
+                toast.success("Nomor surat berhasil disimpan", { id: toastId });
+            }
+        } catch (error) {
+            console.error("Save number error:", error);
+            toast.error("Terjadi kesalahan saat menyimpan nomor surat", {
+                id: toastId,
+            });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     useEffect(() => {
@@ -109,7 +174,7 @@ export function UPANumberingSection({
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={generateNumber}
+                                onClick={handleGenerateNumber}
                                 disabled={isGenerating}
                                 className="h-8 text-undip-blue hover:text-sky-700 hover:bg-blue-50 gap-1.5 font-bold text-xs"
                             >
@@ -145,6 +210,24 @@ export function UPANumberingSection({
                     </div>
                 </CardContent>
             </Card>
+
+            <Button
+                onClick={handleSaveNumber}
+                disabled={!letterNumber || isSaving}
+                className="w-full bg-undip-blue hover:bg-undip-blue/90 text-white font-bold py-6 rounded-xl flex items-center justify-center gap-2 text-base shadow-sm transition-all disabled:opacity-50"
+            >
+                {isSaving ? (
+                    <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Menyimpan...
+                    </>
+                ) : (
+                    <>
+                        <Check className="h-5 w-5" />
+                        Simpan Nomor Surat
+                    </>
+                )}
+            </Button>
 
             <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 flex gap-3 items-start">
                 <div className="bg-white p-2 rounded-xl shadow-sm text-amber-600">

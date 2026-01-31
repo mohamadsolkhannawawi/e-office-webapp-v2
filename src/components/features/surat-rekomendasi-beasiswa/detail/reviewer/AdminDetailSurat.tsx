@@ -24,9 +24,10 @@ import Link from "next/link";
 import { AdminActionModals } from "./AdminActionModals";
 import { WD1SignatureModal } from "./WD1SignatureModal";
 import { UPANumberingModal } from "./UPANumberingModal";
+import { UPAStampModal } from "./UPAStampModal";
 import { ActionStatusModal } from "./ActionStatusModal";
 import { useState } from "react";
-import Image from "next/image";
+import { SignatureImage } from "@/components/ui/signature-image";
 import { Hash, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getReceiverRole } from "@/utils/status-mapper";
@@ -64,11 +65,15 @@ export function AdminDetailSurat({
             : null) || null,
     );
     const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
+    const [isStampModalOpen, setIsStampModalOpen] = useState(false);
     const [upaLetterNumber, setUpaLetterNumber] = useState(
         initialData?.letterNumber || "",
     );
+    const [upaStampId, setUpaStampId] = useState<string | null>(
+        initialData?.stampId || null,
+    );
     const [upaIsStampApplied, setUpaIsStampApplied] = useState(
-        !!initialData?.letterNumber,
+        !!initialData?.stampId,
     );
     const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
     const [statusModal, setStatusModal] = useState<{
@@ -116,8 +121,9 @@ export function AdminDetailSurat({
     // 2. The application is not in a terminal status (COMPLETED/REJECTED)
     // 3. OR if this role previously revised and mahasiswa has resubmitted
     const canTakeAction =
-        (currentStep === roleStep && !isTerminalStatus) ||
-        (hasResubmittedAfterRevision && currentStep === roleStep);
+        !isTerminalStatus &&
+        (currentStep === roleStep ||
+            (hasResubmittedAfterRevision && currentStep === roleStep));
 
     const handleAction = (
         type: "approve" | "revise" | "reject" | "publish",
@@ -297,6 +303,9 @@ export function AdminDetailSurat({
                 onConfirm={handleConfirmAction}
                 type={modalConfig.type}
                 role={role}
+                data={{
+                    nomorSurat: upaLetterNumber,
+                }}
             />
             <WD1SignatureModal
                 isOpen={isSignatureModalOpen}
@@ -309,6 +318,7 @@ export function AdminDetailSurat({
                 onNumberChange={setUpaLetterNumber}
                 onStampApply={setUpaIsStampApplied}
                 applicationId={id}
+                appliedLetterNumber={upaLetterNumber}
             />
             <ActionStatusModal
                 isOpen={statusModal.isOpen}
@@ -424,13 +434,12 @@ export function AdminDetailSurat({
                                                                 Terpilih
                                                             </p>
                                                             <div className="bg-white rounded-lg p-2 border border-slate-100 shadow-sm relative w-32 h-16">
-                                                                <Image
+                                                                <SignatureImage
                                                                     src={
                                                                         wd1Signature
                                                                     }
                                                                     alt="Signature Preview"
-                                                                    fill
-                                                                    className="object-contain p-1"
+                                                                    className="object-contain p-1 w-full h-full"
                                                                 />
                                                             </div>
                                                         </div>
@@ -489,15 +498,15 @@ export function AdminDetailSurat({
 
                                                 <Button
                                                     onClick={() =>
-                                                        setUpaIsStampApplied(
-                                                            !upaIsStampApplied,
+                                                        setIsStampModalOpen(
+                                                            true,
                                                         )
                                                     }
                                                     className={`w-full ${upaIsStampApplied ? "bg-red-600 border-red-200 text-white hover:bg-red-700" : "bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50"} font-bold py-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm`}
                                                 >
                                                     <ShieldCheck className="h-5 w-5" />
                                                     {upaIsStampApplied
-                                                        ? "Hapus Stempel"
+                                                        ? "Ubah Stempel"
                                                         : "Bubuhkan Stempel"}
                                                 </Button>
 
@@ -595,12 +604,14 @@ export function AdminDetailSurat({
 
                                 return {
                                     senderRole:
-                                        log.actor?.role?.name ||
+                                        log.role?.name ||
                                         log.actor?.name ||
                                         "Sistem",
                                     receiverRole: getReceiverRole(
                                         log.action,
                                         initialData?.currentStep,
+                                        log.note,
+                                        log.role?.name || log.actor?.name,
                                     ),
                                     status: log.status, // Pass raw status, let RiwayatSurat handle description
                                     date: new Date(
@@ -651,6 +662,30 @@ export function AdminDetailSurat({
                     />
                 </div>
             </div>
+
+            {/* UPA Stamp Modal */}
+            {role === "upa" && (
+                <UPAStampModal
+                    isOpen={isStampModalOpen}
+                    onClose={() => setIsStampModalOpen(false)}
+                    onStampChange={(data) => {
+                        if (data) {
+                            setUpaStampId(data.stampId);
+                            setUpaIsStampApplied(true);
+                            // Update data with stampUrl for immediate document display
+                            if (data.stampUrl) {
+                                setData((prev) =>
+                                    prev
+                                        ? { ...prev, stampUrl: data.stampUrl }
+                                        : prev,
+                                );
+                            }
+                        }
+                    }}
+                    applicationId={id}
+                    appliedStampId={upaStampId}
+                />
+            )}
         </div>
     );
 }

@@ -11,6 +11,7 @@ import {
     PenTool,
     Hash,
     Check,
+    ArrowRight,
 } from "lucide-react";
 import { formatRoleName, getStatusConfig } from "@/utils/status-mapper";
 
@@ -40,10 +41,26 @@ function TimelineItem({
         ? formatRoleName(receiverRole)
         : undefined;
 
-    // Treat "-" as no note
-    const hasCatatan = catatan && catatan !== "-" && catatan.trim() !== "";
+    // Treat "-" dan "Initial submission" (case-insensitive, trim) as no note
+    const catatanTrim = (catatan || "").trim().toLowerCase();
+    const isInitialSubmission =
+        (actionType === "submit" || actionType === "create") &&
+        (!catatanTrim ||
+            catatanTrim === "initial submission" ||
+            catatanTrim === "-");
+    const hasCatatan =
+        catatanTrim !== "" &&
+        catatanTrim !== "-" &&
+        catatanTrim !== "initial submission";
 
-    const config = getStatusConfig(status, actionType, friendlySender);
+    // For initial submission, always use "PENDING" status to show "Diajukan"
+    const displayStatus = isInitialSubmission ? "PENDING" : status;
+    const config = getStatusConfig(
+        displayStatus,
+        actionType,
+        friendlySender,
+        isInitialSubmission ? undefined : friendlyReceiver, // Don't show receiver for initial submission
+    );
 
     const getIconComponent = (name: string) => {
         switch (name) {
@@ -77,6 +94,13 @@ function TimelineItem({
         return <ShieldCheck className="h-3.5 w-3.5" />;
     };
 
+    // Custom defaultDesc untuk initial submission
+    let customDefaultDesc = config.defaultDesc;
+    if (isInitialSubmission) {
+        customDefaultDesc =
+            "Pengajuan surat telah berhasil dikirim ke Supervisor Akademik.";
+    }
+
     return (
         <div className="flex gap-4 relative pb-8 group">
             {!isLast && (
@@ -98,8 +122,9 @@ function TimelineItem({
                             <span className="text-sm font-bold text-slate-800 tracking-tight">
                                 {friendlySender}
                                 {friendlyReceiver && (
-                                    <span className="text-slate-400 font-normal ml-2 mr-1">
-                                        → {friendlyReceiver}
+                                    <span className="text-slate-400 font-normal ml-2 mr-1 flex items-center gap-1">
+                                        <ArrowRight className="inline h-4 w-4 align-middle" />{" "}
+                                        {friendlyReceiver}
                                     </span>
                                 )}
                             </span>
@@ -124,7 +149,7 @@ function TimelineItem({
                     </div>
                 ) : (
                     <p className="text-[11px] text-slate-400 font-medium">
-                        {config.defaultDesc}
+                        {customDefaultDesc}
                     </p>
                 )}
             </div>
@@ -185,24 +210,35 @@ export function RiwayatSurat({
         return [];
     };
 
-    // Filter: jika ada entry Mahasiswa→- Diajukan (submit/create), dan setelahnya ada Mahasiswa→Supervisor Akademik (atau role lain), maka hide yang initial submission
-    let filteredRiwayat = riwayat || [];
-    if (filteredRiwayat.length > 1) {
-        const first = filteredRiwayat[0];
-        const second = filteredRiwayat[1];
-        if (
-            first.senderRole.toLowerCase().includes("mahasiswa") &&
-            (!first.receiverRole || first.receiverRole === "-") &&
-            (first.status === "Diajukan" ||
-                first.actionType === "submit" ||
-                first.actionType === "create") &&
-            second.senderRole.toLowerCase().includes("mahasiswa") &&
-            second.receiverRole &&
-            second.receiverRole !== "-"
-        ) {
-            filteredRiwayat = filteredRiwayat.slice(1);
-        }
-    }
+    // Filter dan modifikasi: jika ada entry Mahasiswa→- Diajukan (submit/create), dan setelahnya ada Mahasiswa→Supervisor Akademik (atau role lain), maka hide yang initial submission
+    const filteredRiwayat = (riwayat || [])
+        .filter((item) => {
+            // Jika entry adalah Mahasiswa → "-" dengan Diajukan status, skip it (remove dari timeline)
+            if (
+                item.senderRole.toLowerCase().includes("mahasiswa") &&
+                (!item.receiverRole || item.receiverRole === "-") &&
+                (item.status === "Diajukan" ||
+                    item.actionType === "submit" ||
+                    item.actionType === "create")
+            ) {
+                return false; // Filter out this entry
+            }
+            return true;
+        })
+        .map((item, idx) => {
+            // Jika pengajuan awal (receiverRole kosong atau '-') maka set ke Supervisor Akademik
+            if (
+                idx === 0 &&
+                item.senderRole.toLowerCase().includes("mahasiswa") &&
+                (!item.receiverRole || item.receiverRole === "-") &&
+                (item.status === "Diajukan" ||
+                    item.actionType === "submit" ||
+                    item.actionType === "create")
+            ) {
+                return { ...item, receiverRole: "Supervisor Akademik" };
+            }
+            return item;
+        });
 
     const timeline = [
         ...filteredRiwayat,
@@ -223,19 +259,22 @@ export function RiwayatSurat({
             </CardHeader>
             <CardContent className="pt-6">
                 <div className="space-y-0">
-                    {timeline.map((item, index) => (
-                        <TimelineItem
-                            key={index}
-                            senderRole={item.senderRole}
-                            receiverRole={item.receiverRole}
-                            status={item.status}
-                            date={item.date}
-                            time={item.time}
-                            catatan={item.catatan}
-                            actionType={item.actionType}
-                            isLast={index === timeline.length - 1}
-                        />
-                    ))}
+                    {timeline
+                        .slice()
+                        .reverse()
+                        .map((item, index) => (
+                            <TimelineItem
+                                key={index}
+                                senderRole={item.senderRole}
+                                receiverRole={item.receiverRole}
+                                status={item.status}
+                                date={item.date}
+                                time={item.time}
+                                catatan={item.catatan}
+                                actionType={item.actionType}
+                                isLast={index === timeline.length - 1}
+                            />
+                        ))}
                 </div>
             </CardContent>
         </Card>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
-import { getApplicationById } from "@/lib/application-api";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { getApplicationByIdOrCreate } from "@/lib/application-api";
 
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,6 +19,7 @@ import type { FormDataType } from "@/types/form";
 export default function PengajuanBaruPage() {
     const params = useParams();
     const searchParams = useSearchParams();
+    const router = useRouter();
     const jenis = params.jenis as string;
     const editId = searchParams.get("id");
 
@@ -70,9 +71,21 @@ export default function PengajuanBaruPage() {
         const fetchAsyncData = async () => {
             // 1. Fetch specific data based on mode
             if (editId) {
-                // Edit Mode: Fetch existing application
+                // Edit Mode: Fetch existing application or create new draft if not found
                 try {
-                    const data = await getApplicationById(editId);
+                    const data = await getApplicationByIdOrCreate(editId);
+
+                    // If new draft was created, update URL with new ID
+                    if (data.isNewDraft) {
+                        console.log(
+                            "📝 [PengajuanBaruPage] New draft created, updating URL with new ID:",
+                            data.id,
+                        );
+                        router.replace(
+                            `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${data.id}`,
+                        );
+                    }
+
                     if (data) {
                         setFormData((prev) => ({
                             ...prev,
@@ -99,7 +112,10 @@ export default function PengajuanBaruPage() {
                         }));
                     }
                 } catch (err) {
-                    console.error("Failed to fetch application for edit:", err);
+                    console.error(
+                        "Failed to fetch or create application for edit:",
+                        err,
+                    );
                 }
             } else if (!isAuthLoading && authUser) {
                 // New Mode: Fetch profile details to pre-fill if identity is missing
@@ -307,8 +323,11 @@ export default function PengajuanBaruPage() {
                     </h1>
                     <p className="text-gray-500 mt-1">{stepInfo.desc}</p>
                 </div>
-                <Link href="/mahasiswa/surat/surat-rekomendasi-beasiswa" className="order-1 sm:order-2 self-start sm:self-auto">
-                    <Button className="bg-red-600 text-white hover:bg-slate-200 hover:bg-red-700 px-3 py-2 rounded-md inline-flex items-center gap-2">
+                <Link
+                    href="/mahasiswa/surat/surat-rekomendasi-beasiswa"
+                    className="order-1 sm:order-2 self-start sm:self-auto"
+                >
+                    <Button className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-md inline-flex items-center gap-2">
                         <ArrowLeft className="h-4 w-4" />
                         <span className="text-sm font-semibold">Kembali</span>
                     </Button>

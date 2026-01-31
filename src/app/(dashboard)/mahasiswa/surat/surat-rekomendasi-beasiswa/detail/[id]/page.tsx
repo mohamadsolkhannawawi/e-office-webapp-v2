@@ -61,7 +61,7 @@ export default function DetailPengajuanPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center min-h-100">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
                     <p className="text-gray-600">Memuat data...</p>
@@ -72,7 +72,7 @@ export default function DetailPengajuanPage() {
 
     if (error || !application) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center min-h-100">
                 <div className="text-center">
                     <p className="text-red-600 mb-4">
                         {error || "Pengajuan tidak ditemukan"}
@@ -152,8 +152,13 @@ export default function DetailPengajuanPage() {
             .jenisBeasiswa as string) || "internal";
 
     const riwayatData = application.history?.map((h) => ({
-        senderRole: h.actor.role?.name || h.actor.name,
-        receiverRole: getReceiverRole(h.action, application.currentStep),
+        senderRole: h.role?.name || h.actor.name,
+        receiverRole: getReceiverRole(
+            h.action,
+            application.currentStep,
+            h.note,
+            h.role?.name || h.actor.name,
+        ),
         status: h.status,
         date: new Date(h.createdAt).toLocaleDateString("id-ID", {
             day: "numeric",

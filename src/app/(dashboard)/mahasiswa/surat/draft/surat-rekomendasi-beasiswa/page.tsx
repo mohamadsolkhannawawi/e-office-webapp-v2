@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
+import { Card } from "@/components/ui/card";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -200,60 +201,76 @@ export default function SuratDraftPage() {
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Filter Bar */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                <div className="relative w-full sm:w-1/2">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                        placeholder="Cari draft..."
-                        className="pl-9 bg-white border-gray-200 w-full"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <Select value={jenisFilter} onValueChange={setJenisFilter}>
-                    <SelectTrigger className="w-full sm:w-1/2 bg-white border-gray-200 text-slate-700">
-                        <div className="flex items-center gap-2">
-                            <Filter className="h-4 w-4" />
-                            <SelectValue placeholder="Filter Draft" />
+            {/* Filters Card */}
+            <Card className="border-none shadow-sm overflow-hidden bg-white">
+                <div className="p-6 border-b border-slate-50 flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-slate-400" />
+                        <span className="text-sm font-semibold text-slate-600">
+                            Filter
+                        </span>
+                    </div>
+                    <div className="flex flex-wrap gap-3 items-center">
+                        {/* Search */}
+                        <div className="relative flex-1 min-w-50">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input
+                                placeholder="Cari draft..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full"
+                            />
                         </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">Semua Jenis</SelectItem>
-                        <SelectItem value="internal">
-                            Beasiswa Internal
-                        </SelectItem>
-                        <SelectItem value="external">
-                            Beasiswa Eksternal
-                        </SelectItem>
-                        <SelectItem value="akademik">
-                            Beasiswa Akademik
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
 
-            {/* Table Container */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                        {/* Filter Jenis */}
+                        <Select
+                            value={jenisFilter}
+                            onValueChange={setJenisFilter}
+                        >
+                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
+                                <div className="flex items-center gap-2">
+                                    <Filter className="h-4 w-4" />
+                                    <SelectValue placeholder="Jenis Draft" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Semua Jenis</SelectItem>
+                                <SelectItem value="internal">
+                                    Beasiswa Internal
+                                </SelectItem>
+                                <SelectItem value="external">
+                                    Beasiswa Eksternal
+                                </SelectItem>
+                                <SelectItem value="akademik">
+                                    Beasiswa Akademik
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </Card>
+
+            {/* Table Card */}
+            <Card className="border-none shadow-sm overflow-hidden bg-white">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm border-collapse">
-                        <thead className="bg-gray-50/50 border-b border-gray-100">
+                        <thead className="bg-slate-50/50 border-b border-slate-100">
                             <tr>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-12 text-center">
+                                <th className="px-6 py-4 font-semibold text-slate-700 w-12 text-center">
                                     No
                                 </th>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-1/2">
+                                <th className="px-6 py-4 font-semibold text-slate-700 min-w-50">
                                     Subjek Surat
                                 </th>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-1/4">
+                                <th className="px-6 py-4 font-semibold text-slate-700 min-w-50">
                                     Terakhir Diubah
                                 </th>
-                                <th className="px-6 py-4 font-bold text-slate-700 w-1/4 text-right">
+                                <th className="px-6 py-4 font-semibold text-slate-700 w-24 text-right">
                                     Aksi
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-slate-100">
                             {isLoading ? (
                                 <tr>
                                     <td
@@ -284,9 +301,9 @@ export default function SuratDraftPage() {
                                     return (
                                         <tr
                                             key={app.id}
-                                            className="hover:bg-gray-50/30 transition-colors group"
+                                            className="hover:bg-slate-50/50 transition-colors group"
                                         >
-                                            <td className="px-6 py-4 text-center text-slate-500 font-medium">
+                                            <td className="px-6 py-4 text-center text-slate-500 font-medium text-sm">
                                                 {(pagination.page - 1) *
                                                     pagination.limit +
                                                     index +
@@ -294,11 +311,11 @@ export default function SuratDraftPage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                                                    <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
                                                         <FileText className="h-5 w-5" />
                                                     </div>
                                                     <div className="flex flex-col">
-                                                        <span className="font-bold text-slate-800 group-hover:text-[#007bff] transition-colors">
+                                                        <span className="font-semibold text-slate-800 group-hover:text-undip-blue transition-colors">
                                                             {app.scholarshipName ||
                                                                 app.letterType
                                                                     ?.name ||
@@ -312,7 +329,7 @@ export default function SuratDraftPage() {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-slate-600">
+                                            <td className="px-6 py-4 text-slate-600 text-sm">
                                                 {app.updatedAt &&
                                                 !isNaN(
                                                     new Date(
@@ -339,7 +356,7 @@ export default function SuratDraftPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="flex items-center gap-2 text-[#007bff] hover:bg-blue-50 font-medium px-4"
+                                                            className="flex items-center gap-2 text-undip-blue hover:bg-blue-50 font-medium px-4 h-9"
                                                         >
                                                             <Play className="h-4 w-4 fill-current" />
                                                             Lanjutkan
@@ -371,8 +388,8 @@ export default function SuratDraftPage() {
 
                 {/* Pagination */}
                 {!isLoading && pagination.totalPages > 1 && (
-                    <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
-                        <p className="text-xs text-slate-500 italic">
+                    <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                        <p className="text-xs text-slate-500">
                             Menampilkan{" "}
                             {(pagination.page - 1) * pagination.limit + 1} -{" "}
                             {Math.min(
@@ -393,27 +410,9 @@ export default function SuratDraftPage() {
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
-                            <div className="flex items-center gap-1">
-                                {[...Array(pagination.totalPages)].map(
-                                    (_, i) => (
-                                        <Button
-                                            key={i}
-                                            variant={
-                                                pagination.page === i + 1
-                                                    ? "default"
-                                                    : "outline"
-                                            }
-                                            size="sm"
-                                            className={`h-8 w-8 p-0 ${pagination.page === i + 1 ? "bg-[#007bff] hover:bg-blue-600" : ""}`}
-                                            onClick={() =>
-                                                handlePageChange(i + 1)
-                                            }
-                                        >
-                                            {i + 1}
-                                        </Button>
-                                    ),
-                                )}
-                            </div>
+                            <span className="text-xs text-slate-600 px-2">
+                                {pagination.page} / {pagination.totalPages}
+                            </span>
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -430,7 +429,7 @@ export default function SuratDraftPage() {
                         </div>
                     </div>
                 )}
-            </div>
+            </Card>
         </div>
     );
 }

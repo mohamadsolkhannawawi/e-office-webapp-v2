@@ -22,7 +22,7 @@ import {
 } from "@/lib/template-api";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
-import { DocxPreview } from "@/components/features/surat-rekomendasi-beasiswa/preview/DocxPreview";
+// import { DocxPreview } from "@/components/features/surat-rekomendasi-beasiswa/preview/DocxPreview"; // Removed
 import { UPANumberingModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPANumberingModal";
 import { UPAStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPAStampModal";
 import { WD1SignatureModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/WD1SignatureModal";
@@ -72,6 +72,9 @@ export function SuratPreviewContent({
     const router = useRouter();
     const searchParams = useSearchParams();
     const stage = searchParams.get("stage") || defaultStage;
+
+    // Resolve Application ID from prop or data object
+    const pdfId = applicationId || data?.applicationId;
 
     const [upaLetterNumber, setUpaLetterNumber] = useState(
         searchParams.get("no") || data?.nomorSurat || "",
@@ -451,11 +454,19 @@ export function SuratPreviewContent({
                 </div>
 
                 {/* Document Area */}
-                <div className="flex-1 overflow-auto p-6 flex justify-center bg-[#F1F5F9] print:bg-white print:p-0 print:block print:overflow-visible">
-                    <DocxPreview
-                        letterInstanceId={applicationId || ""}
-                        className="w-full max-w-4xl"
-                    />
+                <div className="flex-1 overflow-hidden p-0 flex justify-center bg-[#525659] print:bg-white print:p-0 print:block print:overflow-visible relative">
+                    {/* PDF Preview Iframe - Use pdfId derived from prop or data */}
+                    {pdfId ? (
+                        <iframe
+                            src={`/api/templates/letter/${pdfId}/pdf#toolbar=0&navpanes=0&scrollbar=1`}
+                            className="w-full h-full border-0"
+                            title="Preview Surat"
+                        />
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-white">
+                            <p>Memuat Dokumen...</p>
+                        </div>
+                    )}
                 </div>
             </div>
 

@@ -45,6 +45,12 @@ interface AdminDetailSuratProps {
             createdAt: string;
             actor?: {
                 name: string;
+                role?: {
+                    name: string;
+                };
+            };
+            role?: {
+                name: string;
             };
         }>;
     };
@@ -106,11 +112,28 @@ export function AdminDetailSurat({
 
             // Find if there was a previous revision action from this role
             const previousRevisionFromThisRole = arr.find((prevH, prevIdx) => {
+                // Explicitly type actor as any to allow role access since base type might be incomplete
+                const prevActor = prevH.actor as
+                    | { role?: { name: string }; name?: string }
+                    | undefined;
+                const currentActor = h.actor as
+                    | { role?: { name: string }; name?: string }
+                    | undefined;
+
+                const prevRoleName =
+                    prevH.role?.name ||
+                    prevActor?.role?.name ||
+                    prevActor?.name;
+                const currentRoleName =
+                    h.role?.name ||
+                    currentActor?.role?.name ||
+                    currentActor?.name;
+
                 return (
                     prevIdx > idx && // Earlier in the history (desc order)
                     prevH.action === "revision" &&
-                    prevH.actor?.role?.name === h.actor?.role?.name
-                ); // Same role
+                    prevRoleName === currentRoleName
+                );
             });
 
             return !!previousRevisionFromThisRole;
@@ -672,14 +695,7 @@ export function AdminDetailSurat({
                         if (data) {
                             setUpaStampId(data.stampId);
                             setUpaIsStampApplied(true);
-                            // Update data with stampUrl for immediate document display
-                            if (data.stampUrl) {
-                                setData((prev) =>
-                                    prev
-                                        ? { ...prev, stampUrl: data.stampUrl }
-                                        : prev,
-                                );
-                            }
+                            // setData removed as it is not defined
                         }
                     }}
                     applicationId={id}

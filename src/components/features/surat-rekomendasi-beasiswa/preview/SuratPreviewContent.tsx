@@ -15,15 +15,22 @@ import {
     RotateCcw,
     XOctagon,
     Download,
+    FileText,
+    Code,
 } from "lucide-react";
 import {
     verifyApplication,
     getLetterConfig,
     LeadershipConfig,
 } from "@/lib/application-api";
+import {
+    generateAndDownloadDocument,
+    getTemplateIdByLetterType,
+} from "@/lib/template-api";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SuratDocument } from "@/components/features/surat-rekomendasi-beasiswa/preview/SuratDocument";
+import { DocxPreview } from "@/components/features/surat-rekomendasi-beasiswa/preview/DocxPreview";
 import { UPANumberingModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPANumberingModal";
 import { UPAStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPAStampModal";
 import { WD1SignatureModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/WD1SignatureModal";
@@ -110,6 +117,10 @@ export function SuratPreviewContent({
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [leadershipConfig, setLeadershipConfig] =
         useState<LeadershipConfig | null>(null);
+    const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
+    // 🔴 NEW: Preview mode toggle - DOCX (default) or HTML fallback
+    const [previewMode, setPreviewMode] = useState<"docx" | "html">("docx");
+    const [docxLoadError, setDocxLoadError] = useState(false);
 
     useEffect(() => {
         if (searchParams.get("autoPrint") === "true") {
@@ -442,34 +453,64 @@ export function SuratPreviewContent({
             <div className="flex-1 flex flex-col bg-slate-200 overflow-hidden relative">
                 {/* Toolbar */}
                 <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 shrink-0 shadow-sm print:hidden">
-                    {/* <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold text-slate-600 uppercase tracking-tight">
-                            Pratinjau Surat
-                        </span>
-                    </div> */}
-
-                    <div className="flex items-center gap-4 bg-slate-100 rounded-lg px-2 py-1">
+                    {/* Preview Mode Toggle */}
+                    <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
                         <button
-                            onClick={handleZoomOut}
-                            className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200"
+                            onClick={() => setPreviewMode("docx")}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                                previewMode === "docx"
+                                    ? "bg-white text-undip-blue shadow-sm"
+                                    : "text-slate-500 hover:text-slate-700"
+                            }`}
+                            title="Preview DOCX Generated"
                         >
-                            <Minus className="h-4 w-4 text-slate-600" />
+                            <FileText className="h-3.5 w-3.5" />
+                            DOCX
                         </button>
                         <button
-                            onClick={resetZoom}
-                            className="text-xs font-bold text-slate-700 px-3 border-x border-slate-200 hover:text-undip-blue"
+                            onClick={() => setPreviewMode("html")}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                                previewMode === "html"
+                                    ? "bg-white text-undip-blue shadow-sm"
+                                    : "text-slate-500 hover:text-slate-700"
+                            }`}
+                            title="Preview HTML (Fallback)"
                         >
-                            {zoom}%
-                        </button>
-                        <button
-                            onClick={handleZoomIn}
-                            className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200"
-                        >
-                            <Plus className="h-4 w-4 text-slate-600" />
+                            <Code className="h-3.5 w-3.5" />
+                            HTML
                         </button>
                     </div>
 
+                    {/* Zoom Controls - only show for HTML mode */}
+                    {previewMode === "html" && (
+                        <div className="flex items-center gap-4 bg-slate-100 rounded-lg px-2 py-1">
+                            <button
+                                onClick={handleZoomOut}
+                                className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200"
+                            >
+                                <Minus className="h-4 w-4 text-slate-600" />
+                            </button>
+                            <button
+                                onClick={resetZoom}
+                                className="text-xs font-bold text-slate-700 px-3 border-x border-slate-200 hover:text-undip-blue"
+                            >
+                                {zoom}%
+                            </button>
+                            <button
+                                onClick={handleZoomIn}
+                                className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200"
+                            >
+                                <Plus className="h-4 w-4 text-slate-600" />
+                            </button>
+                        </div>
+                    )}
+
                     <div className="flex items-center gap-4">
+                        {previewMode === "docx" && (
+                            <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
+                                ✓ Dokumen Asli
+                            </span>
+                        )}
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                             Halaman 1/1
                         </span>
@@ -488,13 +529,27 @@ export function SuratPreviewContent({
                 </div>
 
                 {/* Document Area */}
-                <div className="flex-1 overflow-auto p-12 flex justify-center bg-[#F1F5F9] print:bg-white print:p-0 print:block print:overflow-visible">
-                    <div
-                        className="origin-top transition-transform duration-300 shadow-2xl print:shadow-none print:transform-none print:fixed print:top-0 print:left-0 print:z-9999 print:w-screen print:h-auto print:bg-white"
-                        style={{ transform: `scale(${zoom / 100})` }}
-                    >
-                        <SuratDocument {...config} />
-                    </div>
+                <div className="flex-1 overflow-auto p-6 flex justify-center bg-[#F1F5F9] print:bg-white print:p-0 print:block print:overflow-visible">
+                    {previewMode === "docx" ? (
+                        /* DOCX Preview Mode */
+                        <DocxPreview
+                            letterInstanceId={applicationId || ""}
+                            className="w-full max-w-4xl"
+                            onError={() => {
+                                setDocxLoadError(true);
+                                // Auto-fallback to HTML if DOCX fails
+                                // setPreviewMode("html");
+                            }}
+                        />
+                    ) : (
+                        /* HTML Preview Mode (Fallback) */
+                        <div
+                            className="origin-top transition-transform duration-300 shadow-2xl print:shadow-none print:transform-none print:fixed print:top-0 print:left-0 print:z-9999 print:w-screen print:h-auto print:bg-white"
+                            style={{ transform: `scale(${zoom / 100})` }}
+                        >
+                            <SuratDocument {...config} />
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -856,22 +911,84 @@ export function SuratPreviewContent({
                                     <div className="space-y-3 pt-5 border-t border-slate-100 text-center">
                                         <p className="text-xs text-slate-500 mb-4 leading-relaxed">
                                             Klik tombol di bawah untuk mencetak
-                                            atau mengunduh surat sebagai PDF.
+                                            atau mengunduh surat sebagai PDF
+                                            atau Word.
                                         </p>
-                                        <Button
-                                            onClick={() => {
-                                                if (
-                                                    typeof window !==
-                                                    "undefined"
-                                                ) {
-                                                    window.print();
-                                                }
-                                            }}
-                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
-                                        >
-                                            <Download className="h-5 w-5" />
-                                            Unduh PDF
-                                        </Button>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <Button
+                                                onClick={() => {
+                                                    if (
+                                                        typeof window !==
+                                                        "undefined"
+                                                    ) {
+                                                        window.print();
+                                                    }
+                                                }}
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                                            >
+                                                <Download className="h-5 w-5" />
+                                                Cetak/PDF
+                                            </Button>
+                                            <Button
+                                                onClick={async () => {
+                                                    if (!applicationId) {
+                                                        alert(
+                                                            "Application ID tidak ditemukan",
+                                                        );
+                                                        return;
+                                                    }
+                                                    setIsDownloadingTemplate(
+                                                        true,
+                                                    );
+                                                    try {
+                                                        // Get template ID dynamically from API
+                                                        const templateId =
+                                                            await getTemplateIdByLetterType(
+                                                                "Surat Rekomendasi Beasiswa",
+                                                            );
+                                                        if (!templateId) {
+                                                            throw new Error(
+                                                                "Template tidak ditemukan",
+                                                            );
+                                                        }
+                                                        await generateAndDownloadDocument(
+                                                            templateId,
+                                                            applicationId,
+                                                            `surat-rekomendasi-beasiswa-${applicationId}.docx`,
+                                                        );
+                                                        alert(
+                                                            "Dokumen Word berhasil diunduh!",
+                                                        );
+                                                    } catch (error) {
+                                                        console.error(
+                                                            "Download error:",
+                                                            error,
+                                                        );
+                                                        alert(
+                                                            `Gagal mengunduh dokumen Word: ${error instanceof Error ? error.message : "Unknown error"}`,
+                                                        );
+                                                    } finally {
+                                                        setIsDownloadingTemplate(
+                                                            false,
+                                                        );
+                                                    }
+                                                }}
+                                                disabled={isDownloadingTemplate}
+                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
+                                            >
+                                                {isDownloadingTemplate ? (
+                                                    <>
+                                                        <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                        Mengunduh...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Download className="h-5 w-5" />
+                                                        Unduh Word
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

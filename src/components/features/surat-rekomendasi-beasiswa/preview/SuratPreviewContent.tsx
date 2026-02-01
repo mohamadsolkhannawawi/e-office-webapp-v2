@@ -2,8 +2,6 @@
 
 import {
     ChevronLeft,
-    Minus,
-    Plus,
     Maximize2,
     Minimize2,
     Info,
@@ -16,20 +14,14 @@ import {
     XOctagon,
     Download,
     FileText,
-    Code,
 } from "lucide-react";
-import {
-    verifyApplication,
-    getLetterConfig,
-    LeadershipConfig,
-} from "@/lib/application-api";
+import { verifyApplication } from "@/lib/application-api";
 import {
     generateAndDownloadDocument,
     getTemplateIdByLetterType,
 } from "@/lib/template-api";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SuratDocument } from "@/components/features/surat-rekomendasi-beasiswa/preview/SuratDocument";
 import { DocxPreview } from "@/components/features/surat-rekomendasi-beasiswa/preview/DocxPreview";
 import { UPANumberingModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPANumberingModal";
 import { UPAStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPAStampModal";
@@ -38,7 +30,7 @@ import { AdminActionModals } from "@/components/features/surat-rekomendasi-beasi
 import { SuccessStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/SuccessStampModal";
 import { SignatureImage } from "@/components/ui/signature-image";
 import { ActionStatusModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/ActionStatusModal";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export interface PreviewData {
     nama?: string;
@@ -61,7 +53,7 @@ export interface PreviewData {
     publishedAt?: string;
     qrCodeUrl?: string;
     stampId?: string;
-    stampUrl?: string;
+    stampUrl?: string; // Kept in interface just in case data has it, but unused in component state
 }
 
 interface SuratPreviewContentProps {
@@ -87,15 +79,9 @@ export function SuratPreviewContent({
     const [upaStampId, setUpaStampId] = useState<string | null>(
         data?.stampId || null,
     );
-    const [upaStampUrl, setUpaStampUrl] = useState<string | null>(
-        data?.stampUrl || null,
-    );
     const [upaIsStampApplied, setUpaIsStampApplied] = useState(!!data?.stampId);
     const [wd1Signature, setWd1Signature] = useState<string | null>(
         data?.signatureUrl || null,
-    );
-    const [qrCodeUrl, setQrCodeUrl] = useState<string | undefined>(
-        data?.qrCodeUrl,
     );
     const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
     const [isStampModalOpen, setIsStampModalOpen] = useState(false);
@@ -113,14 +99,11 @@ export function SuratPreviewContent({
         message?: string;
     }>({ isOpen: false, status: "success", type: "approve" });
     const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
-    const [zoom, setZoom] = useState(100);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [leadershipConfig, setLeadershipConfig] =
-        useState<LeadershipConfig | null>(null);
+
+    // Removed unused states: upaStampUrl, qrCodeUrl, leadershipConfig, docxLoadError
+
     const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
-    // 🔴 NEW: Preview mode toggle - DOCX (default) or HTML fallback
-    const [previewMode, setPreviewMode] = useState<"docx" | "html">("docx");
-    const [docxLoadError, setDocxLoadError] = useState(false);
 
     useEffect(() => {
         if (searchParams.get("autoPrint") === "true") {
@@ -131,17 +114,7 @@ export function SuratPreviewContent({
         }
     }, [searchParams]);
 
-    // Fetch leadership config on mount - ALWAYS fetch WAKIL_DEKAN_1 for signature
-    // Signature section is exclusively for Wakil Dekan 1, regardless of current stage
-    useEffect(() => {
-        const fetchLeadershipConfig = async () => {
-            const config = await getLetterConfig("WAKIL_DEKAN_1");
-            if (config) {
-                setLeadershipConfig(config);
-            }
-        };
-        fetchLeadershipConfig();
-    }, []);
+    // Removed fetching leadershipConfig as it was unused
 
     // Map stage to step number for canTakeAction logic
     const stageStepMap: Record<string, number> = {
@@ -162,10 +135,6 @@ export function SuratPreviewContent({
     // 2. The application is not in a terminal status (COMPLETED/REJECTED)
     const canTakeAction = currentStep === roleStep && !isTerminalStatus;
 
-    const handleZoomIn = () => setZoom((prev) => Math.min(prev + 10, 200));
-    const handleZoomOut = () => setZoom((prev) => Math.max(prev - 10, 50));
-    const resetZoom = () => setZoom(100);
-
     const handleBack = () => {
         if (backUrl) {
             router.push(backUrl);
@@ -174,35 +143,7 @@ export function SuratPreviewContent({
         }
     };
 
-    const config = useMemo(() => {
-        // SINGLE SOURCE OF TRUTH LOGIC:
-        // Use the actual data state (wd1Signature, upaLetterNumber) to decide what to render.
-        // The 'stage' prop primarily controls the SIDEBAR actions/context, not the document content visibility.
-        // Exception: If we are in 'wd1' stage (approval process), we show the signature being drafted (local state) or existing one.
-
-        const hasSignature = !!wd1Signature;
-        const hasStamp = upaIsStampApplied;
-        const hasLetterNumber = !!upaLetterNumber;
-
-        return {
-            showSignature: hasSignature,
-            signaturePath: wd1Signature || "/assets/signature-dummy.png", // Only used if showSignature is true
-            showStamp: hasStamp,
-            stampUrl: upaStampUrl || null,
-            nomorSurat: hasLetterNumber ? upaLetterNumber : "",
-            data: data,
-            leadershipConfig: leadershipConfig || undefined,
-            qrCodeUrl: qrCodeUrl,
-        };
-    }, [
-        upaLetterNumber,
-        upaIsStampApplied,
-        upaStampUrl,
-        wd1Signature,
-        data,
-        leadershipConfig,
-        qrCodeUrl,
-    ]);
+    // Removed unused config object derived from useMemo as HTML preview is no longer used
 
     const attributes = [
         {
@@ -262,12 +203,43 @@ export function SuratPreviewContent({
                         margin: 0; 
                         size: A4 portrait;
                     }
-                    /* Hide browser headers/footers by clearing page margin */
+                    /* Hide everything except the document preview container */
+                    .print\\:hidden, 
+                    .w-80, 
+                    .h-12, 
+                    .fixed, 
+                    header, 
+                    aside, 
+                    nav, 
+                    footer {
+                        display: none !important;
+                    }
+                    
                     html, body {
-                        margin: 0;
-                        height: 100%;
-                        overflow: hidden !important;
-                        -webkit-print-color-adjust: exact;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        height: 100% !important;
+                        overflow: visible !important;
+                        background: white !important;
+                    }
+
+                    /* Main containers */
+                    .h-full, .flex-1, .bg-slate-200, .bg-slate-100 {
+                        background: white !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                        display: block !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+
+                    /* Document rendering */
+                    .docx-preview-container {
+                        display: block !important;
+                        margin: 0 auto !important;
+                        padding: 0 !important;
+                        width: 100% !important;
+                        background: white !important;
                     }
                 }
             `,
@@ -279,10 +251,8 @@ export function SuratPreviewContent({
                 onNumberChange={setUpaLetterNumber}
                 onStampApply={() => {}} // Stamp is always true in this UI
                 applicationId={applicationId}
-                onVerificationGenerated={(data) => {
-                    if (data.qrImage) {
-                        setQrCodeUrl(data.qrImage);
-                    }
+                onVerificationGenerated={() => {
+                    // QrCode handled via backend now
                 }}
                 appliedLetterNumber={upaLetterNumber}
             />
@@ -292,7 +262,6 @@ export function SuratPreviewContent({
                 onStampChange={(stampData) => {
                     if (stampData) {
                         setUpaStampId(stampData.stampId);
-                        setUpaStampUrl(stampData.stampUrl);
                         setUpaIsStampApplied(true);
                     }
                 }}
@@ -450,67 +419,20 @@ export function SuratPreviewContent({
             </div>
 
             {/* Main Content: Document Preview */}
-            <div className="flex-1 flex flex-col bg-slate-200 overflow-hidden relative">
+            <div className="flex-1 flex flex-col bg-slate-200 overflow-hidden relative print:bg-white print:overflow-visible">
                 {/* Toolbar */}
                 <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 shrink-0 shadow-sm print:hidden">
-                    {/* Preview Mode Toggle */}
-                    <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
-                        <button
-                            onClick={() => setPreviewMode("docx")}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                                previewMode === "docx"
-                                    ? "bg-white text-undip-blue shadow-sm"
-                                    : "text-slate-500 hover:text-slate-700"
-                            }`}
-                            title="Preview DOCX Generated"
-                        >
-                            <FileText className="h-3.5 w-3.5" />
-                            DOCX
-                        </button>
-                        <button
-                            onClick={() => setPreviewMode("html")}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                                previewMode === "html"
-                                    ? "bg-white text-undip-blue shadow-sm"
-                                    : "text-slate-500 hover:text-slate-700"
-                            }`}
-                            title="Preview HTML (Fallback)"
-                        >
-                            <Code className="h-3.5 w-3.5" />
-                            HTML
-                        </button>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-md flex items-center gap-1.5">
+                            <FileText className="h-4 w-4" />
+                            DOCX Generated
+                        </span>
                     </div>
 
-                    {/* Zoom Controls - only show for HTML mode */}
-                    {previewMode === "html" && (
-                        <div className="flex items-center gap-4 bg-slate-100 rounded-lg px-2 py-1">
-                            <button
-                                onClick={handleZoomOut}
-                                className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200"
-                            >
-                                <Minus className="h-4 w-4 text-slate-600" />
-                            </button>
-                            <button
-                                onClick={resetZoom}
-                                className="text-xs font-bold text-slate-700 px-3 border-x border-slate-200 hover:text-undip-blue"
-                            >
-                                {zoom}%
-                            </button>
-                            <button
-                                onClick={handleZoomIn}
-                                className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200"
-                            >
-                                <Plus className="h-4 w-4 text-slate-600" />
-                            </button>
-                        </div>
-                    )}
-
                     <div className="flex items-center gap-4">
-                        {previewMode === "docx" && (
-                            <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
-                                ✓ Dokumen Asli
-                            </span>
-                        )}
+                        <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
+                            ✓ Dokumen Asli
+                        </span>
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                             Halaman 1/1
                         </span>
@@ -530,26 +452,10 @@ export function SuratPreviewContent({
 
                 {/* Document Area */}
                 <div className="flex-1 overflow-auto p-6 flex justify-center bg-[#F1F5F9] print:bg-white print:p-0 print:block print:overflow-visible">
-                    {previewMode === "docx" ? (
-                        /* DOCX Preview Mode */
-                        <DocxPreview
-                            letterInstanceId={applicationId || ""}
-                            className="w-full max-w-4xl"
-                            onError={() => {
-                                setDocxLoadError(true);
-                                // Auto-fallback to HTML if DOCX fails
-                                // setPreviewMode("html");
-                            }}
-                        />
-                    ) : (
-                        /* HTML Preview Mode (Fallback) */
-                        <div
-                            className="origin-top transition-transform duration-300 shadow-2xl print:shadow-none print:transform-none print:fixed print:top-0 print:left-0 print:z-9999 print:w-screen print:h-auto print:bg-white"
-                            style={{ transform: `scale(${zoom / 100})` }}
-                        >
-                            <SuratDocument {...config} />
-                        </div>
-                    )}
+                    <DocxPreview
+                        letterInstanceId={applicationId || ""}
+                        className="w-full max-w-4xl"
+                    />
                 </div>
             </div>
 
@@ -916,13 +822,15 @@ export function SuratPreviewContent({
                                         </p>
                                         <div className="grid grid-cols-2 gap-3">
                                             <Button
-                                                onClick={() => {
-                                                    if (
-                                                        typeof window !==
-                                                        "undefined"
-                                                    ) {
-                                                        window.print();
-                                                    }
+                                                onClick={async () => {
+                                                    if (!applicationId) return;
+
+                                                    // Open PDF in new tab
+                                                    const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                                                    window.open(
+                                                        pdfUrl,
+                                                        "_blank",
+                                                    );
                                                 }}
                                                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
                                             >
@@ -954,7 +862,6 @@ export function SuratPreviewContent({
                                                         await generateAndDownloadDocument(
                                                             templateId,
                                                             applicationId,
-                                                            `surat-rekomendasi-beasiswa-${applicationId}.docx`,
                                                         );
                                                         alert(
                                                             "Dokumen Word berhasil diunduh!",

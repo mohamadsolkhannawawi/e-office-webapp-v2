@@ -334,6 +334,8 @@ export function AdminDetailSurat({
                 isOpen={isSignatureModalOpen}
                 onClose={() => setIsSignatureModalOpen(false)}
                 onSignatureChange={setWd1Signature}
+                applicationId={id}
+                initialSignature={wd1Signature}
             />
             <UPANumberingModal
                 isOpen={isNumberingModalOpen}

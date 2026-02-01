@@ -11,11 +11,13 @@ import {
     CheckCircle,
     XCircle,
     Search,
+    FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
+import { generateAndDownloadDocument } from "@/lib/template-api";
 import { Card } from "@/components/ui/card";
 import {
     Select,
@@ -28,6 +30,7 @@ import {
 export default function SuratSelesaiPage() {
     const [applications, setApplications] = useState<ApplicationSummary[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [jenisFilter, setJenisFilter] = useState<string>("ALL");
     const [pagination, setPagination] = useState({
@@ -63,6 +66,29 @@ export default function SuratSelesaiPage() {
         },
         [searchTerm, jenisFilter],
     );
+
+    // Handle template document download
+    const handleDownloadTemplate = async (applicationId: string) => {
+        setDownloadingId(applicationId);
+        try {
+            // Template ID untuk surat rekomendasi beasiswa - nanti bisa dinamis
+            const templateId = "cml1v2sev0010oau4yy2at0jh"; // Hard coded for now
+
+            await generateAndDownloadDocument(
+                templateId,
+                applicationId,
+                `surat-rekomendasi-beasiswa-${applicationId}.docx`,
+            );
+
+            console.log("Dokumen berhasil diunduh");
+            alert("Dokumen surat berhasil diunduh!");
+        } catch (error) {
+            console.error("Failed to download template:", error);
+            alert("Gagal mengunduh dokumen surat");
+        } finally {
+            setDownloadingId(null);
+        }
+    };
 
     useEffect(() => {
         const delaySearch = setTimeout(() => {
@@ -222,7 +248,6 @@ export default function SuratSelesaiPage() {
                                         app.status,
                                         app,
                                     );
-                                    const StatusIcon = status.icon;
 
                                     return (
                                         <tr
@@ -276,18 +301,45 @@ export default function SuratSelesaiPage() {
 
                                                     {app.status ===
                                                         "COMPLETED" && (
-                                                        <Link
-                                                            href={`/mahasiswa/surat/proses/preview/${app.id}?stage=mahasiswa&autoPrint=true`}
-                                                        >
+                                                        <>
+                                                            {/* Primary: Download Word Document */}
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
                                                                 className="h-9 w-9 p-0 text-slate-600 hover:text-green-600 hover:bg-green-50"
-                                                                title="Download"
+                                                                title="Download Surat (Word)"
+                                                                onClick={() =>
+                                                                    handleDownloadTemplate(
+                                                                        app.id,
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    downloadingId ===
+                                                                    app.id
+                                                                }
                                                             >
-                                                                <Download className="h-4 w-4" />
+                                                                {downloadingId ===
+                                                                app.id ? (
+                                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                                ) : (
+                                                                    <Download className="h-4 w-4" />
+                                                                )}
                                                             </Button>
-                                                        </Link>
+
+                                                            {/* Secondary: HTML Preview */}
+                                                            <Link
+                                                                href={`/mahasiswa/surat/proses/preview/${app.id}?stage=mahasiswa&autoPrint=true`}
+                                                            >
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-9 w-9 p-0 text-slate-600 hover:text-blue-600 hover:bg-blue-50"
+                                                                    title="Preview HTML"
+                                                                >
+                                                                    <FileText className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
+                                                        </>
                                                     )}
                                                 </div>
                                             </td>

@@ -9,15 +9,15 @@ export function mapApplicationToPreviewData(
     application: ApplicationDetail,
     options: MapOptions = {},
 ): PreviewData {
-    // Helper to determine the purpose string
+    // Helper to get scholarship name for keperluan field
+    // Note: HTML template already has "Pengajuan Beasiswa" prefix built-in
+    // so we only return the scholarship name
     const getKeperluan = () => {
-        const name =
+        return (
             application.scholarshipName ||
             application.formData.namaBeasiswa ||
-            "Beasiswa";
-        return name.toLowerCase().startsWith("pengajuan")
-            ? name
-            : `Pengajuan ${name}`;
+            ""
+        );
     };
 
     // Helper to format date

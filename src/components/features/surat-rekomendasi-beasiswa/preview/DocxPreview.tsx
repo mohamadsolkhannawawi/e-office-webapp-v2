@@ -41,7 +41,8 @@ export function DocxPreview({
     const [retryTrigger, setRetryTrigger] = useState(0);
 
     const loadPreview = useCallback(async () => {
-        if (!containerRef.current) return;
+        // Don't check containerRef here - it may not be ready on first render
+        // We'll check it later before rendering
 
         setLoading(true);
         setError(null);
@@ -81,6 +82,16 @@ export function DocxPreview({
                 "bytes",
             );
 
+            // Check if container is ready for rendering
+            if (!containerRef.current) {
+                console.warn(
+                    "⚠️ [DocxPreview] Container ref not ready, retrying...",
+                );
+                // Schedule a retry after a short delay
+                setTimeout(() => setRetryTrigger((prev) => prev + 1), 100);
+                return;
+            }
+
             // Clear previous content
             containerRef.current.innerHTML = "";
 
@@ -93,12 +104,12 @@ export function DocxPreview({
                 {
                     className: "docx-preview-content",
                     inWrapper: true,
-                    ignoreWidth: false,
+                    ignoreWidth: true, // Use container width for flexibility
                     ignoreHeight: false,
                     ignoreFonts: false,
                     breakPages: true,
                     ignoreLastRenderedPageBreak: true,
-                    experimental: true,
+                    experimental: false, // Disable experimental for stability
                     trimXmlDeclaration: true,
                     useBase64URL: true,
                     renderHeaders: true,
@@ -136,7 +147,7 @@ export function DocxPreview({
             setLoading(false);
             onError?.(err instanceof Error ? err : new Error(errorMessage));
         }
-    }, [letterInstanceId, onLoadComplete, onError, retryTrigger]);
+    }, [letterInstanceId, onLoadComplete, onError]);
 
     // Handle on-demand generation
     const handleGenerateDocument = useCallback(async () => {
@@ -164,122 +175,117 @@ export function DocxPreview({
 
     useEffect(() => {
         loadPreview();
-    }, [loadPreview]);
+    }, [loadPreview, retryTrigger]);
 
-    if (loading) {
-        return (
-            <div
-                className={`flex flex-col items-center justify-center h-150 bg-slate-50 rounded-lg border border-slate-200 ${className}`}
-            >
-                <Loader2 className="h-10 w-10 animate-spin text-undip-blue mb-4" />
-                <p className="text-sm font-medium text-slate-600">
-                    Memuat preview dokumen...
-                </p>
-                <p className="text-xs text-slate-400 mt-1">
-                    Mengenerate dokumen DOCX dari template
-                </p>
-            </div>
-        );
-    }
+    return (
+        <div className={`relative ${className}`}>
+            {/* Loading State Overlay */}
+            {loading && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-50/80 backdrop-blur-sm rounded-lg border border-slate-200 h-150">
+                    <Loader2 className="h-10 w-10 animate-spin text-undip-blue mb-4" />
+                    <p className="text-sm font-medium text-slate-600">
+                        Memuat preview dokumen...
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                        Mengenerate dokumen DOCX dari template
+                    </p>
+                </div>
+            )}
 
-    // State: Document not yet generated - show generate button
-    if (notGenerated) {
-        return (
-            <div
-                className={`flex flex-col items-center justify-center h-150 bg-slate-50 rounded-lg border border-slate-200 ${className}`}
-            >
-                {generating ? (
-                    <>
-                        <Loader2 className="h-10 w-10 animate-spin text-undip-blue mb-4" />
-                        <p className="text-sm font-medium text-slate-600">
-                            Generating dokumen...
-                        </p>
-                        <p className="text-xs text-slate-400 mt-1">
-                            Mohon tunggu, dokumen sedang dibuat dari template
-                        </p>
-                    </>
-                ) : (
-                    <>
-                        <FileText className="h-12 w-12 text-slate-400 mb-4" />
-                        <p className="text-sm font-medium text-slate-700 mb-2">
-                            Dokumen Belum Tersedia
-                        </p>
-                        <p className="text-xs text-slate-500 text-center max-w-md px-4 mb-4">
-                            Dokumen belum di-generate. Klik tombol di bawah
-                            untuk membuat dokumen dari template.
-                        </p>
+            {/* ERROR State */}
+            {!loading && error && (
+                <div className="flex flex-col items-center justify-center h-150 bg-slate-50 rounded-lg border border-slate-200">
+                    <FileWarning className="h-12 w-12 text-amber-500 mb-4" />
+                    <p className="text-sm font-medium text-slate-700 mb-2">
+                        Preview Tidak Tersedia
+                    </p>
+                    <p className="text-xs text-slate-500 text-center max-w-md px-4 mb-4">
+                        {error}
+                    </p>
+                    <div className="flex gap-2">
                         <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={loadPreview}
+                            className="gap-2"
+                        >
+                            <RefreshCw className="h-4 w-4" />
+                            Coba Lagi
+                        </Button>
+                        <Button
+                            size="sm"
                             onClick={handleGenerateDocument}
                             disabled={generating}
                             className="gap-2 bg-undip-blue hover:bg-undip-blue/90"
                         >
                             <Sparkles className="h-4 w-4" />
-                            Generate Dokumen
+                            Generate Ulang
                         </Button>
-                    </>
-                )}
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div
-                className={`flex flex-col items-center justify-center h-150 bg-slate-50 rounded-lg border border-slate-200 ${className}`}
-            >
-                <FileWarning className="h-12 w-12 text-amber-500 mb-4" />
-                <p className="text-sm font-medium text-slate-700 mb-2">
-                    Preview Tidak Tersedia
-                </p>
-                <p className="text-xs text-slate-500 text-center max-w-md px-4 mb-4">
-                    {error}
-                </p>
-                <div className="flex gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={loadPreview}
-                        className="gap-2"
-                    >
-                        <RefreshCw className="h-4 w-4" />
-                        Coba Lagi
-                    </Button>
-                    <Button
-                        size="sm"
-                        onClick={handleGenerateDocument}
-                        disabled={generating}
-                        className="gap-2 bg-undip-blue hover:bg-undip-blue/90"
-                    >
-                        <Sparkles className="h-4 w-4" />
-                        Generate Ulang
-                    </Button>
+                    </div>
                 </div>
-            </div>
-        );
-    }
+            )}
 
-    return (
-        <div className={`relative ${className}`}>
-            {/* DOCX Preview Header */}
-            <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-slate-100 to-transparent px-4 py-2 flex items-center gap-2 pointer-events-none">
-                <FileText className="h-4 w-4 text-blue-600" />
-                <span className="text-xs font-medium text-slate-600">
-                    Preview Dokumen DOCX
-                </span>
-                {previewStatus?.generatedAt && (
-                    <span className="text-xs text-slate-400 ml-auto">
-                        Generated:{" "}
-                        {new Date(previewStatus.generatedAt).toLocaleString(
-                            "id-ID",
-                        )}
+            {/* NOT GENERATED State */}
+            {!loading && notGenerated && (
+                <div className="flex flex-col items-center justify-center h-150 bg-slate-50 rounded-lg border border-slate-200">
+                    {generating ? (
+                        <>
+                            <Loader2 className="h-10 w-10 animate-spin text-undip-blue mb-4" />
+                            <p className="text-sm font-medium text-slate-600">
+                                Generating dokumen...
+                            </p>
+                            <p className="text-xs text-slate-400 mt-1">
+                                Mohon tunggu, dokumen sedang dibuat dari
+                                template
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <FileText className="h-12 w-12 text-slate-400 mb-4" />
+                            <p className="text-sm font-medium text-slate-700 mb-2">
+                                Dokumen Belum Tersedia
+                            </p>
+                            <p className="text-xs text-slate-500 text-center max-w-md px-4 mb-4">
+                                Dokumen belum di-generate. Klik tombol di bawah
+                                untuk membuat dokumen dari template.
+                            </p>
+                            <Button
+                                onClick={handleGenerateDocument}
+                                disabled={generating}
+                                className="gap-2 bg-undip-blue hover:bg-undip-blue/90"
+                            >
+                                <Sparkles className="h-4 w-4" />
+                                Generate Dokumen
+                            </Button>
+                        </>
+                    )}
+                </div>
+            )}
+
+            {/* SUCCESS State: DOCX Preview Header */}
+            {!loading && !error && !notGenerated && (
+                <div className="absolute top-0 left-0 right-0 z-10 bg-linear-to-b from-slate-100 to-transparent px-4 py-2 flex items-center gap-2 pointer-events-none">
+                    <FileText className="h-4 w-4 text-blue-600" />
+                    <span className="text-xs font-medium text-slate-600">
+                        Preview Dokumen DOCX
                     </span>
-                )}
-            </div>
+                    {previewStatus?.generatedAt && (
+                        <span className="text-xs text-slate-400 ml-auto">
+                            Generated:{" "}
+                            {new Date(previewStatus.generatedAt).toLocaleString(
+                                "id-ID",
+                            )}
+                        </span>
+                    )}
+                </div>
+            )}
 
-            {/* DOCX Preview Container */}
+            {/* DOCX Preview Container - ALWAYS RENDERED but can be hidden */}
             <div
                 ref={containerRef}
-                className="docx-preview-container bg-white shadow-lg rounded-lg overflow-auto"
+                className={`docx-preview-container bg-white shadow-lg rounded-lg overflow-auto ${
+                    loading || error || notGenerated ? "hidden" : "block"
+                }`}
                 style={{
                     minHeight: "800px",
                     maxHeight: "calc(100vh - 200px)",
@@ -293,36 +299,51 @@ export function DocxPreview({
                 }
 
                 .docx-preview-container .docx-wrapper {
-                    background: white;
-                    padding: 20px;
+                    background: #f1f5f9;
+                    padding: 40px;
+                    display: flex;
+                    justify-content: center;
                 }
 
                 .docx-preview-container .docx-wrapper > section.docx {
                     box-shadow:
-                        0 4px 6px -1px rgba(0, 0, 0, 0.1),
-                        0 2px 4px -1px rgba(0, 0, 0, 0.06);
-                    margin: 20px auto;
+                        0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                    margin: 0 auto;
                     background: white;
+                    /* width and min-height removed to allow natural DOCX proportions */
+                    max-width: 100%;
                 }
 
-                .docx-preview-container article {
-                    padding: 20px;
+                /* Ensure images in headers and content are not clipped */
+                .docx-preview-container .docx-wrapper img {
+                    max-width: none !important;
                 }
 
-                /* Ensure proper A4 sizing */
-                .docx-preview-container .docx-wrapper > section.docx {
-                    width: 210mm !important;
-                    min-height: 297mm !important;
-                }
-
-                /* Print styles */
+                /* Print styles - Critical for high quality PDF */
                 @media print {
                     .docx-preview-container {
                         padding-top: 0 !important;
+                        display: block !important;
+                        background: white !important;
+                        overflow: visible !important;
+                        height: auto !important;
+                        width: 100% !important;
                     }
+
+                    .docx-preview-container .docx-wrapper {
+                        padding: 0 !important;
+                        background: white !important;
+                        display: block !important;
+                        width: 100% !important;
+                    }
+
                     .docx-preview-container .docx-wrapper > section.docx {
                         box-shadow: none !important;
                         margin: 0 !important;
+                        width: 100% !important;
+                        padding: 0 !important;
+                        page-break-after: always;
                     }
                 }
             `}</style>

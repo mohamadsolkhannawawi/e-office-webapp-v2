@@ -20,6 +20,10 @@ async function getApplication(id: string) {
 
         if (!res.ok) return null;
         const json = await res.json();
+        console.log(
+            `[WD1PreviewPage] Fetched values for ${id}:`,
+            JSON.stringify(json.data?.values, null, 2),
+        );
         return json.data as ApplicationDetail;
     } catch (error) {
         console.error("Fetch application error:", error);

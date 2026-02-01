@@ -195,6 +195,7 @@ export async function downloadDocument(downloadUrl: string): Promise<Blob> {
 /**
  * Download pre-generated document from letter instance
  * (auto-generated during approval process)
+ * Now extracts the formal filename from the server's Content-Disposition header
  */
 export async function downloadPreGeneratedDocument(
     letterInstanceId: string,
@@ -231,11 +232,47 @@ export async function downloadPreGeneratedDocument(
             `✅ [downloadPreGeneratedDocument] Got blob, size: ${blob.size} bytes`,
         );
 
+        // Try to extract filename from Content-Disposition header
+        let downloadFilename = filename;
+        if (!downloadFilename) {
+            const contentDisposition = response.headers.get(
+                "Content-Disposition",
+            );
+            if (contentDisposition) {
+                // Try different regex patterns to catch various browser/server/proxy behaviors
+                const filenameMatch =
+                    contentDisposition.match(/filename="?([^"]+)"?/) ||
+                    contentDisposition.match(/filename=([^;]+)/);
+
+                if (filenameMatch && filenameMatch[1]) {
+                    downloadFilename = filenameMatch[1]
+                        .replace(/['"]/g, "")
+                        .trim();
+                    console.log(
+                        `📝 [downloadPreGeneratedDocument] Extracted filename from header: ${downloadFilename}`,
+                    );
+                } else {
+                    console.warn(
+                        `⚠️ [downloadPreGeneratedDocument] could not match filename from header: ${contentDisposition}`,
+                    );
+                }
+            } else {
+                console.warn(
+                    `⚠️ [downloadPreGeneratedDocument] Content-Disposition header missing or empty`,
+                );
+            }
+        }
+
+        // Fallback to default filename
+        if (!downloadFilename) {
+            downloadFilename = `surat-rekomendasi-${letterInstanceId}.docx`;
+        }
+
         // Create download link
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = filename || `surat-rekomendasi-${letterInstanceId}.docx`;
+        a.download = downloadFilename;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -328,22 +365,70 @@ export async function triggerDocxGeneration(
 
 /**
  * Fetch DOCX file as ArrayBuffer for preview rendering
+ * With timeout and detailed error handling
  */
 export async function fetchDocxForPreview(
     letterInstanceId: string,
 ): Promise<ArrayBuffer> {
-    const response = await fetch(
-        `/api/templates/letter/${letterInstanceId}/preview`,
-        {
-            method: "GET",
-        },
+    console.log(
+        `🔄 [fetchDocxForPreview] Starting fetch for: ${letterInstanceId}`,
     );
 
-    if (!response.ok) {
-        throw new Error(`Failed to fetch DOCX for preview: ${response.status}`);
-    }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-    return await response.arrayBuffer();
+    try {
+        const response = await fetch(
+            `/api/templates/letter/${letterInstanceId}/preview`,
+            {
+                method: "GET",
+                signal: controller.signal,
+            },
+        );
+
+        clearTimeout(timeoutId);
+
+        console.log(
+            `📊 [fetchDocxForPreview] Response status: ${response.status}`,
+        );
+        console.log(
+            `📊 [fetchDocxForPreview] Content-Type: ${response.headers.get("content-type")}`,
+        );
+        console.log(
+            `📊 [fetchDocxForPreview] Content-Length: ${response.headers.get("content-length")}`,
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(
+                `❌ [fetchDocxForPreview] Failed: ${response.status} - ${errorText}`,
+            );
+            throw new Error(
+                `Failed to fetch DOCX for preview: ${response.status}`,
+            );
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        console.log(
+            `✅ [fetchDocxForPreview] Received ${arrayBuffer.byteLength} bytes`,
+        );
+
+        return arrayBuffer;
+    } catch (error) {
+        clearTimeout(timeoutId);
+
+        if (error instanceof Error && error.name === "AbortError") {
+            console.error(
+                `❌ [fetchDocxForPreview] Request timed out after 30 seconds`,
+            );
+            throw new Error(
+                "Request timed out. The document may be too large or the server is slow.",
+            );
+        }
+
+        console.error(`❌ [fetchDocxForPreview] Error:`, error);
+        throw error;
+    }
 }
 
 /**

@@ -33,7 +33,6 @@
         "elysia": "^1.4.19",
         "file-saver": "^2.0.5",
         "lucide-react": "^0.556.0",
-        "mammoth": "^1.11.0",
         "next": "16.0.8",
         "react": "19.2.1",
         "react-day-picker": "^9.13.0",

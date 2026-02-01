@@ -407,6 +407,37 @@ export async function updateLetterConfig(
 }
 
 /**
+ * Save signature to application immediately
+ */
+export async function saveSignatureToApplication(
+    applicationId: string,
+    signatureUrl: string,
+): Promise<boolean> {
+    try {
+        const response = await fetch(
+            `/api/surat-rekomendasi/applications/${applicationId}/signature`,
+            {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ signatureUrl }),
+            },
+        );
+
+        if (!response.ok) {
+            throw new Error(`Failed to save signature: ${response.status}`);
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Save signature error:", error);
+        return false;
+    }
+}
+
+/**
  * Interface untuk User Signature
  */
 export interface UserSignature {

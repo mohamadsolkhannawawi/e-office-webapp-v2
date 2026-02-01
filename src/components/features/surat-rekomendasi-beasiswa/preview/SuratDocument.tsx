@@ -77,7 +77,7 @@ export function SuratDocument({
         semester: "…………………………….",
         ipk: "…………………………….",
         ips: "…………………………….",
-        keperluan: "Pengajuan Beasiswa ………………………………",
+        keperluan: "",
         tahunAkademik: autoAcademicYear,
         publishedAt: undefined,
     };
@@ -201,7 +201,7 @@ export function SuratDocument({
                     <p className="text-justify">
                         Surat rekomendasi ini dibuat untuk keperluan :{" "}
                         <span className="underline decoration-1 underline-offset-2">
-                            {finalData.keperluan}
+                            Pengajuan Beasiswa {finalData.keperluan}
                         </span>
                     </p>
 

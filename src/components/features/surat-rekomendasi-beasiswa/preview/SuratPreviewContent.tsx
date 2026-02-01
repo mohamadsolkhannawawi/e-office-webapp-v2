@@ -196,6 +196,20 @@ export function SuratPreviewContent({
         { label: "IPS", value: data?.ips || "-" },
     ];
 
+    // PDF Refresh Trigger
+    const [pdfRefreshTimestamp, setPdfRefreshTimestamp] = useState(0);
+
+    // Hydration fix: Set timestamp only after mount to ensure server/client match initially
+    // and provide a fresh timestamp for the initial load.
+    useEffect(() => {
+        setPdfRefreshTimestamp(Date.now());
+    }, []);
+
+    const triggerPdfRefresh = () => {
+        console.log("🔄 Triggering PDF Refresh...");
+        setPdfRefreshTimestamp(Date.now());
+    };
+
     return (
         <div className="h-full flex overflow-hidden">
             <style
@@ -251,8 +265,14 @@ export function SuratPreviewContent({
             <UPANumberingModal
                 isOpen={isNumberingModalOpen}
                 onClose={() => setIsNumberingModalOpen(false)}
-                onNumberChange={setUpaLetterNumber}
-                onStampApply={() => {}} // Stamp is always true in this UI
+                onNumberChange={(num) => {
+                    setUpaLetterNumber(num);
+                    if (num) triggerPdfRefresh();
+                }}
+                onStampApply={() => {
+                    setUpaIsStampApplied(true);
+                    triggerPdfRefresh();
+                }}
                 applicationId={applicationId}
                 onVerificationGenerated={() => {
                     // QrCode handled via backend now
@@ -266,6 +286,7 @@ export function SuratPreviewContent({
                     if (stampData) {
                         setUpaStampId(stampData.stampId);
                         setUpaIsStampApplied(true);
+                        triggerPdfRefresh();
                     }
                 }}
                 applicationId={applicationId || ""}
@@ -290,7 +311,12 @@ export function SuratPreviewContent({
             <WD1SignatureModal
                 isOpen={isSignatureModalOpen}
                 onClose={() => setIsSignatureModalOpen(false)}
-                onSignatureChange={setWd1Signature}
+                onSignatureChange={(sig) => {
+                    setWd1Signature(sig);
+                    if (sig) triggerPdfRefresh();
+                }}
+                initialSignature={wd1Signature}
+                applicationId={applicationId}
             />
             <AdminActionModals
                 isOpen={isActionModalOpen}
@@ -456,9 +482,9 @@ export function SuratPreviewContent({
                 {/* Document Area */}
                 <div className="flex-1 overflow-hidden p-0 flex justify-center bg-[#525659] print:bg-white print:p-0 print:block print:overflow-visible relative">
                     {/* PDF Preview Iframe - Use pdfId derived from prop or data */}
-                    {pdfId ? (
+                    {pdfId && pdfRefreshTimestamp > 0 ? (
                         <iframe
-                            src={`/api/templates/letter/${pdfId}/pdf#toolbar=0&navpanes=0&scrollbar=1`}
+                            src={`/api/templates/letter/${pdfId}/pdf?t=${pdfRefreshTimestamp}#toolbar=0&navpanes=0&scrollbar=1`}
                             className="w-full h-full border-0"
                             title="Preview Surat"
                         />

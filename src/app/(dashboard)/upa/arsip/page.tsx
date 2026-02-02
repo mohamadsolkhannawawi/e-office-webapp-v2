@@ -22,9 +22,15 @@ import {
     Archive,
     Eye,
     CheckCircle,
+    Download,
+    Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
+import {
+    generateAndDownloadDocument,
+    getTemplateIdByLetterType,
+} from "@/lib/template-api";
 
 // Type untuk export
 interface ExportData {
@@ -47,6 +53,7 @@ export default function ArsipPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     const fetchArchiveData = useCallback(async () => {
         setLoading(true);
@@ -71,6 +78,37 @@ export default function ArsipPage() {
             setLoading(false);
         }
     }, [currentPage, searchTerm, filterBeasiswa, startDate, endDate]);
+
+    const handleDownloadPDF = async (applicationId: string) => {
+        try {
+            const link = document.createElement("a");
+            link.href = `/api/templates/letter/${applicationId}/pdf`;
+            link.download = `Surat-Rekomendasi-${applicationId}.pdf`;
+            link.click();
+        } catch (error) {
+            console.error("Error downloading PDF:", error);
+        }
+    };
+
+    const handleDownloadDOCX = async (applicationId: string) => {
+        setDownloadingId(applicationId);
+        try {
+            const templateId = await getTemplateIdByLetterType(
+                "Surat Rekomendasi Beasiswa",
+            );
+            if (templateId) {
+                await generateAndDownloadDocument(
+                    templateId,
+                    applicationId,
+                    `Surat-Rekomendasi-${applicationId}.docx`,
+                );
+            }
+        } catch (error) {
+            console.error("Error downloading DOCX:", error);
+        } finally {
+            setDownloadingId(null);
+        }
+    };
 
     useEffect(() => {
         fetchArchiveData();
@@ -401,18 +439,53 @@ export default function ArsipPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <Link
-                                                    href={`/upa/surat/surat-rekomendasi-beasiswa/detail/${app.id}`}
-                                                >
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="rounded-full h-8 text-xs bg-undip-blue font-bold border-slate-100 text-white hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4"
+                                                <div className="flex justify-center gap-2">
+                                                    <Link
+                                                        href={`/upa/surat/surat-rekomendasi-beasiswa/detail/${app.id}`}
                                                     >
-                                                        <Eye className="h-3.5 w-3.5" />
-                                                        Detail
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="rounded-full h-8 text-xs bg-undip-blue font-bold border-slate-100 text-white hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4"
+                                                        >
+                                                            <Eye className="h-3.5 w-3.5" />
+                                                            Detail
+                                                        </Button>
+                                                    </Link>
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleDownloadPDF(
+                                                                app.id,
+                                                            )
+                                                        }
+                                                        size="sm"
+                                                        className="rounded-full h-8 text-xs bg-emerald-600 hover:bg-emerald-700 font-bold border-slate-100 text-white transition-all gap-1.5 px-4"
+                                                    >
+                                                        <Download className="h-3.5 w-3.5" />
+                                                        PDF
                                                     </Button>
-                                                </Link>
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleDownloadDOCX(
+                                                                app.id,
+                                                            )
+                                                        }
+                                                        size="sm"
+                                                        disabled={
+                                                            downloadingId ===
+                                                            app.id
+                                                        }
+                                                        className="rounded-full h-8 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 font-bold border-slate-100 text-white transition-all gap-1.5 px-4"
+                                                    >
+                                                        {downloadingId ===
+                                                        app.id ? (
+                                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        ) : (
+                                                            <Download className="h-3.5 w-3.5" />
+                                                        )}
+                                                        Word
+                                                    </Button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))

@@ -58,7 +58,6 @@ export default async function UPAPreviewPage({
     }
 
     // Map application data to PreviewData format
-    // Map application data to PreviewData format
     const previewData = mapApplicationToPreviewData(application, { no });
 
     return (

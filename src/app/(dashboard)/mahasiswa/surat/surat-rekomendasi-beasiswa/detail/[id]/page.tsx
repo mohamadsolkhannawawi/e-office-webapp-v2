@@ -22,6 +22,10 @@ import {
     getApplicationById,
     type ApplicationDetail,
 } from "@/lib/application-api";
+import {
+    generateAndDownloadDocument,
+    getTemplateIdByLetterType,
+} from "@/lib/template-api";
 
 import { getReceiverRole } from "@/utils/status-mapper";
 
@@ -151,6 +155,34 @@ export default function DetailPengajuanPage() {
         ((application.formData as unknown as Record<string, unknown>)
             .jenisBeasiswa as string) || "internal";
 
+    const handleDownloadPDF = async () => {
+        try {
+            const link = document.createElement("a");
+            link.href = `/api/templates/letter/${id}/pdf`;
+            link.download = `${application.formData.namaLengkap}-SuratRekomendasi.pdf`;
+            link.click();
+        } catch (error) {
+            console.error("Error downloading PDF:", error);
+        }
+    };
+
+    const handleDownloadDOCX = async () => {
+        try {
+            const templateId = await getTemplateIdByLetterType(
+                application.letterType?.name || "surat-rekomendasi-beasiswa",
+            );
+            if (templateId) {
+                await generateAndDownloadDocument(
+                    templateId,
+                    id,
+                    `${application.formData.namaLengkap}-SuratRekomendasi.docx`,
+                );
+            }
+        } catch (error) {
+            console.error("Error downloading DOCX:", error);
+        }
+    };
+
     const riwayatData = application.history?.map((h) => ({
         senderRole: h.role?.name || h.actor.name,
         receiverRole: getReceiverRole(
@@ -229,15 +261,35 @@ export default function DetailPengajuanPage() {
                         <h2 className="font-bold text-slate-800 mb-4 uppercase tracking-wider text-sm">
                             Aksi
                         </h2>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <Link
                                 href={`/mahasiswa/surat/proses/preview/${id}?stage=mahasiswa`}
+                                className="block"
                             >
                                 <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
                                     <Eye className="h-5 w-5" />
                                     Preview
                                 </Button>
                             </Link>
+
+                            {isPublished && (
+                                <>
+                                    <Button
+                                        onClick={handleDownloadPDF}
+                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                    >
+                                        <Download className="h-5 w-5" />
+                                        Cetak/PDF
+                                    </Button>
+                                    <Button
+                                        onClick={handleDownloadDOCX}
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                    >
+                                        <Download className="h-5 w-5" />
+                                        Unduh Word
+                                    </Button>
+                                </>
+                            )}
 
                             {canEdit && (
                                 <Button
@@ -251,18 +303,6 @@ export default function DetailPengajuanPage() {
                                     <RotateCcw className="h-5 w-5" />
                                     Revisi
                                 </Button>
-                            )}
-
-                            {isPublished && (
-                                <Link
-                                    href={`/mahasiswa/surat/proses/preview/${id}?stage=mahasiswa&autoPrint=true`}
-                                    target="_blank"
-                                >
-                                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2">
-                                        <Download className="h-5 w-5" />
-                                        Download
-                                    </Button>
-                                </Link>
                             )}
                         </div>
                     </div>

@@ -1,122 +1,108 @@
-import React from "react";
-import { LetterList } from "@/components/features/dashboard/LetterList";
-import { ChevronRight, CheckCircle, XCircle, RotateCw } from "lucide-react";
-import { headers } from "next/headers";
-import { ApplicationSummary } from "@/lib/application-api";
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    ChevronRight,
+    ChevronLeft,
+    Search,
+    Calendar,
+    Filter,
+    Eye,
+    CheckCircle,
+    Download,
+    Loader2,
+} from "lucide-react";
 import Link from "next/link";
+import { getApplications, ApplicationSummary } from "@/lib/application-api";
+import {
+    generateAndDownloadDocument,
+    getTemplateIdByLetterType,
+} from "@/lib/template-api";
 
-type SearchParams = { [key: string]: string | string[] | undefined };
+export default function SelesaiPage() {
+    const [applications, setApplications] = useState<ApplicationSummary[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filterBeasiswa, setFilterBeasiswa] = useState("all");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-async function getCompletedApplications(searchParams: SearchParams) {
-    try {
-        const headersList = await headers();
-        const cookie = headersList.get("cookie");
-
-        const apiUrl =
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
-
-        // Get current month range
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const startDate = startOfMonth.toISOString().split("T")[0];
-
-        const query = new URLSearchParams({
-            mode: "processed",
-            currentStep: "4", // UPA
-            search: String(searchParams.search || ""),
-            page: String(searchParams.page || "1"),
-            limit: String(searchParams.limit || "10"),
-            startDate: String(searchParams.startDate || startDate),
-            endDate: String(searchParams.endDate || ""),
-        });
-
-        const res = await fetch(
-            `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,
-            {
-                headers: { Cookie: cookie || "" },
-                cache: "no-store",
-            },
-        );
-
-        if (!res.ok)
-            return {
-                data: [],
-                meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
-            };
-        const json = await res.json();
-        return json;
-    } catch (err) {
-        console.error("Fetch completed error:", err);
-        return {
-            data: [],
-            meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
-        };
-    }
-}
-
-export default async function SelesaiPage(props: {
-    searchParams: Promise<SearchParams>;
-}) {
-    const searchParams = await props.searchParams;
-    const { data, meta } = await getCompletedApplications(searchParams);
-
-    const letters = data.map((app: ApplicationSummary) => {
-        const stepToRole: Record<number, string> = {
-            1: "Supervisor Akademik",
-            2: "Manajer TU",
-            3: "Wakil Dekan 1",
-            4: "UPA",
-        };
-
-        let target = "Arsip";
-        let status = "Terbit";
-        let statusColor = "bg-emerald-500";
-        let statusIcon: React.ReactNode = null;
-
-        if (app.status === "COMPLETED") {
-            target = "Arsip";
-            status = "Terbit";
-            statusColor = "bg-emerald-500 text-white";
-            statusIcon = <CheckCircle className="w-4 h-4" />;
-        } else if (app.status === "REJECTED") {
-            target = "Ditolak";
-            status = app.lastActorRole
-                ? `Ditolak oleh ${app.lastActorRole}`
-                : "Ditolak";
-            statusColor = "bg-red-500 text-white";
-            statusIcon = <XCircle className="w-4 h-4" />;
-        } else if (app.status === "REVISION") {
-            // Target adalah step berikutnya dari currentStep saat ini
-            const nextStep = app.currentStep + 1;
-            target = stepToRole[nextStep] || "Selesai";
-            status = app.lastRevisionFromRole
-                ? `Revisi dari ${app.lastRevisionFromRole}`
-                : "Revisi Diperlukan";
-            statusColor = "bg-sky-500 text-white";
-            statusIcon = <RotateCw className="w-4 h-4" />;
+    const fetchSelesaiData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const result = await getApplications({
+                status: "COMPLETED",
+                page: currentPage,
+                limit: 10,
+                search: searchTerm,
+                jenisBeasiswa:
+                    filterBeasiswa !== "all" ? filterBeasiswa : undefined,
+                startDate: startDate || undefined,
+                endDate: endDate || undefined,
+                sortOrder: "desc",
+            });
+            setApplications(result.data);
+            setTotalPages(result.meta.totalPages);
+            setTotalItems(result.meta.total);
+        } catch (error) {
+            console.error("Error fetching selesai:", error);
+        } finally {
+            setLoading(false);
         }
+    }, [currentPage, searchTerm, filterBeasiswa, startDate, endDate]);
 
-        return {
-            id: app.id,
-            applicant: app.applicantName || app.formData?.namaLengkap || "N/A",
-            subject:
-                app.scholarshipName ||
-                app.letterType?.name ||
+    const handleDownloadPDF = async (applicationId: string) => {
+        try {
+            const link = document.createElement("a");
+            link.href = `/api/templates/letter/${applicationId}/pdf`;
+            link.download = `Surat-Rekomendasi-${applicationId}.pdf`;
+            link.click();
+        } catch (error) {
+            console.error("Error downloading PDF:", error);
+        }
+    };
+
+    const handleDownloadDOCX = async (applicationId: string) => {
+        setDownloadingId(applicationId);
+        try {
+            const templateId = await getTemplateIdByLetterType(
                 "Surat Rekomendasi Beasiswa",
-            date: new Date(app.createdAt).toLocaleDateString("id-ID", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-            }),
-            target,
-            status,
-            statusColor,
-            statusIcon,
-        };
-    });
+            );
+            if (templateId) {
+                await generateAndDownloadDocument(
+                    templateId,
+                    applicationId,
+                    `Surat-Rekomendasi-${applicationId}.docx`,
+                );
+            }
+        } catch (error) {
+            console.error("Error downloading DOCX:", error);
+        } finally {
+            setDownloadingId(null);
+        }
+    };
+
+    useEffect(() => {
+        fetchSelesaiData();
+    }, [fetchSelesaiData]);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Breadcrumb */}
             <nav className="flex items-center text-sm font-medium text-slate-500">
                 <Link
                     href="/upa"
@@ -128,13 +114,291 @@ export default async function SelesaiPage(props: {
                 <span className="text-slate-800">Selesai</span>
             </nav>
 
-            <LetterList
-                title="Daftar Surat Selesai"
-                letters={letters}
-                rolePath="upa"
-                detailBasePath="surat-rekomendasi-beasiswa"
-                meta={meta}
-            />
+            {/* Header with Title */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-800">
+                        Daftar Surat Selesai
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
+                        Total {totalItems} surat selesai
+                    </p>
+                </div>
+            </div>
+
+            {/* Filters Card */}
+            <Card className="border-none shadow-sm overflow-hidden bg-white">
+                <div className="p-6 border-b border-slate-50 flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-slate-400" />
+                        <span className="text-sm font-semibold text-slate-600">
+                            Filter
+                        </span>
+                    </div>
+                    <div className="flex flex-wrap gap-3 items-center">
+                        {/* Search */}
+                        <div className="relative flex-1 min-w-50">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input
+                                placeholder="Cari nama/NIM..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full"
+                            />
+                        </div>
+
+                        {/* Filter Beasiswa */}
+                        <Select
+                            value={filterBeasiswa}
+                            onValueChange={setFilterBeasiswa}
+                        >
+                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
+                                <div className="flex items-center gap-2">
+                                    <Filter className="h-4 w-4" />
+                                    <SelectValue placeholder="Jenis Beasiswa" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">
+                                    Semua Beasiswa
+                                </SelectItem>
+                                <SelectItem value="BidikmisiKIP">
+                                    Bidikmisi/KIP
+                                </SelectItem>
+                                <SelectItem value="PPA">PPA</SelectItem>
+                                <SelectItem value="Unggulan">
+                                    Beasiswa Unggulan
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        {/* Start Date */}
+                        <div className="relative">
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input
+                                type="date"
+                                placeholder="Dari tanggal"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="pl-10 h-10 border-slate-100 bg-slate-50/50"
+                            />
+                        </div>
+
+                        {/* End Date */}
+                        <div className="relative">
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input
+                                type="date"
+                                placeholder="Sampai tanggal"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="pl-10 h-10 border-slate-100 bg-slate-50/50"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Table */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="bg-undip-blue border-b border-slate-50 text-[11px] uppercase text-white font-bold tracking-wider">
+                                    <th className="px-6 py-4 w-12">No</th>
+                                    <th className="px-6 py-4">Nama Pengaju</th>
+                                    <th className="px-6 py-4">NIM</th>
+                                    <th className="px-6 py-4">Beasiswa</th>
+                                    <th className="px-6 py-4">Nomor Surat</th>
+                                    <th className="px-6 py-4">
+                                        Tanggal Selesai
+                                    </th>
+                                    <th className="px-6 py-4">Status</th>
+                                    <th className="px-6 py-4 text-center">
+                                        Aksi
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50 text-sm">
+                                {loading ? (
+                                    <tr>
+                                        <td
+                                            colSpan={8}
+                                            className="px-6 py-8 text-center text-slate-400"
+                                        >
+                                            Memuat data...
+                                        </td>
+                                    </tr>
+                                ) : applications.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan={8}
+                                            className="px-6 py-8 text-center text-slate-400"
+                                        >
+                                            Tidak ada data selesai
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    applications.map((app, index) => (
+                                        <tr
+                                            key={app.id}
+                                            className="hover:bg-slate-50/30 transition-colors group"
+                                        >
+                                            <td className="px-6 py-4 text-slate-500">
+                                                {(currentPage - 1) * 10 +
+                                                    index +
+                                                    1}
+                                            </td>
+                                            <td className="px-6 py-4 font-bold text-slate-700">
+                                                {app.formData?.namaLengkap ||
+                                                    app.applicantName ||
+                                                    "N/A"}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600">
+                                                {app.formData?.nim || "-"}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600">
+                                                {app.scholarshipName ||
+                                                    app.letterType?.name ||
+                                                    "-"}
+                                            </td>
+                                            <td className="px-6 py-4 font-mono text-sm text-slate-600">
+                                                {app.letterNumber || "-"}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-500 font-medium">
+                                                {new Date(
+                                                    app.updatedAt,
+                                                ).toLocaleDateString("id-ID")}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                                    <span className="text-[11px] font-bold uppercase text-emerald-500">
+                                                        Terbit
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <div className="flex justify-center gap-2">
+                                                    <Link
+                                                        href={`/upa/surat/surat-rekomendasi-beasiswa/detail/${app.id}`}
+                                                    >
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="rounded-full h-8 text-xs bg-undip-blue font-bold border-slate-100 text-white hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4"
+                                                        >
+                                                            <Eye className="h-3.5 w-3.5" />
+                                                            Detail
+                                                        </Button>
+                                                    </Link>
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleDownloadPDF(
+                                                                app.id,
+                                                            )
+                                                        }
+                                                        size="sm"
+                                                        className="rounded-full h-8 text-xs bg-emerald-600 hover:bg-emerald-700 font-bold border-slate-100 text-white transition-all gap-1.5 px-4"
+                                                    >
+                                                        <Download className="h-3.5 w-3.5" />
+                                                        PDF
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleDownloadDOCX(
+                                                                app.id,
+                                                            )
+                                                        }
+                                                        size="sm"
+                                                        disabled={
+                                                            downloadingId ===
+                                                            app.id
+                                                        }
+                                                        className="rounded-full h-8 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 font-bold border-slate-100 text-white transition-all gap-1.5 px-4"
+                                                    >
+                                                        {downloadingId ===
+                                                        app.id ? (
+                                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        ) : (
+                                                            <Download className="h-3.5 w-3.5" />
+                                                        )}
+                                                        Word
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="bg-slate-50/30 px-6 py-4 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p className="text-xs font-bold text-slate-400">
+                            Menampilkan{" "}
+                            <span className="text-slate-600">
+                                {(currentPage - 1) * 10 + 1}-
+                                {Math.min(currentPage * 10, totalItems)}
+                            </span>{" "}
+                            dari{" "}
+                            <span className="text-slate-600">{totalItems}</span>
+                        </p>
+                        <div className="flex items-center gap-1.5">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-slate-400"
+                                onClick={() =>
+                                    setCurrentPage((p) => Math.max(1, p - 1))
+                                }
+                                disabled={currentPage === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+
+                            {Array.from(
+                                { length: Math.min(5, totalPages) },
+                                (_, i) => {
+                                    let pageNum = currentPage - 2 + i;
+                                    if (currentPage <= 2) pageNum = i + 1;
+                                    if (currentPage >= totalPages - 1)
+                                        pageNum = totalPages - 4 + i;
+
+                                    if (pageNum < 1 || pageNum > totalPages)
+                                        return null;
+
+                                    return (
+                                        <Button
+                                            key={pageNum}
+                                            className={`h-8 w-8 text-xs font-bold ${currentPage === pageNum ? "bg-undip-blue hover:bg-sky-700" : "bg-transparent text-slate-600 hover:bg-slate-100 shadow-none border-none"}`}
+                                            onClick={() =>
+                                                setCurrentPage(pageNum)
+                                            }
+                                        >
+                                            {pageNum}
+                                        </Button>
+                                    );
+                                },
+                            )}
+
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-slate-400"
+                                onClick={() =>
+                                    setCurrentPage((p) =>
+                                        Math.min(totalPages, p + 1),
+                                    )
+                                }
+                                disabled={currentPage === totalPages}
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </Card>
         </div>
     );
 }

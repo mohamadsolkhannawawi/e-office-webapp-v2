@@ -12,24 +12,19 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import {
     ChevronRight,
     ChevronLeft,
     FileSpreadsheet,
     FileText,
     Search,
-    Calendar,
     Filter,
     Archive,
     Eye,
     CheckCircle,
     Download,
     Loader2,
+    X,
+    Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
@@ -37,8 +32,7 @@ import {
     generateAndDownloadDocument,
     getTemplateIdByLetterType,
 } from "@/lib/template-api";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
+import { Label } from "@/components/ui/label";
 
 // Type untuk export
 interface ExportData {
@@ -56,7 +50,8 @@ export default function ArsipPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterBeasiswa, setFilterBeasiswa] = useState("all");
-    const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+    const [startDateInput, setStartDateInput] = useState("");
+    const [endDateInput, setEndDateInput] = useState("");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -66,18 +61,18 @@ export default function ArsipPage() {
     const fetchArchiveData = useCallback(async () => {
         setLoading(true);
         try {
-            // Convert date range to ISO format with proper times
+            // Convert date inputs to ISO format with proper times
             let startDateIso: string | undefined = undefined;
             let endDateIso: string | undefined = undefined;
 
-            if (dateRange.from) {
-                const start = new Date(dateRange.from);
+            if (startDateInput) {
+                const start = new Date(startDateInput);
                 start.setHours(0, 0, 0, 0);
                 startDateIso = start.toISOString();
             }
 
-            if (dateRange.to) {
-                const end = new Date(dateRange.to);
+            if (endDateInput) {
+                const end = new Date(endDateInput);
                 end.setHours(23, 59, 59, 999);
                 endDateIso = end.toISOString();
             }
@@ -101,7 +96,7 @@ export default function ArsipPage() {
         } finally {
             setLoading(false);
         }
-    }, [currentPage, searchTerm, filterBeasiswa, dateRange, sortOrder]);
+    }, [currentPage, searchTerm, filterBeasiswa, startDateInput, endDateInput, sortOrder]);
 
     const handleDownloadPDF = async (applicationId: string) => {
         try {
@@ -359,35 +354,62 @@ export default function ArsipPage() {
                             </SelectContent>
                         </Select>
 
-                        {/* Date Range Picker */}
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className="h-10 border-slate-100 text-slate-600 gap-2 w-full sm:w-50"
-                                >
-                                    <Calendar className="h-4 w-4" />
-                                    {dateRange.from && dateRange.to
-                                        ? `${format(dateRange.from, "dd LLL", { locale: id })} - ${format(dateRange.to, "dd LLL", { locale: id })}`
-                                        : "Rentang Tanggal"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="end">
-                                <CalendarComponent
-                                    mode="range"
-                                    selected={{
-                                        from: dateRange.from,
-                                        to: dateRange.to,
-                                    }}
-                                    onSelect={(
-                                        range:
-                                            | { from?: Date; to?: Date }
-                                            | undefined,
-                                    ) => setDateRange(range || {})}
-                                    initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        {/* Date Range Filter - Stylish Design */}
+                        <div className="flex items-center gap-2 bg-slate-50/50 rounded-lg p-2 border border-slate-100">
+                            <Calendar className="h-4 w-4 text-slate-400 ml-1" />
+                            
+                            <div className="flex items-center gap-2">
+                                <Label htmlFor="startDate" className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                                    Dari
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="startDate"
+                                        type="date"
+                                        className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        value={startDateInput}
+                                        onChange={(e) => setStartDateInput(e.target.value)}
+                                        max={endDateInput || undefined}
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="h-4 w-px bg-slate-200" />
+                            
+                            <div className="flex items-center gap-2">
+                                <Label htmlFor="endDate" className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                                    Sampai
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="endDate"
+                                        type="date"
+                                        className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        value={endDateInput}
+                                        onChange={(e) => setEndDateInput(e.target.value)}
+                                        min={startDateInput || undefined}
+                                    />
+                                </div>
+                            </div>
+
+                            {(startDateInput || endDateInput) && (
+                                <>
+                                    <div className="h-4 w-px bg-slate-200" />
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50"
+                                        onClick={() => {
+                                            setStartDateInput("");
+                                            setEndDateInput("");
+                                        }}
+                                        title="Hapus filter tanggal"
+                                    >
+                                        <X className="h-3.5 w-3.5" />
+                                    </Button>
+                                </>
+                            )}
+                        </div>
 
                         {/* Sort Order */}
                         <Select

@@ -3,15 +3,17 @@
 import React from "react";
 import {
     Search,
-    Calendar,
     Filter,
     Eye,
     ChevronLeft,
     ChevronRight,
+    X,
+    Calendar,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
@@ -22,14 +24,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
 
 interface Letter {
     id: string | number;
@@ -69,13 +63,24 @@ export function LetterList({
     const [searchTerm, setSearchTerm] = useState(
         searchParams.get("search") || "",
     );
-    const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({
-        from: searchParams.get("startDate")
-            ? new Date(searchParams.get("startDate")!)
-            : undefined,
-        to: searchParams.get("endDate")
-            ? new Date(searchParams.get("endDate")!)
-            : undefined,
+    
+    // State untuk input tanggal (format YYYY-MM-DD untuk input type="date")
+    const [startDateInput, setStartDateInput] = useState(() => {
+        const start = searchParams.get("startDate");
+        if (start) {
+            const date = new Date(start);
+            return date.toISOString().split('T')[0];
+        }
+        return "";
+    });
+    
+    const [endDateInput, setEndDateInput] = useState(() => {
+        const end = searchParams.get("endDate");
+        if (end) {
+            const date = new Date(end);
+            return date.toISOString().split('T')[0];
+        }
+        return "";
     });
 
     const createQueryString = useCallback(
@@ -146,41 +151,61 @@ export function LetterList({
         }
     };
 
-    const handleDateChange = (
-        range: { from?: Date; to?: Date } | undefined,
-    ) => {
-        if (!range) {
-            // Jika range kosong/direset
-            setDateRange({});
+    const handleStartDateChange = (value: string) => {
+        setStartDateInput(value);
+        
+        // Auto-apply filter jika kedua tanggal sudah terisi
+        if (value && endDateInput) {
+            applyDateFilter(value, endDateInput);
+        } else if (!value && !endDateInput) {
+            // Reset filter jika kedua kosong
             router.push(
                 `${pathname}?${createQueryString({ startDate: null, endDate: null, page: 1 })}`,
                 { scroll: false },
             );
-            return;
         }
+    };
 
-        setDateRange(range);
-
-        // Hanya update URL jika kedua tanggal (from & to) sudah dipilih
-        if (range.from && range.to) {
-            // Set to start of day in local timezone
-            const startDate = new Date(range.from);
-            startDate.setHours(0, 0, 0, 0);
-
-            // Set to end of day in local timezone
-            const endDate = new Date(range.to);
-            endDate.setHours(23, 59, 59, 999);
-
-            // Convert to ISO string which preserves the timezone
+    const handleEndDateChange = (value: string) => {
+        setEndDateInput(value);
+        
+        // Auto-apply filter jika kedua tanggal sudah terisi
+        if (startDateInput && value) {
+            applyDateFilter(startDateInput, value);
+        } else if (!startDateInput && !value) {
+            // Reset filter jika kedua kosong
             router.push(
-                `${pathname}?${createQueryString({
-                    startDate: startDate.toISOString(),
-                    endDate: endDate.toISOString(),
-                    page: 1,
-                })}`,
+                `${pathname}?${createQueryString({ startDate: null, endDate: null, page: 1 })}`,
                 { scroll: false },
             );
         }
+    };
+
+    const applyDateFilter = (start: string, end: string) => {
+        // Konversi YYYY-MM-DD ke Date object dengan timezone lokal
+        const startDate = new Date(start);
+        startDate.setHours(0, 0, 0, 0);
+
+        const endDate = new Date(end);
+        endDate.setHours(23, 59, 59, 999);
+
+        router.push(
+            `${pathname}?${createQueryString({
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                page: 1,
+            })}`,
+            { scroll: false },
+        );
+    };
+
+    const clearDateFilter = () => {
+        setStartDateInput("");
+        setEndDateInput("");
+        router.push(
+            `${pathname}?${createQueryString({ startDate: null, endDate: null, page: 1 })}`,
+            { scroll: false },
+        );
     };
 
     return (
@@ -201,46 +226,71 @@ export function LetterList({
                         />
                     </div>
 
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                className="h-10 border-slate-100 text-slate-600 gap-2 w-full sm:w-50"
-                            >
-                                <Calendar className="h-4 w-4" />
-                                {dateRange.from && dateRange.to
-                                    ? `${format(dateRange.from, "dd LLL", { locale: id })} - ${format(dateRange.to, "dd LLL", { locale: id })}`
-                                    : "Rentang Tanggal"}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="end">
-                            <CalendarComponent
-                                mode="range"
-                                selected={{
-                                    from: dateRange.from,
-                                    to: dateRange.to,
-                                }}
-                                onSelect={(
-                                    range:
-                                        | { from?: Date; to?: Date }
-                                        | undefined,
-                                ) => handleDateChange(range)}
-                                initialFocus
-                            />
-                        </PopoverContent>
-                    </Popover>
+                    {/* Date Range Filter - Stylish Design */}
+                    <div className="flex items-center gap-2 bg-slate-50/50 rounded-lg p-2 border border-slate-100">
+                        <Calendar className="h-4 w-4 text-slate-400 ml-1" />
+                        
+                        <div className="flex items-center gap-2">
+                            <Label htmlFor="startDate" className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                                Dari
+                            </Label>
+                            <div className="relative">
+                                <Input
+                                    id="startDate"
+                                    type="date"
+                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    value={startDateInput}
+                                    onChange={(e) => handleStartDateChange(e.target.value)}
+                                    max={endDateInput || undefined}
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="h-4 w-px bg-slate-200" />
+                        
+                        <div className="flex items-center gap-2">
+                            <Label htmlFor="endDate" className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                                Sampai
+                            </Label>
+                            <div className="relative">
+                                <Input
+                                    id="endDate"
+                                    type="date"
+                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    value={endDateInput}
+                                    onChange={(e) => handleEndDateChange(e.target.value)}
+                                    min={startDateInput || undefined}
+                                />
+                            </div>
+                        </div>
+
+                        {(startDateInput || endDateInput) && (
+                            <>
+                                <div className="h-4 w-px bg-slate-200" />
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50"
+                                    onClick={clearDateFilter}
+                                    title="Hapus filter tanggal"
+                                >
+                                    <X className="h-3.5 w-3.5" />
+                                </Button>
+                            </>
+                        )}
+                    </div>
 
                     <Select
                         defaultValue={searchParams.get("sortOrder") || "desc"}
                         onValueChange={handleSortChange}
                     >
-                        <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
+                        <SelectTrigger className="w-full sm:w-40 h-10 border-slate-100 text-slate-600" suppressHydrationWarning>
                             <div className="flex items-center gap-2">
                                 <Filter className="h-4 w-4" />
                                 <SelectValue placeholder="Urutkan" />
                             </div>
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent suppressHydrationWarning>
                             <SelectItem value="desc">Terbaru</SelectItem>
                             <SelectItem value="asc">Terlama</SelectItem>
                         </SelectContent>

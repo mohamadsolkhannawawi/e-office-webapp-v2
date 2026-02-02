@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { LetterList } from "./LetterList";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
     BarChart as ReBarChart,
     Bar,
@@ -43,6 +44,16 @@ function StatCard({
     iconBgClass,
     href,
 }: StatCardProps) {
+    const searchParams = useSearchParams();
+    
+    // Preserve query parameters when navigating
+    const getHrefWithParams = (basePath: string) => {
+        if (!basePath) return basePath;
+        const params = new URLSearchParams(searchParams.toString());
+        const queryString = params.toString();
+        return queryString ? `${basePath}?${queryString}` : basePath;
+    };
+    
     const CardContent = (
         <Card className="border-none shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-300">
             <CardContentUI className="p-6">
@@ -72,7 +83,7 @@ function StatCard({
     );
 
     if (href) {
-        return <Link href={href}>{CardContent}</Link>;
+        return <Link href={getHrefWithParams(href)}>{CardContent}</Link>;
     }
 
     return CardContent;

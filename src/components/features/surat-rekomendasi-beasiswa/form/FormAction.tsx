@@ -133,7 +133,7 @@ export function FormAction({
                     currentStep === 1 ? "opacity-0 pointer-events-none" : ""
                 }`}
             >
-                Kembali
+                Step Sebelumnya
             </Button>
 
             <div className="flex flex-col sm:flex-row gap-3">

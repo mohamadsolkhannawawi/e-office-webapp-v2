@@ -292,22 +292,43 @@ export default function SuratSelesaiPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="h-9 w-9 p-0 text-slate-600 hover:text-undip-blue hover:bg-blue-50"
+                                                            className="h-9 px-3 gap-2 text-slate-600 hover:text-slate-700 hover:bg-slate-100 font-medium text-xs"
                                                             title="Detail"
                                                         >
                                                             <Eye className="h-4 w-4" />
+                                                            Detail
                                                         </Button>
                                                     </Link>
 
                                                     {app.status ===
                                                         "COMPLETED" && (
                                                         <>
-                                                            {/* Primary: Download Word Document */}
+                                                            {/* Download PDF */}
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="h-9 w-9 p-0 text-slate-600 hover:text-green-600 hover:bg-green-50"
-                                                                title="Download Surat (Word)"
+                                                                className="h-9 px-3 gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-medium text-xs"
+                                                                title="Cetak/PDF"
+                                                                onClick={() => {
+                                                                    const link =
+                                                                        document.createElement(
+                                                                            "a",
+                                                                        );
+                                                                    link.href = `/api/templates/letter/${app.id}/pdf`;
+                                                                    link.download = `${app.scholarshipName || "Surat"}-${app.id}.pdf`;
+                                                                    link.click();
+                                                                }}
+                                                            >
+                                                                <Download className="h-4 w-4" />
+                                                                PDF
+                                                            </Button>
+
+                                                            {/* Download Word Document */}
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-9 px-3 gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium text-xs"
+                                                                title="Unduh Word"
                                                                 onClick={() =>
                                                                     handleDownloadTemplate(
                                                                         app.id,
@@ -324,21 +345,8 @@ export default function SuratSelesaiPage() {
                                                                 ) : (
                                                                     <Download className="h-4 w-4" />
                                                                 )}
+                                                                Word
                                                             </Button>
-
-                                                            {/* Secondary: HTML Preview */}
-                                                            <Link
-                                                                href={`/mahasiswa/surat/proses/preview/${app.id}?stage=mahasiswa&autoPrint=true`}
-                                                            >
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    className="h-9 w-9 p-0 text-slate-600 hover:text-blue-600 hover:bg-blue-50"
-                                                                    title="Preview HTML"
-                                                                >
-                                                                    <FileText className="h-4 w-4" />
-                                                                </Button>
-                                                            </Link>
                                                         </>
                                                     )}
                                                 </div>

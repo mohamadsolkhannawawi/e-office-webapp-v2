@@ -556,7 +556,10 @@ export function SuratPreviewContent({
                                 </div>
                             </div>
                         </div>
-                    ) : stage === "upa" ? (
+                    ) : stage === "upa" &&
+                      !data?.publishedAt &&
+                      data?.status !== "COMPLETED" &&
+                      data?.status !== "PUBLISHED" ? (
                         <>
                             <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
                                 <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
@@ -948,6 +951,114 @@ export function SuratPreviewContent({
                                 </div>
                             </div>
                         </>
+                    ) : stage === "upa" ? (
+                        <>
+                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                                <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
+                                    Unduh Surat
+                                </h2>
+                                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
+                                    Praktinjau & Cetak
+                                </p>
+                            </div>
+
+                            <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
+                                <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                    <div className="flex flex-col items-center gap-2 mb-2">
+                                        <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600">
+                                            <Download className="h-6 w-6" />
+                                        </div>
+                                        <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
+                                            Dokumen Siap
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-3 pt-5 border-t border-slate-100 text-center">
+                                        <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                                            Klik tombol di bawah untuk mencetak
+                                            atau mengunduh surat sebagai PDF
+                                            atau Word.
+                                        </p>
+                                        <div className="flex flex-col gap-3">
+                                            <Button
+                                                onClick={async () => {
+                                                    if (!applicationId) return;
+
+                                                    // Open PDF in new tab
+                                                    const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                                                    window.open(
+                                                        pdfUrl,
+                                                        "_blank",
+                                                    );
+                                                }}
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                                            >
+                                                <Download className="h-5 w-5" />
+                                                Cetak/PDF
+                                            </Button>
+                                            <Button
+                                                onClick={async () => {
+                                                    if (!applicationId) {
+                                                        alert(
+                                                            "Application ID tidak ditemukan",
+                                                        );
+                                                        return;
+                                                    }
+                                                    setIsDownloadingTemplate(
+                                                        true,
+                                                    );
+                                                    try {
+                                                        // Get template ID dynamically from API
+                                                        const templateId =
+                                                            await getTemplateIdByLetterType(
+                                                                "Surat Rekomendasi Beasiswa",
+                                                            );
+                                                        if (!templateId) {
+                                                            throw new Error(
+                                                                "Template tidak ditemukan",
+                                                            );
+                                                        }
+                                                        await generateAndDownloadDocument(
+                                                            templateId,
+                                                            applicationId,
+                                                        );
+                                                        alert(
+                                                            "Dokumen Word berhasil diunduh!",
+                                                        );
+                                                    } catch (error) {
+                                                        console.error(
+                                                            "Download error:",
+                                                            error,
+                                                        );
+                                                        alert(
+                                                            `Gagal mengunduh dokumen Word: ${error instanceof Error ? error.message : "Unknown error"}`,
+                                                        );
+                                                    } finally {
+                                                        setIsDownloadingTemplate(
+                                                            false,
+                                                        );
+                                                    }
+                                                }}
+                                                disabled={isDownloadingTemplate}
+                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
+                                            >
+                                                {isDownloadingTemplate ? (
+                                                    <>
+                                                        <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                        Mengunduh...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Download className="h-5 w-5" />
+                                                        Unduh Word
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
                     ) : (
                         <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
                             <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
@@ -958,6 +1069,76 @@ export function SuratPreviewContent({
                             </p>
                         </div>
                     )}
+
+                    {/* Download Buttons for UPA Published - Vertical Stack */}
+                    {stage === "upa" &&
+                        (data?.publishedAt ||
+                            data?.status === "COMPLETED" ||
+                            data?.status === "PUBLISHED") && (
+                            <div className="space-y-3 pb-2">
+                                <Button
+                                    onClick={async () => {
+                                        if (!applicationId) return;
+                                        const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                                        window.open(pdfUrl, "_blank");
+                                    }}
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+                                >
+                                    <Download className="h-5 w-5" />
+                                    Cetak/PDF
+                                </Button>
+                                <Button
+                                    onClick={async () => {
+                                        if (!applicationId) {
+                                            alert(
+                                                "Application ID tidak ditemukan",
+                                            );
+                                            return;
+                                        }
+                                        setIsDownloadingTemplate(true);
+                                        try {
+                                            const templateId =
+                                                await getTemplateIdByLetterType(
+                                                    "Surat Rekomendasi Beasiswa",
+                                                );
+                                            if (!templateId) {
+                                                throw new Error(
+                                                    "Template tidak ditemukan",
+                                                );
+                                            }
+                                            await generateAndDownloadDocument(
+                                                templateId,
+                                                applicationId,
+                                            );
+                                        } catch (error) {
+                                            console.error(
+                                                "Download error:",
+                                                error,
+                                            );
+                                            alert(
+                                                `Gagal mengunduh: ${error instanceof Error ? error.message : "Unknown error"}`,
+                                            );
+                                        } finally {
+                                            setIsDownloadingTemplate(false);
+                                        }
+                                    }}
+                                    disabled={isDownloadingTemplate}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-5 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+                                >
+                                    {isDownloadingTemplate ? (
+                                        <>
+                                            <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            Mengunduh...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Download className="h-5 w-5" />
+                                            Unduh Word
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        )}
 
                     {/* Back Button */}
                     <div className="pt-2">

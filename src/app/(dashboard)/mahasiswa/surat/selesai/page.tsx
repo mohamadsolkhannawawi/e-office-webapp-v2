@@ -11,11 +11,13 @@ import {
     CheckCircle,
     XCircle,
     Search,
+    FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
+import { generateAndDownloadDocument } from "@/lib/template-api";
 import { Card } from "@/components/ui/card";
 import {
     Select,
@@ -28,6 +30,7 @@ import {
 export default function SuratSelesaiPage() {
     const [applications, setApplications] = useState<ApplicationSummary[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [jenisFilter, setJenisFilter] = useState<string>("ALL");
     const [pagination, setPagination] = useState({
@@ -63,6 +66,29 @@ export default function SuratSelesaiPage() {
         },
         [searchTerm, jenisFilter],
     );
+
+    // Handle template document download
+    const handleDownloadTemplate = async (applicationId: string) => {
+        setDownloadingId(applicationId);
+        try {
+            // Template ID untuk surat rekomendasi beasiswa - nanti bisa dinamis
+            const templateId = "cml1v2sev0010oau4yy2at0jh"; // Hard coded for now
+
+            await generateAndDownloadDocument(
+                templateId,
+                applicationId,
+                `surat-rekomendasi-beasiswa-${applicationId}.docx`,
+            );
+
+            console.log("Dokumen berhasil diunduh");
+            alert("Dokumen surat berhasil diunduh!");
+        } catch (error) {
+            console.error("Failed to download template:", error);
+            alert("Gagal mengunduh dokumen surat");
+        } finally {
+            setDownloadingId(null);
+        }
+    };
 
     useEffect(() => {
         const delaySearch = setTimeout(() => {
@@ -222,7 +248,6 @@ export default function SuratSelesaiPage() {
                                         app.status,
                                         app,
                                     );
-                                    const StatusIcon = status.icon;
 
                                     return (
                                         <tr
@@ -267,27 +292,62 @@ export default function SuratSelesaiPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="h-9 w-9 p-0 text-slate-600 hover:text-undip-blue hover:bg-blue-50"
+                                                            className="h-9 px-3 gap-2 text-slate-600 hover:text-slate-700 hover:bg-slate-100 font-medium text-xs"
                                                             title="Detail"
                                                         >
                                                             <Eye className="h-4 w-4" />
+                                                            Detail
                                                         </Button>
                                                     </Link>
 
                                                     {app.status ===
                                                         "COMPLETED" && (
-                                                        <Link
-                                                            href={`/mahasiswa/surat/proses/preview/${app.id}?stage=mahasiswa&autoPrint=true`}
-                                                        >
+                                                        <>
+                                                            {/* Download PDF */}
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="h-9 w-9 p-0 text-slate-600 hover:text-green-600 hover:bg-green-50"
-                                                                title="Download"
+                                                                className="h-9 px-3 gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-medium text-xs"
+                                                                title="Cetak/PDF"
+                                                                onClick={() => {
+                                                                    const link =
+                                                                        document.createElement(
+                                                                            "a",
+                                                                        );
+                                                                    link.href = `/api/templates/letter/${app.id}/pdf`;
+                                                                    link.download = `${app.scholarshipName || "Surat"}-${app.id}.pdf`;
+                                                                    link.click();
+                                                                }}
                                                             >
                                                                 <Download className="h-4 w-4" />
+                                                                PDF
                                                             </Button>
-                                                        </Link>
+
+                                                            {/* Download Word Document */}
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-9 px-3 gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium text-xs"
+                                                                title="Unduh Word"
+                                                                onClick={() =>
+                                                                    handleDownloadTemplate(
+                                                                        app.id,
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    downloadingId ===
+                                                                    app.id
+                                                                }
+                                                            >
+                                                                {downloadingId ===
+                                                                app.id ? (
+                                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                                ) : (
+                                                                    <Download className="h-4 w-4" />
+                                                                )}
+                                                                Word
+                                                            </Button>
+                                                        </>
                                                     )}
                                                 </div>
                                             </td>

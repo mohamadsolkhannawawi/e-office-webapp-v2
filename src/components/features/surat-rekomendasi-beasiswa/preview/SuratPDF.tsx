@@ -241,7 +241,7 @@ export const SuratPDF = ({
         semester: "...........................",
         ipk: "...........................",
         ips: "...........................",
-        keperluan: "Pengajuan Beasiswa ...........................",
+        keperluan: "",
         tahunAkademik: `${currentYear}/${currentYear + 1}`,
     };
     const finalData = { ...defaultData, ...data };
@@ -387,7 +387,7 @@ export const SuratPDF = ({
                     <Text style={[styles.bodyText, { marginTop: 10 }]}>
                         Surat rekomendasi ini dibuat untuk keperluan :{" "}
                         <Text style={{ textDecoration: "underline" }}>
-                            {finalData.keperluan}
+                            Pengajuan Beasiswa {finalData.keperluan}
                         </Text>
                     </Text>
 

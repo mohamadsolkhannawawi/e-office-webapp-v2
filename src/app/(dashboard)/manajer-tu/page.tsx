@@ -40,14 +40,30 @@ async function getDashboardData(searchParams: SearchParams) {
         };
 
         // 2. Fetch Recent Letters for table (automatically scoped by backend for reviewer role)
-        const query = new URLSearchParams({
+        // Build query params - only include date params if they have valid values
+        const queryParams: Record<string, string> = {
             status: String(searchParams.status || ""),
             search: String(searchParams.search || ""),
             page: String(searchParams.page || "1"),
             limit: String(searchParams.limit || "10"),
-            startDate: String(searchParams.startDate || ""),
-            endDate: String(searchParams.endDate || ""),
-        });
+            sortOrder: String(searchParams.sortOrder || "desc"),
+        };
+
+        // Only add date params if they exist and are not empty
+        if (
+            searchParams.startDate &&
+            String(searchParams.startDate).trim() !== ""
+        ) {
+            queryParams.startDate = String(searchParams.startDate);
+        }
+        if (
+            searchParams.endDate &&
+            String(searchParams.endDate).trim() !== ""
+        ) {
+            queryParams.endDate = String(searchParams.endDate);
+        }
+
+        const query = new URLSearchParams(queryParams);
 
         const appsRes = await fetch(
             `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,

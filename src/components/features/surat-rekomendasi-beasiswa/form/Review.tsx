@@ -49,7 +49,7 @@ export function Review({ data }: ReviewProps) {
         ].every((k) => !!data[k]);
 
     const hasMainAttachments =
-        Array.isArray(data.lampiranUtama) && data.lampiranUtama.length > 0;
+        Array.isArray(data.lampiranUtama) && data.lampiranUtama.length >= 2;
 
     // Konversi file ke format FilePreviewItem
     const previewFiles: FilePreviewItem[] = [];

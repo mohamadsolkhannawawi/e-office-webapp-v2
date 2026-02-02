@@ -10,6 +10,7 @@ import {
     Send,
     PenTool,
     ShieldCheck,
+    Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +33,10 @@ import { Hash, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getReceiverRole } from "@/utils/status-mapper";
 import { ApplicationDetail } from "@/lib/application-api";
+import {
+    generateAndDownloadDocument,
+    getTemplateIdByLetterType,
+} from "@/lib/template-api";
 
 interface AdminDetailSuratProps {
     role: "supervisor-akademik" | "manajer-tu" | "wakil-dekan-1" | "upa";
@@ -44,6 +49,12 @@ interface AdminDetailSuratProps {
             note?: string;
             createdAt: string;
             actor?: {
+                name: string;
+                role?: {
+                    name: string;
+                };
+            };
+            role?: {
                 name: string;
             };
         }>;
@@ -72,6 +83,9 @@ export function AdminDetailSurat({
     const [upaStampId, setUpaStampId] = useState<string | null>(
         initialData?.stampId || null,
     );
+    const [upaStampUrl, setUpaStampUrl] = useState<string | null>(
+        initialData?.stamp?.url || null,
+    );
     const [upaIsStampApplied, setUpaIsStampApplied] = useState(
         !!initialData?.stampId,
     );
@@ -83,6 +97,7 @@ export function AdminDetailSurat({
         message?: string;
     }>({ isOpen: false, status: "success", type: "approve" });
     const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
     const router = useRouter();
 
     // Determine if this role can take action based on currentStep
@@ -106,11 +121,28 @@ export function AdminDetailSurat({
 
             // Find if there was a previous revision action from this role
             const previousRevisionFromThisRole = arr.find((prevH, prevIdx) => {
+                // Explicitly type actor as any to allow role access since base type might be incomplete
+                const prevActor = prevH.actor as
+                    | { role?: { name: string }; name?: string }
+                    | undefined;
+                const currentActor = h.actor as
+                    | { role?: { name: string }; name?: string }
+                    | undefined;
+
+                const prevRoleName =
+                    prevH.role?.name ||
+                    prevActor?.role?.name ||
+                    prevActor?.name;
+                const currentRoleName =
+                    h.role?.name ||
+                    currentActor?.role?.name ||
+                    currentActor?.name;
+
                 return (
                     prevIdx > idx && // Earlier in the history (desc order)
                     prevH.action === "revision" &&
-                    prevH.actor?.role?.name === h.actor?.role?.name
-                ); // Same role
+                    prevRoleName === currentRoleName
+                );
             });
 
             return !!previousRevisionFromThisRole;
@@ -124,6 +156,37 @@ export function AdminDetailSurat({
         !isTerminalStatus &&
         (currentStep === roleStep ||
             (hasResubmittedAfterRevision && currentStep === roleStep));
+
+    const handleDownloadPDF = async (applicationId: string) => {
+        try {
+            const link = document.createElement("a");
+            link.href = `/api/templates/letter/${applicationId}/pdf`;
+            link.download = `Surat-Rekomendasi-${applicationId}.pdf`;
+            link.click();
+        } catch (error) {
+            console.error("Error downloading PDF:", error);
+        }
+    };
+
+    const handleDownloadDOCX = async (applicationId: string) => {
+        setDownloadingId(applicationId);
+        try {
+            const templateId = await getTemplateIdByLetterType(
+                "Surat Rekomendasi Beasiswa",
+            );
+            if (templateId) {
+                await generateAndDownloadDocument(
+                    templateId,
+                    applicationId,
+                    `Surat-Rekomendasi-${applicationId}.docx`,
+                );
+            }
+        } catch (error) {
+            console.error("Error downloading DOCX:", error);
+        } finally {
+            setDownloadingId(null);
+        }
+    };
 
     const handleAction = (
         type: "approve" | "revise" | "reject" | "publish",
@@ -311,6 +374,8 @@ export function AdminDetailSurat({
                 isOpen={isSignatureModalOpen}
                 onClose={() => setIsSignatureModalOpen(false)}
                 onSignatureChange={setWd1Signature}
+                applicationId={id}
+                initialSignature={wd1Signature}
             />
             <UPANumberingModal
                 isOpen={isNumberingModalOpen}
@@ -528,16 +593,24 @@ export function AdminDetailSurat({
                                                             </div>
                                                         )}
 
-                                                        {upaIsStampApplied && (
-                                                            <div className="flex items-center gap-2 justify-center py-1 border-t border-slate-100 pt-3">
-                                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-                                                                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest text-center">
-                                                                    Stempel
-                                                                    Digital
-                                                                    Aktif
-                                                                </span>
-                                                            </div>
-                                                        )}
+                                                        {upaIsStampApplied &&
+                                                            upaStampUrl && (
+                                                                <div className="flex flex-col items-center justify-center py-3 border-t border-slate-100 pt-4">
+                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest">
+                                                                        Stempel
+                                                                        Teraplikasi
+                                                                    </p>
+                                                                    <div className="w-20 h-20 relative">
+                                                                        <img
+                                                                            src={
+                                                                                upaStampUrl
+                                                                            }
+                                                                            alt="Stempel"
+                                                                            className="object-contain w-full h-full"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                     </div>
                                                 )}
                                             </div>
@@ -560,36 +633,66 @@ export function AdminDetailSurat({
                                 </>
                             ) : (
                                 /* Show status message when action is not allowed */
-                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-3">
-                                    <div
-                                        className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${isTerminalStatus ? (initialData?.status === "COMPLETED" ? "bg-emerald-100" : "bg-red-100") : "bg-undip-blue/10"}`}
-                                    >
-                                        {isTerminalStatus ? (
-                                            initialData?.status ===
-                                            "COMPLETED" ? (
-                                                <Check className="h-6 w-6 text-emerald-600" />
+                                <div className="space-y-4">
+                                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-3">
+                                        <div
+                                            className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${isTerminalStatus ? (initialData?.status === "COMPLETED" ? "bg-emerald-100" : "bg-red-100") : "bg-undip-blue/10"}`}
+                                        >
+                                            {isTerminalStatus ? (
+                                                initialData?.status ===
+                                                "COMPLETED" ? (
+                                                    <Check className="h-6 w-6 text-emerald-600" />
+                                                ) : (
+                                                    <XOctagon className="h-6 w-6 text-red-600" />
+                                                )
                                             ) : (
-                                                <XOctagon className="h-6 w-6 text-red-600" />
-                                            )
-                                        ) : (
-                                            <Check className="h-6 w-6 text-undip-blue" />
-                                        )}
+                                                <Check className="h-6 w-6 text-undip-blue" />
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-slate-700">
+                                                {isTerminalStatus
+                                                    ? initialData?.status ===
+                                                      "COMPLETED"
+                                                        ? "Surat Selesai"
+                                                        : "Surat Ditolak"
+                                                    : "Sudah Diproses"}
+                                            </p>
+                                            <p className="text-sm text-slate-500 mt-1">
+                                                {isTerminalStatus
+                                                    ? `Status akhir: ${initialData?.status === "COMPLETED" ? "Terbit" : "Ditolak"}`
+                                                    : `Surat ini sudah Anda proses dan telah diteruskan ke tahap berikutnya.`}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-bold text-slate-700">
-                                            {isTerminalStatus
-                                                ? initialData?.status ===
-                                                  "COMPLETED"
-                                                    ? "Surat Selesai"
-                                                    : "Surat Ditolak"
-                                                : "Sudah Diproses"}
-                                        </p>
-                                        <p className="text-sm text-slate-500 mt-1">
-                                            {isTerminalStatus
-                                                ? `Status akhir: ${initialData?.status === "COMPLETED" ? "Terbit" : "Ditolak"}`
-                                                : `Surat ini sudah Anda proses dan telah diteruskan ke tahap berikutnya.`}
-                                        </p>
-                                    </div>
+
+                                    {initialData?.status === "COMPLETED" && (
+                                        <div className="space-y-3">
+                                            <Button
+                                                onClick={() =>
+                                                    handleDownloadPDF(id)
+                                                }
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                            >
+                                                <Download className="h-5 w-5" />
+                                                Cetak/PDF
+                                            </Button>
+                                            <Button
+                                                onClick={() =>
+                                                    handleDownloadDOCX(id)
+                                                }
+                                                disabled={downloadingId === id}
+                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                            >
+                                                {downloadingId === id ? (
+                                                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                ) : (
+                                                    <Download className="h-5 w-5" />
+                                                )}
+                                                Unduh Word
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -672,14 +775,7 @@ export function AdminDetailSurat({
                         if (data) {
                             setUpaStampId(data.stampId);
                             setUpaIsStampApplied(true);
-                            // Update data with stampUrl for immediate document display
-                            if (data.stampUrl) {
-                                setData((prev) =>
-                                    prev
-                                        ? { ...prev, stampUrl: data.stampUrl }
-                                        : prev,
-                                );
-                            }
+                            // setData removed as it is not defined
                         }
                     }}
                     applicationId={id}

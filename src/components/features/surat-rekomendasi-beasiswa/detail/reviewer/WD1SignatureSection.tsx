@@ -15,7 +15,6 @@ import {
     Loader2,
 } from "lucide-react";
 import SignatureCanvas from "react-signature-canvas";
-import Image from "next/image";
 import { SignatureImage } from "@/components/ui/signature-image";
 import toast from "react-hot-toast";
 import {
@@ -28,20 +27,31 @@ import {
 
 interface WD1SignatureSectionProps {
     onSignatureChange: (signature: string | null) => void;
+    initialSignature?: string | null;
 }
 
 export function WD1SignatureSection({
     onSignatureChange,
+    initialSignature,
 }: WD1SignatureSectionProps) {
     const sigCanvas = useRef<SignatureCanvas>(null);
     const [selectedMethod, setSelectedMethod] = useState("upload");
-    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [previewImage, setPreviewImage] = useState<string | null>(
+        initialSignature || null,
+    );
     const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
         null,
     );
     const [templates, setTemplates] = useState<UserSignature[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+
+    // Sync with initialSignature
+    useEffect(() => {
+        if (initialSignature) {
+            setPreviewImage(initialSignature);
+        }
+    }, [initialSignature]);
 
     // Fetch saved signature templates on mount
     useEffect(() => {
@@ -103,41 +113,6 @@ export function WD1SignatureSection({
         setSelectedTemplateId(id);
         setPreviewImage(url);
         onSignatureChange(url);
-    };
-
-    const handleSaveAsTemplate = async () => {
-        if (!previewImage) return;
-        setIsSaving(true);
-        const toastId = toast.loading("Menyimpan tanda tangan...");
-
-        try {
-            const result = await saveSignature({
-                url: previewImage,
-                signatureType:
-                    selectedMethod === "canvas" ? "DRAWN" : "UPLOADED",
-                isDefault: templates.length === 0, // Set as default if first template
-            });
-
-            if (result.success && result.data) {
-                setTemplates((prev) => [result.data!, ...prev]);
-                toast.success("Tanda tangan berhasil disimpan", {
-                    id: toastId,
-                });
-            } else {
-                toast.error(result.error || "Gagal menyimpan tanda tangan", {
-                    id: toastId,
-                });
-            }
-        } catch (error) {
-            const errorMessage =
-                error instanceof Error
-                    ? error.message
-                    : "Terjadi kesalahan saat menyimpan";
-            console.error("Save template error:", error);
-            toast.error(errorMessage, { id: toastId });
-        } finally {
-            setIsSaving(false);
-        }
     };
 
     const handleSetDefault = async (id: string) => {

@@ -407,6 +407,37 @@ export async function updateLetterConfig(
 }
 
 /**
+ * Save signature to application immediately
+ */
+export async function saveSignatureToApplication(
+    applicationId: string,
+    signatureUrl: string,
+): Promise<boolean> {
+    try {
+        const response = await fetch(
+            `/api/surat-rekomendasi/applications/${applicationId}/signature`,
+            {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ signatureUrl }),
+            },
+        );
+
+        if (!response.ok) {
+            throw new Error(`Failed to save signature: ${response.status}`);
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Save signature error:", error);
+        return false;
+    }
+}
+
+/**
  * Interface untuk User Signature
  */
 export interface UserSignature {
@@ -692,6 +723,43 @@ export async function previewLetterNumber(
     } catch (error) {
         console.error("Preview letter number error:", error);
         return null;
+    }
+}
+
+/**
+ * Save/Update letter number untuk application (UPA role)
+ */
+export async function saveLetterNumber(
+    applicationId: string,
+    letterNumber: string,
+): Promise<boolean> {
+    try {
+        const response = await fetch(
+            `/api/master/letter-numbering/${applicationId}`,
+            {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ letterNumber }),
+            },
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(
+                "Save letter number error:",
+                response.status,
+                errorText,
+            );
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Save letter number error:", error);
+        return false;
     }
 }
 

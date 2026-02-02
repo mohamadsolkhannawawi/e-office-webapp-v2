@@ -261,7 +261,7 @@ export default function PengajuanBaruPage() {
         if (currentStep === 3) {
             return (
                 Array.isArray(formData.lampiranUtama) &&
-                formData.lampiranUtama.length > 0
+                formData.lampiranUtama.length >= 2
             );
         }
         return true;

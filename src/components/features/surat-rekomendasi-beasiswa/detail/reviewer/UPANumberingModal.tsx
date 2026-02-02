@@ -22,6 +22,7 @@ interface UPANumberingModalProps {
         qrImage: string;
     }) => void;
     appliedLetterNumber?: string;
+    onDocumentRegenerate?: () => void;
 }
 
 export function UPANumberingModal({
@@ -32,6 +33,7 @@ export function UPANumberingModal({
     applicationId,
     onVerificationGenerated,
     appliedLetterNumber,
+    onDocumentRegenerate,
 }: UPANumberingModalProps) {
     const handleNumberChange = (number: string) => {
         onNumberChange(number);
@@ -57,6 +59,7 @@ export function UPANumberingModal({
                         applicationId={applicationId}
                         onVerificationGenerated={onVerificationGenerated}
                         appliedLetterNumber={appliedLetterNumber}
+                        onDocumentRegenerate={onDocumentRegenerate}
                     />
                 </div>
             </DialogContent>

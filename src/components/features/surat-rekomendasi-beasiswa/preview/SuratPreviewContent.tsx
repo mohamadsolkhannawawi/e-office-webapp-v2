@@ -1,9 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import {
     ChevronLeft,
-    Minus,
-    Plus,
     Maximize2,
     Minimize2,
     Info,
@@ -16,14 +15,15 @@ import {
     XOctagon,
     Download,
 } from "lucide-react";
+import { verifyApplication } from "@/lib/application-api";
 import {
-    verifyApplication,
-    getLetterConfig,
-    LeadershipConfig,
-} from "@/lib/application-api";
+    generateAndDownloadDocument,
+    getTemplateIdByLetterType,
+    triggerDocxGeneration,
+} from "@/lib/template-api";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SuratDocument } from "@/components/features/surat-rekomendasi-beasiswa/preview/SuratDocument";
+// import { DocxPreview } from "@/components/features/surat-rekomendasi-beasiswa/preview/DocxPreview"; // Removed
 import { UPANumberingModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPANumberingModal";
 import { UPAStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPAStampModal";
 import { WD1SignatureModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/WD1SignatureModal";
@@ -31,7 +31,7 @@ import { AdminActionModals } from "@/components/features/surat-rekomendasi-beasi
 import { SuccessStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/SuccessStampModal";
 import { SignatureImage } from "@/components/ui/signature-image";
 import { ActionStatusModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/ActionStatusModal";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export interface PreviewData {
     nama?: string;
@@ -54,7 +54,7 @@ export interface PreviewData {
     publishedAt?: string;
     qrCodeUrl?: string;
     stampId?: string;
-    stampUrl?: string;
+    stampUrl?: string; // Kept in interface just in case data has it, but unused in component state
 }
 
 interface SuratPreviewContentProps {
@@ -74,6 +74,9 @@ export function SuratPreviewContent({
     const searchParams = useSearchParams();
     const stage = searchParams.get("stage") || defaultStage;
 
+    // Resolve Application ID from prop or data object
+    const pdfId = applicationId || data?.applicationId;
+
     const [upaLetterNumber, setUpaLetterNumber] = useState(
         searchParams.get("no") || data?.nomorSurat || "",
     );
@@ -86,9 +89,6 @@ export function SuratPreviewContent({
     const [upaIsStampApplied, setUpaIsStampApplied] = useState(!!data?.stampId);
     const [wd1Signature, setWd1Signature] = useState<string | null>(
         data?.signatureUrl || null,
-    );
-    const [qrCodeUrl, setQrCodeUrl] = useState<string | undefined>(
-        data?.qrCodeUrl,
     );
     const [isNumberingModalOpen, setIsNumberingModalOpen] = useState(false);
     const [isStampModalOpen, setIsStampModalOpen] = useState(false);
@@ -106,10 +106,11 @@ export function SuratPreviewContent({
         message?: string;
     }>({ isOpen: false, status: "success", type: "approve" });
     const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
-    const [zoom, setZoom] = useState(100);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [leadershipConfig, setLeadershipConfig] =
-        useState<LeadershipConfig | null>(null);
+
+    // Removed unused states: upaStampUrl, qrCodeUrl, leadershipConfig, docxLoadError
+
+    const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
 
     useEffect(() => {
         if (searchParams.get("autoPrint") === "true") {
@@ -120,17 +121,7 @@ export function SuratPreviewContent({
         }
     }, [searchParams]);
 
-    // Fetch leadership config on mount - ALWAYS fetch WAKIL_DEKAN_1 for signature
-    // Signature section is exclusively for Wakil Dekan 1, regardless of current stage
-    useEffect(() => {
-        const fetchLeadershipConfig = async () => {
-            const config = await getLetterConfig("WAKIL_DEKAN_1");
-            if (config) {
-                setLeadershipConfig(config);
-            }
-        };
-        fetchLeadershipConfig();
-    }, []);
+    // Removed fetching leadershipConfig as it was unused
 
     // Map stage to step number for canTakeAction logic
     const stageStepMap: Record<string, number> = {
@@ -151,10 +142,6 @@ export function SuratPreviewContent({
     // 2. The application is not in a terminal status (COMPLETED/REJECTED)
     const canTakeAction = currentStep === roleStep && !isTerminalStatus;
 
-    const handleZoomIn = () => setZoom((prev) => Math.min(prev + 10, 200));
-    const handleZoomOut = () => setZoom((prev) => Math.max(prev - 10, 50));
-    const resetZoom = () => setZoom(100);
-
     const handleBack = () => {
         if (backUrl) {
             router.push(backUrl);
@@ -163,35 +150,7 @@ export function SuratPreviewContent({
         }
     };
 
-    const config = useMemo(() => {
-        // SINGLE SOURCE OF TRUTH LOGIC:
-        // Use the actual data state (wd1Signature, upaLetterNumber) to decide what to render.
-        // The 'stage' prop primarily controls the SIDEBAR actions/context, not the document content visibility.
-        // Exception: If we are in 'wd1' stage (approval process), we show the signature being drafted (local state) or existing one.
-
-        const hasSignature = !!wd1Signature;
-        const hasStamp = upaIsStampApplied;
-        const hasLetterNumber = !!upaLetterNumber;
-
-        return {
-            showSignature: hasSignature,
-            signaturePath: wd1Signature || "/assets/signature-dummy.png", // Only used if showSignature is true
-            showStamp: hasStamp,
-            stampUrl: upaStampUrl || null,
-            nomorSurat: hasLetterNumber ? upaLetterNumber : "",
-            data: data,
-            leadershipConfig: leadershipConfig || undefined,
-            qrCodeUrl: qrCodeUrl,
-        };
-    }, [
-        upaLetterNumber,
-        upaIsStampApplied,
-        upaStampUrl,
-        wd1Signature,
-        data,
-        leadershipConfig,
-        qrCodeUrl,
-    ]);
+    // Removed unused config object derived from useMemo as HTML preview is no longer used
 
     const attributes = [
         {
@@ -241,6 +200,20 @@ export function SuratPreviewContent({
         { label: "IPS", value: data?.ips || "-" },
     ];
 
+    // PDF Refresh Trigger
+    const [pdfRefreshTimestamp, setPdfRefreshTimestamp] = useState(0);
+
+    // Hydration fix: Set timestamp only after mount to ensure server/client match initially
+    // and provide a fresh timestamp for the initial load.
+    useEffect(() => {
+        setPdfRefreshTimestamp(Date.now());
+    }, []);
+
+    const triggerPdfRefresh = () => {
+        console.log("🔄 Triggering PDF Refresh...");
+        setPdfRefreshTimestamp(Date.now());
+    };
+
     return (
         <div className="h-full flex overflow-hidden">
             <style
@@ -251,12 +224,43 @@ export function SuratPreviewContent({
                         margin: 0; 
                         size: A4 portrait;
                     }
-                    /* Hide browser headers/footers by clearing page margin */
+                    /* Hide everything except the document preview container */
+                    .print\\:hidden, 
+                    .w-80, 
+                    .h-12, 
+                    .fixed, 
+                    header, 
+                    aside, 
+                    nav, 
+                    footer {
+                        display: none !important;
+                    }
+                    
                     html, body {
-                        margin: 0;
-                        height: 100%;
-                        overflow: hidden !important;
-                        -webkit-print-color-adjust: exact;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        height: 100% !important;
+                        overflow: visible !important;
+                        background: white !important;
+                    }
+
+                    /* Main containers */
+                    .h-full, .flex-1, .bg-slate-200, .bg-slate-100 {
+                        background: white !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                        display: block !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+
+                    /* Document rendering */
+                    .docx-preview-container {
+                        display: block !important;
+                        margin: 0 auto !important;
+                        padding: 0 !important;
+                        width: 100% !important;
+                        background: white !important;
                     }
                 }
             `,
@@ -265,15 +269,20 @@ export function SuratPreviewContent({
             <UPANumberingModal
                 isOpen={isNumberingModalOpen}
                 onClose={() => setIsNumberingModalOpen(false)}
-                onNumberChange={setUpaLetterNumber}
-                onStampApply={() => {}} // Stamp is always true in this UI
+                onNumberChange={(num) => {
+                    setUpaLetterNumber(num);
+                    if (num) triggerPdfRefresh();
+                }}
+                onStampApply={() => {
+                    setUpaIsStampApplied(true);
+                    triggerPdfRefresh();
+                }}
                 applicationId={applicationId}
-                onVerificationGenerated={(data) => {
-                    if (data.qrImage) {
-                        setQrCodeUrl(data.qrImage);
-                    }
+                onVerificationGenerated={() => {
+                    // QrCode handled via backend now
                 }}
                 appliedLetterNumber={upaLetterNumber}
+                onDocumentRegenerate={triggerPdfRefresh}
             />
             <UPAStampModal
                 isOpen={isStampModalOpen}
@@ -283,6 +292,7 @@ export function SuratPreviewContent({
                         setUpaStampId(stampData.stampId);
                         setUpaStampUrl(stampData.stampUrl);
                         setUpaIsStampApplied(true);
+                        triggerPdfRefresh();
                     }
                 }}
                 applicationId={applicationId || ""}
@@ -307,7 +317,12 @@ export function SuratPreviewContent({
             <WD1SignatureModal
                 isOpen={isSignatureModalOpen}
                 onClose={() => setIsSignatureModalOpen(false)}
-                onSignatureChange={setWd1Signature}
+                onSignatureChange={(sig) => {
+                    setWd1Signature(sig);
+                    if (sig) triggerPdfRefresh();
+                }}
+                initialSignature={wd1Signature}
+                applicationId={applicationId}
             />
             <AdminActionModals
                 isOpen={isActionModalOpen}
@@ -379,6 +394,19 @@ export function SuratPreviewContent({
                             stampId: upaStampId || undefined,
                         });
 
+                        // If publish action, trigger document generation to create QR code
+                        if (modalType === "publish" && applicationId) {
+                            try {
+                                await triggerDocxGeneration(applicationId);
+                                triggerPdfRefresh();
+                            } catch (error) {
+                                console.error(
+                                    "Error generating document with QR code:",
+                                    error,
+                                );
+                            }
+                        }
+
                         setPendingRedirect(redirectPath);
                         setStatusModal({
                             isOpen: true,
@@ -439,62 +467,36 @@ export function SuratPreviewContent({
             </div>
 
             {/* Main Content: Document Preview */}
-            <div className="flex-1 flex flex-col bg-slate-200 overflow-hidden relative">
+            <div className="flex-1 flex flex-col bg-slate-200 overflow-hidden relative print:bg-white print:overflow-visible">
                 {/* Toolbar */}
-                <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 shrink-0 shadow-sm print:hidden">
-                    {/* <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold text-slate-600 uppercase tracking-tight">
-                            Pratinjau Surat
-                        </span>
-                    </div> */}
-
-                    <div className="flex items-center gap-4 bg-slate-100 rounded-lg px-2 py-1">
-                        <button
-                            onClick={handleZoomOut}
-                            className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200"
-                        >
-                            <Minus className="h-4 w-4 text-slate-600" />
-                        </button>
-                        <button
-                            onClick={resetZoom}
-                            className="text-xs font-bold text-slate-700 px-3 border-x border-slate-200 hover:text-undip-blue"
-                        >
-                            {zoom}%
-                        </button>
-                        <button
-                            onClick={handleZoomIn}
-                            className="p-1 hover:bg-white rounded shadow-sm transition-all duration-200"
-                        >
-                            <Plus className="h-4 w-4 text-slate-600" />
-                        </button>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                            Halaman 1/1
-                        </span>
-                        <button
-                            onClick={() => setIsFullscreen(!isFullscreen)}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors group"
-                            title={isFullscreen ? "Minimize" : "Maximize"}
-                        >
-                            {isFullscreen ? (
-                                <Minimize2 className="h-4 w-4 text-slate-400 group-hover:text-undip-blue transition-colors" />
-                            ) : (
-                                <Maximize2 className="h-4 w-4 text-slate-400 group-hover:text-undip-blue transition-colors" />
-                            )}
-                        </button>
-                    </div>
+                <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-end px-4 shrink-0 shadow-sm print:hidden">
+                    <button
+                        onClick={() => setIsFullscreen(!isFullscreen)}
+                        className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors group"
+                        title={isFullscreen ? "Minimize" : "Maximize"}
+                    >
+                        {isFullscreen ? (
+                            <Minimize2 className="h-4 w-4 text-slate-400 group-hover:text-undip-blue transition-colors" />
+                        ) : (
+                            <Maximize2 className="h-4 w-4 text-slate-400 group-hover:text-undip-blue transition-colors" />
+                        )}
+                    </button>
                 </div>
 
                 {/* Document Area */}
-                <div className="flex-1 overflow-auto p-12 flex justify-center bg-[#F1F5F9] print:bg-white print:p-0 print:block print:overflow-visible">
-                    <div
-                        className="origin-top transition-transform duration-300 shadow-2xl print:shadow-none print:transform-none print:fixed print:top-0 print:left-0 print:z-9999 print:w-screen print:h-auto print:bg-white"
-                        style={{ transform: `scale(${zoom / 100})` }}
-                    >
-                        <SuratDocument {...config} />
-                    </div>
+                <div className="flex-1 overflow-hidden p-0 flex justify-center bg-[#525659] print:bg-white print:p-0 print:block print:overflow-visible relative">
+                    {/* PDF Preview Iframe - Use pdfId derived from prop or data */}
+                    {pdfId && pdfRefreshTimestamp > 0 ? (
+                        <iframe
+                            src={`/api/templates/letter/${pdfId}/pdf?t=${pdfRefreshTimestamp}#toolbar=0&navpanes=0&scrollbar=1`}
+                            className="w-full h-full border-0"
+                            title="Preview Surat"
+                        />
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-white">
+                            <p>Memuat Dokumen...</p>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -554,7 +556,10 @@ export function SuratPreviewContent({
                                 </div>
                             </div>
                         </div>
-                    ) : stage === "upa" ? (
+                    ) : stage === "upa" &&
+                      !data?.publishedAt &&
+                      data?.status !== "COMPLETED" &&
+                      data?.status !== "PUBLISHED" ? (
                         <>
                             <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
                                 <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
@@ -625,12 +630,19 @@ export function SuratPreviewContent({
                                             )}
                                         </Button>
 
-                                        {upaIsStampApplied && (
-                                            <div className="flex items-center gap-2 justify-center py-1">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-                                                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">
-                                                    Stempel On-Board
-                                                </span>
+                                        {upaIsStampApplied && upaStampUrl && (
+                                            <div className="flex flex-col items-center justify-center py-3 border-t border-slate-100 pt-4">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest">
+                                                    Stempel Teraplikasi
+                                                </p>
+                                                <div className="w-24 h-24 relative">
+                                                    <Image
+                                                        src={upaStampUrl}
+                                                        alt="Stempel"
+                                                        fill
+                                                        className="object-contain w-full h-full"
+                                                    />
+                                                </div>
                                             </div>
                                         )}
                                     </div>
@@ -856,22 +868,193 @@ export function SuratPreviewContent({
                                     <div className="space-y-3 pt-5 border-t border-slate-100 text-center">
                                         <p className="text-xs text-slate-500 mb-4 leading-relaxed">
                                             Klik tombol di bawah untuk mencetak
-                                            atau mengunduh surat sebagai PDF.
+                                            atau mengunduh surat sebagai PDF
+                                            atau Word.
                                         </p>
-                                        <Button
-                                            onClick={() => {
-                                                if (
-                                                    typeof window !==
-                                                    "undefined"
-                                                ) {
-                                                    window.print();
-                                                }
-                                            }}
-                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
-                                        >
-                                            <Download className="h-5 w-5" />
-                                            Unduh PDF
-                                        </Button>
+                                        <div className="flex flex-col gap-3">
+                                            <Button
+                                                onClick={async () => {
+                                                    if (!applicationId) return;
+
+                                                    // Open PDF in new tab
+                                                    const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                                                    window.open(
+                                                        pdfUrl,
+                                                        "_blank",
+                                                    );
+                                                }}
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                                            >
+                                                <Download className="h-5 w-5" />
+                                                Cetak/PDF
+                                            </Button>
+                                            <Button
+                                                onClick={async () => {
+                                                    if (!applicationId) {
+                                                        alert(
+                                                            "Application ID tidak ditemukan",
+                                                        );
+                                                        return;
+                                                    }
+                                                    setIsDownloadingTemplate(
+                                                        true,
+                                                    );
+                                                    try {
+                                                        // Get template ID dynamically from API
+                                                        const templateId =
+                                                            await getTemplateIdByLetterType(
+                                                                "Surat Rekomendasi Beasiswa",
+                                                            );
+                                                        if (!templateId) {
+                                                            throw new Error(
+                                                                "Template tidak ditemukan",
+                                                            );
+                                                        }
+                                                        await generateAndDownloadDocument(
+                                                            templateId,
+                                                            applicationId,
+                                                        );
+                                                        alert(
+                                                            "Dokumen Word berhasil diunduh!",
+                                                        );
+                                                    } catch (error) {
+                                                        console.error(
+                                                            "Download error:",
+                                                            error,
+                                                        );
+                                                        alert(
+                                                            `Gagal mengunduh dokumen Word: ${error instanceof Error ? error.message : "Unknown error"}`,
+                                                        );
+                                                    } finally {
+                                                        setIsDownloadingTemplate(
+                                                            false,
+                                                        );
+                                                    }
+                                                }}
+                                                disabled={isDownloadingTemplate}
+                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
+                                            >
+                                                {isDownloadingTemplate ? (
+                                                    <>
+                                                        <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                        Mengunduh...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Download className="h-5 w-5" />
+                                                        Unduh Word
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    ) : stage === "upa" ? (
+                        <>
+                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                                <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
+                                    Unduh Surat
+                                </h2>
+                                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">
+                                    Praktinjau & Cetak
+                                </p>
+                            </div>
+
+                            <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
+                                <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                    <div className="flex flex-col items-center gap-2 mb-2">
+                                        <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600">
+                                            <Download className="h-6 w-6" />
+                                        </div>
+                                        <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
+                                            Dokumen Siap
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-3 pt-5 border-t border-slate-100 text-center">
+                                        <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                                            Klik tombol di bawah untuk mencetak
+                                            atau mengunduh surat sebagai PDF
+                                            atau Word.
+                                        </p>
+                                        <div className="flex flex-col gap-3">
+                                            <Button
+                                                onClick={async () => {
+                                                    if (!applicationId) return;
+
+                                                    // Open PDF in new tab
+                                                    const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                                                    window.open(
+                                                        pdfUrl,
+                                                        "_blank",
+                                                    );
+                                                }}
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                                            >
+                                                <Download className="h-5 w-5" />
+                                                Cetak/PDF
+                                            </Button>
+                                            <Button
+                                                onClick={async () => {
+                                                    if (!applicationId) {
+                                                        alert(
+                                                            "Application ID tidak ditemukan",
+                                                        );
+                                                        return;
+                                                    }
+                                                    setIsDownloadingTemplate(
+                                                        true,
+                                                    );
+                                                    try {
+                                                        // Get template ID dynamically from API
+                                                        const templateId =
+                                                            await getTemplateIdByLetterType(
+                                                                "Surat Rekomendasi Beasiswa",
+                                                            );
+                                                        if (!templateId) {
+                                                            throw new Error(
+                                                                "Template tidak ditemukan",
+                                                            );
+                                                        }
+                                                        await generateAndDownloadDocument(
+                                                            templateId,
+                                                            applicationId,
+                                                        );
+                                                        alert(
+                                                            "Dokumen Word berhasil diunduh!",
+                                                        );
+                                                    } catch (error) {
+                                                        console.error(
+                                                            "Download error:",
+                                                            error,
+                                                        );
+                                                        alert(
+                                                            `Gagal mengunduh dokumen Word: ${error instanceof Error ? error.message : "Unknown error"}`,
+                                                        );
+                                                    } finally {
+                                                        setIsDownloadingTemplate(
+                                                            false,
+                                                        );
+                                                    }
+                                                }}
+                                                disabled={isDownloadingTemplate}
+                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
+                                            >
+                                                {isDownloadingTemplate ? (
+                                                    <>
+                                                        <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                        Mengunduh...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Download className="h-5 w-5" />
+                                                        Unduh Word
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -886,6 +1069,76 @@ export function SuratPreviewContent({
                             </p>
                         </div>
                     )}
+
+                    {/* Download Buttons for UPA Published - Vertical Stack */}
+                    {stage === "upa" &&
+                        (data?.publishedAt ||
+                            data?.status === "COMPLETED" ||
+                            data?.status === "PUBLISHED") && (
+                            <div className="space-y-3 pb-2">
+                                <Button
+                                    onClick={async () => {
+                                        if (!applicationId) return;
+                                        const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                                        window.open(pdfUrl, "_blank");
+                                    }}
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+                                >
+                                    <Download className="h-5 w-5" />
+                                    Cetak/PDF
+                                </Button>
+                                <Button
+                                    onClick={async () => {
+                                        if (!applicationId) {
+                                            alert(
+                                                "Application ID tidak ditemukan",
+                                            );
+                                            return;
+                                        }
+                                        setIsDownloadingTemplate(true);
+                                        try {
+                                            const templateId =
+                                                await getTemplateIdByLetterType(
+                                                    "Surat Rekomendasi Beasiswa",
+                                                );
+                                            if (!templateId) {
+                                                throw new Error(
+                                                    "Template tidak ditemukan",
+                                                );
+                                            }
+                                            await generateAndDownloadDocument(
+                                                templateId,
+                                                applicationId,
+                                            );
+                                        } catch (error) {
+                                            console.error(
+                                                "Download error:",
+                                                error,
+                                            );
+                                            alert(
+                                                `Gagal mengunduh: ${error instanceof Error ? error.message : "Unknown error"}`,
+                                            );
+                                        } finally {
+                                            setIsDownloadingTemplate(false);
+                                        }
+                                    }}
+                                    disabled={isDownloadingTemplate}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-5 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+                                >
+                                    {isDownloadingTemplate ? (
+                                        <>
+                                            <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            Mengunduh...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Download className="h-5 w-5" />
+                                            Unduh Word
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        )}
 
                     {/* Back Button */}
                     <div className="pt-2">

@@ -12,6 +12,12 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
     ChevronRight,
     ChevronLeft,
     FileSpreadsheet,
@@ -22,9 +28,17 @@ import {
     Archive,
     Eye,
     CheckCircle,
+    Download,
+    Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
+import {
+    generateAndDownloadDocument,
+    getTemplateIdByLetterType,
+} from "@/lib/template-api";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 // Type untuk export
 interface ExportData {
@@ -42,15 +56,32 @@ export default function ArsipPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterBeasiswa, setFilterBeasiswa] = useState("all");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+    const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     const fetchArchiveData = useCallback(async () => {
         setLoading(true);
         try {
+            // Convert date range to ISO format with proper times
+            let startDateIso: string | undefined = undefined;
+            let endDateIso: string | undefined = undefined;
+
+            if (dateRange.from) {
+                const start = new Date(dateRange.from);
+                start.setHours(0, 0, 0, 0);
+                startDateIso = start.toISOString();
+            }
+
+            if (dateRange.to) {
+                const end = new Date(dateRange.to);
+                end.setHours(23, 59, 59, 999);
+                endDateIso = end.toISOString();
+            }
+
             const result = await getApplications({
                 status: "COMPLETED",
                 page: currentPage,
@@ -58,9 +89,9 @@ export default function ArsipPage() {
                 search: searchTerm,
                 jenisBeasiswa:
                     filterBeasiswa !== "all" ? filterBeasiswa : undefined,
-                startDate: startDate || undefined,
-                endDate: endDate || undefined,
-                sortOrder: "desc",
+                startDate: startDateIso,
+                endDate: endDateIso,
+                sortOrder: sortOrder,
             });
             setApplications(result.data);
             setTotalPages(result.meta.totalPages);
@@ -70,7 +101,38 @@ export default function ArsipPage() {
         } finally {
             setLoading(false);
         }
-    }, [currentPage, searchTerm, filterBeasiswa, startDate, endDate]);
+    }, [currentPage, searchTerm, filterBeasiswa, dateRange, sortOrder]);
+
+    const handleDownloadPDF = async (applicationId: string) => {
+        try {
+            const link = document.createElement("a");
+            link.href = `/api/templates/letter/${applicationId}/pdf`;
+            link.download = `Surat-Rekomendasi-${applicationId}.pdf`;
+            link.click();
+        } catch (error) {
+            console.error("Error downloading PDF:", error);
+        }
+    };
+
+    const handleDownloadDOCX = async (applicationId: string) => {
+        setDownloadingId(applicationId);
+        try {
+            const templateId = await getTemplateIdByLetterType(
+                "Surat Rekomendasi Beasiswa",
+            );
+            if (templateId) {
+                await generateAndDownloadDocument(
+                    templateId,
+                    applicationId,
+                    `Surat-Rekomendasi-${applicationId}.docx`,
+                );
+            }
+        } catch (error) {
+            console.error("Error downloading DOCX:", error);
+        } finally {
+            setDownloadingId(null);
+        }
+    };
 
     useEffect(() => {
         fetchArchiveData();
@@ -297,29 +359,54 @@ export default function ArsipPage() {
                             </SelectContent>
                         </Select>
 
-                        {/* Start Date */}
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <Input
-                                type="date"
-                                placeholder="Dari tanggal"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                className="pl-10 h-10 border-slate-100 bg-slate-50/50"
-                            />
-                        </div>
+                        {/* Date Range Picker */}
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className="h-10 border-slate-100 text-slate-600 gap-2 w-full sm:w-50"
+                                >
+                                    <Calendar className="h-4 w-4" />
+                                    {dateRange.from && dateRange.to
+                                        ? `${format(dateRange.from, "dd LLL", { locale: id })} - ${format(dateRange.to, "dd LLL", { locale: id })}`
+                                        : "Rentang Tanggal"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="end">
+                                <CalendarComponent
+                                    mode="range"
+                                    selected={{
+                                        from: dateRange.from,
+                                        to: dateRange.to,
+                                    }}
+                                    onSelect={(
+                                        range:
+                                            | { from?: Date; to?: Date }
+                                            | undefined,
+                                    ) => setDateRange(range || {})}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
 
-                        {/* End Date */}
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <Input
-                                type="date"
-                                placeholder="Sampai tanggal"
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                className="pl-10 h-10 border-slate-100 bg-slate-50/50"
-                            />
-                        </div>
+                        {/* Sort Order */}
+                        <Select
+                            value={sortOrder}
+                            onValueChange={(value: "asc" | "desc") =>
+                                setSortOrder(value)
+                            }
+                        >
+                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
+                                <div className="flex items-center gap-2">
+                                    <Filter className="h-4 w-4" />
+                                    <SelectValue placeholder="Urutkan" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="desc">Terbaru</SelectItem>
+                                <SelectItem value="asc">Terlama</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {/* Table */}
@@ -401,18 +488,53 @@ export default function ArsipPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <Link
-                                                    href={`/upa/surat/surat-rekomendasi-beasiswa/detail/${app.id}`}
-                                                >
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="rounded-full h-8 text-xs bg-undip-blue font-bold border-slate-100 text-white hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4"
+                                                <div className="flex justify-center gap-2">
+                                                    <Link
+                                                        href={`/upa/surat/surat-rekomendasi-beasiswa/detail/${app.id}`}
                                                     >
-                                                        <Eye className="h-3.5 w-3.5" />
-                                                        Detail
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="rounded-full h-8 text-xs bg-undip-blue font-bold border-slate-100 text-white hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4"
+                                                        >
+                                                            <Eye className="h-3.5 w-3.5" />
+                                                            Detail
+                                                        </Button>
+                                                    </Link>
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleDownloadPDF(
+                                                                app.id,
+                                                            )
+                                                        }
+                                                        size="sm"
+                                                        className="rounded-full h-8 text-xs bg-emerald-600 hover:bg-emerald-700 font-bold border-slate-100 text-white transition-all gap-1.5 px-4"
+                                                    >
+                                                        <Download className="h-3.5 w-3.5" />
+                                                        PDF
                                                     </Button>
-                                                </Link>
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleDownloadDOCX(
+                                                                app.id,
+                                                            )
+                                                        }
+                                                        size="sm"
+                                                        disabled={
+                                                            downloadingId ===
+                                                            app.id
+                                                        }
+                                                        className="rounded-full h-8 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 font-bold border-slate-100 text-white transition-all gap-1.5 px-4"
+                                                    >
+                                                        {downloadingId ===
+                                                        app.id ? (
+                                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        ) : (
+                                                            <Download className="h-3.5 w-3.5" />
+                                                        )}
+                                                        Word
+                                                    </Button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))

@@ -727,6 +727,43 @@ export async function previewLetterNumber(
 }
 
 /**
+ * Save/Update letter number untuk application (UPA role)
+ */
+export async function saveLetterNumber(
+    applicationId: string,
+    letterNumber: string,
+): Promise<boolean> {
+    try {
+        const response = await fetch(
+            `/api/master/letter-numbering/${applicationId}`,
+            {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ letterNumber }),
+            },
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(
+                "Save letter number error:",
+                response.status,
+                errorText,
+            );
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Save letter number error:", error);
+        return false;
+    }
+}
+
+/**
  * Generate nomor surat baru (dengan increment counter)
  */
 export async function generateLetterNumber(

@@ -116,7 +116,7 @@ export default function LoginPage() {
 
             {/* Main Content */}
             <main className="flex grow items-center justify-center p-4 md:p-6">
-                <div className="flex min-h-[600px] w-full max-w-5xl flex-col overflow-hidden rounded-lg bg-card-light shadow-xl dark:bg-card-dark md:flex-row">
+                <div className="flex min-h-150 w-full max-w-5xl flex-col overflow-hidden rounded-lg bg-card-light shadow-xl dark:bg-card-dark md:flex-row">
                     {/* Left Panel */}
                     <div className="flex w-full flex-col items-center justify-center border-b border-gray-100 p-8 text-center dark:border-gray-700 dark:bg-gray-900 md:w-1/2 md:border-b-0 md:border-r md:p-12">
                         <div className="relative mb-6 h-48 w-48 md:h-56 md:w-56">

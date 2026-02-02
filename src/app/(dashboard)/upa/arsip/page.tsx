@@ -12,6 +12,12 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
     ChevronRight,
     ChevronLeft,
     FileSpreadsheet,
@@ -31,6 +37,8 @@ import {
     generateAndDownloadDocument,
     getTemplateIdByLetterType,
 } from "@/lib/template-api";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 // Type untuk export
 interface ExportData {
@@ -48,8 +56,8 @@ export default function ArsipPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterBeasiswa, setFilterBeasiswa] = useState("all");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+    const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
@@ -58,6 +66,22 @@ export default function ArsipPage() {
     const fetchArchiveData = useCallback(async () => {
         setLoading(true);
         try {
+            // Convert date range to ISO format with proper times
+            let startDateIso: string | undefined = undefined;
+            let endDateIso: string | undefined = undefined;
+
+            if (dateRange.from) {
+                const start = new Date(dateRange.from);
+                start.setHours(0, 0, 0, 0);
+                startDateIso = start.toISOString();
+            }
+
+            if (dateRange.to) {
+                const end = new Date(dateRange.to);
+                end.setHours(23, 59, 59, 999);
+                endDateIso = end.toISOString();
+            }
+
             const result = await getApplications({
                 status: "COMPLETED",
                 page: currentPage,
@@ -65,9 +89,9 @@ export default function ArsipPage() {
                 search: searchTerm,
                 jenisBeasiswa:
                     filterBeasiswa !== "all" ? filterBeasiswa : undefined,
-                startDate: startDate || undefined,
-                endDate: endDate || undefined,
-                sortOrder: "desc",
+                startDate: startDateIso,
+                endDate: endDateIso,
+                sortOrder: sortOrder,
             });
             setApplications(result.data);
             setTotalPages(result.meta.totalPages);
@@ -77,7 +101,7 @@ export default function ArsipPage() {
         } finally {
             setLoading(false);
         }
-    }, [currentPage, searchTerm, filterBeasiswa, startDate, endDate]);
+    }, [currentPage, searchTerm, filterBeasiswa, dateRange, sortOrder]);
 
     const handleDownloadPDF = async (applicationId: string) => {
         try {
@@ -335,29 +359,54 @@ export default function ArsipPage() {
                             </SelectContent>
                         </Select>
 
-                        {/* Start Date */}
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <Input
-                                type="date"
-                                placeholder="Dari tanggal"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                className="pl-10 h-10 border-slate-100 bg-slate-50/50"
-                            />
-                        </div>
+                        {/* Date Range Picker */}
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className="h-10 border-slate-100 text-slate-600 gap-2 w-full sm:w-50"
+                                >
+                                    <Calendar className="h-4 w-4" />
+                                    {dateRange.from && dateRange.to
+                                        ? `${format(dateRange.from, "dd LLL", { locale: id })} - ${format(dateRange.to, "dd LLL", { locale: id })}`
+                                        : "Rentang Tanggal"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="end">
+                                <CalendarComponent
+                                    mode="range"
+                                    selected={{
+                                        from: dateRange.from,
+                                        to: dateRange.to,
+                                    }}
+                                    onSelect={(
+                                        range:
+                                            | { from?: Date; to?: Date }
+                                            | undefined,
+                                    ) => setDateRange(range || {})}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
 
-                        {/* End Date */}
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <Input
-                                type="date"
-                                placeholder="Sampai tanggal"
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                className="pl-10 h-10 border-slate-100 bg-slate-50/50"
-                            />
-                        </div>
+                        {/* Sort Order */}
+                        <Select
+                            value={sortOrder}
+                            onValueChange={(value: "asc" | "desc") =>
+                                setSortOrder(value)
+                            }
+                        >
+                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
+                                <div className="flex items-center gap-2">
+                                    <Filter className="h-4 w-4" />
+                                    <SelectValue placeholder="Urutkan" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="desc">Terbaru</SelectItem>
+                                <SelectItem value="asc">Terlama</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {/* Table */}

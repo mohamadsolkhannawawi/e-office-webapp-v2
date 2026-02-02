@@ -16,7 +16,9 @@ import {
 import {
     previewLetterNumber,
     generateLetterNumber,
+    saveLetterNumber,
 } from "@/lib/application-api";
+import { triggerDocxGeneration } from "@/lib/template-api";
 import { toast } from "react-hot-toast";
 
 interface UPANumberingSectionProps {
@@ -30,6 +32,7 @@ interface UPANumberingSectionProps {
         qrImage: string;
     }) => void;
     appliedLetterNumber?: string;
+    onDocumentRegenerate?: () => void;
 }
 
 export function UPANumberingSection({
@@ -39,6 +42,7 @@ export function UPANumberingSection({
     applicationId,
     onVerificationGenerated,
     appliedLetterNumber,
+    onDocumentRegenerate,
 }: UPANumberingSectionProps) {
     const [letterNumber, setLetterNumber] = useState("");
     const [isGenerating, setIsGenerating] = useState(false);
@@ -120,18 +124,49 @@ export function UPANumberingSection({
 
         try {
             if (applicationId) {
-                const result = await generateLetterNumber("SRB", applicationId);
-                if (result) {
-                    onNumberChange(letterNumber);
-                    if (onNumberSave) {
-                        onNumberSave(letterNumber);
+                // Save letter number to database
+                const saveSuccess = await saveLetterNumber(
+                    applicationId,
+                    letterNumber,
+                );
+                if (saveSuccess) {
+                    toast.success(
+                        "Nomor surat berhasil disimpan, sedang membuat dokumen...",
+                        {
+                            id: toastId,
+                        },
+                    );
+
+                    // Trigger document regeneration with new number
+                    const genResult =
+                        await triggerDocxGeneration(applicationId);
+                    if (genResult.success) {
+                        onNumberChange(letterNumber);
+                        if (onNumberSave) {
+                            onNumberSave(letterNumber);
+                        }
+                        // Trigger PDF refresh
+                        if (onDocumentRegenerate) {
+                            onDocumentRegenerate();
+                        }
+                        toast.success(
+                            "Dokumen berhasil diperbarui dengan nomor surat!",
+                            {
+                                id: toastId,
+                            },
+                        );
+                    } else {
+                        toast.error(
+                            `Nomor surat disimpan, namun error saat membuat dokumen: ${genResult.error}`,
+                            {
+                                id: toastId,
+                            },
+                        );
+                        onNumberChange(letterNumber);
+                        if (onNumberSave) {
+                            onNumberSave(letterNumber);
+                        }
                     }
-                    if (result.verification && onVerificationGenerated) {
-                        onVerificationGenerated(result.verification);
-                    }
-                    toast.success("Nomor surat berhasil disimpan", {
-                        id: toastId,
-                    });
                 } else {
                     toast.error("Gagal menyimpan nomor surat", {
                         id: toastId,

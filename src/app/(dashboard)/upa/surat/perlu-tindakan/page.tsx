@@ -22,16 +22,32 @@ async function getActionRequiredApplications(searchParams: SearchParams) {
         const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
-        const query = new URLSearchParams({
+        // Build query params - only include date params if they have valid values
+        const queryParams: Record<string, string> = {
             mode: "pending",
             currentStep: "4", // UPA
             status: (searchParams.status as string) || "",
             search: (searchParams.search as string) || "",
             page: (searchParams.page as string) || "1",
             limit: (searchParams.limit as string) || "10",
-            startDate: (searchParams.startDate as string) || "",
-            endDate: (searchParams.endDate as string) || "",
-        });
+            sortOrder: (searchParams.sortOrder as string) || "desc",
+        };
+
+        // Only add date params if they exist and are not empty
+        if (
+            searchParams.startDate &&
+            String(searchParams.startDate).trim() !== ""
+        ) {
+            queryParams.startDate = String(searchParams.startDate);
+        }
+        if (
+            searchParams.endDate &&
+            String(searchParams.endDate).trim() !== ""
+        ) {
+            queryParams.endDate = String(searchParams.endDate);
+        }
+
+        const query = new URLSearchParams(queryParams);
 
         const res = await fetch(
             `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
     ChevronLeft,
     Maximize2,
@@ -13,12 +14,12 @@ import {
     RotateCcw,
     XOctagon,
     Download,
-    FileText,
 } from "lucide-react";
 import { verifyApplication } from "@/lib/application-api";
 import {
     generateAndDownloadDocument,
     getTemplateIdByLetterType,
+    triggerDocxGeneration,
 } from "@/lib/template-api";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -81,6 +82,9 @@ export function SuratPreviewContent({
     );
     const [upaStampId, setUpaStampId] = useState<string | null>(
         data?.stampId || null,
+    );
+    const [upaStampUrl, setUpaStampUrl] = useState<string | null>(
+        data?.stampUrl || null,
     );
     const [upaIsStampApplied, setUpaIsStampApplied] = useState(!!data?.stampId);
     const [wd1Signature, setWd1Signature] = useState<string | null>(
@@ -278,6 +282,7 @@ export function SuratPreviewContent({
                     // QrCode handled via backend now
                 }}
                 appliedLetterNumber={upaLetterNumber}
+                onDocumentRegenerate={triggerPdfRefresh}
             />
             <UPAStampModal
                 isOpen={isStampModalOpen}
@@ -285,6 +290,7 @@ export function SuratPreviewContent({
                 onStampChange={(stampData) => {
                     if (stampData) {
                         setUpaStampId(stampData.stampId);
+                        setUpaStampUrl(stampData.stampUrl);
                         setUpaIsStampApplied(true);
                         triggerPdfRefresh();
                     }
@@ -388,6 +394,19 @@ export function SuratPreviewContent({
                             stampId: upaStampId || undefined,
                         });
 
+                        // If publish action, trigger document generation to create QR code
+                        if (modalType === "publish" && applicationId) {
+                            try {
+                                await triggerDocxGeneration(applicationId);
+                                triggerPdfRefresh();
+                            } catch (error) {
+                                console.error(
+                                    "Error generating document with QR code:",
+                                    error,
+                                );
+                            }
+                        }
+
                         setPendingRedirect(redirectPath);
                         setStatusModal({
                             isOpen: true,
@@ -450,33 +469,18 @@ export function SuratPreviewContent({
             {/* Main Content: Document Preview */}
             <div className="flex-1 flex flex-col bg-slate-200 overflow-hidden relative print:bg-white print:overflow-visible">
                 {/* Toolbar */}
-                <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 shrink-0 shadow-sm print:hidden">
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-md flex items-center gap-1.5">
-                            <FileText className="h-4 w-4" />
-                            DOCX Generated
-                        </span>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
-                            ✓ Dokumen Asli
-                        </span>
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                            Halaman 1/1
-                        </span>
-                        <button
-                            onClick={() => setIsFullscreen(!isFullscreen)}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors group"
-                            title={isFullscreen ? "Minimize" : "Maximize"}
-                        >
-                            {isFullscreen ? (
-                                <Minimize2 className="h-4 w-4 text-slate-400 group-hover:text-undip-blue transition-colors" />
-                            ) : (
-                                <Maximize2 className="h-4 w-4 text-slate-400 group-hover:text-undip-blue transition-colors" />
-                            )}
-                        </button>
-                    </div>
+                <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-end px-4 shrink-0 shadow-sm print:hidden">
+                    <button
+                        onClick={() => setIsFullscreen(!isFullscreen)}
+                        className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors group"
+                        title={isFullscreen ? "Minimize" : "Maximize"}
+                    >
+                        {isFullscreen ? (
+                            <Minimize2 className="h-4 w-4 text-slate-400 group-hover:text-undip-blue transition-colors" />
+                        ) : (
+                            <Maximize2 className="h-4 w-4 text-slate-400 group-hover:text-undip-blue transition-colors" />
+                        )}
+                    </button>
                 </div>
 
                 {/* Document Area */}
@@ -623,12 +627,19 @@ export function SuratPreviewContent({
                                             )}
                                         </Button>
 
-                                        {upaIsStampApplied && (
-                                            <div className="flex items-center gap-2 justify-center py-1">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-                                                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">
-                                                    Stempel On-Board
-                                                </span>
+                                        {upaIsStampApplied && upaStampUrl && (
+                                            <div className="flex flex-col items-center justify-center py-3 border-t border-slate-100 pt-4">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest">
+                                                    Stempel Teraplikasi
+                                                </p>
+                                                <div className="w-24 h-24 relative">
+                                                    <Image
+                                                        src={upaStampUrl}
+                                                        alt="Stempel"
+                                                        fill
+                                                        className="object-contain w-full h-full"
+                                                    />
+                                                </div>
                                             </div>
                                         )}
                                     </div>

@@ -635,12 +635,11 @@ export function SuratPreviewContent({
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest">
                                                     Stempel Teraplikasi
                                                 </p>
-                                                <div className="w-24 h-24 relative">
-                                                    <Image
+                                                <div className="w-24 h-24">
+                                                    <SignatureImage
                                                         src={upaStampUrl}
                                                         alt="Stempel"
-                                                        fill
-                                                        className="object-contain w-full h-full"
+                                                        className="object-contain mix-blend-multiply w-full h-full"
                                                     />
                                                 </div>
                                             </div>

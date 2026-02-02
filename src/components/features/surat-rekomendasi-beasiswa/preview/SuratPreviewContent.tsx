@@ -868,7 +868,7 @@ export function SuratPreviewContent({
                                             atau mengunduh surat sebagai PDF
                                             atau Word.
                                         </p>
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="flex flex-col gap-3">
                                             <Button
                                                 onClick={async () => {
                                                     if (!applicationId) return;

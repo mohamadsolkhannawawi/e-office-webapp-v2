@@ -197,10 +197,14 @@ export function FormAction({
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
+                                <AlertDialogCancel
+                                    className="bg-red-600 hover:bg-red-700 text-white h-11 px-8 font-medium shadow-sm shadow-red-200"
+                                >
+                                    Batal
+                                </AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={handleConfirmAjukan}
-                                    className="bg-[#007bff] hover:bg-blue-700"
+                                    className="bg-undip-blue hover:bg-sky-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
                                     disabled={isSubmitting}
                                 >
                                     {isSubmitting

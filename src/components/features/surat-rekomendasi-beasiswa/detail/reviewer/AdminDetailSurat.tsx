@@ -78,6 +78,9 @@ export function AdminDetailSurat({
     const [upaStampId, setUpaStampId] = useState<string | null>(
         initialData?.stampId || null,
     );
+    const [upaStampUrl, setUpaStampUrl] = useState<string | null>(
+        initialData?.stamp?.url || null,
+    );
     const [upaIsStampApplied, setUpaIsStampApplied] = useState(
         !!initialData?.stampId,
     );
@@ -553,16 +556,24 @@ export function AdminDetailSurat({
                                                             </div>
                                                         )}
 
-                                                        {upaIsStampApplied && (
-                                                            <div className="flex items-center gap-2 justify-center py-1 border-t border-slate-100 pt-3">
-                                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-                                                                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest text-center">
-                                                                    Stempel
-                                                                    Digital
-                                                                    Aktif
-                                                                </span>
-                                                            </div>
-                                                        )}
+                                                        {upaIsStampApplied &&
+                                                            upaStampUrl && (
+                                                                <div className="flex flex-col items-center justify-center py-3 border-t border-slate-100 pt-4">
+                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest">
+                                                                        Stempel
+                                                                        Teraplikasi
+                                                                    </p>
+                                                                    <div className="w-20 h-20 relative">
+                                                                        <img
+                                                                            src={
+                                                                                upaStampUrl
+                                                                            }
+                                                                            alt="Stempel"
+                                                                            className="object-contain w-full h-full"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                     </div>
                                                 )}
                                             </div>

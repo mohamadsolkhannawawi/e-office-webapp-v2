@@ -9,7 +9,7 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, AlertCircle, Send, Check } from "lucide-react";
+import { XCircle, AlertCircle, Send, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ActionStatusModalProps {
@@ -95,7 +95,7 @@ export function ActionStatusModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[400px] rounded-[32px] border-none shadow-2xl p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-100 rounded-4xl border-none shadow-2xl p-0 overflow-hidden">
                 <div className="p-8 text-center space-y-6">
                     <div className="flex justify-center">
                         <div className="relative">

@@ -480,31 +480,23 @@ export function WD1SignatureSection({
                                             backgroundColor="transparent"
                                         />
                                     </div>
-                                    <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
                                         <div className="text-[11px] text-slate-500 font-medium">
                                             Gunakan kursor atau pen untuk
                                             membubuhkan tanda tangan dalam kotak
-                                            di atas.
+                                            di atas. Klik tombol &quot;Simpan
+                                            Tanda Tangan&quot; di bawah setelah
+                                            selesai.
                                         </div>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={clearCanvas}
-                                                className="h-9 rounded-lg border-slate-200 text-slate-600 hover:bg-white hover:text-red-500 hover:border-red-100 font-bold gap-1.5"
-                                            >
-                                                <Trash2 className="h-3.5 w-3.5" />
-                                                Bersihkan
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                onClick={saveCanvas}
-                                                className="h-9 rounded-lg bg-undip-blue hover:bg-sky-700 text-white font-bold gap-1.5 shadow-sm shadow-blue-100"
-                                            >
-                                                <Check className="h-3.5 w-3.5" />
-                                                Simpan
-                                            </Button>
-                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={clearCanvas}
+                                            className="h-9 rounded-lg border-slate-200 text-slate-600 hover:bg-white hover:text-red-500 hover:border-red-100 font-bold gap-1.5"
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                            Bersihkan
+                                        </Button>
                                     </div>
                                 </div>
                             </TabsContent>

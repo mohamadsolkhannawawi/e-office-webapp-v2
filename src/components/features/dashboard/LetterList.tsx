@@ -136,6 +136,7 @@ export function LetterList({
     const handleSortChange = (sort: string) => {
         router.push(
             `${pathname}?${createQueryString({ sortOrder: sort, page: 1 })}`,
+            { scroll: false },
         );
     };
 
@@ -152,7 +153,8 @@ export function LetterList({
             // Jika range kosong/direset
             setDateRange({});
             router.push(
-                `${pathname}?${createQueryString({ startDate: "", endDate: "" })}`,
+                `${pathname}?${createQueryString({ startDate: null, endDate: null, page: 1 })}`,
+                { scroll: false },
             );
             return;
         }
@@ -161,15 +163,22 @@ export function LetterList({
 
         // Hanya update URL jika kedua tanggal (from & to) sudah dipilih
         if (range.from && range.to) {
-            // Set endDate ke akhir hari (23:59:59.999) agar mencakup semua data di hari tersebut
+            // Set to start of day in local timezone
+            const startDate = new Date(range.from);
+            startDate.setHours(0, 0, 0, 0);
+
+            // Set to end of day in local timezone
             const endDate = new Date(range.to);
             endDate.setHours(23, 59, 59, 999);
 
+            // Convert to ISO string which preserves the timezone
             router.push(
                 `${pathname}?${createQueryString({
-                    startDate: range.from.toISOString(),
+                    startDate: startDate.toISOString(),
                     endDate: endDate.toISOString(),
+                    page: 1,
                 })}`,
+                { scroll: false },
             );
         }
     };

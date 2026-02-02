@@ -22,20 +22,31 @@ async function getCompletedApplications(searchParams: SearchParams) {
         const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
-        // Get current month range
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const startDate = startOfMonth.toISOString().split("T")[0];
-
-        const query = new URLSearchParams({
+        // Build query params - only include date params if they have valid values
+        const queryParams: Record<string, string> = {
             mode: "processed",
             currentStep: "2", // Manajer TU
             search: String(searchParams.search || ""),
             page: String(searchParams.page || "1"),
             limit: String(searchParams.limit || "10"),
-            startDate: String(searchParams.startDate || startDate),
-            endDate: String(searchParams.endDate || ""),
-        });
+            sortOrder: String(searchParams.sortOrder || "desc"),
+        };
+
+        // Only add date params if they exist and are not empty
+        if (
+            searchParams.startDate &&
+            String(searchParams.startDate).trim() !== ""
+        ) {
+            queryParams.startDate = String(searchParams.startDate);
+        }
+        if (
+            searchParams.endDate &&
+            String(searchParams.endDate).trim() !== ""
+        ) {
+            queryParams.endDate = String(searchParams.endDate);
+        }
+
+        const query = new URLSearchParams(queryParams);
 
         const res = await fetch(
             `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,

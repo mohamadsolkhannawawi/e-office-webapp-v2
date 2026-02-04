@@ -74,7 +74,7 @@ export function LampiranSurat({ data }: LampiranSuratProps) {
     );
 
     return (
-        <Card className="border-none shadow-sm bg-white">
+        <Card className="border-none shadow-sm bg-white rounded-3xl">
             <CardHeader className="pb-3 border-b border-gray-300 gap-0">
                 <CardTitle className="text-base font-bold text-gray-800">
                     Lampiran

@@ -82,12 +82,12 @@ export function AdminActionModals({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-125 rounded-2xl border-none shadow-2xl p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-125 rounded-3xl border-none shadow-2xl p-0 overflow-hidden">
                 <div className="p-8">
                     <DialogHeader className="mb-6">
                         <div className="flex items-center gap-4">
                             <div
-                                className={`p-3 rounded-2xl ${
+                                className={`p-3 rounded-3xl ${
                                     type === "approve" || type === "publish"
                                         ? "bg-blue-50 text-undip-blue"
                                         : type === "revise"
@@ -139,7 +139,7 @@ export function AdminActionModals({
                                     onValueChange={setTargetRole}
                                     defaultValue={getRevisionRoles()[0].value}
                                 >
-                                    <SelectTrigger className="h-12 rounded-xl border-slate-200">
+                                    <SelectTrigger className="h-12 rounded-3xl border-slate-200">
                                         <SelectValue placeholder="Pilih Role" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -163,7 +163,7 @@ export function AdminActionModals({
                                     {type === "revise" ? "Revisi" : "Penolakan"}
                                 </Label>
                                 <Textarea
-                                    className="min-h-30 rounded-xl border-slate-200 focus:ring-undip-blue resize-none"
+                                    className="min-h-30 rounded-3xl border-slate-200 focus:ring-undip-blue resize-none"
                                     placeholder={`Tuliskan alasan ${type === "revise" ? "revisi" : "penolakan"} Anda di sini...`}
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
@@ -189,7 +189,7 @@ export function AdminActionModals({
                                 </div>
 
                                 {/* Nomor Surat */}
-                                <div className="bg-linear-to-br from-blue-50 to-blue-50/30 p-5 rounded-2xl border border-blue-200/50">
+                                <div className="bg-linear-to-br from-blue-50 to-blue-50/30 p-5 rounded-3xl border border-blue-200/50">
                                     <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-3">
                                         Nomor Surat
                                     </p>
@@ -203,7 +203,7 @@ export function AdminActionModals({
                                 </div>
 
                                 {/* Status Publikasi */}
-                                <div className="bg-linear-to-br from-green-50 to-green-50/30 p-5 rounded-2xl border border-green-200/50">
+                                <div className="bg-linear-to-br from-green-50 to-green-50/30 p-5 rounded-3xl border border-green-200/50">
                                     <div className="flex items-start gap-3">
                                         <div className="mt-1">
                                             <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5"></div>
@@ -228,13 +228,13 @@ export function AdminActionModals({
                         <Button
                             variant="outline"
                             onClick={onClose}
-                            className="flex-1 h-12 rounded-xl font-bold border-slate-300 text-slate-600 hover:bg-slate-50"
+                            className="flex-1 h-12 rounded-3xl font-bold border-slate-300 text-slate-600 hover:bg-slate-50"
                         >
                             Batal
                         </Button>
                         <Button
                             onClick={handleConfirm}
-                            className={`flex-1 h-12 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 ${
+                            className={`flex-1 h-12 rounded-3xl font-bold text-white shadow-lg transition-all active:scale-95 ${
                                 type === "approve" || type === "publish"
                                     ? "bg-undip-blue hover:bg-sky-700 shadow-blue-100"
                                     : type === "revise"

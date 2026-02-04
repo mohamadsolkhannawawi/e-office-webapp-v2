@@ -55,7 +55,7 @@ export function DetailPengajuan({ data, setData }: DetailPengajuanProps) {
 
     return (
         <section aria-label="Detail Pengajuan">
-            <Card className="border-none shadow-sm bg-white">
+            <Card className="border-none shadow-sm bg-white rounded-3xl">
                 <CardContent className="p-8">
                     <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">

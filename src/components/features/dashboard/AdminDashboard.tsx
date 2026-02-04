@@ -55,7 +55,7 @@ function StatCard({
     };
     
     const CardContent = (
-        <Card className="border-none shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-300">
+        <Card className="border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-100 transition-all hover:-translate-y-1 duration-300 rounded-3xl">
             <CardContentUI className="p-6">
                 <div className="flex justify-between items-start mb-4">
                     <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">
@@ -230,7 +230,7 @@ export function AdminDashboard({
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <Card className="lg:col-span-2 border-none shadow-sm overflow-hidden">
+                <Card className="lg:col-span-2 border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 overflow-hidden rounded-3xl">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-base font-bold text-slate-800">
                             Tren Volume 30 Hari
@@ -282,7 +282,7 @@ export function AdminDashboard({
                     </CardContentUI>
                 </Card>
 
-                <Card className="border-none shadow-sm overflow-hidden">
+                <Card className="border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 overflow-hidden rounded-3xl">
                     <CardHeader className="pb-0">
                         <CardTitle className="text-base font-bold text-slate-800">
                             Distribusi Status

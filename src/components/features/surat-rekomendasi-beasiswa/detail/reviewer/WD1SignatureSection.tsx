@@ -169,7 +169,7 @@ export function WD1SignatureSection({
                 )}
             </div>
 
-            <Card className="border-none shadow-sm overflow-hidden bg-white/50 backdrop-blur-sm border border-slate-100">
+            <Card className="border-none shadow-sm overflow-hidden bg-white/50 backdrop-blur-sm border border-slate-100 rounded-3xl">
                 <CardContent className="p-0">
                     <Tabs
                         defaultValue="upload"
@@ -207,7 +207,7 @@ export function WD1SignatureSection({
                             >
                                 <div className="space-y-4">
                                     <div
-                                        className="border-2 border-dashed border-slate-200 rounded-2xl p-12 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-white hover:border-undip-blue transition-all group cursor-pointer relative"
+                                        className="border-2 border-dashed border-slate-200 rounded-3xl p-12 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-white hover:border-undip-blue transition-all group cursor-pointer relative"
                                         onClick={() =>
                                             document
                                                 .getElementById("sig-upload")
@@ -221,7 +221,7 @@ export function WD1SignatureSection({
                                             accept="image/*"
                                             onChange={handleFileUpload}
                                         />
-                                        <div className="bg-white p-4 rounded-2xl shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                                        <div className="bg-white p-4 rounded-3xl shadow-sm mb-4 group-hover:scale-110 transition-transform">
                                             <Upload className="h-8 w-8 text-undip-blue" />
                                         </div>
                                         <p className="font-bold text-slate-700">
@@ -238,11 +238,11 @@ export function WD1SignatureSection({
 
                                     {previewImage &&
                                         selectedMethod === "upload" && (
-                                            <div className="bg-slate-50 rounded-xl p-4 flex flex-col items-center border border-slate-100">
+                                            <div className="bg-slate-50 rounded-3xl p-4 flex flex-col items-center border border-slate-100">
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
                                                     Pratinjau Unggahan
                                                 </p>
-                                                <div className="relative w-48 h-24 bg-white rounded-lg border border-slate-200 p-2 overflow-hidden shadow-sm">
+                                                <div className="relative w-48 h-24 bg-white rounded-3xl border border-slate-200 p-2 overflow-hidden shadow-sm">
                                                     <SignatureImage
                                                         src={previewImage}
                                                         alt="Uploaded Signature"
@@ -279,7 +279,7 @@ export function WD1SignatureSection({
                                         {templates.map((template) => (
                                             <div
                                                 key={template.id}
-                                                className={`relative aspect-video rounded-xl border-2 transition-all cursor-pointer group flex items-center justify-center p-4 bg-white ${
+                                                className={`relative aspect-video rounded-3xl border-2 transition-all cursor-pointer group flex items-center justify-center p-4 bg-white ${
                                                     selectedTemplateId ===
                                                     template.id
                                                         ? "border-undip-blue shadow-md shadow-blue-50 ring-2 ring-blue-50"
@@ -339,7 +339,7 @@ export function WD1SignatureSection({
                                             </div>
                                         ))}
                                         <div
-                                            className="aspect-video rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-undip-blue hover:text-undip-blue transition-all cursor-pointer"
+                                            className="aspect-video rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:border-undip-blue hover:text-undip-blue transition-all cursor-pointer"
                                             onClick={() =>
                                                 document
                                                     .getElementById(
@@ -469,7 +469,7 @@ export function WD1SignatureSection({
                                 className="mt-0 focus-visible:outline-none"
                             >
                                 <div className="space-y-4">
-                                    <div className="border border-slate-200 rounded-2xl bg-white overflow-hidden shadow-sm">
+                                    <div className="border border-slate-200 rounded-3xl bg-white overflow-hidden shadow-sm">
                                         <SignatureCanvas
                                             ref={sigCanvas}
                                             canvasProps={{
@@ -480,7 +480,7 @@ export function WD1SignatureSection({
                                             backgroundColor="transparent"
                                         />
                                     </div>
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-slate-50 p-3 rounded-3xl border border-slate-100">
                                         <div className="text-[11px] text-slate-500 font-medium">
                                             Gunakan kursor atau pen untuk
                                             membubuhkan tanda tangan dalam kotak
@@ -492,7 +492,7 @@ export function WD1SignatureSection({
                                             variant="outline"
                                             size="sm"
                                             onClick={clearCanvas}
-                                            className="h-9 rounded-lg border-slate-200 text-slate-600 hover:bg-white hover:text-red-500 hover:border-red-100 font-bold gap-1.5"
+                                            className="h-9 rounded-3xl border-slate-200 text-slate-600 hover:bg-white hover:text-red-500 hover:border-red-100 font-bold gap-1.5"
                                         >
                                             <Trash2 className="h-3.5 w-3.5" />
                                             Bersihkan
@@ -505,8 +505,8 @@ export function WD1SignatureSection({
                 </CardContent>
             </Card>
 
-            <div className="flex items-start gap-4 p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
-                <div className="bg-white p-2.5 rounded-xl shadow-sm text-undip-blue">
+            <div className="flex items-start gap-4 p-4 bg-blue-50/50 rounded-3xl border border-blue-100">
+                <div className="bg-white p-2.5 rounded-3xl shadow-sm text-undip-blue">
                     <Check className="h-5 w-5" />
                 </div>
                 <div>

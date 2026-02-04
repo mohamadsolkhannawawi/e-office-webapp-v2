@@ -441,7 +441,7 @@ export function SuratPreviewContent({
                         </p>
                     </div>
 
-                    <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden text-center">
+                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden text-center">
                         <div className="bg-slate-50 px-4 py-3 border-b border-gray-100 flex items-center gap-2">
                             <Info className="h-4 w-4 text-slate-400" />
                             <h2 className="font-bold text-sm text-slate-700 uppercase tracking-wider">
@@ -472,7 +472,7 @@ export function SuratPreviewContent({
                 <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-end px-4 shrink-0 shadow-sm print:hidden">
                     <button
                         onClick={() => setIsFullscreen(!isFullscreen)}
-                        className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors group"
+                        className="p-1.5 hover:bg-slate-100 rounded-3xl transition-colors group"
                         title={isFullscreen ? "Minimize" : "Maximize"}
                     >
                         {isFullscreen ? (
@@ -522,7 +522,7 @@ export function SuratPreviewContent({
                                 </p>
                             </div>
 
-                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-3">
+                            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 text-center space-y-3">
                                 <div
                                     className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${data?.status === "REJECTED" ? "bg-red-100" : "bg-amber-100"}`}
                                 >
@@ -602,7 +602,7 @@ export function SuratPreviewContent({
 
                                         {upaLetterNumber && (
                                             <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 animate-in zoom-in duration-300">
-                                                <div className="bg-white border border-emerald-100 rounded-lg py-2 px-3 text-center shadow-inner">
+                                                <div className="bg-white border border-emerald-100 rounded-3xl py-2 px-3 text-center shadow-inner">
                                                     <span className="text-[10px] font-bold text-emerald-700 font-mono tracking-tight">
                                                         {upaLetterNumber}
                                                     </span>
@@ -655,7 +655,7 @@ export function SuratPreviewContent({
                                                 !upaLetterNumber ||
                                                 !upaIsStampApplied
                                             }
-                                            className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
+                                            className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-3xl flex items-center justify-center gap-2`}
                                             onClick={() => {
                                                 setModalType("publish");
                                                 setIsActionModalOpen(true);
@@ -718,7 +718,7 @@ export function SuratPreviewContent({
 
                                         {wd1Signature && (
                                             <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 animate-in zoom-in duration-300">
-                                                <div className="bg-white border border-emerald-100 rounded-lg py-2 px-3 flex justify-center shadow-inner pt-2">
+                                                <div className="bg-white border border-emerald-100 rounded-3xl py-2 px-3 flex justify-center shadow-inner pt-2">
                                                     <SignatureImage
                                                         src={wd1Signature}
                                                         alt="WD1 Signature"
@@ -735,7 +735,7 @@ export function SuratPreviewContent({
                                         </p>
                                         <Button
                                             disabled={!wd1Signature}
-                                            className={`w-full ${!wd1Signature ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
+                                            className={`w-full ${!wd1Signature ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-3xl flex items-center justify-center gap-2`}
                                             onClick={() => {
                                                 setModalType("approve");
                                                 setIsActionModalOpen(true);
@@ -786,9 +786,9 @@ export function SuratPreviewContent({
                             </div>
 
                             <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
-                                <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                <div className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
                                     <div className="flex flex-col items-center gap-2 mb-2">
-                                        <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
+                                        <div className="p-3 bg-blue-50 rounded-3xl text-undip-blue">
                                             <ShieldCheck className="h-6 w-6" />
                                         </div>
                                         <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
@@ -806,7 +806,7 @@ export function SuratPreviewContent({
                                                 setModalType("approve");
                                                 setIsActionModalOpen(true);
                                             }}
-                                            className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                            className="w-full bg-undip-blue hover:bg-sky-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                         >
                                             <Check className="h-5 w-5" />
                                             Setujui
@@ -817,7 +817,7 @@ export function SuratPreviewContent({
                                                 setModalType("revise");
                                                 setIsActionModalOpen(true);
                                             }}
-                                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                         >
                                             <RotateCcw className="h-5 w-5" />
                                             Revisi
@@ -828,7 +828,7 @@ export function SuratPreviewContent({
                                                 setModalType("reject");
                                                 setIsActionModalOpen(true);
                                             }}
-                                            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                         >
                                             <XOctagon className="h-5 w-5" />
                                             Tolak
@@ -854,9 +854,9 @@ export function SuratPreviewContent({
                             </div>
 
                             <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
-                                <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                <div className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
                                     <div className="flex flex-col items-center gap-2 mb-2">
-                                        <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600">
+                                        <div className="p-3 bg-emerald-50 rounded-3xl text-emerald-600">
                                             <Download className="h-6 w-6" />
                                         </div>
                                         <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
@@ -882,7 +882,7 @@ export function SuratPreviewContent({
                                                         "_blank",
                                                     );
                                                 }}
-                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
                                             >
                                                 <Download className="h-5 w-5" />
                                                 Cetak/PDF
@@ -931,7 +931,7 @@ export function SuratPreviewContent({
                                                     }
                                                 }}
                                                 disabled={isDownloadingTemplate}
-                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
+                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
                                             >
                                                 {isDownloadingTemplate ? (
                                                     <>
@@ -1081,7 +1081,7 @@ export function SuratPreviewContent({
                                         const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
                                         window.open(pdfUrl, "_blank");
                                     }}
-                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-3xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
                                 >
                                     <Download className="h-5 w-5" />
                                     Cetak/PDF
@@ -1122,7 +1122,7 @@ export function SuratPreviewContent({
                                         }
                                     }}
                                     disabled={isDownloadingTemplate}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-5 rounded-lg flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-5 rounded-3xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
                                 >
                                     {isDownloadingTemplate ? (
                                         <>
@@ -1144,7 +1144,7 @@ export function SuratPreviewContent({
                         <Button
                             onClick={handleBack}
                             variant="outline"
-                            className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-6 rounded-lg flex items-center justify-center gap-2 border-none shadow-sm transition-all active:scale-95"
+                            className="w-full bg-red-600 hover:bg-red-700 text-white hover:text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 border-none shadow-sm transition-all active:scale-95"
                         >
                             <ChevronLeft className="h-5 w-5" />
                             Kembali

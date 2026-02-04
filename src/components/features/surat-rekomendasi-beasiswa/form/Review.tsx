@@ -121,7 +121,7 @@ export function Review({ data }: ReviewProps) {
                 </CardContent>
             </Card>
 
-            <Card className="border-none shadow-sm bg-white">
+            <Card className="border-none shadow-sm bg-white rounded-3xl">
                 <CardHeader className="pb-3 border-b border-gray-300 gap-0">
                     <CardTitle className="text-base font-bold text-gray-800">
                         Detail Surat Pengajuan
@@ -141,7 +141,7 @@ export function Review({ data }: ReviewProps) {
                 </CardContent>
             </Card>
 
-            <Card className="border-none shadow-sm bg-green-50 border border-green-200">
+            <Card className="border-none shadow-sm bg-green-50 border border-green-200 rounded-3xl">
                 <CardHeader>
                     <CardTitle className="text-base font-bold text-green-800">
                         Checklist Kesiapan
@@ -174,7 +174,7 @@ export function Review({ data }: ReviewProps) {
                 </CardContent>
             </Card>
 
-            <Card className="border-none shadow-sm bg-white">
+            <Card className="border-none shadow-sm bg-white rounded-3xl">
                 <CardHeader className="pb-3 border-b border-gray-300 gap-0">
                     <CardTitle className="text-base font-bold text-gray-800">
                         Lampiran Dokumen

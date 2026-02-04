@@ -257,7 +257,7 @@ export default function DetailPengajuanPage() {
 
                 <div className="lg:col-span-1 space-y-6">
                     {/* Aksi Card */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
                         <h2 className="font-bold text-slate-800 mb-4 uppercase tracking-wider text-sm">
                             Aksi
                         </h2>
@@ -267,7 +267,7 @@ export default function DetailPengajuanPage() {
                                 className="block"
                             >
                                 <Button
-                                    className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 mb-3"
+                                    className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 mb-3"
                                 >
                                     <Eye className="h-5 w-5" />
                                     Preview
@@ -278,14 +278,14 @@ export default function DetailPengajuanPage() {
                                 <>
                                     <Button
                                         onClick={handleDownloadPDF}
-                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                     >
                                         <Download className="h-5 w-5" />
                                         Cetak/PDF
                                     </Button>
                                     <Button
                                         onClick={handleDownloadDOCX}
-                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                     >
                                         <Download className="h-5 w-5" />
                                         Unduh Word
@@ -300,7 +300,7 @@ export default function DetailPengajuanPage() {
                                             `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
                                         )
                                     }
-                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                 >
                                     <RotateCcw className="h-5 w-5" />
                                     Revisi

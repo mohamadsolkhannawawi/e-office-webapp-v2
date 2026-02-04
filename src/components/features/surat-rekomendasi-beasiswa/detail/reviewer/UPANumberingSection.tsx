@@ -189,12 +189,6 @@ export function UPANumberingSection({
         }
     };
 
-    useEffect(() => {
-        // Default stamp to true
-        onStampApply(true);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
     return (
         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between">

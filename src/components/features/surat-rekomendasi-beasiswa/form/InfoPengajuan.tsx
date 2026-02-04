@@ -64,7 +64,7 @@ function FormField({
                     <button
                         type="button"
                         onClick={onEditToggle}
-                        className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-md ${
+                        className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-3xl ${
                             isEditable
                                 ? "text-amber-600 bg-amber-50 font-bold border border-amber-100"
                                 : "text-amber-600 hover:text-amber-700 hover:bg-slate-50"
@@ -266,7 +266,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
 
     return (
         <section aria-label="Informasi Identitas">
-            <Card className="border-none shadow-sm bg-white">
+            <Card className="border-none shadow-sm bg-white rounded-3xl">
                 <CardContent className="p-8">
                     <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField
@@ -425,7 +425,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                 <button
                                     type="button"
                                     onClick={() => toggleEdit("tanggalLahir")}
-                                    className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-md ${
+                                    className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-3xl ${
                                         editableFields.tanggalLahir
                                             ? "text-amber-600 bg-amber-50 font-bold border border-amber-100"
                                             : "text-amber-600 hover:text-amber-700 hover:bg-slate-50"

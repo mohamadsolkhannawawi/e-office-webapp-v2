@@ -95,7 +95,7 @@ export function ActionStatusModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-100 rounded-4xl border-none shadow-2xl p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-100 rounded-3xl border-none shadow-2xl p-0 overflow-hidden">
                 <div className="p-8 text-center space-y-6">
                     <div className="flex justify-center">
                         <div className="relative">
@@ -131,7 +131,7 @@ export function ActionStatusModal({
                     <Button
                         onClick={onClose}
                         className={cn(
-                            "w-full text-white font-bold h-12 rounded-xl shadow-lg transition-all active:scale-95",
+                            "w-full text-white font-bold h-12 rounded-3xl shadow-lg transition-all active:scale-95",
                             isSuccess
                                 ? "bg-undip-blue hover:bg-sky-700 shadow-blue-100"
                                 : "bg-red-600 hover:bg-red-700 shadow-red-100",

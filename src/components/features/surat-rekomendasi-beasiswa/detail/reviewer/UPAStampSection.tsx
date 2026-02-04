@@ -162,7 +162,7 @@ export function UPAStampSection({
                 </h2>
             </div>
 
-            <Card className="border border-slate-200 shadow-sm">
+            <Card className="border border-slate-200 shadow-sm rounded-3xl">
                 <CardContent className="p-8">
                     {isLoading ? (
                         <div className="flex items-center justify-center py-12">

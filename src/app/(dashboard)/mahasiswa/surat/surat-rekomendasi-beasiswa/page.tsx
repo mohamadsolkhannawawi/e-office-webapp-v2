@@ -65,7 +65,7 @@ export default function SuratRekomendasiBeasiswaPage() {
                     </p>
                 </div>
                 <Link href="/mahasiswa" className="order-1 sm:order-2 self-start sm:self-auto">
-                    <Button className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-md inline-flex items-center gap-2">
+                    <Button className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-3xl inline-flex items-center gap-2">
                         <ArrowLeft className="h-4 w-4" />
                         <span className="text-sm font-semibold">Kembali</span>
                     </Button>
@@ -81,7 +81,7 @@ export default function SuratRekomendasiBeasiswaPage() {
                             key={jenis.id}
                             href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis.id}`}
                         >
-                            <Card className="group cursor-pointer hover:bg-slate-50 hover:shadow-md hover:border-blue-100 transition-all duration-300 h-full">
+                            <Card className="group cursor-pointer hover:bg-slate-50 hover:shadow-md hover:border-blue-100 transition-all duration-300 h-full rounded-3xl">
                                 <CardHeader>
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-undip-blue/10 transition-all duration-300 group-hover:scale-110">

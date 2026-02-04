@@ -434,7 +434,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                 </div>
             )}
 
-            <Card className="border-none shadow-sm bg-white">
+            <Card className="border-none shadow-sm bg-white rounded-3xl">
                 <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">
                         <p className="font-bold text-gray-800">
@@ -527,7 +527,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                 </CardContent>
             </Card>
 
-            <Card className="mt-6 border-none shadow-sm bg-white">
+            <Card className="mt-6 border-none shadow-sm bg-white rounded-3xl">
                 <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -632,7 +632,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                         idx,
                                                                     )
                                                                 }
-                                                                className="text-xs flex items-center gap-1"
+                                                                className="text-xs flex items-center gap-1 rounded-3xl"
                                                             >
                                                                 <Eye className="w-3 h-3" />
                                                                 Lihat
@@ -644,7 +644,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                     <Button
                                                                         variant="destructive"
                                                                         size="sm"
-                                                                        className="text-xs flex items-center gap-1"
+                                                                        className="text-xs flex items-center gap-1 rounded-3xl"
                                                                     >
                                                                         <Trash2 className="w-3 h-3" />
                                                                         Hapus
@@ -670,7 +670,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                         </AlertDialogDescription>
                                                                     </AlertDialogHeader>
                                                                     <AlertDialogFooter>
-                                                                        <AlertDialogCancel>
+                                                                        <AlertDialogCancel className="rounded-3xl">
                                                                             Batal
                                                                         </AlertDialogCancel>
                                                                         <AlertDialogAction
@@ -680,7 +680,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                                     idx,
                                                                                 )
                                                                             }
-                                                                            className="bg-red-600 hover:bg-red-700"
+                                                                            className="bg-red-600 hover:bg-red-700 rounded-3xl"
                                                                         >
                                                                             Hapus
                                                                         </AlertDialogAction>
@@ -704,7 +704,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                 </CardContent>
             </Card>
 
-            <Card className="mt-8 border-none shadow-sm bg-white">
+            <Card className="mt-8 border-none shadow-sm bg-white rounded-3xl">
                 <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">
                         <p className="font-bold text-gray-800">
@@ -792,7 +792,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                 </CardContent>
             </Card>
 
-            <Card className="mt-6 border-none shadow-sm bg-white">
+            <Card className="mt-6 border-none shadow-sm bg-white rounded-3xl">
                 <CardContent className="p-8 space-y-4">
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -899,7 +899,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                         idx,
                                                                     )
                                                                 }
-                                                                className="text-xs flex items-center gap-1"
+                                                                className="text-xs flex items-center gap-1 rounded-3xl"
                                                             >
                                                                 <Eye className="w-3 h-3" />
                                                                 Lihat
@@ -911,7 +911,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                     <Button
                                                                         variant="destructive"
                                                                         size="sm"
-                                                                        className="text-xs flex items-center gap-1"
+                                                                        className="text-xs flex items-center gap-1 rounded-3xl"
                                                                     >
                                                                         <Trash2 className="w-3 h-3" />
                                                                         Hapus
@@ -937,7 +937,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                         </AlertDialogDescription>
                                                                     </AlertDialogHeader>
                                                                     <AlertDialogFooter>
-                                                                        <AlertDialogCancel>
+                                                                        <AlertDialogCancel className="rounded-3xl">
                                                                             Batal
                                                                         </AlertDialogCancel>
                                                                         <AlertDialogAction
@@ -947,7 +947,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                                                     idx,
                                                                                 )
                                                                             }
-                                                                            className="bg-red-600 hover:bg-red-700"
+                                                                            className="bg-red-600 hover:bg-red-700 rounded-3xl"
                                                                         >
                                                                             Hapus
                                                                         </AlertDialogAction>
@@ -973,12 +973,12 @@ export function Lampiran({ data, setData }: LampiranProps) {
 
             {previewUrl && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="bg-white rounded-lg overflow-hidden w-[90%] max-w-3xl">
+                    <div className="bg-white rounded-3xl overflow-hidden w-[90%] max-w-3xl">
                         <div className="flex justify-end p-2">
                             <Button
                                 variant="ghost"
                                 onClick={handleClosePreview}
-                                className="text-sm"
+                                className="text-sm rounded-3xl"
                             >
                                 Tutup
                             </Button>

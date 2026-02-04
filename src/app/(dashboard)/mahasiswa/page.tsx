@@ -67,10 +67,10 @@ export default function MahasiswaDashboardPage() {
                 {DASHBOARD_ACTIONS.map((action, index) => (
                     <div
                         key={action.title}
-                        className={`group bg-white rounded-lg sm:rounded-xl border border-gray-100 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 transition-all duration-300 animate-in slide-in-from-bottom-4 duration-700 ${
+                        className={`group bg-white rounded-3xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 transition-all duration-300 animate-in slide-in-from-bottom-4 duration-700 h-full ${
                             action.disabled
-                                ? "opacity-60 cursor-not-allowed"
-                                : "hover:shadow-md hover:border-blue-100"
+                                ? "opacity-60 cursor-not-allowed border-gray-200"
+                                : "hover:shadow-md hover:border-blue-100 border-gray-200"
                         }`}
                     >
                         <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">

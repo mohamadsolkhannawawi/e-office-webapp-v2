@@ -441,7 +441,7 @@ export function AdminDetailSurat({
                 {/* Right Column */}
                 <div className="lg:col-span-4 space-y-6">
                     {/* Aksi Card */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
                         <h2 className="font-bold text-slate-800 mb-4 uppercase tracking-wider text-sm">
                             Aksi
                         </h2>
@@ -465,7 +465,7 @@ export function AdminDetailSurat({
                                             : "upa"
                                 }${upaLetterNumber ? `&no=${encodeURIComponent(upaLetterNumber)}` : ""}`}
                             >
-                                <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 mb-3">
+                                <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 mb-3">
                                     <Eye className="h-5 w-5" />
                                     Preview
                                 </Button>
@@ -484,7 +484,7 @@ export function AdminDetailSurat({
                                                                 true,
                                                             )
                                                         }
-                                                        className="w-full bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50 font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                                        className="w-full bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50 font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                                     >
                                                         <PenTool className="h-5 w-5" />
                                                         {wd1Signature
@@ -498,7 +498,7 @@ export function AdminDetailSurat({
                                                                 Tanda Tangan
                                                                 Terpilih
                                                             </p>
-                                                            <div className="bg-white rounded-lg p-2 border border-slate-100 shadow-sm relative w-32 h-16">
+                                                            <div className="bg-white rounded-3xl p-2 border border-slate-100 shadow-sm relative w-32 h-16">
                                                                 <SignatureImage
                                                                     src={
                                                                         wd1Signature
@@ -520,7 +520,7 @@ export function AdminDetailSurat({
                                                     role === "wakil-dekan-1" &&
                                                     !wd1Signature
                                                 }
-                                                className={`w-full ${role === "wakil-dekan-1" && !wd1Signature ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
+                                                className={`w-full ${role === "wakil-dekan-1" && !wd1Signature ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-3xl flex items-center justify-center gap-2`}
                                             >
                                                 <Check className="h-5 w-5" />
                                                 Setujui
@@ -529,7 +529,7 @@ export function AdminDetailSurat({
                                                 onClick={() =>
                                                     handleAction("revise")
                                                 }
-                                                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                             >
                                                 <RotateCcw className="h-5 w-5" />
                                                 Revisi
@@ -538,7 +538,7 @@ export function AdminDetailSurat({
                                                 onClick={() =>
                                                     handleAction("reject")
                                                 }
-                                                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                             >
                                                 <XOctagon className="h-5 w-5" />
                                                 Tolak
@@ -553,7 +553,7 @@ export function AdminDetailSurat({
                                                             true,
                                                         )
                                                     }
-                                                    className="w-full bg-yellow-400 border-2 border-yellow-400 text-black hover:bg-yellow-500 font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                                    className="w-full bg-yellow-400 border-2 border-yellow-400 text-black hover:bg-yellow-500 font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                                 >
                                                     <Hash className="h-5 w-5" />
                                                     {upaLetterNumber
@@ -567,7 +567,7 @@ export function AdminDetailSurat({
                                                             true,
                                                         )
                                                     }
-                                                    className={`w-full ${upaIsStampApplied ? "bg-red-600 border-red-200 text-white hover:bg-red-700" : "bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50"} font-bold py-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm`}
+                                                    className={`w-full ${upaIsStampApplied ? "bg-red-600 border-red-200 text-white hover:bg-red-700" : "bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50"} font-bold py-6 rounded-3xl flex items-center justify-center gap-2 transition-all shadow-sm`}
                                                 >
                                                     <ShieldCheck className="h-5 w-5" />
                                                     {upaIsStampApplied
@@ -584,7 +584,7 @@ export function AdminDetailSurat({
                                                                     Nomor Surat
                                                                     Terpilih
                                                                 </p>
-                                                                <div className="flex items-center gap-2 text-undip-blue font-bold text-sm bg-white px-4 py-2 rounded-lg shadow-sm border border-blue-50 w-full justify-center">
+                                                                <div className="flex items-center gap-2 text-undip-blue font-bold text-sm bg-white px-4 py-2 rounded-3xl shadow-sm border border-blue-50 w-full justify-center">
                                                                     <Sparkles className="h-3.5 w-3.5" />
                                                                     {
                                                                         upaLetterNumber
@@ -623,7 +623,7 @@ export function AdminDetailSurat({
                                                     !upaLetterNumber ||
                                                     !upaIsStampApplied
                                                 }
-                                                className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg"} font-bold py-6 rounded-lg flex items-center justify-center gap-2`}
+                                                className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg"} font-bold py-6 rounded-3xl flex items-center justify-center gap-2`}
                                             >
                                                 <Send className="h-5 w-5" />
                                                 Publish
@@ -672,7 +672,7 @@ export function AdminDetailSurat({
                                                 onClick={() =>
                                                     handleDownloadPDF(id)
                                                 }
-                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                             >
                                                 <Download className="h-5 w-5" />
                                                 Cetak/PDF
@@ -682,7 +682,7 @@ export function AdminDetailSurat({
                                                     handleDownloadDOCX(id)
                                                 }
                                                 disabled={downloadingId === id}
-                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                             >
                                                 {downloadingId === id ? (
                                                     <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

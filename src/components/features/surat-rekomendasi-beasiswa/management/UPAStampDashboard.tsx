@@ -151,7 +151,7 @@ export function UPAStampDashboard() {
                     onOpenChange={setUploadDialogOpen}
                 >
                     <DialogTrigger asChild>
-                        <Button className="bg-undip-blue hover:bg-sky-700">
+                        <Button className="bg-undip-blue hover:bg-sky-700 rounded-3xl">
                             <Upload className="h-4 w-4 mr-2" />
                             Upload Template Baru
                         </Button>
@@ -203,7 +203,7 @@ export function UPAStampDashboard() {
             </div>
 
             {/* Stamps Grid */}
-            <div className="bg-white rounded-lg border overflow-hidden">
+            <div className="bg-white rounded-3xl border overflow-hidden">
                 <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
                     <h3 className="font-semibold text-gray-900">
                         Template Stempel ({stamps.length})

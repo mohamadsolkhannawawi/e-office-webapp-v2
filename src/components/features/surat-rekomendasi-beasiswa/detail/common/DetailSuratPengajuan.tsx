@@ -33,7 +33,7 @@ export function DetailSuratPengajuan({ data }: DetailSuratPengajuanProps) {
     };
 
     return (
-        <Card className="border-none shadow-sm bg-white">
+        <Card className="border-none shadow-sm bg-white rounded-3xl">
             <CardHeader className="pb-3 border-b border-gray-300 gap-0">
                 <CardTitle className="text-base font-bold text-gray-800 flex items-center justify-between">
                     <span>Detail Surat Pengajuan</span>

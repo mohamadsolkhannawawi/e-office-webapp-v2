@@ -8,7 +8,7 @@ interface InfoRowProps {
 
 function InfoRow({ label, value }: InfoRowProps) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50/30 transition-colors px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 py-3 border-b border-gray-200 last:border-0 hover:bg-gray-50/30 transition-colors px-6">
             <span className="text-sm text-slate-500 font-medium">{label}</span>
             <span className="md:col-span-2 text-sm font-bold text-slate-800">
                 {value}
@@ -52,12 +52,12 @@ export function IdentitasPengaju({ data }: IdentitasPengajuProps) {
 
     return (
         <Card className="border-none shadow-sm bg-white">
-            <CardHeader className="pb-3 border-b border-gray-100">
+            <CardHeader className="pb-2 border-b border-gray-300 gap-0">
                 <CardTitle className="text-base font-bold text-gray-800">
                     Identitas Pengaju
                 </CardTitle>
             </CardHeader>
-            <CardContent className="pt-3">
+            <CardContent className="pt-2">
                 <div className="space-y-0">
                     <InfoRow
                         label="Nama Lengkap"

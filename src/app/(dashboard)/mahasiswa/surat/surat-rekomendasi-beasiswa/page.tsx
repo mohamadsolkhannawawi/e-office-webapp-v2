@@ -41,7 +41,7 @@ export default function SuratRekomendasiBeasiswaPage() {
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Breadcrumb */}
-            <nav className="flex items-center text-sm font-medium text-slate-500 mb-4">
+            <nav className="flex items-center text-sm font-medium text-slate-500 mb-4 animate-in slide-in-from-bottom-3 duration-700">
                 <Link
                     href="/mahasiswa"
                     className="hover:text-undip-blue transition-colors"
@@ -55,7 +55,7 @@ export default function SuratRekomendasiBeasiswaPage() {
             </nav>
 
             {/* Header */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-in slide-in-from-bottom-3 duration-700">
                 <div className="order-2 sm:order-1">
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                         Surat Rekomendasi Beasiswa
@@ -73,7 +73,7 @@ export default function SuratRekomendasiBeasiswaPage() {
             </div>
 
             {/* Jenis Beasiswa Grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 animate-in slide-in-from-bottom-4 duration-700">
                 {jenisBeasiswa.map((jenis) => {
                     const Icon = jenis.icon;
                     return (
@@ -81,13 +81,13 @@ export default function SuratRekomendasiBeasiswaPage() {
                             key={jenis.id}
                             href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis.id}`}
                         >
-                            <Card className="cursor-pointer hover:bg-slate-50 hover:border-primary transition-all h-full">
+                            <Card className="group cursor-pointer hover:bg-slate-50 hover:shadow-md hover:border-blue-100 transition-all duration-300 h-full">
                                 <CardHeader>
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-lg bg-primary/10">
-                                            <Icon className="h-6 w-6 text-primary" />
+                                        <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-undip-blue/10 transition-all duration-300 group-hover:scale-110">
+                                            <Icon className="h-6 w-6 text-primary group-hover:text-undip-blue transition-colors duration-300" />
                                         </div>
-                                        <CardTitle className="text-lg">
+                                        <CardTitle className="text-lg group-hover:text-undip-blue transition-colors duration-300">
                                             {jenis.name}
                                         </CardTitle>
                                     </div>

@@ -251,7 +251,7 @@ export function RiwayatSurat({
 
     return (
         <Card className="border-none shadow-sm bg-white h-fit">
-            <CardHeader className="pb-3 border-b border-gray-100">
+            <CardHeader className="pb-3 border-b border-gray-300 gap-0">
                 <CardTitle className=" text-sm uppercase tracking-wider font-bold text-gray-800">
                     Riwayat Surat{" "}
                     <span className="text-blue-600">({timeline.length})</span>

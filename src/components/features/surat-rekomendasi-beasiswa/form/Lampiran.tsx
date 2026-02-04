@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, Trash2 } from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -593,94 +593,106 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                 }
 
                                 return (
-                                    <ul className="space-y-3">
+                                    <div className="space-y-4">
                                         {filteredFiles.map(
                                             (f: LampiranFile, idx: number) => (
-                                                <li
+                                                <div
                                                     key={`preview-u-${idx}`}
-                                                    className="flex items-center justify-between gap-4"
+                                                    className="border border-gray-200 rounded-lg bg-white p-4 hover:shadow-md transition-shadow duration-200"
                                                 >
-                                                    <div className="flex-1">
-                                                        <div className="text-sm font-medium truncate">
-                                                            {f.name}
+                                                    <div className="flex items-center justify-between gap-4">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="text-sm font-medium text-gray-900 truncate" title={f.name}>
+                                                                {f.name}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                                                                <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                                                                    f.kategori === 'File' ? 'bg-red-100 text-red-700' :
+                                                                    f.kategori === 'Foto' ? 'bg-green-100 text-green-700' :
+                                                                    'bg-gray-100 text-gray-700'
+                                                                }`}>
+                                                                    {f.kategori || "Lainnya"}
+                                                                </span>
+                                                                <span>
+                                                                    {formatSize(
+                                                                        Number(
+                                                                            f.size,
+                                                                        ) || 0,
+                                                                    )}
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                        <div className="text-xs text-gray-500">
-                                                            {f.kategori ||
-                                                                "(Tidak tersedia)"}{" "}
-                                                            •{" "}
-                                                            {formatSize(
-                                                                Number(
-                                                                    f.size,
-                                                                ) || 0,
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Button
-                                                            variant="ghost"
-                                                            onClick={() =>
-                                                                handleViewFile(
-                                                                    "utama",
-                                                                    idx,
-                                                                )
-                                                            }
-                                                            className="h-9"
-                                                        >
-                                                            Lihat
-                                                        </Button>
-                                                        <AlertDialog>
-                                                            <AlertDialogTrigger
-                                                                asChild
+                                                        <div className="flex items-center gap-2 shrink-0">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() =>
+                                                                    handleViewFile(
+                                                                        "utama",
+                                                                        idx,
+                                                                    )
+                                                                }
+                                                                className="text-xs flex items-center gap-1"
                                                             >
-                                                                <Button
-                                                                    variant="destructive"
-                                                                    className="h-9"
+                                                                <Eye className="w-3 h-3" />
+                                                                Lihat
+                                                            </Button>
+                                                            <AlertDialog>
+                                                                <AlertDialogTrigger
+                                                                    asChild
                                                                 >
-                                                                    Hapus
-                                                                </Button>
-                                                            </AlertDialogTrigger>
-                                                            <AlertDialogContent>
-                                                                <AlertDialogHeader>
-                                                                    <AlertDialogTitle>
-                                                                        Hapus
-                                                                        File?
-                                                                    </AlertDialogTitle>
-                                                                    <AlertDialogDescription>
-                                                                        Yakin
-                                                                        ingin
-                                                                        menghapus
-                                                                        file{" "}
-                                                                        <strong>
-                                                                            {
-                                                                                f.name
-                                                                            }
-                                                                        </strong>
-                                                                        ?
-                                                                    </AlertDialogDescription>
-                                                                </AlertDialogHeader>
-                                                                <AlertDialogFooter>
-                                                                    <AlertDialogCancel>
-                                                                        Batal
-                                                                    </AlertDialogCancel>
-                                                                    <AlertDialogAction
-                                                                        onClick={() =>
-                                                                            handleDelete(
-                                                                                "utama",
-                                                                                idx,
-                                                                            )
-                                                                        }
-                                                                        className="bg-red-600 hover:bg-red-700"
+                                                                    <Button
+                                                                        variant="destructive"
+                                                                        size="sm"
+                                                                        className="text-xs flex items-center gap-1"
                                                                     >
+                                                                        <Trash2 className="w-3 h-3" />
                                                                         Hapus
-                                                                    </AlertDialogAction>
-                                                                </AlertDialogFooter>
-                                                            </AlertDialogContent>
-                                                        </AlertDialog>
+                                                                    </Button>
+                                                                </AlertDialogTrigger>
+                                                                <AlertDialogContent>
+                                                                    <AlertDialogHeader>
+                                                                        <AlertDialogTitle>
+                                                                            Hapus
+                                                                            File?
+                                                                        </AlertDialogTitle>
+                                                                        <AlertDialogDescription>
+                                                                            Yakin
+                                                                            ingin
+                                                                            menghapus
+                                                                            file{" "}
+                                                                            <strong>
+                                                                                {
+                                                                                    f.name
+                                                                                }
+                                                                            </strong>
+                                                                            ?
+                                                                        </AlertDialogDescription>
+                                                                    </AlertDialogHeader>
+                                                                    <AlertDialogFooter>
+                                                                        <AlertDialogCancel>
+                                                                            Batal
+                                                                        </AlertDialogCancel>
+                                                                        <AlertDialogAction
+                                                                            onClick={() =>
+                                                                                handleDelete(
+                                                                                    "utama",
+                                                                                    idx,
+                                                                                )
+                                                                            }
+                                                                            className="bg-red-600 hover:bg-red-700"
+                                                                        >
+                                                                            Hapus
+                                                                        </AlertDialogAction>
+                                                                    </AlertDialogFooter>
+                                                                </AlertDialogContent>
+                                                            </AlertDialog>
+                                                        </div>
                                                     </div>
-                                                </li>
+                                                </div>
                                             ),
                                         )}
-                                    </ul>
+                                    </div>
                                 );
                             })()
                         ) : (
@@ -848,94 +860,106 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                 }
 
                                 return (
-                                    <ul className="space-y-3">
+                                    <div className="space-y-4">
                                         {filteredFiles.map(
                                             (f: LampiranFile, idx: number) => (
-                                                <li
+                                                <div
                                                     key={`preview-t-${idx}`}
-                                                    className="flex items-center justify-between gap-4"
+                                                    className="border border-gray-200 rounded-lg bg-white p-4 hover:shadow-md transition-shadow duration-200"
                                                 >
-                                                    <div className="flex-1">
-                                                        <div className="text-sm font-medium truncate">
-                                                            {f.name}
+                                                    <div className="flex items-center justify-between gap-4">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="text-sm font-medium text-gray-900 truncate" title={f.name}>
+                                                                {f.name}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                                                                <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                                                                    f.kategori === 'File' ? 'bg-red-100 text-red-700' :
+                                                                    f.kategori === 'Foto' ? 'bg-green-100 text-green-700' :
+                                                                    'bg-gray-100 text-gray-700'
+                                                                }`}>
+                                                                    {f.kategori || "Lainnya"}
+                                                                </span>
+                                                                <span>
+                                                                    {formatSize(
+                                                                        Number(
+                                                                            f.size,
+                                                                        ) || 0,
+                                                                    )}
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                        <div className="text-xs text-gray-500">
-                                                            {f.kategori ||
-                                                                "(Tidak tersedia)"}{" "}
-                                                            •{" "}
-                                                            {formatSize(
-                                                                Number(
-                                                                    f.size,
-                                                                ) || 0,
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Button
-                                                            variant="ghost"
-                                                            onClick={() =>
-                                                                handleViewFile(
-                                                                    "tambahan",
-                                                                    idx,
-                                                                )
-                                                            }
-                                                            className="h-9"
-                                                        >
-                                                            Lihat
-                                                        </Button>
-                                                        <AlertDialog>
-                                                            <AlertDialogTrigger
-                                                                asChild
+                                                        <div className="flex items-center gap-2 shrink-0">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() =>
+                                                                    handleViewFile(
+                                                                        "tambahan",
+                                                                        idx,
+                                                                    )
+                                                                }
+                                                                className="text-xs flex items-center gap-1"
                                                             >
-                                                                <Button
-                                                                    variant="destructive"
-                                                                    className="h-9"
+                                                                <Eye className="w-3 h-3" />
+                                                                Lihat
+                                                            </Button>
+                                                            <AlertDialog>
+                                                                <AlertDialogTrigger
+                                                                    asChild
                                                                 >
-                                                                    Hapus
-                                                                </Button>
-                                                            </AlertDialogTrigger>
-                                                            <AlertDialogContent>
-                                                                <AlertDialogHeader>
-                                                                    <AlertDialogTitle>
-                                                                        Hapus
-                                                                        File?
-                                                                    </AlertDialogTitle>
-                                                                    <AlertDialogDescription>
-                                                                        Yakin
-                                                                        ingin
-                                                                        menghapus
-                                                                        file{" "}
-                                                                        <strong>
-                                                                            {
-                                                                                f.name
-                                                                            }
-                                                                        </strong>
-                                                                        ?
-                                                                    </AlertDialogDescription>
-                                                                </AlertDialogHeader>
-                                                                <AlertDialogFooter>
-                                                                    <AlertDialogCancel>
-                                                                        Batal
-                                                                    </AlertDialogCancel>
-                                                                    <AlertDialogAction
-                                                                        onClick={() =>
-                                                                            handleDelete(
-                                                                                "tambahan",
-                                                                                idx,
-                                                                            )
-                                                                        }
-                                                                        className="bg-red-600 hover:bg-red-700"
+                                                                    <Button
+                                                                        variant="destructive"
+                                                                        size="sm"
+                                                                        className="text-xs flex items-center gap-1"
                                                                     >
+                                                                        <Trash2 className="w-3 h-3" />
                                                                         Hapus
-                                                                    </AlertDialogAction>
-                                                                </AlertDialogFooter>
-                                                            </AlertDialogContent>
-                                                        </AlertDialog>
+                                                                    </Button>
+                                                                </AlertDialogTrigger>
+                                                                <AlertDialogContent>
+                                                                    <AlertDialogHeader>
+                                                                        <AlertDialogTitle>
+                                                                            Hapus
+                                                                            File?
+                                                                        </AlertDialogTitle>
+                                                                        <AlertDialogDescription>
+                                                                            Yakin
+                                                                            ingin
+                                                                            menghapus
+                                                                            file{" "}
+                                                                            <strong>
+                                                                                {
+                                                                                    f.name
+                                                                                }
+                                                                            </strong>
+                                                                            ?
+                                                                        </AlertDialogDescription>
+                                                                    </AlertDialogHeader>
+                                                                    <AlertDialogFooter>
+                                                                        <AlertDialogCancel>
+                                                                            Batal
+                                                                        </AlertDialogCancel>
+                                                                        <AlertDialogAction
+                                                                            onClick={() =>
+                                                                                handleDelete(
+                                                                                    "tambahan",
+                                                                                    idx,
+                                                                                )
+                                                                            }
+                                                                            className="bg-red-600 hover:bg-red-700"
+                                                                        >
+                                                                            Hapus
+                                                                        </AlertDialogAction>
+                                                                    </AlertDialogFooter>
+                                                                </AlertDialogContent>
+                                                            </AlertDialog>
+                                                        </div>
                                                     </div>
-                                                </li>
+                                                </div>
                                             ),
                                         )}
-                                    </ul>
+                                    </div>
                                 );
                             })()
                         ) : (

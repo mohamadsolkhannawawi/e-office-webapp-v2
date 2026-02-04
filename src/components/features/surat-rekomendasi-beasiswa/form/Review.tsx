@@ -19,7 +19,7 @@ function SummaryRow({
     value: React.ReactNode;
 }) {
     return (
-        <div className="flex flex-col sm:flex-row items-start py-3 border-b border-gray-100 last:border-0 gap-2 sm:gap-48">
+        <div className="flex flex-col sm:flex-row items-start py-3 border-b border-gray-200 last:border-0 gap-2 sm:gap-48">
             <span className="text-sm text-gray-500 font-medium w-full sm:w-40 sm:w-52 shrink-0">
                 {label}
             </span>
@@ -81,7 +81,7 @@ export function Review({ data }: ReviewProps) {
     return (
         <section aria-label="Review dan Ajukan" className="space-y-6">
             <Card className="border-none shadow-sm bg-white">
-                <CardHeader className="pb-3 border-b border-gray-100">
+                <CardHeader className="pb-3 border-b border-gray-300 gap-0">
                     <CardTitle className="text-base font-bold text-gray-800">
                         Identitas Pengaju
                     </CardTitle>
@@ -122,7 +122,7 @@ export function Review({ data }: ReviewProps) {
             </Card>
 
             <Card className="border-none shadow-sm bg-white">
-                <CardHeader className="pb-3 border-b border-gray-100">
+                <CardHeader className="pb-3 border-b border-gray-300 gap-0">
                     <CardTitle className="text-base font-bold text-gray-800">
                         Detail Surat Pengajuan
                     </CardTitle>
@@ -175,7 +175,7 @@ export function Review({ data }: ReviewProps) {
             </Card>
 
             <Card className="border-none shadow-sm bg-white">
-                <CardHeader className="pb-3 border-b border-gray-100">
+                <CardHeader className="pb-3 border-b border-gray-300 gap-0">
                     <CardTitle className="text-base font-bold text-gray-800">
                         Lampiran Dokumen
                     </CardTitle>

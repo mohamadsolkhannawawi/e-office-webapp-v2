@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
     ArrowLeft,
     Loader2,
     ChevronRight,
-    Eye,
     RotateCcw,
     Download,
 } from "lucide-react";
@@ -32,7 +31,9 @@ import { getReceiverRole } from "@/utils/status-mapper";
 export default function DetailPengajuanPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const id = params.id as string;
+    const from = searchParams.get("from") || "proses"; // default to proses
 
     const [application, setApplication] = useState<ApplicationDetail | null>(
         null,
@@ -208,20 +209,26 @@ export default function DetailPengajuanPage() {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-            {/* Breadcrumb */}
+            {/* Breadcrumb - Dynamic based on from parameter */}
             <nav className="flex items-center text-sm font-medium text-slate-500 mb-4">
-                <Link
-                    href="/mahasiswa"
-                    className="hover:text-undip-blue transition-colors"
-                >
-                    Dashboard
-                </Link>
-                <ChevronRight className="mx-2 h-4 w-4" />
                 <Link
                     href="/mahasiswa/surat/proses"
                     className="hover:text-undip-blue transition-colors"
                 >
-                    Persuratan
+                    Surat Saya
+                </Link>
+                <ChevronRight className="mx-2 h-4 w-4" />
+                <Link
+                    href={
+                        from === "selesai"
+                            ? "/mahasiswa/surat/selesai"
+                            : "/mahasiswa/surat/proses"
+                    }
+                    className="hover:text-undip-blue transition-colors"
+                >
+                    {from === "selesai"
+                        ? "Surat Selesai"
+                        : "Surat Dalam Proses"}
                 </Link>
                 <ChevronRight className="mx-2 h-4 w-4" />
                 <span className="text-slate-800">Detail Pengajuan</span>
@@ -229,21 +236,12 @@ export default function DetailPengajuanPage() {
 
             {/* Header */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Link href={`/mahasiswa/surat/proses`}>
-                        <Button variant="ghost" size="icon">
-                            <ArrowLeft className="h-4 w-4" />
-                        </Button>
-                    </Link>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-800">
-                            Detail Pengajuan
-                        </h1>
-                        <p className="text-sm text-gray-600 mt-1">
-                            {application.scholarshipName ||
-                                "Surat Rekomendasi Beasiswa"}
-                        </p>
-                    </div>
+                <div className="w-full">
+                    <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                        {application.scholarshipName ||
+                            "Surat Rekomendasi Beasiswa"}
+                    </h1>
+                    <p className="text-sm text-gray-600">Detail Pengajuan</p>
                 </div>
             </div>
 
@@ -266,10 +264,7 @@ export default function DetailPengajuanPage() {
                                 href={`/mahasiswa/surat/proses/preview/${id}?stage=mahasiswa`}
                                 className="block"
                             >
-                                <Button
-                                    className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 mb-3"
-                                >
-                                    <Eye className="h-5 w-5" />
+                                <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 mb-3">
                                     Preview
                                 </Button>
                             </Link>

@@ -48,18 +48,15 @@ const DASHBOARD_ACTIONS = [
 export default function MahasiswaDashboardPage() {
     return (
         <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-in fade-in duration-500">
-            {/* Breadcrumb */}
-            <nav className="flex items-center text-xs sm:text-sm font-medium text-slate-500 animate-in slide-in-from-bottom-3 duration-700">
-                <span className="text-slate-800">Dashboard</span>
-                <ChevronRight className="mx-1 sm:mx-2 h-3 w-3 sm:h-4 sm:w-4" />
-            </nav>
+            {/* Breadcrumb - Hidden on dashboard */}
 
             {/* Page Title */}
             <h1 className="text-2xl font-bold text-slate-800 animate-in slide-in-from-bottom-3 duration-700">
                 Dashboard
             </h1>
             <p className="text-sm text-slate-500 -mt-4 animate-in slide-in-from-bottom-3 duration-700">
-                Selamat datang di dashboard mahasiswa. Kelola pengajuan surat dan dokumen administratif Anda dengan mudah.
+                Selamat datang di dashboard mahasiswa. Kelola pengajuan surat
+                dan dokumen administratif Anda dengan mudah.
             </p>
 
             {/* Actions Grid */}

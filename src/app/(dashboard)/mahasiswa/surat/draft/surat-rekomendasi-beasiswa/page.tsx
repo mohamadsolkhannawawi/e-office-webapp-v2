@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
 import { Card } from "@/components/ui/card";
+import { InlineLoader, ButtonLoader } from "@/components/ui/loader";
+import { usePageLoading, useCustomLoading } from "@/contexts/LoadingContext";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -37,14 +39,15 @@ import {
 
 export default function SuratDraftPage() {
     const [applications, setApplications] = useState<ApplicationSummary[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const { setPageLoading } = usePageLoading();
+    const { loading: deleteLoading, setLoading: setDeleteLoading } =
+        useCustomLoading("delete-draft");
     const [searchTerm, setSearchTerm] = useState("");
     const [jenisFilter, setJenisFilter] = useState<string>("ALL");
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedDeleteId, setSelectedDeleteId] = useState<string | null>(
         null,
     );
-    const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
     const [pagination, setPagination] = useState({
         page: 1,
@@ -55,7 +58,7 @@ export default function SuratDraftPage() {
 
     const fetchApplications = useCallback(
         async (page = 1, search = searchTerm, jenis = jenisFilter) => {
-            setIsLoading(true);
+            setPageLoading(true, "Memuat draft surat...");
             try {
                 const { data, meta } = await getApplications({
                     status: "DRAFT",
@@ -74,7 +77,7 @@ export default function SuratDraftPage() {
             } catch (error) {
                 console.error("Failed to fetch applications:", error);
             } finally {
-                setIsLoading(false);
+                setPageLoading(false);
             }
         },
         [searchTerm, jenisFilter],
@@ -97,7 +100,7 @@ export default function SuratDraftPage() {
     const handleDeleteDraft = async () => {
         if (!selectedDeleteId) return;
 
-        setIsDeleting(true);
+        setDeleteLoading(true, "Menghapus draft...");
         try {
             const res = await fetch(
                 `/api/surat-rekomendasi/applications/${selectedDeleteId}`,
@@ -109,7 +112,6 @@ export default function SuratDraftPage() {
             if (res.ok) {
                 setIsDeleteDialogOpen(false);
                 setSelectedDeleteId(null);
-                setIsDeleting(false);
                 fetchApplications(pagination.page);
             } else {
                 const errorData = await res.json();
@@ -117,14 +119,14 @@ export default function SuratDraftPage() {
                     errorData.error ||
                         "Gagal menghapus draft. Silakan coba lagi.",
                 );
-                setIsDeleting(false);
             }
         } catch (error) {
             console.error("Delete draft error:", error);
             setDeleteError(
                 "Terjadi kesalahan saat menghapus draft. Silakan coba lagi.",
             );
-            setIsDeleting(false);
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -139,10 +141,10 @@ export default function SuratDraftPage() {
             {/* Breadcrumb */}
             <nav className="flex items-center text-sm font-medium text-slate-500">
                 <Link
-                    href="/mahasiswa"
+                    href="/mahasiswa/surat/draft/surat-rekomendasi-beasiswa"
                     className="hover:text-undip-blue transition-colors"
                 >
-                    Draf Surat
+                    Draft Surat
                 </Link>
                 <ChevronRight className="mx-2 h-4 w-4" />
                 <span className="text-slate-800">
@@ -180,17 +182,20 @@ export default function SuratDraftPage() {
                         </div>
                     )}
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting} className="rounded-3xl">
+                        <AlertDialogCancel
+                            disabled={deleteLoading}
+                            className="rounded-3xl"
+                        >
                             Batal
                         </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDeleteDraft}
-                            disabled={isDeleting}
+                            disabled={deleteLoading}
                             className="bg-red-600 hover:bg-red-700 text-white rounded-3xl"
                         >
-                            {isDeleting ? (
+                            {deleteLoading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <ButtonLoader />
                                     Menghapus...
                                 </>
                             ) : (
@@ -222,7 +227,10 @@ export default function SuratDraftPage() {
                             value={jenisFilter}
                             onValueChange={setJenisFilter}
                         >
-                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600 rounded-3xl" suppressHydrationWarning>
+                            <SelectTrigger
+                                className="w-full sm:w-50 h-10 border-slate-100 text-slate-600 rounded-3xl"
+                                suppressHydrationWarning
+                            >
                                 <div className="flex items-center gap-2">
                                     <Filter className="h-4 w-4" />
                                     <SelectValue placeholder="Jenis Draft" />
@@ -264,29 +272,36 @@ export default function SuratDraftPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {isLoading ? (
+                            {applications.length === 0 ? (
                                 <tr>
                                     <td
                                         colSpan={4}
-                                        className="px-6 py-12 text-center text-slate-500"
+                                        className="px-6 py-12 text-center"
                                     >
-                                        <div className="flex justify-center items-center gap-2">
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                            Loading data...
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : applications.length === 0 ? (
-                                <tr>
-                                    <td colSpan={4} className="px-6 py-12 text-center">
                                         <div className="flex flex-col items-center justify-center gap-2">
                                             <div className="text-slate-400">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-16 w-16 mx-auto mb-2"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                    />
                                                 </svg>
                                             </div>
-                                            <p className="text-slate-600 font-medium">Tidak ada Draft Surat tersimpan.</p>
-                                            <p className="text-slate-400 text-sm">Belum ada draft yang tersimpan saat ini.</p>
+                                            <p className="text-slate-600 font-medium">
+                                                Tidak ada Draft Surat tersimpan.
+                                            </p>
+                                            <p className="text-slate-400 text-sm">
+                                                Belum ada draft yang tersimpan
+                                                saat ini.
+                                            </p>
                                         </div>
                                     </td>
                                 </tr>

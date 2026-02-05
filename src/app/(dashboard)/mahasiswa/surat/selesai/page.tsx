@@ -132,10 +132,10 @@ export default function SuratSelesaiPage() {
             {/* Breadcrumb */}
             <nav className="flex items-center text-sm font-medium text-slate-500">
                 <Link
-                    href="/mahasiswa"
+                    href="/mahasiswa/surat/selesai"
                     className="hover:text-undip-blue transition-colors"
                 >
-                    Persuratan
+                    Surat Saya
                 </Link>
                 <ChevronRight className="mx-2 h-4 w-4" />
                 <span className="text-slate-800">Surat Selesai</span>
@@ -168,7 +168,10 @@ export default function SuratSelesaiPage() {
                             value={jenisFilter}
                             onValueChange={setJenisFilter}
                         >
-                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600 rounded-3xl" suppressHydrationWarning>
+                            <SelectTrigger
+                                className="w-full sm:w-50 h-10 border-slate-100 text-slate-600 rounded-3xl"
+                                suppressHydrationWarning
+                            >
                                 <div className="flex items-center gap-2">
                                     <Filter className="h-4 w-4" />
                                     <SelectValue placeholder="Jenis Surat" />
@@ -227,15 +230,34 @@ export default function SuratSelesaiPage() {
                                 </tr>
                             ) : applications.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center">
+                                    <td
+                                        colSpan={5}
+                                        className="px-6 py-12 text-center"
+                                    >
                                         <div className="flex flex-col items-center justify-center gap-2">
                                             <div className="text-slate-400">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-16 w-16 mx-auto mb-2"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                    />
                                                 </svg>
                                             </div>
-                                            <p className="text-slate-600 font-medium">Tidak ada surat yang selesai.</p>
-                                            <p className="text-slate-400 text-sm">Belum ada surat yang telah diselesaikan.</p>
+                                            <p className="text-slate-600 font-medium">
+                                                Tidak ada surat yang selesai.
+                                            </p>
+                                            <p className="text-slate-400 text-sm">
+                                                Belum ada surat yang telah
+                                                diselesaikan.
+                                            </p>
                                         </div>
                                     </td>
                                 </tr>
@@ -284,7 +306,7 @@ export default function SuratSelesaiPage() {
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex justify-end gap-2">
                                                     <Link
-                                                        href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}`}
+                                                        href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}?from=selesai`}
                                                     >
                                                         <Button
                                                             variant="ghost"

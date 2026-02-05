@@ -70,11 +70,27 @@ export default function LoginPage() {
         }
     }, [isAuthenticated, currentUser, authLoading, redirectToDashboard]);
 
+    // Check for logout success flag and show notification
+    React.useEffect(() => {
+        if (typeof window !== "undefined") {
+            const logoutSuccess = sessionStorage.getItem("logout_success");
+            if (logoutSuccess === "true") {
+                toast.success(
+                    "Berhasil keluar dari akun! Sampai jumpa kembali",
+                    {
+                        duration: 4000,
+                    },
+                );
+                sessionStorage.removeItem("logout_success");
+            }
+        }
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!email || !password) {
-            toast.error("Email dan password harus diisi");
+            toast.error("Email dan password wajib diisi untuk masuk ke sistem");
             return;
         }
 
@@ -82,7 +98,9 @@ export default function LoginPage() {
 
         try {
             await signIn(email, password);
-            toast.success("Login berhasil!");
+            toast.success(
+                "Login berhasil! Selamat datang di E-Office FSM UNDIP",
+            );
 
             // FETCH LATEST SESSION TO GET ROLES (Manual Handler only intercepts getSession)
             await refreshSession();
@@ -99,11 +117,44 @@ export default function LoginPage() {
             }
         } catch (error) {
             console.error("Login error:", error);
-            toast.error(
-                error instanceof Error
-                    ? error.message
-                    : "Login gagal. Periksa email dan password Anda.",
-            );
+
+            // Pesan error yang lebih spesifik
+            let errorMessage = "Login gagal. Silakan coba lagi";
+
+            if (error instanceof Error) {
+                const errMsg = error.message.toLowerCase();
+
+                if (
+                    errMsg.includes("invalid") ||
+                    errMsg.includes("incorrect") ||
+                    errMsg.includes("wrong")
+                ) {
+                    errorMessage =
+                        "Email atau password yang Anda masukkan salah. Silakan periksa kembali";
+                } else if (
+                    errMsg.includes("not found") ||
+                    errMsg.includes("user not found")
+                ) {
+                    errorMessage =
+                        "Akun tidak ditemukan. Pastikan email Anda sudah terdaftar";
+                } else if (
+                    errMsg.includes("disabled") ||
+                    errMsg.includes("inactive")
+                ) {
+                    errorMessage =
+                        "Akun Anda tidak aktif. Hubungi administrator untuk bantuan";
+                } else if (
+                    errMsg.includes("network") ||
+                    errMsg.includes("connection")
+                ) {
+                    errorMessage =
+                        "Koneksi bermasalah. Periksa jaringan internet Anda";
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+            }
+
+            toast.error(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -111,7 +162,49 @@ export default function LoginPage() {
 
     return (
         <div className="flex min-h-screen flex-col bg-bg-light font-sans text-gray-800 antialiased dark:bg-bg-dark dark:text-gray-200">
-            <Toaster position="top-right" />
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    style: {
+                        minWidth: "400px",
+                        minHeight: "80px",
+                        padding: "16px",
+                        borderRadius: "12px",
+                        fontSize: "15px",
+                        fontWeight: "600",
+                    },
+                    success: {
+                        style: {
+                            background: "#10b981",
+                            color: "white",
+                            minWidth: "400px",
+                            minHeight: "80px",
+                            borderRadius: "12px",
+                            fontSize: "15px",
+                            fontWeight: "600",
+                        },
+                        iconTheme: {
+                            primary: "white",
+                            secondary: "#10b981",
+                        },
+                    },
+                    error: {
+                        style: {
+                            background: "#ef4444",
+                            color: "white",
+                            minWidth: "400px",
+                            minHeight: "80px",
+                            borderRadius: "12px",
+                            fontSize: "15px",
+                            fontWeight: "600",
+                        },
+                        iconTheme: {
+                            primary: "white",
+                            secondary: "#ef4444",
+                        },
+                    },
+                }}
+            />
             <Navbar showProfile={false} />
 
             {/* Main Content */}
@@ -129,7 +222,7 @@ export default function LoginPage() {
                             />
                         </div>
                         <h1 className="mb-4 text-3xl font-bold text-dark-navy dark:text-white">
-                            FSM UNDIP SSO
+                            Aplikasi Persuratan Fakultas Sains dan Matematika
                         </h1>
                         <p className="max-w-sm leading-relaxed text-gray-500 dark:text-gray-400">
                             Selamat datang di Portal Aplikasi UNDIP FSM. Silakan
@@ -141,7 +234,7 @@ export default function LoginPage() {
                     <div className="flex w-full flex-col justify-center bg-card-light p-8 dark:bg-card-dark md:w-1/2 md:p-12">
                         <div className="mb-8">
                             <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-                                Masuk
+                                Selamat Datang !
                             </h2>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
                                 Masukkan kredensial Anda untuk mengakses akun

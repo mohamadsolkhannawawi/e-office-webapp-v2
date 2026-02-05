@@ -60,25 +60,34 @@ export function LetterList({
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
+    // Determine the 'from' parameter based on current pathname
+    const isSelesaiPage = pathname.includes("/selesai");
+    const isPerluTindakanPage = pathname.includes("/perlu-tindakan");
+    const fromParam = isSelesaiPage
+        ? "selesai"
+        : isPerluTindakanPage
+          ? "perlu-tindakan"
+          : "";
+
     const [searchTerm, setSearchTerm] = useState(
         searchParams.get("search") || "",
     );
-    
+
     // State untuk input tanggal (format YYYY-MM-DD untuk input type="date")
     const [startDateInput, setStartDateInput] = useState(() => {
         const start = searchParams.get("startDate");
         if (start) {
             const date = new Date(start);
-            return date.toISOString().split('T')[0];
+            return date.toISOString().split("T")[0];
         }
         return "";
     });
-    
+
     const [endDateInput, setEndDateInput] = useState(() => {
         const end = searchParams.get("endDate");
         if (end) {
             const date = new Date(end);
-            return date.toISOString().split('T')[0];
+            return date.toISOString().split("T")[0];
         }
         return "";
     });
@@ -153,7 +162,7 @@ export function LetterList({
 
     const handleStartDateChange = (value: string) => {
         setStartDateInput(value);
-        
+
         // Auto-apply filter jika kedua tanggal sudah terisi
         if (value && endDateInput) {
             applyDateFilter(value, endDateInput);
@@ -168,7 +177,7 @@ export function LetterList({
 
     const handleEndDateChange = (value: string) => {
         setEndDateInput(value);
-        
+
         // Auto-apply filter jika kedua tanggal sudah terisi
         if (startDateInput && value) {
             applyDateFilter(startDateInput, value);
@@ -229,9 +238,12 @@ export function LetterList({
                     {/* Date Range Filter - Stylish Design */}
                     <div className="flex items-center gap-2 bg-slate-50/50 rounded-3xl p-2 border border-slate-100">
                         <Calendar className="h-4 w-4 text-slate-400 ml-1" />
-                        
+
                         <div className="flex items-center gap-2">
-                            <Label htmlFor="startDate" className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                            <Label
+                                htmlFor="startDate"
+                                className="text-xs font-medium text-slate-600 whitespace-nowrap"
+                            >
                                 Dari
                             </Label>
                             <div className="relative">
@@ -240,16 +252,21 @@ export function LetterList({
                                     type="date"
                                     className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
                                     value={startDateInput}
-                                    onChange={(e) => handleStartDateChange(e.target.value)}
+                                    onChange={(e) =>
+                                        handleStartDateChange(e.target.value)
+                                    }
                                     max={endDateInput || undefined}
                                 />
                             </div>
                         </div>
-                        
+
                         <div className="h-4 w-px bg-slate-200" />
-                        
+
                         <div className="flex items-center gap-2">
-                            <Label htmlFor="endDate" className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                            <Label
+                                htmlFor="endDate"
+                                className="text-xs font-medium text-slate-600 whitespace-nowrap"
+                            >
                                 Sampai
                             </Label>
                             <div className="relative">
@@ -258,7 +275,9 @@ export function LetterList({
                                     type="date"
                                     className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
                                     value={endDateInput}
-                                    onChange={(e) => handleEndDateChange(e.target.value)}
+                                    onChange={(e) =>
+                                        handleEndDateChange(e.target.value)
+                                    }
                                     min={startDateInput || undefined}
                                 />
                             </div>
@@ -284,7 +303,10 @@ export function LetterList({
                         defaultValue={searchParams.get("sortOrder") || "desc"}
                         onValueChange={handleSortChange}
                     >
-                        <SelectTrigger className="w-full sm:w-40 h-10 border-slate-100 text-slate-600 rounded-3xl" suppressHydrationWarning>
+                        <SelectTrigger
+                            className="w-full sm:w-40 h-10 border-slate-100 text-slate-600 rounded-3xl"
+                            suppressHydrationWarning
+                        >
                             <div className="flex items-center gap-2">
                                 <Filter className="h-4 w-4" />
                                 <SelectValue placeholder="Urutkan" />
@@ -301,36 +323,54 @@ export function LetterList({
             {/* Table Section */}
             <div className="overflow-x-auto">
                 <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-undip-blue border-b border-slate-100 text-[11px] uppercase text-white font-bold tracking-wider">
-                                <th className="px-6 py-4 w-12">No</th>
-                                <th className="px-6 py-4">
-                                    Pengirim / Pemohon
-                                </th>
-                                <th className="px-6 py-4">Perihal</th>
-                                <th className="px-6 py-4">Tanggal Diterima</th>
-                                <th className="px-6 py-4">Tujuan Saat Ini</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 text-sm">
-                            {letters.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center">
-                                        <div className="flex flex-col items-center justify-center gap-2">
-                                            <div className="text-slate-400">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                </svg>
-                                            </div>
-                                            <p className="text-slate-600 font-medium">Tidak ada surat yang sedang diproses.</p>
-                                            <p className="text-slate-400 text-sm">Belum ada data surat yang tersedia saat ini.</p>
+                    <thead>
+                        <tr className="bg-undip-blue border-b border-slate-100 text-[11px] uppercase text-white font-bold tracking-wider">
+                            <th className="px-6 py-4 w-12">No</th>
+                            <th className="px-6 py-4">Pengirim / Pemohon</th>
+                            <th className="px-6 py-4">Perihal</th>
+                            <th className="px-6 py-4">Tanggal Diterima</th>
+                            <th className="px-6 py-4">Tujuan Saat Ini</th>
+                            <th className="px-6 py-4">Status</th>
+                            <th className="px-6 py-4 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-sm">
+                        {letters.length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan={7}
+                                    className="px-6 py-12 text-center"
+                                >
+                                    <div className="flex flex-col items-center justify-center gap-2">
+                                        <div className="text-slate-400">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="h-16 w-16 mx-auto mb-2"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={1.5}
+                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                />
+                                            </svg>
                                         </div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                letters.map((letter, index) => (
+                                        <p className="text-slate-600 font-medium">
+                                            Tidak ada surat yang sedang
+                                            diproses.
+                                        </p>
+                                        <p className="text-slate-400 text-sm">
+                                            Belum ada data surat yang tersedia
+                                            saat ini.
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : (
+                            letters.map((letter, index) => (
                                 <tr
                                     key={letter.id}
                                     className="hover:bg-slate-50/30 transition-colors group"
@@ -375,7 +415,7 @@ export function LetterList({
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <Link
-                                            href={`/${rolePath}/surat/${detailBasePath}/detail/${letter.id}`}
+                                            href={`/${rolePath}/surat/${detailBasePath}/detail/${letter.id}${fromParam ? `?from=${fromParam}` : ""}`}
                                         >
                                             <Button
                                                 variant="outline"
@@ -388,10 +428,11 @@ export function LetterList({
                                         </Link>
                                     </td>
                                 </tr>
-                            )))}
-                        </tbody>
-                    </table>
-                </div>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
             {/* Pagination */}
             {meta && meta.totalPages > 1 && (

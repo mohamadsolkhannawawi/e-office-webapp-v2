@@ -139,7 +139,7 @@ export default async function SelesaiPage(props: {
         <div className="space-y-8 animate-in fade-in duration-500">
             <nav className="flex items-center text-sm font-medium text-slate-500">
                 <Link
-                    href="/manajer-tu"
+                    href="/manajer-tu/surat/selesai"
                     className="hover:text-undip-blue transition-colors"
                 >
                     Surat Masuk

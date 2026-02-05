@@ -27,10 +27,15 @@ async function getApplication(id: string) {
 
 export default async function ManajerTUDetailSuratPage({
     params,
+    searchParams,
 }: {
     params: Promise<{ id: string }>;
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
     const { id } = await params;
+    const search = await searchParams;
+    const from =
+        (search.from as "perlu-tindakan" | "selesai" | undefined) || undefined;
     const application = await getApplication(id);
 
     if (!application) {
@@ -45,6 +50,11 @@ export default async function ManajerTUDetailSuratPage({
     }
 
     return (
-        <AdminDetailSurat role="manajer-tu" id={id} initialData={application} />
+        <AdminDetailSurat
+            role="manajer-tu"
+            id={id}
+            from={from}
+            initialData={application}
+        />
     );
 }

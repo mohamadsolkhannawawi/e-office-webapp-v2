@@ -10,7 +10,6 @@ import {
     X,
     ChevronRight,
     ChevronDown,
-    Eye,
     Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -131,7 +130,6 @@ export function FilePreview({
                                         onClick={() => togglePreview(index)}
                                         className="text-xs p-2 flex items-center gap-1"
                                     >
-                                        <Eye className="w-3 h-3" />
                                         {isExpanded ? (
                                             <ChevronDown className="w-4 h-4" />
                                         ) : (

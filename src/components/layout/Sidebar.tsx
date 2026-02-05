@@ -10,6 +10,8 @@ import {
     FileEdit,
     LogOut,
     ChevronDown,
+    ChevronLeft,
+    ChevronRight,
     Archive,
     Settings,
     User,
@@ -17,11 +19,23 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 interface SidebarProps {
     className?: string;
     isOpen?: boolean;
     onClose?: () => void;
+    isCollapsed?: boolean;
+    onToggleCollapse?: (collapsed: boolean) => void;
 }
 
 interface MenuItem {
@@ -215,11 +229,24 @@ export function Sidebar({
     className = "",
     isOpen = false,
     onClose,
+    isCollapsed: propIsCollapsed = false,
+    onToggleCollapse,
 }: SidebarProps) {
     const { signOut } = useAuth();
     const pathname = usePathname();
     const role = useCurrentRole();
     const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
+    const [isCollapsed, setIsCollapsed] = useState(propIsCollapsed);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    const toggleCollapse = () => {
+        const newState = !isCollapsed;
+        setIsCollapsed(newState);
+        if (onToggleCollapse) {
+            onToggleCollapse(newState);
+        }
+    };
 
     const menuItems = useMemo(() => {
         return roleMenuConfig[role] || roleMenuConfig.mahasiswa;
@@ -257,24 +284,48 @@ export function Sidebar({
         }
     };
 
+    const handleLogoutClick = () => {
+        setShowLogoutModal(true);
+    };
+
+    const handleLogoutConfirm = async () => {
+        setIsLoggingOut(true);
+
+        try {
+            await signOut();
+            // Toast akan ditampilkan di login page setelah redirect
+        } catch {
+            toast.error("Gagal keluar dari akun. Silakan coba lagi");
+            setIsLoggingOut(false);
+            setShowLogoutModal(false);
+        }
+    };
+
+    const handleLogoutCancel = () => {
+        setShowLogoutModal(false);
+    };
+
     return (
         <>
             {/* Overlay for mobile */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                    className="fixed inset-0 bg-black/50 z-30 lg:hidden"
                     onClick={onClose}
                 />
             )}
 
             {/* Sidebar */}
             <aside
-                className={`w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 print:hidden
-                    fixed lg:static top-16 lg:top-0 bottom-0 left-0 z-50 lg:h-full
+                className={`bg-white border-r border-gray-200 flex flex-col justify-between transition-all duration-300 print:hidden
+                    fixed lg:fixed top-16 bottom-0 left-0 z-40 h-[calc(100vh-4rem)]
+                    ${isCollapsed ? "w-20" : "w-64"}
                     ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
                     ${className}`}
             >
-                <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+                <nav
+                    className={`flex-1 px-3 py-6 space-y-1 overflow-y-auto ${isCollapsed ? "flex flex-col items-center" : ""}`}
+                >
                     {menuItems.map((item) => (
                         <div key={item.label}>
                             {item.submenu ? (
@@ -297,37 +348,45 @@ export function Sidebar({
                                             >
                                                 {item.icon}
                                             </span>
-                                            <span className="font-medium text-sm">
-                                                {item.label}
-                                            </span>
+                                            {!isCollapsed && (
+                                                <span className="font-medium text-sm">
+                                                    {item.label}
+                                                </span>
+                                            )}
                                         </div>
-                                        <ChevronDown
-                                            size={18}
-                                            className={`text-slate-400 transition-transform duration-200 ${
-                                                expandedMenu === item.label
-                                                    ? "rotate-180"
-                                                    : ""
-                                            }`}
-                                        />
+                                        {!isCollapsed && (
+                                            <ChevronDown
+                                                size={18}
+                                                className={`text-slate-400 transition-transform duration-200 ${
+                                                    expandedMenu === item.label
+                                                        ? "rotate-180"
+                                                        : ""
+                                                }`}
+                                            />
+                                        )}
                                     </button>
-                                    {expandedMenu === item.label && (
-                                        <div className="ml-9 mt-1 space-y-1">
-                                            {item.submenu.map((sub) => (
-                                                <Link
-                                                    key={sub.label}
-                                                    href={sub.href}
-                                                    onClick={handleLinkClick}
-                                                    className={`block px-3 py-2 text-sm rounded-2xl transition-colors ${
-                                                        pathname === sub.href
-                                                            ? "text-white font-medium bg-undip-blue"
-                                                            : "text-slate-500 hover:text-slate-900 hover:bg-gray-50"
-                                                    }`}
-                                                >
-                                                    {sub.label}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    )}
+                                    {!isCollapsed &&
+                                        expandedMenu === item.label && (
+                                            <div className="ml-9 mt-1 space-y-1">
+                                                {item.submenu.map((sub) => (
+                                                    <Link
+                                                        key={sub.label}
+                                                        href={sub.href}
+                                                        onClick={
+                                                            handleLinkClick
+                                                        }
+                                                        className={`block px-3 py-2 text-sm rounded-2xl transition-colors ${
+                                                            pathname ===
+                                                            sub.href
+                                                                ? "text-white font-medium bg-undip-blue"
+                                                                : "text-slate-500 hover:text-slate-900 hover:bg-gray-50"
+                                                        }`}
+                                                    >
+                                                        {sub.label}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )}
                                 </div>
                             ) : (
                                 <Link
@@ -337,7 +396,8 @@ export function Sidebar({
                                         isActive(item.href)
                                             ? "bg-undip-blue text-white"
                                             : "text-slate-700 hover:bg-gray-100"
-                                    }`}
+                                    } ${isCollapsed ? "justify-center" : ""}`}
+                                    title={isCollapsed ? item.label : ""}
                                 >
                                     <span
                                         className={`${
@@ -348,23 +408,83 @@ export function Sidebar({
                                     >
                                         {item.icon}
                                     </span>
-                                    {item.label}
+                                    {!isCollapsed && item.label}
                                 </Link>
                             )}
                         </div>
                     ))}
                 </nav>
 
-                <div className="p-4 border-t border-gray-100">
+                {/* Collapse Toggle Button - Positioned in the center of sidebar */}
+                <div className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 -mr-4">
                     <button
-                        onClick={() => signOut()}
-                        className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                        onClick={toggleCollapse}
+                        className="bg-white border border-gray-200 rounded-full p-2 hover:bg-gray-50 transition-colors shadow-sm"
+                        title={
+                            isCollapsed ? "Perluas sidebar" : "Tutup sidebar"
+                        }
+                    >
+                        {isCollapsed ? (
+                            <ChevronRight
+                                size={18}
+                                className="text-slate-600"
+                            />
+                        ) : (
+                            <ChevronLeft size={18} className="text-slate-600" />
+                        )}
+                    </button>
+                </div>
+
+                <div
+                    className={`shrink-0 px-4 py-6 border-t border-gray-100 ${isCollapsed ? "flex flex-col items-center" : ""}`}
+                >
+                    <button
+                        onClick={handleLogoutClick}
+                        className={`flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors ${isCollapsed ? "justify-center" : "w-full"}`}
+                        title={isCollapsed ? "Keluar" : ""}
                     >
                         <LogOut size={20} />
-                        Keluar
+                        {!isCollapsed && "Keluar"}
                     </button>
                 </div>
             </aside>
+
+            {/* Logout Confirmation Modal */}
+            <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
+                <DialogContent className="sm:max-w-md rounded-3xl">
+                    <DialogHeader>
+                        <div>
+                            <DialogTitle className="text-xl font-bold text-gray-900 text-left mb-2">
+                                Konfirmasi Keluar
+                            </DialogTitle>
+                            <DialogDescription className="text-left text-base text-gray-600">
+                                Apakah Anda yakin ingin keluar dari akun? Anda
+                                perlu login kembali untuk mengakses sistem.
+                            </DialogDescription>
+                        </div>
+                    </DialogHeader>
+                    <DialogFooter className="flex gap-3 sm:gap-3 mt-6">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleLogoutCancel}
+                            disabled={isLoggingOut}
+                            className="flex-1 h-11 rounded-xl font-semibold"
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleLogoutConfirm}
+                            disabled={isLoggingOut}
+                            className="flex-1 h-11 rounded-xl font-semibold text-white"
+                            style={{ backgroundColor: "#ef4444" }}
+                        >
+                            {isLoggingOut ? "Memproses..." : "Ya, Keluar"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

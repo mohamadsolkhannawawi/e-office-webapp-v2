@@ -277,8 +277,10 @@ export function NotificationBell() {
                 </Button>
             </PopoverTrigger>
             <PopoverContent
-                className="w-80 p-0 shadow-xl border-slate-200 rounded-xl overflow-hidden"
+                className="w-[600px] max-h-[700px] p-0 shadow-2xl border-slate-200 rounded-xl overflow-hidden"
                 align="end"
+                sideOffset={8}
+                alignOffset={-560}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50">
@@ -309,7 +311,7 @@ export function NotificationBell() {
                 </div>
 
                 {/* Notification List */}
-                <div className="max-h-80 overflow-y-auto">
+                <div className="max-h-[600px] overflow-y-auto">
                     {isLoading ? (
                         <div className="p-4 text-center text-slate-400 text-sm">
                             Memuat...

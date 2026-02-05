@@ -81,7 +81,6 @@ export default function SuratSelesaiPage() {
             );
 
             console.log("Dokumen berhasil diunduh");
-            alert("Dokumen surat berhasil diunduh!");
         } catch (error) {
             console.error("Failed to download template:", error);
             alert("Gagal mengunduh dokumen surat");
@@ -160,7 +159,7 @@ export default function SuratSelesaiPage() {
                                 placeholder="Cari surat selesai..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full"
+                                className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full rounded-3xl"
                             />
                         </div>
 
@@ -169,7 +168,7 @@ export default function SuratSelesaiPage() {
                             value={jenisFilter}
                             onValueChange={setJenisFilter}
                         >
-                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
+                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600 rounded-3xl" suppressHydrationWarning>
                                 <div className="flex items-center gap-2">
                                     <Filter className="h-4 w-4" />
                                     <SelectValue placeholder="Jenis Surat" />

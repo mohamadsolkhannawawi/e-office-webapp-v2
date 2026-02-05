@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Edit2, CircleAlert } from "lucide-react";
 import {
     validateNamaLengkap,
     validateRole,
@@ -20,11 +20,31 @@ import {
     validateIPS,
     validateSemester,
 } from "@/utils/validations/suratRekomendasi";
-import { Edit2 } from "lucide-react";
-
 interface InfoPengajuanProps {
     data: FormDataType;
     setData: Dispatch<SetStateAction<FormDataType>>;
+}
+
+function HelperButton({ text }: { text: string }) {
+    const [showHelper, setShowHelper] = useState(false);
+
+    return (
+        <div className="relative flex items-center">
+            <button
+                type="button"
+                onClick={() => setShowHelper(!showHelper)}
+                onBlur={() => setTimeout(() => setShowHelper(false), 150)}
+                className="text-gray-500 hover:text-gray-700 transition-colors flex items-center"
+            >
+                <CircleAlert className="w-4 h-4" />
+            </button>
+            {showHelper && (
+                <div className="absolute left-0 top-6 z-50 w-64 p-3 bg-black rounded-xl shadow-lg text-xs font-normal text-white animate-in fade-in-0 zoom-in-95 duration-150">
+                    {text}
+                </div>
+            )}
+        </div>
+    );
 }
 
 interface FieldProps {
@@ -40,6 +60,7 @@ interface FieldProps {
     error?: string;
     onEditToggle?: () => void;
     isEditable?: boolean;
+    helperText?: string;
 }
 
 function FormField({
@@ -55,18 +76,44 @@ function FormField({
     error,
     onEditToggle,
     isEditable,
+    helperText,
 }: FieldProps) {
+    const [showHelper, setShowHelper] = useState(false);
+
     return (
         <div className={`space-y-2 ${className}`}>
-            <Label className="text-sm font-semibold text-gray-700 flex items-center justify-between">
-                <span>{label}</span>
+            <div className="text-sm font-semibold text-gray-700 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Label className="cursor-default">{label}</Label>
+                    {helperText && (
+                        <div className="relative flex items-center">
+                            <button
+                                type="button"
+                                onClick={() => setShowHelper(!showHelper)}
+                                onBlur={() => setTimeout(() => setShowHelper(false), 150)}
+                                className="text-gray-500 hover:text-gray-700 transition-colors flex items-center"
+                            >
+                                <CircleAlert className="w-4 h-4" />
+                            </button>
+                            {showHelper && (
+                                <div className="absolute left-0 top-6 z-50 w-64 p-3 bg-black rounded-xl shadow-lg text-xs font-normal text-white animate-in fade-in-0 zoom-in-95 duration-150">
+                                    {helperText}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
                 {onEditToggle && (
                     <button
                         type="button"
-                        onClick={onEditToggle}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onEditToggle();
+                        }}
                         className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-3xl ${
                             isEditable
-                                ? "text-amber-600 bg-amber-50 font-bold border border-amber-100"
+                                ? "text-amber-600 bg-amber-50 border border-amber-100"
                                 : "text-amber-600 hover:text-amber-700 hover:bg-slate-50"
                         }`}
                     >
@@ -74,7 +121,7 @@ function FormField({
                         {isEditable ? "Sedang Diedit" : "Koreksi Data"}
                     </button>
                 )}
-            </Label>
+            </div>
             <div className="relative">
                 <Input
                     value={value}
@@ -83,7 +130,7 @@ function FormField({
                     readOnly={readOnly && !isEditable}
                     onChange={(e) => onChange && onChange(e.target.value)}
                     onBlur={onBlur}
-                    className={`h-11 transition-all duration-200 ${
+                    className={`h-11 rounded-3xl transition-all duration-200 ${
                         readOnly && !isEditable
                             ? "bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed select-none opacity-80"
                             : isEditable
@@ -277,6 +324,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             readOnly
                             isEditable={editableFields.namaLengkap}
                             onEditToggle={() => toggleEdit("namaLengkap")}
+                            helperText="Nama lengkap sesuai dengan identitas resmi Anda"
                             error={errors.namaLengkap}
                             onChange={(val) => {
                                 setData((prev) => ({
@@ -300,6 +348,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             value={data.role as string}
                             placeholder="Contoh: Mahasiswa"
                             readOnly
+                            helperText="Status Anda di sistem (Mahasiswa/Dosen/Staf)"
                             error={errors.role}
                             onChange={(val) => {
                                 setData((prev) => ({ ...prev, role: val }));
@@ -318,6 +367,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             readOnly
                             isEditable={editableFields.nim}
                             onEditToggle={() => toggleEdit("nim")}
+                            helperText="Nomor Induk Mahasiswa (14 digit)"
                             error={errors.nim}
                             onChange={(val) => {
                                 setData((prev) => ({ ...prev, nim: val }));
@@ -335,6 +385,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             readOnly
                             isEditable={editableFields.email}
                             onEditToggle={() => toggleEdit("email")}
+                            helperText="Email aktif Anda. Pastikan email dapat menerima notifikasi"
                             error={errors.email}
                             onChange={(val) => {
                                 setData((prev) => ({ ...prev, email: val }));
@@ -353,6 +404,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             readOnly
                             isEditable={editableFields.departemen}
                             onEditToggle={() => toggleEdit("departemen")}
+                            helperText="Departemen tempat Anda kuliah"
                             error={errors.departemen}
                             onChange={(val) => {
                                 setData((prev) => ({
@@ -375,6 +427,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             readOnly
                             isEditable={editableFields.programStudi}
                             onEditToggle={() => toggleEdit("programStudi")}
+                            helperText="Jenjang dan program studi Anda (contoh: S1 - Informatika)"
                             error={errors.programStudi}
                             onChange={(val) => {
                                 setData((prev) => ({
@@ -401,6 +454,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             readOnly
                             isEditable={editableFields.tempatLahir}
                             onEditToggle={() => toggleEdit("tempatLahir")}
+                            helperText="Kota/kabupaten tempat Anda dilahirkan"
                             error={errors.tempatLahir}
                             onChange={(val) => {
                                 setData((prev) => ({
@@ -421,13 +475,16 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
 
                         <div className="space-y-2">
                             <Label className="text-sm font-semibold text-gray-700 flex items-center justify-between">
-                                <span>Tanggal Lahir</span>
+                                <div className="flex items-center gap-2">
+                                    <span>Tanggal Lahir</span>
+                                    <HelperButton text="Tanggal lahir sesuai identitas resmi Anda" />
+                                </div>
                                 <button
                                     type="button"
                                     onClick={() => toggleEdit("tanggalLahir")}
                                     className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-3xl ${
                                         editableFields.tanggalLahir
-                                            ? "text-amber-600 bg-amber-50 font-bold border border-amber-100"
+                                            ? "text-amber-600 bg-amber-50 border border-amber-100"
                                             : "text-amber-600 hover:text-amber-700 hover:bg-slate-50"
                                     }`}
                                 >
@@ -448,8 +505,8 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     <DatePicker
                                         className={
                                             !editableFields.tanggalLahir
-                                                ? "bg-slate-50 text-slate-500 border-slate-200"
-                                                : ""
+                                                ? "bg-slate-50 text-slate-500 border-slate-200 rounded-3xl"
+                                                : "rounded-3xl"
                                         }
                                         date={
                                             data.tanggalLahir
@@ -488,9 +545,10 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-gray-700">
-                                No. HP
-                            </Label>
+                            <div className="flex items-center gap-2">
+                                <Label className="text-sm font-semibold text-gray-700">No. HP</Label>
+                                <HelperButton text="Nomor HP Aktif anda. Pastikan No. HP dapat dihubungi" />
+                            </div>
                             <Input
                                 name="noHp"
                                 type="text"
@@ -524,7 +582,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                 onBlur={() =>
                                     handleValidation("noHp", data.noHp)
                                 }
-                                className={`h-11 ${
+                                className={`h-11 rounded-3xl ${
                                     errors.noHp
                                         ? "bg-white border-red-500 focus-visible:ring-red-500"
                                         : "bg-white border-gray-300"
@@ -540,9 +598,10 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-gray-700">
-                                IPK
-                            </Label>
+                            <div className="flex items-center gap-2">
+                                <Label className="text-sm font-semibold text-gray-700">IPK</Label>
+                                <HelperButton text="Indeks Prestasi Kumulatif terakhir Anda (skala 0.00 - 4.00)" />
+                            </div>
                             <Input
                                 name="ipk"
                                 type="text"
@@ -588,7 +647,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     }
                                 }}
                                 onBlur={() => handleValidation("ipk", data.ipk)}
-                                className={`h-11 ${
+                                className={`h-11 rounded-3xl ${
                                     errors.ipk
                                         ? "bg-white border-red-500 focus-visible:ring-red-500"
                                         : "bg-white border-gray-300"
@@ -605,9 +664,10 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-gray-700">
-                                IPS
-                            </Label>
+                            <div className="flex items-center gap-2">
+                                <Label className="text-sm font-semibold text-gray-700">IPS</Label>
+                                <HelperButton text="Indeks Prestasi Semester terakhir Anda (skala 0.00 - 4.00)" />
+                            </div>
                             <Input
                                 name="ips"
                                 type="text"
@@ -653,7 +713,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     }
                                 }}
                                 onBlur={() => handleValidation("ips", data.ips)}
-                                className={`h-11 ${
+                                className={`h-11 rounded-3xl ${
                                     errors.ips
                                         ? "bg-white border-red-500 focus-visible:ring-red-500"
                                         : "bg-white border-gray-300"
@@ -670,9 +730,10 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-gray-700">
-                                Semester
-                            </Label>
+                            <div className="flex items-center gap-2">
+                                <Label className="text-sm font-semibold text-gray-700">Semester</Label>
+                                <HelperButton text="Semester kuliah Anda saat ini (contoh: 7 untuk semester tujuh)" />
+                            </div>
                             <Input
                                 name="semester"
                                 type="text"
@@ -710,7 +771,7 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                 onBlur={() =>
                                     handleValidation("semester", data.semester)
                                 }
-                                className={`h-11 ${
+                                className={`h-11 rounded-3xl ${
                                     errors.semester
                                         ? "bg-white border-red-500 focus-visible:ring-red-500"
                                         : "bg-white border-gray-300"

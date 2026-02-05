@@ -233,7 +233,7 @@ export function UPAStampDashboard() {
                         {stamps.map((stamp) => (
                             <div
                                 key={stamp.id}
-                                className="border border-slate-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-white"
+                                className="border border-slate-200 rounded-3xl overflow-hidden hover:shadow-md transition-shadow bg-white"
                             >
                                 {/* Stamp Preview */}
                                 <div className="aspect-video bg-gray-50 flex items-center justify-center border-b p-4">
@@ -287,7 +287,7 @@ export function UPAStampDashboard() {
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                className="flex-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                                className="flex-1 bg-amber-400 hover:bg-amber-500 text-white hover:text-white rounded-3xl"
                                                 onClick={() =>
                                                     handleSetDefault(stamp.id)
                                                 }
@@ -299,7 +299,7 @@ export function UPAStampDashboard() {
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            className="flex-1 bg-red-600 hover:bg-red-700 text-white hover:text-white rounded-3xl"
                                             onClick={() =>
                                                 handleDelete(stamp.id)
                                             }

@@ -561,7 +561,7 @@ export function SuratPreviewContent({
                       data?.status !== "COMPLETED" &&
                       data?.status !== "PUBLISHED" ? (
                         <>
-                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                            <div className="bg-slate-50/50 rounded-3xl p-4 border border-slate-100">
                                 <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
                                     Penerbitan
                                 </h2>
@@ -571,9 +571,9 @@ export function SuratPreviewContent({
                             </div>
 
                             <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
-                                <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                <div className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
                                     <div className="flex flex-col items-center gap-2 mb-2">
-                                        <div className="p-3 bg-blue-50 rounded-2xl text-undip-blue">
+                                        <div className="p-3 bg-blue-50 rounded-3xl text-undip-blue">
                                             <ShieldCheck className="h-6 w-6" />
                                         </div>
                                         <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
@@ -589,7 +589,7 @@ export function SuratPreviewContent({
                                             onClick={() =>
                                                 setIsNumberingModalOpen(true)
                                             }
-                                            className={`w-full ${upaLetterNumber ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
+                                            className={`w-full ${upaLetterNumber ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-3xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
                                         >
                                             <Hash className="h-4 w-4" />
                                             {upaLetterNumber
@@ -619,7 +619,7 @@ export function SuratPreviewContent({
                                             onClick={() =>
                                                 setIsStampModalOpen(true)
                                             }
-                                            className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
+                                            className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-3xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
                                         >
                                             <ShieldCheck className="h-4 w-4" />
                                             {upaIsStampApplied

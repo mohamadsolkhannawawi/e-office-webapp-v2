@@ -216,7 +216,7 @@ export function LetterList({
                     <div className="relative flex-1 min-w-50">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <Input
-                            className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full"
+                            className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full rounded-3xl"
                             placeholder="Cari surat..."
                             value={searchTerm}
                             onChange={(e) => handleSearchChange(e.target.value)}
@@ -227,7 +227,7 @@ export function LetterList({
                     </div>
 
                     {/* Date Range Filter - Stylish Design */}
-                    <div className="flex items-center gap-2 bg-slate-50/50 rounded-lg p-2 border border-slate-100">
+                    <div className="flex items-center gap-2 bg-slate-50/50 rounded-3xl p-2 border border-slate-100">
                         <Calendar className="h-4 w-4 text-slate-400 ml-1" />
                         
                         <div className="flex items-center gap-2">
@@ -238,7 +238,7 @@ export function LetterList({
                                 <Input
                                     id="startDate"
                                     type="date"
-                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
                                     value={startDateInput}
                                     onChange={(e) => handleStartDateChange(e.target.value)}
                                     max={endDateInput || undefined}
@@ -256,7 +256,7 @@ export function LetterList({
                                 <Input
                                     id="endDate"
                                     type="date"
-                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
                                     value={endDateInput}
                                     onChange={(e) => handleEndDateChange(e.target.value)}
                                     min={startDateInput || undefined}
@@ -284,7 +284,7 @@ export function LetterList({
                         defaultValue={searchParams.get("sortOrder") || "desc"}
                         onValueChange={handleSortChange}
                     >
-                        <SelectTrigger className="w-full sm:w-40 h-10 border-slate-100 text-slate-600" suppressHydrationWarning>
+                        <SelectTrigger className="w-full sm:w-40 h-10 border-slate-100 text-slate-600 rounded-3xl" suppressHydrationWarning>
                             <div className="flex items-center gap-2">
                                 <Filter className="h-4 w-4" />
                                 <SelectValue placeholder="Urutkan" />

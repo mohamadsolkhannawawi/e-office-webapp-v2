@@ -84,10 +84,10 @@ export default function UpaSettingsPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-                <Card>
+                <Card className="rounded-3xl">
                     <CardHeader>
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-blue-50 rounded-lg">
+                            <div className="p-2 bg-blue-50 rounded-2xl">
                                 <UserCog className="h-5 w-5 text-blue-600" />
                             </div>
                             <CardTitle className="text-lg">
@@ -111,6 +111,7 @@ export default function UpaSettingsPage() {
                                         })
                                     }
                                     placeholder="Contoh: Prof. Dr. Ngadiwiyana, S.Si., M.Si."
+                                    className="rounded-3xl"
                                     required
                                 />
                             </div>
@@ -126,6 +127,7 @@ export default function UpaSettingsPage() {
                                         })
                                     }
                                     placeholder="Contoh: 196906201999031002"
+                                    className="rounded-3xl"
                                     required
                                 />
                             </div>
@@ -143,6 +145,7 @@ export default function UpaSettingsPage() {
                                         })
                                     }
                                     placeholder="Contoh: Wakil Dekan Akademik dan Kemahasiswaan"
+                                    className="rounded-3xl"
                                     required
                                 />
                             </div>
@@ -150,7 +153,7 @@ export default function UpaSettingsPage() {
                                 <Button
                                     type="submit"
                                     disabled={saving}
-                                    className="w-full"
+                                    className="w-full rounded-3xl"
                                 >
                                     {saving ? (
                                         <>
@@ -170,7 +173,7 @@ export default function UpaSettingsPage() {
                 </Card>
 
                 {/* Placeholder for future configs like Kop Surat */}
-                <Card className="opacity-60">
+                <Card className="opacity-60 rounded-3xl">
                     <CardHeader>
                         <CardTitle className="text-lg">
                             Kop Surat (Coming Soon)

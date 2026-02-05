@@ -80,7 +80,9 @@ export function UPAStampSection({
 
     const handleSaveSelection = async () => {
         if (!selectedTemplateId) {
-            toast.error("Pilih stempel terlebih dahulu");
+            toast.error(
+                "Pilih stempel terlebih dahulu! Silakan pilih template stempel yang akan digunakan",
+            );
             return;
         }
 
@@ -102,13 +104,22 @@ export function UPAStampSection({
                     stampId: selectedTemplateId,
                     stampUrl: selectedTemplate?.url || null,
                 });
-                toast.success("Stempel berhasil diterapkan", { id: toastId });
+                toast.success(
+                    "Stempel berhasil diterapkan! Stempel telah ditambahkan ke dokumen",
+                    { id: toastId },
+                );
             } else {
-                toast.error("Gagal menerapkan stempel", { id: toastId });
+                toast.error(
+                    "Gagal menerapkan stempel. Silakan coba lagi atau hubungi administrator",
+                    { id: toastId },
+                );
             }
         } catch (error) {
             console.error("Save selection error:", error);
-            toast.error("Terjadi kesalahan", { id: toastId });
+            toast.error(
+                "Terjadi kesalahan sistem saat menerapkan stempel. Hubungi administrator",
+                { id: toastId },
+            );
         } finally {
             setIsSaving(false);
         }
@@ -121,13 +132,19 @@ export function UPAStampSection({
                 setTemplates((prev) =>
                     prev.map((t) => ({ ...t, isDefault: t.id === id })),
                 );
-                toast.success("Template dijadikan default");
+                toast.success(
+                    "Template berhasil dijadikan default! Template ini akan digunakan secara otomatis",
+                );
             } else {
-                toast.error("Gagal mengatur template default");
+                toast.error(
+                    "Gagal mengatur template default. Silakan coba lagi",
+                );
             }
         } catch (error) {
             console.error("Set default error:", error);
-            toast.error("Terjadi kesalahan saat mengatur default");
+            toast.error(
+                "Terjadi kesalahan sistem saat mengatur default. Hubungi administrator",
+            );
         }
     };
 

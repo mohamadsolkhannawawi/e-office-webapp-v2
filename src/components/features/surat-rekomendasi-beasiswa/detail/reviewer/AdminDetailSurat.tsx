@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
     ChevronRight,
     Eye,
@@ -41,6 +42,7 @@ import {
 interface AdminDetailSuratProps {
     role: "supervisor-akademik" | "manajer-tu" | "wakil-dekan-1" | "upa";
     id: string;
+    from?: "perlu-tindakan" | "selesai" | "arsip"; // Dynamic breadcrumb source
     initialData?: ApplicationDetail & {
         history?: Array<{
             id: string;
@@ -64,8 +66,22 @@ interface AdminDetailSuratProps {
 export function AdminDetailSurat({
     role,
     id,
+    from,
     initialData,
 }: AdminDetailSuratProps) {
+    const searchParams = useSearchParams();
+    // Always read from URL first since props don't sync properly between server and client
+    const urlFrom = searchParams.get("from") as
+        | "perlu-tindakan"
+        | "selesai"
+        | "arsip"
+        | null;
+    const effectiveFrom = urlFrom || from || undefined;
+
+    // Debug log
+    console.log(
+        `[AdminDetailSurat] role=${role}, id=${id}, urlFrom=${urlFrom}, from=${from}, effectiveFrom=${effectiveFrom}`,
+    );
     const [modalConfig, setModalConfig] = useState<{
         isOpen: boolean;
         type: "approve" | "revise" | "reject" | "publish";
@@ -314,46 +330,21 @@ export function AdminDetailSurat({
             downloadUrl: att.downloadUrl,
         })) || [];
 
-    const breadcrumbs: Record<string, { label: string; href?: string }[]> = {
-        "supervisor-akademik": [
-            { label: "Dashboard", href: "/supervisor-akademik" },
-            {
-                label: "Surat Masuk",
-                href: "/supervisor-akademik/surat/perlu-tindakan",
-            },
-            { label: "Identitas Pemohon" },
-        ],
-        "manajer-tu": [
-            { label: "Dashboard", href: "/manajer-tu" },
-            { label: "Surat Masuk", href: "/manajer-tu/surat/perlu-tindakan" },
-            { label: "Identitas Pemohon" },
-        ],
-        "wakil-dekan-1": [
-            { label: "Dashboard", href: "/wakil-dekan-1" },
-            {
-                label: "Surat Masuk",
-                href: "/wakil-dekan-1/surat/perlu-tindakan",
-            },
-            { label: "Detail Penandatanganan" },
-        ],
-        upa: [
-            { label: "Dashboard", href: "/upa" },
-            { label: "Surat Masuk", href: "/upa/surat/perlu-tindakan" },
-            { label: "Detail Publikasi" },
-        ],
-    };
-
-    // Determine the list link based on status
+    // Determine the list link based on from parameter or status
     const isCompleted = initialData?.status === "COMPLETED";
-    const listHref = isCompleted
-        ? `/${role}/surat/selesai`
-        : `/${role}/surat/perlu-tindakan`;
-    const listLabel = isCompleted ? "Surat Selesai" : "Surat Masuk";
+    const finalFrom =
+        effectiveFrom || (isCompleted ? "selesai" : "perlu-tindakan");
+    const listHref = `/${role}/surat/${finalFrom}`;
+    const statusLabel = finalFrom === "selesai" ? "Selesai" : "Perlu Tindakan";
 
-    const currentBreadcrumb = breadcrumbs[role] || [
-        { label: "Dashboard", href: `/${role}` },
-        { label: listLabel, href: listHref },
-        { label: "Detail Surat" },
+    console.log(
+        `[AdminDetailSurat] isCompleted=${isCompleted}, effectiveFrom=${effectiveFrom}, finalFrom=${finalFrom}, listHref=${listHref}`,
+    );
+
+    const currentBreadcrumb = [
+        { label: "Surat Masuk", href: listHref },
+        { label: statusLabel, href: listHref },
+        { label: "Detail Pengajuan" },
     ];
 
     return (
@@ -399,31 +390,36 @@ export function AdminDetailSurat({
             />
 
             {/* Breadcrumb */}
-            <nav className="flex items-center text-sm font-medium text-slate-500 mb-6">
-                {currentBreadcrumb.map((crumb, index) => (
-                    <React.Fragment key={index}>
-                        {index > 0 && <ChevronRight className="mx-2 h-4 w-4" />}
-                        {crumb.href && index < currentBreadcrumb.length - 1 ? (
-                            <Link
-                                href={crumb.href}
-                                className="hover:text-undip-blue transition-colors"
-                            >
-                                {crumb.label}
-                            </Link>
-                        ) : (
-                            <span
-                                className={
-                                    index === currentBreadcrumb.length - 1
-                                        ? "text-slate-800"
-                                        : ""
-                                }
-                            >
-                                {crumb.label}
-                            </span>
-                        )}
-                    </React.Fragment>
-                ))}
-            </nav>
+            {effectiveFrom !== "arsip" && (
+                <nav className="flex items-center text-sm font-medium text-slate-500 mb-6">
+                    {currentBreadcrumb.map((crumb, index) => (
+                        <React.Fragment key={index}>
+                            {index > 0 && (
+                                <ChevronRight className="mx-2 h-4 w-4" />
+                            )}
+                            {crumb.href &&
+                            index < currentBreadcrumb.length - 1 ? (
+                                <Link
+                                    href={crumb.href}
+                                    className="hover:text-undip-blue transition-colors"
+                                >
+                                    {crumb.label}
+                                </Link>
+                            ) : (
+                                <span
+                                    className={
+                                        index === currentBreadcrumb.length - 1
+                                            ? "text-slate-800"
+                                            : ""
+                                    }
+                                >
+                                    {crumb.label}
+                                </span>
+                            )}
+                        </React.Fragment>
+                    ))}
+                </nav>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Left Column */}

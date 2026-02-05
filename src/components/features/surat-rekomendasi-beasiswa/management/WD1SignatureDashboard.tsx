@@ -46,7 +46,9 @@ export function WD1SignatureDashboard() {
             const data = await getSignatures();
             setSignatures(data);
         } catch (error) {
-            toast.error("Gagal memuat template tanda tangan");
+            toast.error(
+                "Gagal memuat template tanda tangan. Silakan refresh halaman atau hubungi administrator",
+            );
             console.error(error);
         } finally {
             setLoading(false);
@@ -59,13 +61,17 @@ export function WD1SignatureDashboard() {
             // Validate file size (max 5MB)
             const maxSize = 5 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
-                toast.error("Ukuran file terlalu besar. Maksimal 5MB.");
+                toast.error(
+                    "Ukuran file terlalu besar! File maksimal 5MB. Silakan kompres gambar Anda",
+                );
                 return;
             }
 
             // Validate file type
             if (!file.type.startsWith("image/")) {
-                toast.error("File harus berupa gambar (JPG, PNG, GIF, etc)");
+                toast.error(
+                    "File harus berupa gambar! Format yang didukung: JPG, PNG, GIF",
+                );
                 return;
             }
 
@@ -85,7 +91,7 @@ export function WD1SignatureDashboard() {
                     if (result.success && result.data) {
                         setSignatures((prev) => [result.data!, ...prev]);
                         toast.success(
-                            "Template tanda tangan berhasil diunggah",
+                            "Template tanda tangan berhasil diunggah! Template siap digunakan",
                             {
                                 id: toastId,
                             },
@@ -93,7 +99,8 @@ export function WD1SignatureDashboard() {
                         setUploadDialogOpen(false);
                     } else {
                         toast.error(
-                            result.error || "Gagal mengunggah template",
+                            result.error ||
+                                "Gagal mengunggah template. Periksa file dan coba lagi",
                             {
                                 id: toastId,
                             },
@@ -121,13 +128,19 @@ export function WD1SignatureDashboard() {
                 setSignatures((prev) =>
                     prev.map((sig) => ({ ...sig, isDefault: sig.id === id })),
                 );
-                toast.success("Template dijadikan default");
+                toast.success(
+                    "Template berhasil dijadikan default! Template ini akan digunakan secara otomatis",
+                );
             } else {
-                toast.error("Gagal mengatur template default");
+                toast.error(
+                    "Gagal mengatur template default. Silakan coba lagi",
+                );
             }
         } catch (error) {
             console.error("Set default error:", error);
-            toast.error("Terjadi kesalahan saat mengatur default");
+            toast.error(
+                "Terjadi kesalahan sistem saat mengatur default. Hubungi administrator",
+            );
         }
     };
 
@@ -136,13 +149,15 @@ export function WD1SignatureDashboard() {
             const success = await deleteSignature(id);
             if (success) {
                 setSignatures((prev) => prev.filter((sig) => sig.id !== id));
-                toast.success("Template berhasil dihapus");
+                toast.success("Template berhasil dihapus dari sistem");
             } else {
-                toast.error("Gagal menghapus template");
+                toast.error("Gagal menghapus template. Silakan coba lagi");
             }
         } catch (error) {
             console.error("Delete template error:", error);
-            toast.error("Terjadi kesalahan saat menghapus template");
+            toast.error(
+                "Terjadi kesalahan sistem saat menghapus template. Hubungi administrator",
+            );
         }
     };
 

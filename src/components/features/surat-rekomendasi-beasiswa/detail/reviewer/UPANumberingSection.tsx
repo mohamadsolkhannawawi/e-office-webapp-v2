@@ -87,10 +87,12 @@ export function UPANumberingSection({
                     if (result.verification && onVerificationGenerated) {
                         onVerificationGenerated(result.verification);
                     }
-                    toast.success("Nomor surat berhasil digenerate!");
+                    toast.success(
+                        "Nomor surat berhasil digenerate! Nomor siap digunakan",
+                    );
                 } else {
                     toast.error(
-                        "Gagal generate nomor surat. Silakan coba lagi.",
+                        "Gagal generate nomor surat. Silakan coba lagi atau hubungi administrator",
                     );
                 }
             } else {
@@ -103,7 +105,9 @@ export function UPANumberingSection({
             }
         } catch (error) {
             console.error("Error generating number:", error);
-            toast.error("Terjadi kesalahan saat generate nomor surat.");
+            toast.error(
+                "Terjadi kesalahan sistem saat generate nomor surat. Hubungi administrator",
+            );
         } finally {
             setIsGenerating(false);
         }
@@ -115,7 +119,9 @@ export function UPANumberingSection({
 
     const handleSaveNumber = async () => {
         if (!letterNumber.trim()) {
-            toast.error("Nomor surat tidak boleh kosong");
+            toast.error(
+                "Nomor surat tidak boleh kosong! Silakan isi nomor surat terlebih dahulu",
+            );
             return;
         }
 
@@ -131,7 +137,7 @@ export function UPANumberingSection({
                 );
                 if (saveSuccess) {
                     toast.success(
-                        "Nomor surat berhasil disimpan, sedang membuat dokumen...",
+                        "Nomor surat berhasil disimpan! Sedang membuat dokumen...",
                         {
                             id: toastId,
                         },
@@ -150,14 +156,14 @@ export function UPANumberingSection({
                             onDocumentRegenerate();
                         }
                         toast.success(
-                            "Dokumen berhasil diperbarui dengan nomor surat!",
+                            "Dokumen berhasil diperbarui dengan nomor surat! Silakan download dokumen",
                             {
                                 id: toastId,
                             },
                         );
                     } else {
                         toast.error(
-                            `Nomor surat disimpan, namun error saat membuat dokumen: ${genResult.error}`,
+                            `Nomor surat tersimpan, namun terjadi kesalahan saat membuat dokumen: ${genResult.error}`,
                             {
                                 id: toastId,
                             },
@@ -168,22 +174,31 @@ export function UPANumberingSection({
                         }
                     }
                 } else {
-                    toast.error("Gagal menyimpan nomor surat", {
-                        id: toastId,
-                    });
+                    toast.error(
+                        "Gagal menyimpan nomor surat. Silakan coba lagi",
+                        {
+                            id: toastId,
+                        },
+                    );
                 }
             } else {
                 onNumberChange(letterNumber);
                 if (onNumberSave) {
                     onNumberSave(letterNumber);
                 }
-                toast.success("Nomor surat berhasil disimpan", { id: toastId });
+                toast.success(
+                    "Nomor surat berhasil disimpan! Data telah tersimpan",
+                    { id: toastId },
+                );
             }
         } catch (error) {
             console.error("Save number error:", error);
-            toast.error("Terjadi kesalahan saat menyimpan nomor surat", {
-                id: toastId,
-            });
+            toast.error(
+                "Terjadi kesalahan sistem saat menyimpan nomor surat. Hubungi administrator",
+                {
+                    id: toastId,
+                },
+            );
         } finally {
             setIsSaving(false);
         }

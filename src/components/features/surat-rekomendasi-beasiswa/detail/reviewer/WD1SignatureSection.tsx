@@ -86,13 +86,17 @@ export function WD1SignatureSection({
             // Validate file size (max 5MB)
             const maxSize = 5 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
-                toast.error("Ukuran file terlalu besar. Maksimal 5MB.");
+                toast.error(
+                    "Ukuran file terlalu besar! File maksimal 5MB. Silakan kompres gambar Anda",
+                );
                 return;
             }
 
             // Validate file type
             if (!file.type.startsWith("image/")) {
-                toast.error("File harus berupa gambar (JPG, PNG, GIF, etc)");
+                toast.error(
+                    "File harus berupa gambar! Format yang didukung: JPG, PNG, GIF",
+                );
                 return;
             }
 
@@ -103,7 +107,9 @@ export function WD1SignatureSection({
                 onSignatureChange(result);
             };
             reader.onerror = () => {
-                toast.error("Gagal membaca file");
+                toast.error(
+                    "Gagal membaca file. Silakan coba file lain atau hubungi administrator",
+                );
             };
             reader.readAsDataURL(file);
         }
@@ -122,13 +128,19 @@ export function WD1SignatureSection({
                 setTemplates((prev) =>
                     prev.map((t) => ({ ...t, isDefault: t.id === id })),
                 );
-                toast.success("Template dijadikan default");
+                toast.success(
+                    "Template berhasil dijadikan default! Template ini akan digunakan secara otomatis",
+                );
             } else {
-                toast.error("Gagal mengatur template default");
+                toast.error(
+                    "Gagal mengatur template default. Silakan coba lagi",
+                );
             }
         } catch (error) {
             console.error("Set default error:", error);
-            toast.error("Terjadi kesalahan saat mengatur default");
+            toast.error(
+                "Terjadi kesalahan sistem saat mengatur default. Hubungi administrator",
+            );
         }
     };
 
@@ -137,7 +149,7 @@ export function WD1SignatureSection({
             const success = await deleteSignature(id);
             if (success) {
                 setTemplates((prev) => prev.filter((t) => t.id !== id));
-                toast.success("Template berhasil dihapus");
+                toast.success("Template berhasil dihapus dari sistem");
 
                 // Clear selection if deleted template was selected
                 if (selectedTemplateId === id) {
@@ -146,11 +158,13 @@ export function WD1SignatureSection({
                     onSignatureChange(null);
                 }
             } else {
-                toast.error("Gagal menghapus template");
+                toast.error("Gagal menghapus template. Silakan coba lagi");
             }
         } catch (error) {
             console.error("Delete template error:", error);
-            toast.error("Terjadi kesalahan saat menghapus template");
+            toast.error(
+                "Terjadi kesalahan sistem saat menghapus template. Hubungi administrator",
+            );
         }
     };
 

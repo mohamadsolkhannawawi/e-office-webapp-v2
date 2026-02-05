@@ -45,7 +45,9 @@ export function UPAStampDashboard() {
             const data = await getStamps();
             setStamps(data);
         } catch (error) {
-            toast.error("Gagal memuat template stempel");
+            toast.error(
+                "Gagal memuat template stempel. Silakan refresh halaman atau hubungi administrator",
+            );
             console.error(error);
         } finally {
             setLoading(false);
@@ -58,13 +60,17 @@ export function UPAStampDashboard() {
             // Validate file size (max 5MB)
             const maxSize = 5 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
-                toast.error("Ukuran file terlalu besar. Maksimal 5MB.");
+                toast.error(
+                    "Ukuran file terlalu besar! File maksimal 5MB. Silakan kompres gambar Anda",
+                );
                 return;
             }
 
             // Validate file type
             if (!file.type.startsWith("image/")) {
-                toast.error("File harus berupa gambar (JPG, PNG, GIF, etc)");
+                toast.error(
+                    "File harus berupa gambar! Format yang didukung: JPG, PNG, GIF",
+                );
                 return;
             }
 
@@ -81,9 +87,12 @@ export function UPAStampDashboard() {
 
                     if (result.success && result.data) {
                         setStamps((prev) => [result.data!, ...prev]);
-                        toast.success("Template stempel berhasil diunggah", {
-                            id: toastId,
-                        });
+                        toast.success(
+                            "Template stempel berhasil diunggah! Template siap digunakan",
+                            {
+                                id: toastId,
+                            },
+                        );
                         setUploadDialogOpen(false);
                         // Reset file input
                         const input = document.getElementById(
@@ -92,14 +101,18 @@ export function UPAStampDashboard() {
                         if (input) input.value = "";
                     } else {
                         toast.error(
-                            result.error || "Gagal mengunggah template",
+                            result.error ||
+                                "Gagal mengunggah template. Periksa file dan coba lagi",
                             { id: toastId },
                         );
                     }
                 } catch (error) {
-                    toast.error("Terjadi kesalahan saat mengunggah", {
-                        id: toastId,
-                    });
+                    toast.error(
+                        "Terjadi kesalahan sistem saat mengunggah. Silakan coba lagi",
+                        {
+                            id: toastId,
+                        },
+                    );
                     console.error(error);
                 } finally {
                     setIsUploading(false);
@@ -117,13 +130,19 @@ export function UPAStampDashboard() {
                 setStamps((prev) =>
                     prev.map((s) => ({ ...s, isDefault: s.id === id })),
                 );
-                toast.success("Stempel dijadikan default");
+                toast.success(
+                    "Stempel berhasil dijadikan default! Stempel ini akan digunakan secara otomatis",
+                );
             } else {
-                toast.error("Gagal mengatur stempel default");
+                toast.error(
+                    "Gagal mengatur stempel default. Silakan coba lagi",
+                );
             }
         } catch (error) {
             console.error("Set default error:", error);
-            toast.error("Terjadi kesalahan saat mengatur default");
+            toast.error(
+                "Terjadi kesalahan sistem saat mengatur default. Hubungi administrator",
+            );
         }
     };
 
@@ -132,13 +151,15 @@ export function UPAStampDashboard() {
             const success = await deleteStamp(id);
             if (success) {
                 setStamps((prev) => prev.filter((s) => s.id !== id));
-                toast.success("Stempel berhasil dihapus");
+                toast.success("Stempel berhasil dihapus dari sistem");
             } else {
-                toast.error("Gagal menghapus stempel");
+                toast.error("Gagal menghapus stempel. Silakan coba lagi");
             }
         } catch (error) {
             console.error("Delete error:", error);
-            toast.error("Terjadi kesalahan saat menghapus");
+            toast.error(
+                "Terjadi kesalahan sistem saat menghapus. Hubungi administrator",
+            );
         }
     };
 

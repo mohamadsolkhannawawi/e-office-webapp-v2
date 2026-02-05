@@ -61,11 +61,17 @@ export function WD1SignatureModal({
                 );
 
                 if (success) {
-                    toast.success("Tanda tangan diterapkan", { id: toastId });
+                    toast.success(
+                        "Tanda tangan berhasil diterapkan! Tanda tangan telah ditambahkan ke dokumen",
+                        { id: toastId },
+                    );
                 } else {
-                    toast.error("Gagal menyimpan tanda tangan", {
-                        id: toastId,
-                    });
+                    toast.error(
+                        "Gagal menyimpan tanda tangan. Silakan coba lagi atau hubungi administrator",
+                        {
+                            id: toastId,
+                        },
+                    );
                     // Verify if we should stop here? User might want to proceed locally anyway.
                     // But if this fails, regeneration won't happen.
                 }

@@ -74,10 +74,14 @@ export function LetterNumberingDashboard() {
                 const publishedData = json.data as typeof json.data;
                 setPublishedNumbers(publishedData?.items ?? []);
             } else {
-                toast.error("Gagal memuat daftar nomor surat");
+                toast.error(
+                    "Gagal memuat daftar nomor surat. Silakan refresh halaman atau hubungi administrator",
+                );
             }
         } catch (error) {
-            toast.error("Error loading published numbers");
+            toast.error(
+                "Terjadi kesalahan saat memuat data nomor surat. Periksa koneksi internet Anda",
+            );
             console.error(error);
         } finally {
             setLoading(false);
@@ -121,10 +125,12 @@ export function LetterNumberingDashboard() {
                 const validationData = json.data as ValidationResult;
                 setValidationResult(validationData);
             } else {
-                toast.error("Error validating letter number");
+                toast.error("Gagal memvalidasi nomor surat. Silakan coba lagi");
             }
         } catch (error) {
-            toast.error("Validation error");
+            toast.error(
+                "Terjadi kesalahan saat validasi. Periksa koneksi internet Anda",
+            );
             console.error(error);
         } finally {
             setIsValidating(false);
@@ -142,7 +148,9 @@ export function LetterNumberingDashboard() {
     // Submit edit
     const handleEditSubmit = async () => {
         if (!editingId || !validationResult?.isAvailable) {
-            toast.error("Format tidak valid atau nomor sudah digunakan");
+            toast.error(
+                "Format nomor surat tidak valid atau nomor sudah digunakan. Silakan gunakan nomor lain",
+            );
             return;
         }
 
@@ -157,7 +165,9 @@ export function LetterNumberingDashboard() {
             );
 
             if (response.ok) {
-                toast.success("Nomor surat berhasil diubah");
+                toast.success(
+                    "Nomor surat berhasil diubah! Perubahan telah tersimpan",
+                );
                 setEditingId(null);
                 setEditValue("");
                 setValidationResult(null);
@@ -165,14 +175,19 @@ export function LetterNumberingDashboard() {
                 loadNextSuggestion();
             } else if (response.status === 403) {
                 toast.error(
-                    "Anda tidak memiliki izin untuk mengubah nomor surat",
+                    "Anda tidak memiliki izin untuk mengubah nomor surat. Hubungi administrator",
                 );
             } else {
                 const error = await response.json();
-                toast.error(error.message || "Gagal mengubah nomor surat");
+                toast.error(
+                    error.message ||
+                        "Gagal mengubah nomor surat. Silakan coba lagi",
+                );
             }
         } catch (error) {
-            toast.error("Error saat mengubah nomor surat");
+            toast.error(
+                "Terjadi kesalahan sistem saat mengubah nomor surat. Hubungi administrator",
+            );
             console.error(error);
         }
     };
@@ -348,8 +363,8 @@ export function LetterNumberingDashboard() {
                                                 dipublikasikan
                                             </p>
                                             <p className="text-slate-400 text-sm">
-                                                Belum ada data surat yang tersedia
-                                                saat ini.
+                                                Belum ada data surat yang
+                                                tersedia saat ini.
                                             </p>
                                         </div>
                                     </td>

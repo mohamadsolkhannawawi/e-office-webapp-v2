@@ -17,14 +17,14 @@ interface AuthContextType {
     isAuthenticated: boolean;
     signIn: (
         email: string,
-        password: string
+        password: string,
     ) => Promise<{ user: User; session: Session } | undefined>;
     signOut: () => Promise<void>;
     refreshSession: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
-    undefined
+    undefined,
 );
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (data?.user) {
                 console.log(
                     ">>> AUTH CONTEXT USER ROLES:",
-                    (data.user as User).roles
+                    (data.user as User).roles,
                 );
             }
 
@@ -93,12 +93,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await authClient.signOut();
             setUser(null);
             setSession(null);
+            // Set flag untuk menampilkan notifikasi di login page
+            if (typeof window !== "undefined") {
+                sessionStorage.setItem("logout_success", "true");
+            }
             router.push("/login");
         } catch (error) {
             console.error("Logout failed:", error);
             // Fallback: clear state and redirect anyway
             setUser(null);
             setSession(null);
+            if (typeof window !== "undefined") {
+                sessionStorage.setItem("logout_success", "true");
+            }
             router.push("/login");
         }
     };

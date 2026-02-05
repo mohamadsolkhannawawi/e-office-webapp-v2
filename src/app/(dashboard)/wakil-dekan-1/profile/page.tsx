@@ -1,9 +1,5 @@
-import { ProfilePage } from "@/components/features/profile/ProfilePage";
+import ProfilePage from "@/components/features/profile/ProfilePage";
 
-export default function WakilDekanProfilePage() {
-    return (
-        <div className="p-6">
-            <ProfilePage backUrl="/wakil-dekan-1" />
-        </div>
-    );
+export default function WakilDekan1ProfilePage() {
+    return <ProfilePage editHref="/wakil-dekan-1/profile/edit" />;
 }

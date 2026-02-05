@@ -48,10 +48,15 @@ async function getApplication(id: string) {
 
 export default async function WD1DetailSuratPage({
     params,
+    searchParams,
 }: {
     params: Promise<{ id: string }>;
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
     const { id } = await params;
+    const search = await searchParams;
+    const from =
+        (search.from as "perlu-tindakan" | "selesai" | undefined) || undefined;
     console.log(`[WD1DetailPage] Rendering page for ID: ${id}`);
 
     const application = await getApplication(id);
@@ -77,6 +82,7 @@ export default async function WD1DetailSuratPage({
         <AdminDetailSurat
             role="wakil-dekan-1"
             id={id}
+            from={from}
             initialData={application}
         />
     );

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Inbox, CheckCircle, BarChart, ChevronRight } from "lucide-react";
+import { Inbox, CheckCircle, BarChart } from "lucide-react";
 import {
     Card,
     CardContent as CardContentUI,
@@ -45,7 +45,7 @@ function StatCard({
     href,
 }: StatCardProps) {
     const searchParams = useSearchParams();
-    
+
     // Preserve query parameters when navigating
     const getHrefWithParams = (basePath: string) => {
         if (!basePath) return basePath;
@@ -53,7 +53,7 @@ function StatCard({
         const queryString = params.toString();
         return queryString ? `${basePath}?${queryString}` : basePath;
     };
-    
+
     const CardContent = (
         <Card className="border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-100 transition-all hover:-translate-y-1 duration-300 rounded-3xl">
             <CardContentUI className="p-6">
@@ -176,18 +176,6 @@ export function AdminDashboard({
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            {/* Breadcrumb */}
-            <nav className="flex items-center text-sm font-medium text-slate-500">
-                <Link
-                    href={`/${rolePath}`}
-                    className="hover:text-undip-blue transition-colors"
-                >
-                    Dashboard
-                </Link>
-                <ChevronRight className="mx-2 h-4 w-4" />
-                <span className="text-slate-800">Dashboard Persuratan</span>
-            </nav>
-
             {/* Header */}
             <div>
                 <h1 className="text-3xl font-bold text-slate-800 mb-2">

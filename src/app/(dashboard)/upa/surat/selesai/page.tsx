@@ -150,15 +150,10 @@ export default function SelesaiPage() {
                 </div>
             </div>
 
-            {/* Filters Card */}
-            <Card className="border-none shadow-sm overflow-hidden bg-white">
-                <div className="p-6 border-b border-slate-50 flex flex-col gap-4">
-                    <div className="flex items-center gap-2">
-                        <Filter className="h-4 w-4 text-slate-400" />
-                        <span className="text-sm font-semibold text-slate-600">
-                            Filter
-                        </span>
-                    </div>
+            {/* Filters and Table Card */}
+            <Card className="border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 overflow-hidden bg-white rounded-3xl py-0 gap-0">
+                <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
+                    <h2 className="text-xl font-bold text-slate-800">Daftar Surat Selesai</h2>
                     <div className="flex flex-wrap gap-3 items-center">
                         {/* Search */}
                         <div className="relative flex-1 min-w-50">
@@ -245,12 +240,13 @@ export default function SelesaiPage() {
                             </SelectContent>
                         </Select>
                     </div>
+                </div>
 
-                    {/* Table */}
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="bg-undip-blue border-b border-slate-50 text-[11px] uppercase text-white font-bold tracking-wider">
+                {/* Table Section */}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="bg-undip-blue border-b border-slate-100 text-[11px] uppercase text-white font-bold tracking-wider">
                                     <th className="px-6 py-4 w-12">No</th>
                                     <th className="px-6 py-4">Nama Pengaju</th>
                                     <th className="px-6 py-4">NIM</th>
@@ -264,24 +260,39 @@ export default function SelesaiPage() {
                                         Aksi
                                     </th>
                                 </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50 text-sm">
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-sm">
                                 {loading ? (
                                     <tr>
                                         <td
                                             colSpan={8}
-                                            className="px-6 py-8 text-center text-slate-400"
+                                            className="px-6 py-12 text-center"
                                         >
-                                            Memuat data...
+                                            <div className="flex flex-col items-center justify-center gap-2">
+                                                <div className="text-slate-400">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                </div>
+                                                <p className="text-slate-600 font-medium">Memuat data...</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : applications.length === 0 ? (
                                     <tr>
                                         <td
                                             colSpan={8}
-                                            className="px-6 py-8 text-center text-slate-400"
+                                            className="px-6 py-12 text-center"
                                         >
-                                            Tidak ada data selesai
+                                            <div className="flex flex-col items-center justify-center gap-2">
+                                                <div className="text-slate-400">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                </div>
+                                                <p className="text-slate-600 font-medium">Tidak ada data surat selesai.</p>
+                                                <p className="text-slate-400 text-sm">Belum ada surat yang tersedia saat ini.</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
@@ -376,14 +387,13 @@ export default function SelesaiPage() {
                                         </tr>
                                     ))
                                 )}
-                            </tbody>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="bg-slate-50/30 px-6 py-4 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <p className="text-xs font-bold text-slate-400">
                             Menampilkan{" "}
                             <span className="text-slate-600">

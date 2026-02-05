@@ -81,7 +81,6 @@ export default function SuratSelesaiPage() {
             );
 
             console.log("Dokumen berhasil diunduh");
-            alert("Dokumen surat berhasil diunduh!");
         } catch (error) {
             console.error("Failed to download template:", error);
             alert("Gagal mengunduh dokumen surat");
@@ -148,15 +147,10 @@ export default function SuratSelesaiPage() {
                 Surat-surat rekomendasi beasiswa yang telah selesai diproses.
             </p>
 
-            {/* Filters Card */}
-            <Card className="border-none shadow-sm overflow-hidden bg-white">
-                <div className="p-6 border-b border-slate-50 flex flex-col gap-4">
-                    <div className="flex items-center gap-2">
-                        <Filter className="h-4 w-4 text-slate-400" />
-                        <span className="text-sm font-semibold text-slate-600">
-                            Filter
-                        </span>
-                    </div>
+            {/* Combined Filters and Table Card */}
+            <Card className="border-none shadow-sm overflow-hidden bg-white rounded-3xl py-0 gap-0">
+                {/* Filters Section */}
+                <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
                     <div className="flex flex-wrap gap-3 items-center">
                         {/* Search */}
                         <div className="relative flex-1 min-w-50">
@@ -165,7 +159,7 @@ export default function SuratSelesaiPage() {
                                 placeholder="Cari surat selesai..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full"
+                                className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full rounded-3xl"
                             />
                         </div>
 
@@ -174,7 +168,7 @@ export default function SuratSelesaiPage() {
                             value={jenisFilter}
                             onValueChange={setJenisFilter}
                         >
-                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
+                            <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600 rounded-3xl" suppressHydrationWarning>
                                 <div className="flex items-center gap-2">
                                     <Filter className="h-4 w-4" />
                                     <SelectValue placeholder="Jenis Surat" />
@@ -195,27 +189,25 @@ export default function SuratSelesaiPage() {
                         </Select>
                     </div>
                 </div>
-            </Card>
 
-            {/* Table Card */}
-            <Card className="border-none shadow-sm overflow-hidden bg-white">
+                {/* Table Section */}
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm border-collapse">
-                        <thead className="bg-slate-50/50 border-b border-slate-100">
+                        <thead className="bg-undip-blue border-b border-slate-100">
                             <tr>
-                                <th className="px-6 py-4 font-semibold text-slate-700 w-12">
+                                <th className="px-6 py-4 font-semibold text-white w-12">
                                     No
                                 </th>
-                                <th className="px-6 py-4 font-semibold text-slate-700 min-w-50">
+                                <th className="px-6 py-4 font-semibold text-white min-w-50">
                                     Subjek Surat
                                 </th>
-                                <th className="px-6 py-4 font-semibold text-slate-700 min-w-50">
+                                <th className="px-6 py-4 font-semibold text-white min-w-50">
                                     Tanggal Pengajuan
                                 </th>
-                                <th className="px-6 py-4 font-semibold text-slate-700 min-w-50">
+                                <th className="px-6 py-4 font-semibold text-white min-w-50">
                                     Status
                                 </th>
-                                <th className="px-6 py-4 font-semibold text-slate-700 w-24 text-right">
+                                <th className="px-6 py-4 font-semibold text-white w-24">
                                     Aksi
                                 </th>
                             </tr>
@@ -235,11 +227,16 @@ export default function SuratSelesaiPage() {
                                 </tr>
                             ) : applications.length === 0 ? (
                                 <tr>
-                                    <td
-                                        colSpan={5}
-                                        className="px-6 py-12 text-center text-slate-400"
-                                    >
-                                        Belum ada surat yang selesai.
+                                    <td colSpan={5} className="px-6 py-12 text-center">
+                                        <div className="flex flex-col items-center justify-center gap-2">
+                                            <div className="text-slate-400">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <p className="text-slate-600 font-medium">Tidak ada surat yang selesai.</p>
+                                            <p className="text-slate-400 text-sm">Belum ada surat yang telah diselesaikan.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
@@ -292,7 +289,7 @@ export default function SuratSelesaiPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="h-9 px-3 gap-2 text-slate-600 hover:text-slate-700 hover:bg-slate-100 font-medium text-xs"
+                                                            className="h-9 px-3 gap-2 text-white bg-undip-blue hover:bg-sky-700 hover:text-white font-medium text-xs rounded-3xl"
                                                             title="Detail"
                                                         >
                                                             <Eye className="h-4 w-4" />
@@ -307,7 +304,7 @@ export default function SuratSelesaiPage() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="h-9 px-3 gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-medium text-xs"
+                                                                className="h-9 px-3 gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-medium text-xs rounded-3xl"
                                                                 title="Cetak/PDF"
                                                                 onClick={() => {
                                                                     const link =
@@ -327,7 +324,7 @@ export default function SuratSelesaiPage() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="h-9 px-3 gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium text-xs"
+                                                                className="h-9 px-3 gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium text-xs rounded-3xl"
                                                                 title="Unduh Word"
                                                                 onClick={() =>
                                                                     handleDownloadTemplate(

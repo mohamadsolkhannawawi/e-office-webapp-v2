@@ -241,7 +241,7 @@ export default function DetailSuratProsesPage() {
                 {/* Right Column */}
                 <div className="lg:col-span-4 space-y-6">
                     {/* Aksi Card */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
                         <h2 className="text-lg font-bold text-slate-800 mb-4">
                             Aksi
                         </h2>
@@ -249,7 +249,7 @@ export default function DetailSuratProsesPage() {
                             <Link
                                 href={`/mahasiswa/surat/proses/preview/${id}?stage=mahasiswa`}
                             >
-                                <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-medium py-6 rounded-lg flex items-center justify-center gap-2 mb-3">
+                                <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-medium py-6 rounded-3xl flex items-center justify-center gap-2 mb-3">
                                     <Eye className="h-4 w-4" />
                                     Preview
                                 </Button>
@@ -260,7 +260,7 @@ export default function DetailSuratProsesPage() {
                                     href={`/mahasiswa/surat/proses/preview/${id}?stage=mahasiswa&autoPrint=true`}
                                     target="_blank"
                                 >
-                                    <Button className="w-full bg-undip-blue hover:bg-sky-700 text-white font-medium py-6 rounded-lg flex items-center justify-center gap-2">
+                                    <Button className="w-full bg-undip-blue hover:bg-sky-700 text-white font-medium py-6 rounded-3xl flex items-center justify-center gap-2">
                                         <Download className="h-4 w-4" />
                                         Download
                                     </Button>
@@ -274,7 +274,7 @@ export default function DetailSuratProsesPage() {
                                             `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
                                         )
                                     }
-                                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-6 rounded-lg flex items-center justify-center gap-2"
+                                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-6 rounded-3xl flex items-center justify-center gap-2"
                                 >
                                     <EditNoteIcon />
                                     Revisi

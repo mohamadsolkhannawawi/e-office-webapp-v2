@@ -281,7 +281,7 @@ export function Sidebar({
                                 <div className="space-y-1">
                                     <button
                                         onClick={() => toggleMenu(item.label)}
-                                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md group transition-colors ${
+                                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-2xl group transition-colors ${
                                             expandedMenu === item.label
                                                 ? "bg-gray-50 text-undip-blue"
                                                 : "text-slate-600 hover:bg-gray-100"
@@ -317,9 +317,9 @@ export function Sidebar({
                                                     key={sub.label}
                                                     href={sub.href}
                                                     onClick={handleLinkClick}
-                                                    className={`block px-3 py-2 text-sm rounded-md transition-colors ${
+                                                    className={`block px-3 py-2 text-sm rounded-2xl transition-colors ${
                                                         pathname === sub.href
-                                                            ? "text-undip-blue font-medium bg-blue-50/50"
+                                                            ? "text-white font-medium bg-undip-blue"
                                                             : "text-slate-500 hover:text-slate-900 hover:bg-gray-50"
                                                     }`}
                                                 >
@@ -333,16 +333,16 @@ export function Sidebar({
                                 <Link
                                     href={item.href || "#"}
                                     onClick={handleLinkClick}
-                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-md group font-medium transition-colors text-sm ${
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl group font-medium transition-colors text-sm ${
                                         isActive(item.href)
-                                            ? "bg-gray-100 text-undip-blue"
+                                            ? "bg-undip-blue text-white"
                                             : "text-slate-700 hover:bg-gray-100"
                                     }`}
                                 >
                                     <span
                                         className={`${
                                             isActive(item.href)
-                                                ? "text-undip-blue"
+                                                ? "text-white"
                                                 : "text-slate-500 group-hover:text-undip-blue"
                                         }`}
                                     >
@@ -358,7 +358,7 @@ export function Sidebar({
                 <div className="p-4 border-t border-gray-100">
                     <button
                         onClick={() => signOut()}
-                        className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                        className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                     >
                         <LogOut size={20} />
                         Keluar

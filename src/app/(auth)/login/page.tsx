@@ -116,7 +116,7 @@ export default function LoginPage() {
 
             {/* Main Content */}
             <main className="flex grow items-center justify-center p-4 md:p-6">
-                <div className="flex min-h-150 w-full max-w-5xl flex-col overflow-hidden rounded-lg bg-card-light shadow-xl dark:bg-card-dark md:flex-row">
+                <div className="flex min-h-150 w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-card-light shadow-xl dark:bg-card-dark md:flex-row">
                     {/* Left Panel */}
                     <div className="flex w-full flex-col items-center justify-center border-b border-gray-100 p-8 text-center dark:border-gray-700 dark:bg-gray-900 md:w-1/2 md:border-b-0 md:border-r md:p-12">
                         <div className="relative mb-6 h-48 w-48 md:h-56 md:w-56">
@@ -168,7 +168,7 @@ export default function LoginPage() {
                                             setEmail(e.target.value)
                                         }
                                         placeholder="Contoh: mahasiswa@students.undip.ac.id"
-                                        className="h-12 pl-10"
+                                        className="h-12 pl-10 rounded-3xl"
                                         disabled={isLoading}
                                         required
                                     />
@@ -195,7 +195,7 @@ export default function LoginPage() {
                                             setPassword(e.target.value)
                                         }
                                         placeholder="Masukkan kata sandi"
-                                        className="h-12 pl-10 pr-10"
+                                        className="h-12 pl-10 pr-10 rounded-3xl"
                                         disabled={isLoading}
                                         required
                                     />
@@ -227,7 +227,7 @@ export default function LoginPage() {
 
                             <Button
                                 type="submit"
-                                className="w-full bg-dark-navy py-6 text-white hover:bg-slate-800"
+                                className="w-full bg-dark-navy py-6 text-white hover:bg-slate-800 rounded-3xl"
                                 disabled={isLoading}
                             >
                                 {isLoading ? "Memproses..." : "Masuk"}
@@ -248,7 +248,7 @@ export default function LoginPage() {
                             <Button
                                 variant="outline"
                                 type="button"
-                                className="w-full border-gray-300 py-6 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                                className="w-full border-gray-300 py-6 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 rounded-3xl"
                                 disabled={isLoading}
                             >
                                 Masuk dengan SSO UNDIP

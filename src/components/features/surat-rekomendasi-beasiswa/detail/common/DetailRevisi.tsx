@@ -15,7 +15,7 @@ export function DetailRevisi({
     revisionDate,
 }: DetailRevisiProps) {
     return (
-        <Card className="border-orange-300 bg-orange-50/80 px-4 py-2 rounded-lg flex flex-col gap-2 shadow-none">
+        <Card className="border-orange-300 bg-orange-50/80 px-4 py-2 rounded-3xl flex flex-col gap-2 shadow-none">
             <div className="flex items-center gap-2 mb-1">
                 <AlertCircle className="h-5 w-5 text-orange-600" />
                 <span className="font-bold text-orange-800 text-base">

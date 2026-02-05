@@ -209,14 +209,14 @@ export function LetterList({
     };
 
     return (
-        <Card className="border-none shadow-sm overflow-hidden bg-white">
-            <div className="p-6 border-b border-slate-50 flex flex-col gap-4">
+        <Card className="border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 overflow-hidden bg-white rounded-3xl py-0 gap-0">
+            <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
                 <h2 className="text-xl font-bold text-slate-800">{title}</h2>
                 <div className="flex flex-wrap gap-3 items-center">
                     <div className="relative flex-1 min-w-50">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <Input
-                            className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full"
+                            className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full rounded-3xl"
                             placeholder="Cari surat..."
                             value={searchTerm}
                             onChange={(e) => handleSearchChange(e.target.value)}
@@ -227,7 +227,7 @@ export function LetterList({
                     </div>
 
                     {/* Date Range Filter - Stylish Design */}
-                    <div className="flex items-center gap-2 bg-slate-50/50 rounded-lg p-2 border border-slate-100">
+                    <div className="flex items-center gap-2 bg-slate-50/50 rounded-3xl p-2 border border-slate-100">
                         <Calendar className="h-4 w-4 text-slate-400 ml-1" />
                         
                         <div className="flex items-center gap-2">
@@ -238,7 +238,7 @@ export function LetterList({
                                 <Input
                                     id="startDate"
                                     type="date"
-                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
                                     value={startDateInput}
                                     onChange={(e) => handleStartDateChange(e.target.value)}
                                     max={endDateInput || undefined}
@@ -256,7 +256,7 @@ export function LetterList({
                                 <Input
                                     id="endDate"
                                     type="date"
-                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
                                     value={endDateInput}
                                     onChange={(e) => handleEndDateChange(e.target.value)}
                                     min={startDateInput || undefined}
@@ -284,7 +284,7 @@ export function LetterList({
                         defaultValue={searchParams.get("sortOrder") || "desc"}
                         onValueChange={handleSortChange}
                     >
-                        <SelectTrigger className="w-full sm:w-40 h-10 border-slate-100 text-slate-600" suppressHydrationWarning>
+                        <SelectTrigger className="w-full sm:w-40 h-10 border-slate-100 text-slate-600 rounded-3xl" suppressHydrationWarning>
                             <div className="flex items-center gap-2">
                                 <Filter className="h-4 w-4" />
                                 <SelectValue placeholder="Urutkan" />
@@ -296,10 +296,13 @@ export function LetterList({
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+            </div>
+
+            {/* Table Section */}
+            <div className="overflow-x-auto">
+                <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-undip-blue border-b border-slate-50 text-[11px] uppercase text-white font-bold tracking-wider">
+                            <tr className="bg-undip-blue border-b border-slate-100 text-[11px] uppercase text-white font-bold tracking-wider">
                                 <th className="px-6 py-4 w-12">No</th>
                                 <th className="px-6 py-4">
                                     Pengirim / Pemohon
@@ -311,8 +314,23 @@ export function LetterList({
                                 <th className="px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-50 text-sm">
-                            {letters.map((letter, index) => (
+                        <tbody className="divide-y divide-slate-100 text-sm">
+                            {letters.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-6 py-12 text-center">
+                                        <div className="flex flex-col items-center justify-center gap-2">
+                                            <div className="text-slate-400">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <p className="text-slate-600 font-medium">Tidak ada surat yang sedang diproses.</p>
+                                            <p className="text-slate-400 text-sm">Belum ada data surat yang tersedia saat ini.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : (
+                                letters.map((letter, index) => (
                                 <tr
                                     key={letter.id}
                                     className="hover:bg-slate-50/30 transition-colors group"
@@ -370,15 +388,14 @@ export function LetterList({
                                         </Link>
                                     </td>
                                 </tr>
-                            ))}
+                            )))}
                         </tbody>
                     </table>
                 </div>
-            </div>
 
             {/* Pagination */}
             {meta && meta.totalPages > 1 && (
-                <div className="bg-slate-50/30 px-6 py-4 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-xs font-bold text-slate-400">
                         Menampilkan{" "}
                         <span className="text-slate-600">

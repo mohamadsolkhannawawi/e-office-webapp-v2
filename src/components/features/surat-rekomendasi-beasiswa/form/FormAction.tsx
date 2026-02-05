@@ -129,7 +129,7 @@ export function FormAction({
                 variant="outline"
                 onClick={onBack}
                 disabled={currentStep === 1}
-                className={`bg-white border-gray-300 text-gray-700 hover:bg-gray-50 px-6 h-11 ${
+                className={`bg-white border-gray-300 text-gray-700 hover:bg-gray-50 px-6 h-11 rounded-3xl ${
                     currentStep === 1 ? "opacity-0 pointer-events-none" : ""
                 }`}
             >
@@ -141,7 +141,7 @@ export function FormAction({
                     <AlertDialogTrigger asChild>
                         <Button
                             variant="outline"
-                            className="text-white bg-orange-500 border-orange-500 hover:bg-orange-600 hover:text-white h-11 px-6"
+                            className="text-white bg-orange-500 border-orange-500 hover:bg-orange-600 hover:text-white h-11 px-6 rounded-3xl"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? "Menyimpan..." : "Simpan Draft"}
@@ -158,10 +158,10 @@ export function FormAction({
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogCancel className="rounded-3xl">Batal</AlertDialogCancel>
                             <AlertDialogAction
                                 onClick={handleSaveDraft}
-                                className="bg-undip-blue hover:bg-sky-700"
+                                className="bg-undip-blue hover:bg-sky-700 rounded-3xl"
                             >
                                 Ya, Simpan
                             </AlertDialogAction>
@@ -173,7 +173,7 @@ export function FormAction({
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button
-                                className="bg-undip-blue hover:bg-sky-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
+                                className="bg-undip-blue hover:bg-sky-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200 rounded-3xl"
                                 disabled={
                                     isSubmitting ||
                                     !!(
@@ -198,13 +198,13 @@ export function FormAction({
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel
-                                    className="bg-red-600 hover:bg-red-700 text-white h-11 px-8 font-medium shadow-sm shadow-red-200"
+                                    className="bg-red-600 hover:bg-red-700 text-white h-11 px-8 font-medium shadow-sm shadow-red-200 rounded-3xl"
                                 >
                                     Batal
                                 </AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={handleConfirmAjukan}
-                                    className="bg-undip-blue hover:bg-sky-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
+                                    className="bg-undip-blue hover:bg-sky-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200 rounded-3xl"
                                     disabled={isSubmitting}
                                 >
                                     {isSubmitting
@@ -217,7 +217,7 @@ export function FormAction({
                 ) : (
                     <Button
                         onClick={handleAjukanSurat}
-                        className="bg-undip-blue hover:bg-sky-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200"
+                        className="bg-undip-blue hover:bg-sky-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200 rounded-3xl"
                         disabled={
                             !!(
                                 typeof isNextDisabled !== "undefined" &&

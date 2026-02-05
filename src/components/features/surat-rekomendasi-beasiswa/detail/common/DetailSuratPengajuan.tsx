@@ -8,7 +8,7 @@ interface InfoRowProps {
 
 function InfoRow({ label, value }: InfoRowProps) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 px-6 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/30 transition-colors">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 px-6 py-4 border-b border-gray-200 last:border-0 hover:bg-gray-50/30 transition-colors">
             <span className="text-sm text-slate-500 font-medium">{label}</span>
             <span className="md:col-span-2 text-sm font-bold text-slate-800">
                 {value}
@@ -33,8 +33,8 @@ export function DetailSuratPengajuan({ data }: DetailSuratPengajuanProps) {
     };
 
     return (
-        <Card className="border-none shadow-sm bg-white">
-            <CardHeader className="pb-3 border-b border-gray-100">
+        <Card className="border-none shadow-sm bg-white rounded-3xl">
+            <CardHeader className="pb-3 border-b border-gray-300 gap-0">
                 <CardTitle className="text-base font-bold text-gray-800 flex items-center justify-between">
                     <span>Detail Surat Pengajuan</span>
                 </CardTitle>

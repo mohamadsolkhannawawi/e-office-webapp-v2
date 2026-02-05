@@ -151,7 +151,7 @@ export function WD1SignatureDashboard() {
             <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg">
+                        <div className="p-2 rounded-3xl">
                             <PenTool className="h-6 w-6 text-undip-blue" />
                         </div>
                         <div>
@@ -168,12 +168,12 @@ export function WD1SignatureDashboard() {
                         onOpenChange={setUploadDialogOpen}
                     >
                         <DialogTrigger asChild>
-                            <Button className="bg-undip-blue hover:bg-sky-700">
+                            <Button className="bg-undip-blue hover:bg-sky-700 rounded-3xl">
                                 <Upload className="h-4 w-4 mr-2" />
                                 Upload Template Baru
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-md">
+                        <DialogContent className="sm:max-w-md rounded-3xl">
                             <DialogHeader>
                                 <DialogTitle>
                                     Upload Template Tanda Tangan
@@ -186,7 +186,7 @@ export function WD1SignatureDashboard() {
                             </DialogHeader>
 
                             <div className="space-y-4">
-                                <div className="border-2 border-dashed border-slate-200 rounded-lg p-6 flex flex-col items-center justify-center hover:border-undip-blue transition-colors cursor-pointer">
+                                <div className="border-2 border-dashed border-slate-200 rounded-3xl p-6 flex flex-col items-center justify-center hover:border-undip-blue transition-colors cursor-pointer">
                                     <input
                                         id="file-upload"
                                         type="file"
@@ -228,7 +228,7 @@ export function WD1SignatureDashboard() {
                         <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
                     </div>
                 ) : signatures.length === 0 ? (
-                    <div className="text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                    <div className="text-center py-12 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
                         <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-2" />
                         <p className="text-gray-500">
                             Belum ada template tanda tangan
@@ -242,7 +242,7 @@ export function WD1SignatureDashboard() {
                         {signatures.map((signature) => (
                             <div
                                 key={signature.id}
-                                className="border border-slate-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-white"
+                                className="border border-slate-200 rounded-3xl overflow-hidden hover:shadow-md transition-shadow bg-white"
                             >
                                 {/* Signature Preview */}
                                 <div className="aspect-video bg-gray-50 flex items-center justify-center border-b p-4">
@@ -289,7 +289,7 @@ export function WD1SignatureDashboard() {
                                                         signature.id,
                                                     )
                                                 }
-                                                className="flex-1 text-xs"
+                                                className="flex-1 text-xs rounded-3xl"
                                             >
                                                 <Star className="h-3 w-3 mr-1" />
                                                 Jadikan Default
@@ -301,7 +301,7 @@ export function WD1SignatureDashboard() {
                                             onClick={() =>
                                                 handleDelete(signature.id)
                                             }
-                                            className="text-red-600 border-red-200 hover:bg-red-50"
+                                            className="text-red-600 border-red-200 hover:bg-red-50 rounded-3xl"
                                         >
                                             <Trash2 className="h-3 w-3" />
                                         </Button>

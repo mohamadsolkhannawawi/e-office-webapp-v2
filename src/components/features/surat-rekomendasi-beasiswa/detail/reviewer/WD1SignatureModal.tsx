@@ -83,7 +83,7 @@ export function WD1SignatureModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-3xl w-full max-w-[95%] rounded-2xl border-none shadow-lg p-4 sm:p-8 overflow-hidden overflow-y-auto max-h-[90vh]">
+            <DialogContent className="sm:max-w-3xl w-full max-w-[95%] rounded-3xl border-none shadow-lg p-4 sm:p-8 overflow-hidden overflow-y-auto max-h-[90vh]">
                 <DialogHeader className="sr-only">
                     <DialogTitle className="text-base sm:text-lg font-semibold">
                         Tanda Tangan Digital
@@ -103,14 +103,14 @@ export function WD1SignatureModal({
                     <Button
                         variant="outline"
                         onClick={onClose}
-                        className="flex-1 h-12 rounded-xl font-bold border-slate-300 text-slate-600 hover:bg-slate-50 mt-4"
+                        className="flex-1 h-12 rounded-3xl font-bold border-slate-300 text-slate-600 hover:bg-slate-50 mt-4"
                     >
                         Batal
                     </Button>
                     <Button
                         onClick={handleSave}
                         disabled={!selectedSignature || isSaving}
-                        className="flex-1 h-12 rounded-xl font-bold text-white bg-undip-blue hover:bg-sky-700 shadow-lg shadow-blue-100 transition-all active:scale-95 mt-4"
+                        className="flex-1 h-12 rounded-3xl font-bold text-white bg-undip-blue hover:bg-sky-700 shadow-lg shadow-blue-100 transition-all active:scale-95 mt-4"
                     >
                         {isSaving ? (
                             <>

@@ -49,20 +49,28 @@ export default function MahasiswaDashboardPage() {
     return (
         <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-in fade-in duration-500">
             {/* Breadcrumb */}
-            <nav className="flex items-center text-xs sm:text-sm font-medium text-slate-500">
+            <nav className="flex items-center text-xs sm:text-sm font-medium text-slate-500 animate-in slide-in-from-bottom-3 duration-700">
                 <span className="text-slate-800">Dashboard</span>
                 <ChevronRight className="mx-1 sm:mx-2 h-3 w-3 sm:h-4 sm:w-4" />
             </nav>
 
+            {/* Page Title */}
+            <h1 className="text-2xl font-bold text-slate-800 animate-in slide-in-from-bottom-3 duration-700">
+                Dashboard
+            </h1>
+            <p className="text-sm text-slate-500 -mt-4 animate-in slide-in-from-bottom-3 duration-700">
+                Selamat datang di dashboard mahasiswa. Kelola pengajuan surat dan dokumen administratif Anda dengan mudah.
+            </p>
+
             {/* Actions Grid */}
             <div className="grid gap-3 sm:gap-4">
-                {DASHBOARD_ACTIONS.map((action) => (
+                {DASHBOARD_ACTIONS.map((action, index) => (
                     <div
                         key={action.title}
-                        className={`group bg-white rounded-lg sm:rounded-xl border border-gray-100 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 transition-all duration-300 ${
+                        className={`group bg-white rounded-3xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 transition-all duration-300 animate-in slide-in-from-bottom-4 duration-700 h-full ${
                             action.disabled
-                                ? "opacity-60 cursor-not-allowed"
-                                : "hover:shadow-md hover:border-blue-100"
+                                ? "opacity-60 cursor-not-allowed border-gray-200"
+                                : "hover:shadow-md hover:border-blue-100 border-gray-200"
                         }`}
                     >
                         <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">

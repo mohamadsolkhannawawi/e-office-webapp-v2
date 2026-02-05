@@ -327,7 +327,7 @@ export default function PengajuanBaruPage() {
                     href="/mahasiswa/surat/surat-rekomendasi-beasiswa"
                     className="order-1 sm:order-2 self-start sm:self-auto"
                 >
-                    <Button className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-md inline-flex items-center gap-2">
+                    <Button className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-3xl inline-flex items-center gap-2">
                         <ArrowLeft className="h-4 w-4" />
                         <span className="text-sm font-semibold">Kembali</span>
                     </Button>

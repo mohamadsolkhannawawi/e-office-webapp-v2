@@ -33,7 +33,9 @@ export default function UpaSettingsPage() {
             }
         } catch (error) {
             console.error("Failed to load configs", error);
-            toast.error("Gagal memuat konfigurasi.");
+            toast.error(
+                "Gagal memuat konfigurasi. Silakan refresh halaman atau hubungi administrator",
+            );
         } finally {
             setLoading(false);
         }
@@ -52,13 +54,17 @@ export default function UpaSettingsPage() {
                 wd1Config as unknown as Record<string, unknown>,
             );
             if (success) {
-                toast.success("Konfigurasi Wakil Dekan 1 berhasil diperbarui.");
+                toast.success(
+                    "Konfigurasi Wakil Dekan 1 berhasil diperbarui! Perubahan telah tersimpan",
+                );
             } else {
                 throw new Error("Update failed");
             }
         } catch (error) {
             console.error(error);
-            toast.error("Terjadi kesalahan saat menyimpan.");
+            toast.error(
+                "Terjadi kesalahan sistem saat menyimpan. Silakan coba lagi atau hubungi administrator",
+            );
         } finally {
             setSaving(false);
         }

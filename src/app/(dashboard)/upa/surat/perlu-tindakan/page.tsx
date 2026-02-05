@@ -150,7 +150,7 @@ export default async function PerluTindakanPage(props: {
         <div className="space-y-8 animate-in fade-in duration-500">
             <nav className="flex items-center text-sm font-medium text-slate-500">
                 <Link
-                    href="/upa"
+                    href="/upa/surat/perlu-tindakan"
                     className="hover:text-undip-blue transition-colors"
                 >
                     Surat Masuk

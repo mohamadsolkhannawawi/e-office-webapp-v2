@@ -96,7 +96,14 @@ export default function ArsipPage() {
         } finally {
             setLoading(false);
         }
-    }, [currentPage, searchTerm, filterBeasiswa, startDateInput, endDateInput, sortOrder]);
+    }, [
+        currentPage,
+        searchTerm,
+        filterBeasiswa,
+        startDateInput,
+        endDateInput,
+        sortOrder,
+    ]);
 
     const handleDownloadPDF = async (applicationId: string) => {
         try {
@@ -264,18 +271,6 @@ export default function ArsipPage() {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            {/* Breadcrumb */}
-            <nav className="flex items-center text-sm font-medium text-slate-500">
-                <Link
-                    href="/upa"
-                    className="hover:text-undip-blue transition-colors"
-                >
-                    Dashboard
-                </Link>
-                <ChevronRight className="mx-2 h-4 w-4" />
-                <span className="text-slate-800">Arsip Surat</span>
-            </nav>
-
             {/* Header with Title and Export Buttons */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
@@ -351,9 +346,12 @@ export default function ArsipPage() {
                         {/* Date Range Filter - Stylish Design */}
                         <div className="flex items-center gap-2 bg-slate-50/50 rounded-lg p-2 border border-slate-100">
                             <Calendar className="h-4 w-4 text-slate-400 ml-1" />
-                            
+
                             <div className="flex items-center gap-2">
-                                <Label htmlFor="startDate" className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                                <Label
+                                    htmlFor="startDate"
+                                    className="text-xs font-medium text-slate-600 whitespace-nowrap"
+                                >
                                     Dari
                                 </Label>
                                 <div className="relative">
@@ -362,16 +360,21 @@ export default function ArsipPage() {
                                         type="date"
                                         className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                         value={startDateInput}
-                                        onChange={(e) => setStartDateInput(e.target.value)}
+                                        onChange={(e) =>
+                                            setStartDateInput(e.target.value)
+                                        }
                                         max={endDateInput || undefined}
                                     />
                                 </div>
                             </div>
-                            
+
                             <div className="h-4 w-px bg-slate-200" />
-                            
+
                             <div className="flex items-center gap-2">
-                                <Label htmlFor="endDate" className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                                <Label
+                                    htmlFor="endDate"
+                                    className="text-xs font-medium text-slate-600 whitespace-nowrap"
+                                >
                                     Sampai
                                 </Label>
                                 <div className="relative">
@@ -380,7 +383,9 @@ export default function ArsipPage() {
                                         type="date"
                                         className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                         value={endDateInput}
-                                        onChange={(e) => setEndDateInput(e.target.value)}
+                                        onChange={(e) =>
+                                            setEndDateInput(e.target.value)
+                                        }
                                         min={startDateInput || undefined}
                                     />
                                 </div>
@@ -436,13 +441,9 @@ export default function ArsipPage() {
                                 <th className="px-6 py-4">NIM</th>
                                 <th className="px-6 py-4">Beasiswa</th>
                                 <th className="px-6 py-4">Nomor Surat</th>
-                                <th className="px-6 py-4">
-                                    Tanggal Terbit
-                                </th>
+                                <th className="px-6 py-4">Tanggal Terbit</th>
                                 <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-center">
-                                    Aksi
-                                </th>
+                                <th className="px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 text-sm">
@@ -454,11 +455,24 @@ export default function ArsipPage() {
                                     >
                                         <div className="flex flex-col items-center justify-center gap-2">
                                             <div className="text-slate-400">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-16 w-16 mx-auto mb-2"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                    />
                                                 </svg>
                                             </div>
-                                            <p className="text-slate-600 font-medium">Memuat data...</p>
+                                            <p className="text-slate-600 font-medium">
+                                                Memuat data...
+                                            </p>
                                         </div>
                                     </td>
                                 </tr>
@@ -470,12 +484,28 @@ export default function ArsipPage() {
                                     >
                                         <div className="flex flex-col items-center justify-center gap-2">
                                             <div className="text-slate-400">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-16 w-16 mx-auto mb-2"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                    />
                                                 </svg>
                                             </div>
-                                            <p className="text-slate-600 font-medium">Tidak ada data arsip.</p>
-                                            <p className="text-slate-400 text-sm">Belum ada surat yang tersedia saat ini.</p>
+                                            <p className="text-slate-600 font-medium">
+                                                Tidak ada data arsip.
+                                            </p>
+                                            <p className="text-slate-400 text-sm">
+                                                Belum ada surat yang tersedia
+                                                saat ini.
+                                            </p>
                                         </div>
                                     </td>
                                 </tr>
@@ -486,9 +516,7 @@ export default function ArsipPage() {
                                         className="hover:bg-slate-50/30 transition-colors group"
                                     >
                                         <td className="px-6 py-4 text-slate-500">
-                                            {(currentPage - 1) * 10 +
-                                                index +
-                                                1}
+                                            {(currentPage - 1) * 10 + index + 1}
                                         </td>
                                         <td className="px-6 py-4 font-bold text-slate-700">
                                             {app.formData?.namaLengkap ||
@@ -522,7 +550,7 @@ export default function ArsipPage() {
                                         <td className="px-6 py-4 text-center">
                                             <div className="flex justify-center gap-2">
                                                 <Link
-                                                    href={`/upa/surat/surat-rekomendasi-beasiswa/detail/${app.id}`}
+                                                    href={`/upa/surat/surat-rekomendasi-beasiswa/detail/${app.id}?from=arsip`}
                                                 >
                                                     <Button
                                                         variant="outline"
@@ -553,8 +581,7 @@ export default function ArsipPage() {
                                                     }
                                                     size="sm"
                                                     disabled={
-                                                        downloadingId ===
-                                                        app.id
+                                                        downloadingId === app.id
                                                     }
                                                     className="rounded-full h-8 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 font-bold border-slate-100 text-white transition-all gap-1.5 px-4"
                                                 >

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import toast from "react-hot-toast";
 import {
     ChevronRight,
     Filter,
@@ -19,6 +20,7 @@ import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
 import { generateAndDownloadDocument } from "@/lib/template-api";
 import { Card } from "@/components/ui/card";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 import {
     Select,
     SelectContent,
@@ -41,13 +43,18 @@ export default function SuratSelesaiPage() {
     });
 
     const fetchApplications = useCallback(
-        async (page = 1, search = searchTerm, jenis = jenisFilter) => {
+        async (
+            page = 1,
+            search = searchTerm,
+            jenis = jenisFilter,
+            limit = pagination.limit,
+        ) => {
             setIsLoading(true);
             try {
                 const { data, meta } = await getApplications({
                     status: "FINISHED",
                     page,
-                    limit: 10,
+                    limit,
                     search: search || undefined,
                     jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
                 });
@@ -64,7 +71,7 @@ export default function SuratSelesaiPage() {
                 setIsLoading(false);
             }
         },
-        [searchTerm, jenisFilter],
+        [searchTerm, jenisFilter, pagination.limit],
     );
 
     // Handle template document download
@@ -80,10 +87,12 @@ export default function SuratSelesaiPage() {
                 `surat-rekomendasi-beasiswa-${applicationId}.docx`,
             );
 
-            console.log("Dokumen berhasil diunduh");
+            toast.success("Dokumen Word berhasil diunduh!");
         } catch (error) {
             console.error("Failed to download template:", error);
-            alert("Gagal mengunduh dokumen surat");
+            toast.error(
+                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+            );
         } finally {
             setDownloadingId(null);
         }
@@ -91,7 +100,7 @@ export default function SuratSelesaiPage() {
 
     useEffect(() => {
         const delaySearch = setTimeout(() => {
-            fetchApplications(1, searchTerm, jenisFilter);
+            fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
         }, 500);
 
         return () => clearTimeout(delaySearch);
@@ -99,8 +108,18 @@ export default function SuratSelesaiPage() {
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pagination.totalPages) {
-            fetchApplications(newPage);
+            fetchApplications(
+                newPage,
+                searchTerm,
+                jenisFilter,
+                pagination.limit,
+            );
         }
+    };
+
+    const handlePageSizeChange = (newPageSize: number) => {
+        setPagination((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
+        fetchApplications(1, searchTerm, jenisFilter, newPageSize);
     };
 
     const getStatusInfo = (status: string, app?: ApplicationSummary) => {
@@ -329,13 +348,26 @@ export default function SuratSelesaiPage() {
                                                                 className="h-9 px-3 gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-medium text-xs rounded-3xl"
                                                                 title="Cetak/PDF"
                                                                 onClick={() => {
-                                                                    const link =
-                                                                        document.createElement(
-                                                                            "a",
+                                                                    try {
+                                                                        const link =
+                                                                            document.createElement(
+                                                                                "a",
+                                                                            );
+                                                                        link.href = `/api/templates/letter/${app.id}/pdf`;
+                                                                        link.download = `${app.scholarshipName || "Surat"}-${app.id}.pdf`;
+                                                                        link.click();
+                                                                        toast.success(
+                                                                            "PDF berhasil diunduh!",
                                                                         );
-                                                                    link.href = `/api/templates/letter/${app.id}/pdf`;
-                                                                    link.download = `${app.scholarshipName || "Surat"}-${app.id}.pdf`;
-                                                                    link.click();
+                                                                    } catch (error) {
+                                                                        console.error(
+                                                                            "Error downloading PDF:",
+                                                                            error,
+                                                                        );
+                                                                        toast.error(
+                                                                            `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+                                                                        );
+                                                                    }
                                                                 }}
                                                             >
                                                                 <Download className="h-4 w-4" />
@@ -378,49 +410,16 @@ export default function SuratSelesaiPage() {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                {!isLoading && pagination.totalPages > 1 && (
-                    <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-                        <p className="text-xs text-slate-500">
-                            Menampilkan{" "}
-                            {(pagination.page - 1) * pagination.limit + 1} -{" "}
-                            {Math.min(
-                                pagination.page * pagination.limit,
-                                pagination.total,
-                            )}{" "}
-                            dari {pagination.total} surat
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() =>
-                                    handlePageChange(pagination.page - 1)
-                                }
-                                disabled={pagination.page === 1}
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <span className="text-xs text-slate-600 px-2">
-                                {pagination.page} / {pagination.totalPages}
-                            </span>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() =>
-                                    handlePageChange(pagination.page + 1)
-                                }
-                                disabled={
-                                    pagination.page === pagination.totalPages
-                                }
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                {/* Standard Pagination */}
+                <StandardPagination
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    pageSize={pagination.limit}
+                    totalItems={pagination.total}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                    itemLabel="surat selesai"
+                />
             </Card>
         </div>
     );

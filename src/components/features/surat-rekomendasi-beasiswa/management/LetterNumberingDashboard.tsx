@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 import toast from "react-hot-toast";
 import {
     Loader2,
@@ -44,6 +45,8 @@ interface ValidationResult {
     isValidFormat: boolean;
     isAvailable: boolean;
     inUse?: boolean;
+    usedBy?: string;
+    usedByApplicationId?: string;
 }
 
 export function LetterNumberingDashboard() {
@@ -60,6 +63,10 @@ export function LetterNumberingDashboard() {
     const [validationResult, setValidationResult] =
         useState<ValidationResult | null>(null);
     const [isValidating, setIsValidating] = useState(false);
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     // Load published numbers
     const loadPublishedNumbers = async () => {
@@ -207,6 +214,27 @@ export function LetterNumberingDashboard() {
         });
     };
 
+    // Pagination logic
+    const totalPages = Math.ceil(publishedNumbers.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentItems = publishedNumbers.slice(startIndex, endIndex);
+
+    // Reset to page 1 when year changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [year]);
+
+    // Pagination handlers
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+    };
+
+    const handlePageSizeChange = (newPageSize: number) => {
+        setItemsPerPage(newPageSize);
+        setCurrentPage(1);
+    };
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Controls Card */}
@@ -300,7 +328,7 @@ export function LetterNumberingDashboard() {
                             <tr className="bg-undip-blue border-b border-slate-100 text-[11px] uppercase text-white font-bold tracking-wider">
                                 <th className="px-6 py-4 w-12">No</th>
                                 <th className="px-6 py-4">Nomor Surat</th>
-                                <th className="px-6 py-4">Nama Aplikasi</th>
+                                <th className="px-6 py-4">Nama Beasiswa</th>
                                 <th className="px-6 py-4">Tanggal Publish</th>
                                 <th className="px-6 py-4 text-center">Aksi</th>
                             </tr>
@@ -370,13 +398,13 @@ export function LetterNumberingDashboard() {
                                     </td>
                                 </tr>
                             ) : (
-                                publishedNumbers.map((item, idx) => (
+                                currentItems.map((item, idx) => (
                                     <tr
                                         key={item.applicationId}
                                         className="hover:bg-slate-50/30 transition-colors group"
                                     >
                                         <td className="px-6 py-4 text-slate-500">
-                                            {idx + 1}
+                                            {startIndex + idx + 1}
                                         </td>
                                         <td className="px-6 py-4 font-mono font-bold text-slate-700">
                                             {item.letterNumber}
@@ -523,12 +551,12 @@ export function LetterNumberingDashboard() {
                                                                                     xxx/UN7.F8.1/KM/I/2026
                                                                                 </p>
                                                                             )}
-                                                                            {validationResult.inUse && (
+                                                                            {validationResult.usedBy && (
                                                                                 <p className="text-xs text-red-700">
                                                                                     Digunakan
                                                                                     oleh:{" "}
                                                                                     {
-                                                                                        validationResult.inUse
+                                                                                        validationResult.usedBy
                                                                                     }
                                                                                 </p>
                                                                             )}
@@ -590,6 +618,17 @@ export function LetterNumberingDashboard() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Standard Pagination */}
+                <StandardPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    pageSize={itemsPerPage}
+                    totalItems={publishedNumbers.length}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                    itemLabel="nomor"
+                />
             </Card>
         </div>
     );

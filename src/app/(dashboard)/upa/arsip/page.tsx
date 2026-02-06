@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import toast from "react-hot-toast";
 import {
     Select,
     SelectContent,
@@ -12,13 +13,10 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
-    ChevronRight,
-    ChevronLeft,
     FileSpreadsheet,
     FileText,
     Search,
     Filter,
-    Archive,
     Eye,
     CheckCircle,
     Download,
@@ -33,6 +31,7 @@ import {
     getTemplateIdByLetterType,
 } from "@/lib/template-api";
 import { Label } from "@/components/ui/label";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 
 // Type untuk export
 interface ExportData {
@@ -53,9 +52,12 @@ export default function ArsipPage() {
     const [startDateInput, setStartDateInput] = useState("");
     const [endDateInput, setEndDateInput] = useState("");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [totalItems, setTotalItems] = useState(0);
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 1,
+    });
     const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     const fetchArchiveData = useCallback(async () => {
@@ -79,8 +81,8 @@ export default function ArsipPage() {
 
             const result = await getApplications({
                 status: "COMPLETED",
-                page: currentPage,
-                limit: 10,
+                page: pagination.page,
+                limit: pagination.limit,
                 search: searchTerm,
                 jenisBeasiswa:
                     filterBeasiswa !== "all" ? filterBeasiswa : undefined,
@@ -89,15 +91,20 @@ export default function ArsipPage() {
                 sortOrder: sortOrder,
             });
             setApplications(result.data);
-            setTotalPages(result.meta.totalPages);
-            setTotalItems(result.meta.total);
+            setPagination({
+                page: result.meta.page,
+                limit: result.meta.limit,
+                total: result.meta.total,
+                totalPages: result.meta.totalPages,
+            });
         } catch (error) {
             console.error("Error fetching archive:", error);
         } finally {
             setLoading(false);
         }
     }, [
-        currentPage,
+        pagination.page,
+        pagination.limit,
         searchTerm,
         filterBeasiswa,
         startDateInput,
@@ -111,8 +118,12 @@ export default function ArsipPage() {
             link.href = `/api/templates/letter/${applicationId}/pdf`;
             link.download = `Surat-Rekomendasi-${applicationId}.pdf`;
             link.click();
+            toast.success("PDF berhasil diunduh!");
         } catch (error) {
             console.error("Error downloading PDF:", error);
+            toast.error(
+                `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+            );
         }
     };
 
@@ -128,12 +139,26 @@ export default function ArsipPage() {
                     applicationId,
                     `Surat-Rekomendasi-${applicationId}.docx`,
                 );
+                toast.success("Dokumen Word berhasil diunduh!");
+            } else {
+                toast.error("Template tidak ditemukan");
             }
         } catch (error) {
             console.error("Error downloading DOCX:", error);
+            toast.error(
+                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+            );
         } finally {
             setDownloadingId(null);
         }
+    };
+
+    const handlePageChange = (newPage: number) => {
+        setPagination((prev) => ({ ...prev, page: newPage }));
+    };
+
+    const handlePageSizeChange = (newPageSize: number) => {
+        setPagination((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
     };
 
     useEffect(() => {
@@ -155,54 +180,68 @@ export default function ArsipPage() {
 
     // Export to Excel (CSV format for simplicity)
     const exportToExcel = () => {
-        const data = prepareExportData();
-        const headers = [
-            "No",
-            "Nama",
-            "NIM",
-            "Beasiswa",
-            "Nomor Surat",
-            "Tanggal Terbit",
-            "Status",
-        ];
-        const rows = data.map((d) => [
-            d.no,
-            d.nama,
-            d.nim,
-            d.beasiswa,
-            d.nomorSurat,
-            d.tanggalTerbit,
-            d.status,
-        ]);
+        try {
+            const data = prepareExportData();
+            const headers = [
+                "No",
+                "Nama",
+                "NIM",
+                "Beasiswa",
+                "Nomor Surat",
+                "Tanggal Terbit",
+                "Status",
+            ];
+            const rows = data.map((d) => [
+                d.no,
+                d.nama,
+                d.nim,
+                d.beasiswa,
+                d.nomorSurat,
+                d.tanggalTerbit,
+                d.status,
+            ]);
 
-        const csvContent = [
-            headers.join(","),
-            ...rows.map((r) => r.map((cell) => `"${cell}"`).join(",")),
-        ].join("\n");
+            const csvContent = [
+                headers.join(","),
+                ...rows.map((r) => r.map((cell) => `"${cell}"`).join(",")),
+            ].join("\n");
 
-        const blob = new Blob([csvContent], {
-            type: "text/csv;charset=utf-8;",
-        });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute(
-            "download",
-            `arsip-surat-${new Date().toISOString().split("T")[0]}.csv`,
-        );
-        link.style.visibility = "hidden";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            const blob = new Blob([csvContent], {
+                type: "text/csv;charset=utf-8;",
+            });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute(
+                "download",
+                `arsip-surat-${new Date().toISOString().split("T")[0]}.csv`,
+            );
+            link.style.visibility = "hidden";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            toast.success("Excel berhasil diunduh!");
+        } catch (error) {
+            console.error("Error exporting to Excel:", error);
+            toast.error(
+                `Gagal export Excel: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+            );
+        }
     };
 
     // Export to PDF (simple print-based approach)
     const exportToPDF = () => {
-        const data = prepareExportData();
-        const printWindow = window.open("", "_blank");
-        if (!printWindow) return;
+        try {
+            const data = prepareExportData();
+            const printWindow = window.open("", "_blank");
+            if (!printWindow) {
+                toast.error(
+                    "Gagal membuka jendela cetak. Pastikan popup tidak diblokir.",
+                );
+                return;
+            }
 
-        const html = `
+            const html = `
             <!DOCTYPE html>
             <html>
             <head>
@@ -258,15 +297,22 @@ export default function ArsipPage() {
                     </tbody>
                 </table>
                 <div class="footer">
-                    Total: ${totalItems} surat
+                    Total: ${pagination.total} surat
                 </div>
             </body>
             </html>
         `;
 
-        printWindow.document.write(html);
-        printWindow.document.close();
-        printWindow.print();
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.print();
+            toast.success("Jendela cetak PDF berhasil dibuka!");
+        } catch (error) {
+            console.error("Error exporting to PDF:", error);
+            toast.error(
+                `Gagal export PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+            );
+        }
     };
 
     return (
@@ -278,7 +324,7 @@ export default function ArsipPage() {
                         Arsip Surat
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
-                        Total {totalItems} surat tersimpan
+                        Total {pagination.total} arsip surat
                     </p>
                 </div>
 
@@ -358,7 +404,7 @@ export default function ArsipPage() {
                                     <Input
                                         id="startDate"
                                         type="date"
-                                        className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        className="h-9 w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                         value={startDateInput}
                                         onChange={(e) =>
                                             setStartDateInput(e.target.value)
@@ -381,7 +427,7 @@ export default function ArsipPage() {
                                     <Input
                                         id="endDate"
                                         type="date"
-                                        className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        className="h-9 w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                                         value={endDateInput}
                                         onChange={(e) =>
                                             setEndDateInput(e.target.value)
@@ -516,7 +562,10 @@ export default function ArsipPage() {
                                         className="hover:bg-slate-50/30 transition-colors group"
                                     >
                                         <td className="px-6 py-4 text-slate-500">
-                                            {(currentPage - 1) * 10 + index + 1}
+                                            {(pagination.page - 1) *
+                                                pagination.limit +
+                                                index +
+                                                1}
                                         </td>
                                         <td className="px-6 py-4 font-bold text-slate-700">
                                             {app.formData?.namaLengkap ||
@@ -602,72 +651,16 @@ export default function ArsipPage() {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <p className="text-xs font-bold text-slate-400">
-                            Menampilkan{" "}
-                            <span className="text-slate-600">
-                                {(currentPage - 1) * 10 + 1}-
-                                {Math.min(currentPage * 10, totalItems)}
-                            </span>{" "}
-                            dari{" "}
-                            <span className="text-slate-600">{totalItems}</span>
-                        </p>
-                        <div className="flex items-center gap-1.5">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-slate-400"
-                                onClick={() =>
-                                    setCurrentPage((p) => Math.max(1, p - 1))
-                                }
-                                disabled={currentPage === 1}
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-
-                            {Array.from(
-                                { length: Math.min(5, totalPages) },
-                                (_, i) => {
-                                    let pageNum = currentPage - 2 + i;
-                                    if (currentPage <= 2) pageNum = i + 1;
-                                    if (currentPage >= totalPages - 1)
-                                        pageNum = totalPages - 4 + i;
-
-                                    if (pageNum < 1 || pageNum > totalPages)
-                                        return null;
-
-                                    return (
-                                        <Button
-                                            key={pageNum}
-                                            className={`h-8 w-8 text-xs font-bold ${currentPage === pageNum ? "bg-undip-blue hover:bg-sky-700" : "bg-transparent text-slate-600 hover:bg-slate-100 shadow-none border-none"}`}
-                                            onClick={() =>
-                                                setCurrentPage(pageNum)
-                                            }
-                                        >
-                                            {pageNum}
-                                        </Button>
-                                    );
-                                },
-                            )}
-
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-slate-400"
-                                onClick={() =>
-                                    setCurrentPage((p) =>
-                                        Math.min(totalPages, p + 1),
-                                    )
-                                }
-                                disabled={currentPage === totalPages}
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                {/* Standard Pagination */}
+                <StandardPagination
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    pageSize={pagination.limit}
+                    totalItems={pagination.total}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                    itemLabel="surat"
+                />
             </Card>
         </div>
     );

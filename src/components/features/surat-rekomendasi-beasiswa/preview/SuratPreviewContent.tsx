@@ -743,7 +743,7 @@ export function SuratPreviewContent({
                                             onClick={() =>
                                                 setIsSignatureModalOpen(true)
                                             }
-                                            className={`w-full ${wd1Signature ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
+                                            className={`w-full ${wd1Signature ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-3xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
                                         >
                                             <PenTool className="h-4 w-4" />
                                             {wd1Signature

@@ -728,11 +728,19 @@ export async function previewLetterNumber(
 
 /**
  * Save/Update letter number untuk application (UPA role)
+ * Returns verification data if successful
  */
 export async function saveLetterNumber(
     applicationId: string,
     letterNumber: string,
-): Promise<boolean> {
+): Promise<{
+    success: boolean;
+    verification?: {
+        code: string;
+        verifyUrl: string;
+        qrImage: string;
+    };
+} | null> {
     try {
         const response = await fetch(
             `/api/master/letter-numbering/${applicationId}`,
@@ -753,13 +761,17 @@ export async function saveLetterNumber(
                 response.status,
                 errorText,
             );
-            return false;
+            return { success: false };
         }
 
-        return true;
+        const result = await response.json();
+        return {
+            success: true,
+            verification: result.data?.verification,
+        };
     } catch (error) {
         console.error("Save letter number error:", error);
-        return false;
+        return null;
     }
 }
 
@@ -931,25 +943,57 @@ export async function deleteAllNotifications(): Promise<boolean> {
 /**
  * Public Verification API
  */
+export interface VerificationHistory {
+    action: string;
+    note: string | null;
+    actorName: string;
+    roleName: string | null;
+    status: string | null;
+    timestamp: string;
+}
+
+export interface VerificationData {
+    letterNumber: string;
+    issuedAt: string;
+    publishedAt: string | null;
+    verifiedCount: number;
+    letterType: {
+        id: string;
+        name: string;
+        description: string | null;
+    };
+    applicant: {
+        name: string;
+        nim: string | null;
+        departemen: string | null;
+        programStudi: string | null;
+    };
+    application: {
+        id: string;
+        scholarshipName: string;
+        status: string;
+        createdAt: string;
+    };
+    history: VerificationHistory[];
+    authenticity: {
+        issuer: string;
+        institution: string;
+        verificationStatement: string;
+        digitalSignatureValid: boolean;
+    };
+}
+
 export async function verifyLetterPublic(code: string): Promise<{
     valid: boolean;
-    data?: {
-        letterNumber: string;
-        issuedAt: string;
-        verifiedCount: number;
-        application: {
-            id: string;
-            scholarshipName: string;
-            status: string;
-        };
-    };
+    data?: VerificationData;
     message?: string;
 } | null> {
     try {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/public/verification/${code}`,
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005"}/api/public/verification/${code}`,
             {
                 method: "GET",
+                cache: "no-store",
             },
         );
 

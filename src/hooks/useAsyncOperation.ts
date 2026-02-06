@@ -1,4 +1,5 @@
 import { useLoading } from "@/contexts/LoadingContext";
+import toast from "react-hot-toast";
 
 interface AsyncOperationOptions<T = unknown> {
     loadingKey?: string;
@@ -70,10 +71,21 @@ export const usePDFGeneration = () => {
     const generatePDF = async <T>(
         operation: () => Promise<T>,
         message = "Menghasilkan dokumen PDF...",
+        showSuccessToast = true,
     ) => {
         return executeWithLoading(operation, {
             usePDFLoader: true,
             loadingMessage: message,
+            onSuccess: () => {
+                if (showSuccessToast) {
+                    toast.success("PDF berhasil diunduh!");
+                }
+            },
+            onError: (error) => {
+                toast.error(
+                    `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+                );
+            },
         });
     };
 

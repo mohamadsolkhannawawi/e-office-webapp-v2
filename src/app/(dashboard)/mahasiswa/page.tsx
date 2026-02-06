@@ -8,6 +8,7 @@ import {
     MoreHorizontal,
     ChevronRight,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 
 const DASHBOARD_ACTIONS = [
@@ -46,6 +47,7 @@ const DASHBOARD_ACTIONS = [
 ];
 
 export default function MahasiswaDashboardPage() {
+    const { user } = useAuth();
     return (
         <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-in fade-in duration-500">
             {/* Breadcrumb - Hidden on dashboard */}
@@ -54,9 +56,13 @@ export default function MahasiswaDashboardPage() {
             <h1 className="text-2xl font-bold text-slate-800 animate-in slide-in-from-bottom-3 duration-700">
                 Dashboard
             </h1>
-            <p className="text-sm text-slate-500 -mt-4 animate-in slide-in-from-bottom-3 duration-700">
-                Selamat datang di dashboard mahasiswa. Kelola pengajuan surat
-                dan dokumen administratif Anda dengan mudah.
+            {user?.name && (
+                <p className="text-base text-slate-600 animate-in slide-in-from-bottom-3 duration-700 font-medium">
+                    Selamat datang <span className="text-undip-blue font-bold">{user.name}</span> 👋
+                </p>
+            )}
+            <p className="text-sm text-slate-500 animate-in slide-in-from-bottom-3 duration-700">
+                Kelola pengajuan surat dan dokumen administratif Anda dengan mudah.
             </p>
 
             {/* Actions Grid */}

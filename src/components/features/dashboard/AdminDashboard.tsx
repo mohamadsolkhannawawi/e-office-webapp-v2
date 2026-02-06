@@ -9,6 +9,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { LetterList } from "./LetterList";
+import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -143,6 +144,7 @@ export function AdminDashboard({
     meta,
     detailBasePath = "perlu-tindakan",
 }: AdminDashboardProps) {
+    const { user } = useAuth();
     // Helper for Trend Chart
     const trendData = (stats.trend || []).map((d) => ({
         ...d,
@@ -184,6 +186,11 @@ export function AdminDashboard({
                 <p className="text-slate-500 text-lg leading-relaxed">
                     {description}
                 </p>
+                {user?.name && (
+                    <p className="text-slate-600 text-base mt-4 font-medium">
+                        Selamat datang <span className="text-undip-blue font-bold">{user.name}</span> 👋
+                    </p>
+                )}
             </div>
 
             {/* Stats Grid */}

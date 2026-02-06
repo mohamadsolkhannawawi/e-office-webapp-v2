@@ -7,8 +7,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { User, Phone, Loader2, ChevronLeft, Save } from "lucide-react";
-import { getMe, updateProfile, UserProfile } from "@/lib/application-api";
+import {
+    User,
+    Phone,
+    Loader2,
+    ChevronLeft,
+    Save,
+    Camera,
+    Upload,
+} from "lucide-react";
+import {
+    getMe,
+    updateProfile,
+    UserProfile,
+    uploadProfilePhoto,
+    fileToBase64,
+} from "@/lib/application-api";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -114,6 +128,8 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -147,6 +163,62 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
             ...prev,
             [name]: value,
         }));
+    };
+
+    const handlePhotoChange = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith("image/")) {
+            toast.error("File harus berupa gambar!");
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Ukuran gambar tidak boleh lebih dari 5MB!");
+            return;
+        }
+
+        try {
+            setIsUploadingPhoto(true);
+
+            // Convert to base64 for preview
+            const base64 = await fileToBase64(file);
+            setPreviewImage(base64);
+
+            // Upload photo
+            const result = await uploadProfilePhoto(base64);
+
+            if (result.success && result.imageUrl) {
+                // Update the profileData to reflect the new image
+                setProfileData((prev) =>
+                    prev ? { ...prev, image: result.imageUrl } : null,
+                );
+                toast.success("Foto profil berhasil diperbarui!");
+            } else {
+                toast.error(result.error || "Gagal mengupload foto profil");
+                setPreviewImage(null);
+            }
+        } catch (error) {
+            console.error("Photo upload error:", error);
+            toast.error("Terjadi kesalahan saat mengupload foto");
+            setPreviewImage(null);
+        } finally {
+            setIsUploadingPhoto(false);
+        }
+    };
+
+    const getInitials = (name: string): string => {
+        return name
+            .split(" ")
+            .map((word) => word[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -200,15 +272,6 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
         );
     }
 
-    const getInitials = (name: string): string => {
-        return name
-            .split(" ")
-            .map((word) => word[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2);
-    };
-
     return (
         <div className="space-y-6 p-6">
             {/* Header */}
@@ -239,21 +302,54 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Profile Avatar and Basic Info */}
                         <div className="flex items-center gap-6 pb-6 border-b border-gray-200">
-                            <Avatar className="h-20 w-20">
-                                <AvatarImage
-                                    src={profileData.image}
-                                    alt={profileData.name}
-                                />
-                                <AvatarFallback className="bg-blue-600 text-white text-lg font-semibold">
-                                    {getInitials(profileData.name)}
-                                </AvatarFallback>
-                            </Avatar>
+                            <div className="relative">
+                                <Avatar className="h-20 w-20">
+                                    <AvatarImage
+                                        src={previewImage || profileData.image}
+                                        alt={profileData.name}
+                                    />
+                                    <AvatarFallback className="bg-blue-600 text-white text-lg font-semibold">
+                                        {getInitials(profileData.name)}
+                                    </AvatarFallback>
+                                </Avatar>
+
+                                {/* Upload Photo Button */}
+                                <div className="absolute -bottom-1 -right-1">
+                                    <label
+                                        htmlFor="photo-upload"
+                                        className={`
+                                            inline-flex items-center justify-center 
+                                            h-8 w-8 rounded-full bg-blue-600 text-white 
+                                            shadow-md cursor-pointer hover:bg-blue-700 
+                                            transition-colors duration-200
+                                            ${isUploadingPhoto ? "opacity-50 cursor-not-allowed" : ""}
+                                        `}
+                                    >
+                                        {isUploadingPhoto ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Camera className="h-4 w-4" />
+                                        )}
+                                    </label>
+                                    <input
+                                        id="photo-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handlePhotoChange}
+                                        disabled={isUploadingPhoto}
+                                        className="hidden"
+                                    />
+                                </div>
+                            </div>
                             <div>
                                 <p className="text-sm font-medium text-gray-500">
                                     {profileData.userRole}
                                 </p>
                                 <p className="text-gray-500">
                                     {profileData.email}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    Klik ikon kamera untuk mengubah foto profil
                                 </p>
                             </div>
                         </div>

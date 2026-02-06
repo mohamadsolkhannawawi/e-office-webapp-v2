@@ -18,6 +18,7 @@ import { getApplications, ApplicationSummary } from "@/lib/application-api";
 import { Card } from "@/components/ui/card";
 import { InlineLoader, ButtonLoader } from "@/components/ui/loader";
 import { usePageLoading, useCustomLoading } from "@/contexts/LoadingContext";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -39,7 +40,7 @@ import {
 
 export default function SuratDraftPage() {
     const [applications, setApplications] = useState<ApplicationSummary[]>([]);
-    const { setPageLoading } = usePageLoading();
+    const { isPageLoading, setPageLoading } = usePageLoading();
     const { loading: deleteLoading, setLoading: setDeleteLoading } =
         useCustomLoading("delete-draft");
     const [searchTerm, setSearchTerm] = useState("");
@@ -57,13 +58,18 @@ export default function SuratDraftPage() {
     });
 
     const fetchApplications = useCallback(
-        async (page = 1, search = searchTerm, jenis = jenisFilter) => {
+        async (
+            page = 1,
+            search = searchTerm,
+            jenis = jenisFilter,
+            limit = pagination.limit,
+        ) => {
             setPageLoading(true, "Memuat draft surat...");
             try {
                 const { data, meta } = await getApplications({
                     status: "DRAFT",
                     page,
-                    limit: 10,
+                    limit,
                     search: search || undefined,
                     jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
                 });
@@ -80,7 +86,7 @@ export default function SuratDraftPage() {
                 setPageLoading(false);
             }
         },
-        [searchTerm, jenisFilter],
+        [searchTerm, jenisFilter, pagination.limit, setPageLoading],
     );
 
     useEffect(() => {
@@ -93,8 +99,18 @@ export default function SuratDraftPage() {
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pagination.totalPages) {
-            fetchApplications(newPage);
+            fetchApplications(
+                newPage,
+                searchTerm,
+                jenisFilter,
+                pagination.limit,
+            );
         }
+    };
+
+    const handlePageSizeChange = (newPageSize: number) => {
+        setPagination((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
+        fetchApplications(1, searchTerm, jenisFilter, newPageSize);
     };
 
     const handleDeleteDraft = async () => {
@@ -399,49 +415,16 @@ export default function SuratDraftPage() {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                {!isLoading && pagination.totalPages > 1 && (
-                    <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-                        <p className="text-xs text-slate-500">
-                            Menampilkan{" "}
-                            {(pagination.page - 1) * pagination.limit + 1} -{" "}
-                            {Math.min(
-                                pagination.page * pagination.limit,
-                                pagination.total,
-                            )}{" "}
-                            dari {pagination.total} draft
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() =>
-                                    handlePageChange(pagination.page - 1)
-                                }
-                                disabled={pagination.page === 1}
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <span className="text-xs text-slate-600 px-2">
-                                {pagination.page} / {pagination.totalPages}
-                            </span>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() =>
-                                    handlePageChange(pagination.page + 1)
-                                }
-                                disabled={
-                                    pagination.page === pagination.totalPages
-                                }
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                {/* Standard Pagination */}
+                <StandardPagination
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    pageSize={pagination.limit}
+                    totalItems={pagination.total}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                    itemLabel="draft surat"
+                />
             </Card>
         </div>
     );

@@ -379,12 +379,14 @@ export default function ArsipPage() {
                                 <SelectItem value="all">
                                     Semua Beasiswa
                                 </SelectItem>
-                                <SelectItem value="BidikmisiKIP">
-                                    Bidikmisi/KIP
+                                <SelectItem value="internal">
+                                    Beasiswa Internal
                                 </SelectItem>
-                                <SelectItem value="PPA">PPA</SelectItem>
-                                <SelectItem value="Unggulan">
-                                    Beasiswa Unggulan
+                                <SelectItem value="external">
+                                    Beasiswa Eksternal
+                                </SelectItem>
+                                <SelectItem value="akademik">
+                                    Beasiswa Akademik
                                 </SelectItem>
                             </SelectContent>
                         </Select>

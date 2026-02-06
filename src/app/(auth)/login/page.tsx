@@ -166,22 +166,23 @@ export default function LoginPage() {
                 position="top-right"
                 toastOptions={{
                     style: {
-                        minWidth: "400px",
-                        minHeight: "80px",
-                        padding: "16px",
-                        borderRadius: "12px",
-                        fontSize: "15px",
-                        fontWeight: "600",
+                        minWidth: "280px",
+                        minHeight: "auto",
+                        padding: "12px 16px",
+                        borderRadius: "8px",
+                        fontSize: "13px",
+                        fontWeight: "500",
                     },
                     success: {
                         style: {
                             background: "#10b981",
                             color: "white",
-                            minWidth: "400px",
-                            minHeight: "80px",
-                            borderRadius: "12px",
-                            fontSize: "15px",
-                            fontWeight: "600",
+                            minWidth: "280px",
+                            minHeight: "auto",
+                            padding: "12px 16px",
+                            borderRadius: "8px",
+                            fontSize: "13px",
+                            fontWeight: "500",
                         },
                         iconTheme: {
                             primary: "white",
@@ -192,11 +193,12 @@ export default function LoginPage() {
                         style: {
                             background: "#ef4444",
                             color: "white",
-                            minWidth: "400px",
-                            minHeight: "80px",
-                            borderRadius: "12px",
-                            fontSize: "15px",
-                            fontWeight: "600",
+                            minWidth: "280px",
+                            minHeight: "auto",
+                            padding: "12px 16px",
+                            borderRadius: "8px",
+                            fontSize: "13px",
+                            fontWeight: "500",
                         },
                         iconTheme: {
                             primary: "white",

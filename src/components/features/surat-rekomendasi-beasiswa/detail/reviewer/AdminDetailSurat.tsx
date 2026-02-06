@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 import {
     ChevronRight,
     Eye,
@@ -179,8 +180,12 @@ export function AdminDetailSurat({
             link.href = `/api/templates/letter/${applicationId}/pdf`;
             link.download = `Surat-Rekomendasi-${applicationId}.pdf`;
             link.click();
+            toast.success("PDF berhasil diunduh!");
         } catch (error) {
             console.error("Error downloading PDF:", error);
+            toast.error(
+                `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+            );
         }
     };
 
@@ -196,9 +201,15 @@ export function AdminDetailSurat({
                     applicationId,
                     `Surat-Rekomendasi-${applicationId}.docx`,
                 );
+                toast.success("Dokumen Word berhasil diunduh!");
+            } else {
+                toast.error("Template tidak ditemukan");
             }
         } catch (error) {
             console.error("Error downloading DOCX:", error);
+            toast.error(
+                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+            );
         } finally {
             setDownloadingId(null);
         }

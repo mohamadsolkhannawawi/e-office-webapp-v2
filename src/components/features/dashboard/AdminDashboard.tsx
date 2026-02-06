@@ -184,13 +184,14 @@ export function AdminDashboard({
                     {title}
                 </h1>
                 <p className="text-slate-500 text-lg leading-relaxed">
-                    {description}
+                    {user?.name ? (
+                        <>
+                            Selamat datang <span className="text-undip-blue font-bold">{user.name}</span>, bagian ini merupakan pusat kendali yang berisi informasi untuk mengelola semua surat Fakultas Sains dan Matematika.
+                        </>
+                    ) : (
+                        description
+                    )}
                 </p>
-                {user?.name && (
-                    <p className="text-slate-600 text-base mt-4 font-medium">
-                        Selamat datang <span className="text-undip-blue font-bold">{user.name}</span> 👋
-                    </p>
-                )}
             </div>
 
             {/* Stats Grid */}

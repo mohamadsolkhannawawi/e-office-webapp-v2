@@ -57,13 +57,15 @@ export default function MahasiswaDashboardPage() {
                 Dashboard
             </h1>
             {user?.name && (
-                <p className="text-base text-slate-600 animate-in slide-in-from-bottom-3 duration-700 font-medium">
-                    Selamat datang <span className="text-undip-blue font-bold">{user.name}</span> 👋
+                <p className="text-base text-slate-600 animate-in slide-in-from-bottom-3 duration-700 leading-relaxed">
+                    Selamat datang <span className="font-bold text-undip-blue">{user.name}</span>, disini Anda bisa mengelola pengajuan surat dan dokumen administratif dengan lebih mudah.
                 </p>
             )}
-            <p className="text-sm text-slate-500 animate-in slide-in-from-bottom-3 duration-700">
-                Kelola pengajuan surat dan dokumen administratif Anda dengan mudah.
-            </p>
+            {!user?.name && (
+                <p className="text-sm text-slate-500 animate-in slide-in-from-bottom-3 duration-700">
+                    Kelola pengajuan surat dan dokumen administratif Anda dengan mudah.
+                </p>
+            )}
 
             {/* Actions Grid */}
             <div className="grid gap-3 sm:gap-4">

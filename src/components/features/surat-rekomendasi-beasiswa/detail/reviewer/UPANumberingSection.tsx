@@ -131,11 +131,16 @@ export function UPANumberingSection({
         try {
             if (applicationId) {
                 // Save letter number to database
-                const saveSuccess = await saveLetterNumber(
+                const saveResult = await saveLetterNumber(
                     applicationId,
                     letterNumber,
                 );
-                if (saveSuccess) {
+                if (saveResult?.success) {
+                    // Pass verification data if available
+                    if (saveResult.verification && onVerificationGenerated) {
+                        onVerificationGenerated(saveResult.verification);
+                    }
+
                     toast.success(
                         "Nomor surat berhasil disimpan! Sedang membuat dokumen...",
                         {

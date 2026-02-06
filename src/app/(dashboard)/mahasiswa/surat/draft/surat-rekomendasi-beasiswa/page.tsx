@@ -95,16 +95,16 @@ export default function SuratDraftPage() {
                 setPageLoading(false);
             }
         },
-        [searchTerm, jenisFilter, pagination.limit, setPageLoading],
+        [setPageLoading],
     );
 
     useEffect(() => {
         const delaySearch = setTimeout(() => {
-            fetchApplications(1, searchTerm, jenisFilter);
+            fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
         }, 500);
 
         return () => clearTimeout(delaySearch);
-    }, [searchTerm, jenisFilter, fetchApplications]);
+    }, [searchTerm, jenisFilter]);
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pagination.totalPages) {

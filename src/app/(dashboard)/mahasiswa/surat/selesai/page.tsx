@@ -71,7 +71,7 @@ export default function SuratSelesaiPage() {
                 setIsLoading(false);
             }
         },
-        [searchTerm, jenisFilter, pagination.limit],
+        [],
     );
 
     // Handle template document download
@@ -104,7 +104,7 @@ export default function SuratSelesaiPage() {
         }, 500);
 
         return () => clearTimeout(delaySearch);
-    }, [searchTerm, jenisFilter, fetchApplications]);
+    }, [searchTerm, jenisFilter]);
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pagination.totalPages) {

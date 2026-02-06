@@ -193,6 +193,11 @@ export async function getApplications(params?: {
         }
         
         console.error("Get applications error:", error);
+        console.error("Error details:", {
+            message: errorMessage,
+            url: new URL("/api/surat-rekomendasi/applications", window.location.origin).toString(),
+            params: params,
+        });
         throw new Error(errorMessage);
     }
 }

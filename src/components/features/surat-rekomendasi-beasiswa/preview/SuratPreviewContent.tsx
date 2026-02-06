@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
     ChevronLeft,
     Maximize2,
@@ -14,6 +13,7 @@ import {
     RotateCcw,
     XOctagon,
     Download,
+    Sparkles,
 } from "lucide-react";
 import { verifyApplication } from "@/lib/application-api";
 import {
@@ -23,6 +23,8 @@ import {
 } from "@/lib/template-api";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
+import { usePDFGeneration } from "@/hooks/useAsyncOperation";
+import toast from "react-hot-toast";
 // import { DocxPreview } from "@/components/features/surat-rekomendasi-beasiswa/preview/DocxPreview"; // Removed
 import { UPANumberingModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPANumberingModal";
 import { UPAStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/UPAStampModal";
@@ -73,6 +75,7 @@ export function SuratPreviewContent({
     const router = useRouter();
     const searchParams = useSearchParams();
     const stage = searchParams.get("stage") || defaultStage;
+    const { generatePDF } = usePDFGeneration();
 
     // Resolve Application ID from prop or data object
     const pdfId = applicationId || data?.applicationId;
@@ -107,6 +110,7 @@ export function SuratPreviewContent({
     }>({ isOpen: false, status: "success", type: "approve" });
     const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isPdfPreviewLoading, setIsPdfPreviewLoading] = useState(true);
 
     // Removed unused states: upaStampUrl, qrCodeUrl, leadershipConfig, docxLoadError
 
@@ -208,6 +212,13 @@ export function SuratPreviewContent({
     useEffect(() => {
         setPdfRefreshTimestamp(Date.now());
     }, []);
+
+    // Handle PDF preview loading state
+    useEffect(() => {
+        if (pdfId && pdfRefreshTimestamp > 0) {
+            setIsPdfPreviewLoading(true);
+        }
+    }, [pdfId, pdfRefreshTimestamp]);
 
     const triggerPdfRefresh = () => {
         console.log("🔄 Triggering PDF Refresh...");
@@ -487,11 +498,29 @@ export function SuratPreviewContent({
                 <div className="flex-1 overflow-hidden p-0 flex justify-center bg-[#525659] print:bg-white print:p-0 print:block print:overflow-visible relative">
                     {/* PDF Preview Iframe - Use pdfId derived from prop or data */}
                     {pdfId && pdfRefreshTimestamp > 0 ? (
-                        <iframe
-                            src={`/api/templates/letter/${pdfId}/pdf?t=${pdfRefreshTimestamp}#toolbar=0&navpanes=0&scrollbar=1`}
-                            className="w-full h-full border-0"
-                            title="Preview Surat"
-                        />
+                        <>
+                            {isPdfPreviewLoading && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-[#525659] z-10">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="relative w-12 h-12">
+                                            <div className="absolute inset-0 border-4 border-white/20 rounded-full"></div>
+                                            <div className="absolute inset-0 border-4 border-transparent border-t-white rounded-full animate-spin"></div>
+                                        </div>
+                                        <p className="text-white text-sm font-medium">
+                                            Render PDF surat...
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                            <iframe
+                                src={`/api/templates/letter/${pdfId}/pdf?t=${pdfRefreshTimestamp}#toolbar=0&navpanes=0&scrollbar=1`}
+                                className="w-full h-full border-0"
+                                title="Preview Surat"
+                                onLoad={() => {
+                                    setIsPdfPreviewLoading(false);
+                                }}
+                            />
+                        </>
                     ) : (
                         <div className="flex items-center justify-center h-full text-white">
                             <p>Memuat Dokumen...</p>
@@ -561,7 +590,7 @@ export function SuratPreviewContent({
                       data?.status !== "COMPLETED" &&
                       data?.status !== "PUBLISHED" ? (
                         <>
-                            <div className="bg-slate-50/50 rounded-3xl p-4 border border-slate-100">
+                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
                                 <h2 className="text-xl font-extrabold text-slate-800 tracking-tight mb-1">
                                     Penerbitan
                                 </h2>
@@ -581,88 +610,91 @@ export function SuratPreviewContent({
                                         </h3>
                                     </div>
 
-                                    <div className="space-y-3">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                                    <div className="space-y-3 pt-5 border-t border-slate-100">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
                                             Tahap 1: Penomoran
                                         </p>
+
                                         <Button
                                             onClick={() =>
                                                 setIsNumberingModalOpen(true)
                                             }
-                                            className={`w-full ${upaLetterNumber ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-3xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
+                                            className="w-full bg-yellow-400 border-2 border-yellow-400 text-black hover:bg-yellow-500 font-bold py-5 rounded-3xl flex items-center justify-center gap-2"
                                         >
-                                            <Hash className="h-4 w-4" />
+                                            <Hash className="h-5 w-5" />
                                             {upaLetterNumber
                                                 ? "Ubah No. Surat"
-                                                : "Isi No. Surat"}
-                                            {upaLetterNumber && (
-                                                <Check className="h-3 w-3" />
-                                            )}
+                                                : "Beri Nomor Surat"}
                                         </Button>
 
                                         {upaLetterNumber && (
-                                            <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 animate-in zoom-in duration-300">
-                                                <div className="bg-white border border-emerald-100 rounded-3xl py-2 px-3 text-center shadow-inner">
-                                                    <span className="text-[10px] font-bold text-emerald-700 font-mono tracking-tight">
+                                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 animate-in zoom-in duration-300">
+                                                <div className="flex flex-col items-center">
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest text-center">
+                                                        Nomor Surat Terpilih
+                                                    </p>
+                                                    <div className="flex items-center gap-2 text-undip-blue font-bold text-sm bg-white px-4 py-2 rounded-3xl shadow-sm border border-blue-50 w-full justify-center">
+                                                        <Sparkles className="h-3.5 w-3.5" />
                                                         {upaLetterNumber}
-                                                    </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="space-y-3 border-t border-slate-100 pt-5">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                                    <div className="space-y-3 pt-5 border-t border-slate-100">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
                                             Tahap 2: Pengesahan
                                         </p>
+
                                         <Button
                                             onClick={() =>
                                                 setIsStampModalOpen(true)
                                             }
-                                            className={`w-full ${upaIsStampApplied ? "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"} border-2 font-bold py-5 rounded-3xl flex items-center justify-center gap-2 text-[11px] shadow-sm transition-all`}
+                                            className={`w-full ${upaIsStampApplied ? "bg-red-600 border-red-200 text-white hover:bg-red-700" : "bg-white border-2 border-undip-blue text-undip-blue hover:bg-blue-50"} font-bold py-5 rounded-3xl flex items-center justify-center gap-2 transition-all shadow-sm`}
                                         >
-                                            <ShieldCheck className="h-4 w-4" />
+                                            <ShieldCheck className="h-5 w-5" />
                                             {upaIsStampApplied
                                                 ? "Ubah Stempel"
                                                 : "Bubuhkan Stempel"}
-                                            {upaIsStampApplied && (
-                                                <Check className="h-3 w-3" />
-                                            )}
                                         </Button>
 
                                         {upaIsStampApplied && upaStampUrl && (
-                                            <div className="flex flex-col items-center justify-center py-3 border-t border-slate-100 pt-4">
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest">
-                                                    Stempel Teraplikasi
-                                                </p>
-                                                <div className="w-24 h-24">
-                                                    <SignatureImage
-                                                        src={upaStampUrl}
-                                                        alt="Stempel"
-                                                        className="object-contain mix-blend-multiply w-full h-full"
-                                                    />
+                                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 animate-in zoom-in duration-300">
+                                                <div className="flex flex-col items-center justify-center">
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-widest">
+                                                        Stempel Teraplikasi
+                                                    </p>
+                                                    <div className="w-20 h-20 relative">
+                                                        <img
+                                                            src={upaStampUrl}
+                                                            alt="Stempel"
+                                                            className="object-contain w-full h-full"
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="space-y-3 border-t border-slate-100 pt-5">
+                                    <div className="space-y-3 pt-5 border-t border-slate-100">
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
                                             Langkah Terakhir
                                         </p>
+
                                         <Button
                                             disabled={
                                                 !upaLetterNumber ||
                                                 !upaIsStampApplied
                                             }
-                                            className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-3xl flex items-center justify-center gap-2`}
+                                            className={`w-full ${!upaLetterNumber || !upaIsStampApplied ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white shadow-lg"} font-bold py-6 rounded-3xl flex items-center justify-center gap-2`}
                                             onClick={() => {
                                                 setModalType("publish");
                                                 setIsActionModalOpen(true);
                                             }}
                                         >
                                             <Send className="h-5 w-5" />
-                                            Publish & Terbitkan
+                                            Publish
                                         </Button>
                                         {(!upaLetterNumber ||
                                             !upaIsStampApplied) && (
@@ -750,7 +782,7 @@ export function SuratPreviewContent({
                                                 setModalType("revise");
                                                 setIsActionModalOpen(true);
                                             }}
-                                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                         >
                                             <RotateCcw className="h-5 w-5" />
                                             Revisi
@@ -761,7 +793,7 @@ export function SuratPreviewContent({
                                                 setModalType("reject");
                                                 setIsActionModalOpen(true);
                                             }}
-                                            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2"
+                                            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                         >
                                             <XOctagon className="h-5 w-5" />
                                             Tolak
@@ -875,11 +907,16 @@ export function SuratPreviewContent({
                                                 onClick={async () => {
                                                     if (!applicationId) return;
 
-                                                    // Open PDF in new tab
-                                                    const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
-                                                    window.open(
-                                                        pdfUrl,
-                                                        "_blank",
+                                                    // Open PDF in new tab with loader
+                                                    await generatePDF(
+                                                        async () => {
+                                                            const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                                                            window.open(
+                                                                pdfUrl,
+                                                                "_blank",
+                                                            );
+                                                        },
+                                                        "Render PDF surat...",
                                                     );
                                                 }}
                                                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
@@ -890,7 +927,7 @@ export function SuratPreviewContent({
                                             <Button
                                                 onClick={async () => {
                                                     if (!applicationId) {
-                                                        alert(
+                                                        toast.error(
                                                             "Application ID tidak ditemukan",
                                                         );
                                                         return;
@@ -913,7 +950,7 @@ export function SuratPreviewContent({
                                                             templateId,
                                                             applicationId,
                                                         );
-                                                        alert(
+                                                        toast.success(
                                                             "Dokumen Word berhasil diunduh!",
                                                         );
                                                     } catch (error) {
@@ -921,8 +958,8 @@ export function SuratPreviewContent({
                                                             "Download error:",
                                                             error,
                                                         );
-                                                        alert(
-                                                            `Gagal mengunduh dokumen Word: ${error instanceof Error ? error.message : "Unknown error"}`,
+                                                        toast.error(
+                                                            `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
                                                         );
                                                     } finally {
                                                         setIsDownloadingTemplate(
@@ -983,11 +1020,16 @@ export function SuratPreviewContent({
                                                 onClick={async () => {
                                                     if (!applicationId) return;
 
-                                                    // Open PDF in new tab
-                                                    const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
-                                                    window.open(
-                                                        pdfUrl,
-                                                        "_blank",
+                                                    // Open PDF in new tab with loader
+                                                    await generatePDF(
+                                                        async () => {
+                                                            const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                                                            window.open(
+                                                                pdfUrl,
+                                                                "_blank",
+                                                            );
+                                                        },
+                                                        "Render PDF surat...",
                                                     );
                                                 }}
                                                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
@@ -998,7 +1040,7 @@ export function SuratPreviewContent({
                                             <Button
                                                 onClick={async () => {
                                                     if (!applicationId) {
-                                                        alert(
+                                                        toast.error(
                                                             "Application ID tidak ditemukan",
                                                         );
                                                         return;
@@ -1021,7 +1063,7 @@ export function SuratPreviewContent({
                                                             templateId,
                                                             applicationId,
                                                         );
-                                                        alert(
+                                                        toast.success(
                                                             "Dokumen Word berhasil diunduh!",
                                                         );
                                                     } catch (error) {
@@ -1029,8 +1071,8 @@ export function SuratPreviewContent({
                                                             "Download error:",
                                                             error,
                                                         );
-                                                        alert(
-                                                            `Gagal mengunduh dokumen Word: ${error instanceof Error ? error.message : "Unknown error"}`,
+                                                        toast.error(
+                                                            `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
                                                         );
                                                     } finally {
                                                         setIsDownloadingTemplate(
@@ -1078,8 +1120,11 @@ export function SuratPreviewContent({
                                 <Button
                                     onClick={async () => {
                                         if (!applicationId) return;
-                                        const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
-                                        window.open(pdfUrl, "_blank");
+                                        // Open PDF in new tab with loader
+                                        await generatePDF(async () => {
+                                            const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                                            window.open(pdfUrl, "_blank");
+                                        }, "Render PDF surat...");
                                     }}
                                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-3xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
                                 >
@@ -1089,7 +1134,7 @@ export function SuratPreviewContent({
                                 <Button
                                     onClick={async () => {
                                         if (!applicationId) {
-                                            alert(
+                                            toast.error(
                                                 "Application ID tidak ditemukan",
                                             );
                                             return;
@@ -1109,13 +1154,16 @@ export function SuratPreviewContent({
                                                 templateId,
                                                 applicationId,
                                             );
+                                            toast.success(
+                                                "Dokumen Word berhasil diunduh!",
+                                            );
                                         } catch (error) {
                                             console.error(
                                                 "Download error:",
                                                 error,
                                             );
-                                            alert(
-                                                `Gagal mengunduh: ${error instanceof Error ? error.message : "Unknown error"}`,
+                                            toast.error(
+                                                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
                                             );
                                         } finally {
                                             setIsDownloadingTemplate(false);

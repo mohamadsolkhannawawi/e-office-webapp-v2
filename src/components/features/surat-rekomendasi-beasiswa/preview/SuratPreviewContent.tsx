@@ -541,6 +541,11 @@ export function SuratPreviewContent({
                         stage === "mahasiswa" &&
                         (data?.status === "COMPLETED" ||
                             data?.status === "PUBLISHED")
+                    ) &&
+                    !(
+                        stage === "upa" &&
+                        (data?.status === "COMPLETED" ||
+                            data?.status === "PUBLISHED")
                     ) ? (
                         <div className="space-y-4">
                             <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
@@ -1112,82 +1117,6 @@ export function SuratPreviewContent({
                             </p>
                         </div>
                     )}
-
-                    {/* Download Buttons for UPA Published - Vertical Stack */}
-                    {stage === "upa" &&
-                        (data?.publishedAt ||
-                            data?.status === "COMPLETED" ||
-                            data?.status === "PUBLISHED") && (
-                            <div className="space-y-3 pb-2">
-                                <Button
-                                    onClick={async () => {
-                                        if (!applicationId) return;
-                                        // Open PDF in new tab with loader
-                                        await generatePDF(async () => {
-                                            const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
-                                            window.open(pdfUrl, "_blank");
-                                        }, "Render PDF surat...");
-                                    }}
-                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-3xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
-                                >
-                                    <Download className="h-5 w-5" />
-                                    Cetak/PDF
-                                </Button>
-                                <Button
-                                    onClick={async () => {
-                                        if (!applicationId) {
-                                            toast.error(
-                                                "Application ID tidak ditemukan",
-                                            );
-                                            return;
-                                        }
-                                        setIsDownloadingTemplate(true);
-                                        try {
-                                            const templateId =
-                                                await getTemplateIdByLetterType(
-                                                    "Surat Rekomendasi Beasiswa",
-                                                );
-                                            if (!templateId) {
-                                                throw new Error(
-                                                    "Template tidak ditemukan",
-                                                );
-                                            }
-                                            await generateAndDownloadDocument(
-                                                templateId,
-                                                applicationId,
-                                            );
-                                            toast.success(
-                                                "Dokumen Word berhasil diunduh!",
-                                            );
-                                        } catch (error) {
-                                            console.error(
-                                                "Download error:",
-                                                error,
-                                            );
-                                            toast.error(
-                                                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
-                                            );
-                                        } finally {
-                                            setIsDownloadingTemplate(false);
-                                        }
-                                    }}
-                                    disabled={isDownloadingTemplate}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-5 rounded-3xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
-                                >
-                                    {isDownloadingTemplate ? (
-                                        <>
-                                            <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                            Mengunduh...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Download className="h-5 w-5" />
-                                            Unduh Word
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-                        )}
 
                     {/* Back Button */}
                     <div className="pt-2">

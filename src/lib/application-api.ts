@@ -1067,6 +1067,7 @@ export async function getMe(): Promise<UserProfile | null> {
 export async function updateProfile(data: {
     name: string;
     noHp?: string;
+    image?: string;
 }): Promise<boolean> {
     try {
         const response = await fetch("/api/me", {
@@ -1083,4 +1084,64 @@ export async function updateProfile(data: {
         console.error("Update profile error:", error);
         return false;
     }
+}
+
+/**
+ * Upload profile photo
+ */
+export async function uploadProfilePhoto(imageData: string): Promise<{
+    success: boolean;
+    imageUrl?: string;
+    error?: string;
+}> {
+    try {
+        const response = await fetch("/api/me/photo", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                url: imageData, // base64 data URL or file path
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            return {
+                success: false,
+                error: errorData.error || "Upload failed",
+            };
+        }
+
+        const result = await response.json();
+        return {
+            success: true,
+            imageUrl: result.data?.image,
+        };
+    } catch (error) {
+        console.error("Upload profile photo error:", error);
+        return {
+            success: false,
+            error: "Network error occurred",
+        };
+    }
+}
+
+/**
+ * Helper function to convert File to base64 data URL
+ */
+export function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            if (typeof reader.result === "string") {
+                resolve(reader.result);
+            } else {
+                reject(new Error("Failed to convert file to base64"));
+            }
+        };
+        reader.onerror = () => reject(new Error("File reading failed"));
+        reader.readAsDataURL(file);
+    });
 }

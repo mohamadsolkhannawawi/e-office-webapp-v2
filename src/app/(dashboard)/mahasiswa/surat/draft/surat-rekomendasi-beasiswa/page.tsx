@@ -10,6 +10,8 @@ import {
     Play,
     FileText,
     Search,
+    AlertCircle,
+    RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +21,7 @@ import { Card } from "@/components/ui/card";
 import { InlineLoader, ButtonLoader } from "@/components/ui/loader";
 import { usePageLoading, useCustomLoading } from "@/contexts/LoadingContext";
 import { StandardPagination } from "@/components/ui/standard-pagination";
+import toast from "react-hot-toast";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -40,6 +43,7 @@ import {
 
 export default function SuratDraftPage() {
     const [applications, setApplications] = useState<ApplicationSummary[]>([]);
+    const [fetchError, setFetchError] = useState<string | null>(null);
     const { isPageLoading, setPageLoading } = usePageLoading();
     const { loading: deleteLoading, setLoading: setDeleteLoading } =
         useCustomLoading("delete-draft");
@@ -65,6 +69,7 @@ export default function SuratDraftPage() {
             limit = pagination.limit,
         ) => {
             setPageLoading(true, "Memuat draft surat...");
+            setFetchError(null);
             try {
                 const { data, meta } = await getApplications({
                     status: "DRAFT",
@@ -81,7 +86,11 @@ export default function SuratDraftPage() {
                     totalPages: meta.totalPages,
                 });
             } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : "Gagal memuat draft surat";
                 console.error("Failed to fetch applications:", error);
+                setFetchError(errorMessage);
+                setApplications([]);
+                toast.error("Gagal memuat draft surat. Silakan coba lagi.");
             } finally {
                 setPageLoading(false);
             }
@@ -288,7 +297,35 @@ export default function SuratDraftPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {applications.length === 0 ? (
+                            {fetchError ? (
+                                <tr>
+                                    <td
+                                        colSpan={4}
+                                        className="px-6 py-12 text-center"
+                                    >
+                                        <div className="flex flex-col items-center justify-center gap-3">
+                                            <div className="bg-red-50 rounded-full p-3">
+                                                <AlertCircle className="h-8 w-8 text-red-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-slate-700 font-semibold">
+                                                    Gagal memuat draft surat
+                                                </p>
+                                                <p className="text-slate-500 text-sm mt-1">
+                                                    {fetchError}
+                                                </p>
+                                            </div>
+                                            <Button
+                                                onClick={() => fetchApplications(1, searchTerm, jenisFilter)}
+                                                className="mt-2 bg-undip-blue hover:bg-sky-700 text-white flex items-center gap-2"
+                                            >
+                                                <RefreshCw className="h-4 w-4" />
+                                                Coba Lagi
+                                            </Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : applications.length === 0 ? (
                                 <tr>
                                     <td
                                         colSpan={4}

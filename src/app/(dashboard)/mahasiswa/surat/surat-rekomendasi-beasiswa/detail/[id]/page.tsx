@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 import {
     ArrowLeft,
     Loader2,
@@ -162,8 +163,12 @@ export default function DetailPengajuanPage() {
             link.href = `/api/templates/letter/${id}/pdf`;
             link.download = `${application.formData.namaLengkap}-SuratRekomendasi.pdf`;
             link.click();
+            toast.success("PDF berhasil diunduh!");
         } catch (error) {
             console.error("Error downloading PDF:", error);
+            toast.error(
+                `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+            );
         }
     };
 
@@ -178,9 +183,15 @@ export default function DetailPengajuanPage() {
                     id,
                     `${application.formData.namaLengkap}-SuratRekomendasi.docx`,
                 );
+                toast.success("Dokumen Word berhasil diunduh!");
+            } else {
+                toast.error("Template tidak ditemukan");
             }
         } catch (error) {
             console.error("Error downloading DOCX:", error);
+            toast.error(
+                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+            );
         }
     };
 

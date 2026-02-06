@@ -1,15 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-    Search,
-    Filter,
-    Eye,
-    ChevronLeft,
-    ChevronRight,
-    X,
-    Calendar,
-} from "lucide-react";
+import { Search, Filter, Eye, X, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 
 interface Letter {
     id: string | number;
@@ -160,6 +153,13 @@ export function LetterList({
         }
     };
 
+    const handlePageSizeChange = (newPageSize: number) => {
+        router.push(
+            `${pathname}?${createQueryString({ limit: newPageSize, page: 1 })}`,
+            { scroll: false },
+        );
+    };
+
     const handleStartDateChange = (value: string) => {
         setStartDateInput(value);
 
@@ -250,7 +250,7 @@ export function LetterList({
                                 <Input
                                     id="startDate"
                                     type="date"
-                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
+                                    className="h-9 w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
                                     value={startDateInput}
                                     onChange={(e) =>
                                         handleStartDateChange(e.target.value)
@@ -273,7 +273,7 @@ export function LetterList({
                                 <Input
                                     id="endDate"
                                     type="date"
-                                    className="h-9 w-[140px] text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
+                                    className="h-9 w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
                                     value={endDateInput}
                                     onChange={(e) =>
                                         handleEndDateChange(e.target.value)
@@ -434,66 +434,17 @@ export function LetterList({
                 </table>
             </div>
 
-            {/* Pagination */}
-            {meta && meta.totalPages > 1 && (
-                <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <p className="text-xs font-bold text-slate-400">
-                        Menampilkan{" "}
-                        <span className="text-slate-600">
-                            {(meta.page - 1) * meta.limit + 1}-
-                            {Math.min(meta.page * meta.limit, meta.total)}
-                        </span>{" "}
-                        dari{" "}
-                        <span className="text-slate-600">{meta.total}</span>
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-slate-400"
-                            onClick={() => handlePageChange(meta.page - 1)}
-                            disabled={meta.page <= 1}
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                        </Button>
-
-                        {Array.from(
-                            { length: Math.min(5, meta.totalPages) },
-                            (_, i) => {
-                                // Basic pagination logic: show pages around meta.page
-                                let pageNum = meta.page - 2 + i;
-                                if (meta.page <= 2) pageNum = i + 1;
-                                if (meta.page >= meta.totalPages - 1)
-                                    pageNum = meta.totalPages - 4 + i;
-
-                                if (pageNum < 1 || pageNum > meta.totalPages)
-                                    return null;
-
-                                return (
-                                    <Button
-                                        key={pageNum}
-                                        className={`h-8 w-8 text-xs font-bold ${meta.page === pageNum ? "bg-undip-blue hover:bg-sky-700" : "bg-transparent text-slate-600 hover:bg-slate-100 shadow-none border-none"}`}
-                                        onClick={() =>
-                                            handlePageChange(pageNum)
-                                        }
-                                    >
-                                        {pageNum}
-                                    </Button>
-                                );
-                            },
-                        )}
-
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-slate-400"
-                            onClick={() => handlePageChange(meta.page + 1)}
-                            disabled={meta.page >= meta.totalPages}
-                        >
-                            <ChevronRight className="h-4 w-4" />
-                        </Button>
-                    </div>
-                </div>
+            {/* Standard Pagination */}
+            {meta && (
+                <StandardPagination
+                    currentPage={meta.page}
+                    totalPages={meta.totalPages}
+                    pageSize={meta.limit}
+                    totalItems={meta.total}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                    itemLabel="surat"
+                />
             )}
         </Card>
     );

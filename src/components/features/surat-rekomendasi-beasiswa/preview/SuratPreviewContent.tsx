@@ -1039,7 +1039,7 @@ export function SuratPreviewContent({
                                                         "Render PDF surat...",
                                                     );
                                                 }}
-                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
                                             >
                                                 <Download className="h-5 w-5" />
                                                 Cetak/PDF
@@ -1088,7 +1088,7 @@ export function SuratPreviewContent({
                                                     }
                                                 }}
                                                 disabled={isDownloadingTemplate}
-                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
+                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
                                             >
                                                 {isDownloadingTemplate ? (
                                                     <>

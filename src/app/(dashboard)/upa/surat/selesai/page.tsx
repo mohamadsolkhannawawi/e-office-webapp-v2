@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import toast from "react-hot-toast";
 import {
     Select,
     SelectContent,
@@ -36,6 +37,7 @@ import {
 } from "@/lib/template-api";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 
 export default function SelesaiPage() {
     const [applications, setApplications] = useState<ApplicationSummary[]>([]);
@@ -44,9 +46,12 @@ export default function SelesaiPage() {
     const [filterBeasiswa, setFilterBeasiswa] = useState("all");
     const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [totalItems, setTotalItems] = useState(0);
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 1,
+    });
     const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     const fetchSelesaiData = useCallback(async () => {
@@ -70,8 +75,8 @@ export default function SelesaiPage() {
 
             const result = await getApplications({
                 status: "COMPLETED",
-                page: currentPage,
-                limit: 10,
+                page: pagination.page,
+                limit: pagination.limit,
                 search: searchTerm,
                 jenisBeasiswa:
                     filterBeasiswa !== "all" ? filterBeasiswa : undefined,
@@ -80,14 +85,25 @@ export default function SelesaiPage() {
                 sortOrder: sortOrder,
             });
             setApplications(result.data);
-            setTotalPages(result.meta.totalPages);
-            setTotalItems(result.meta.total);
+            setPagination({
+                page: result.meta.page,
+                limit: result.meta.limit,
+                total: result.meta.total,
+                totalPages: result.meta.totalPages,
+            });
         } catch (error) {
             console.error("Error fetching selesai:", error);
         } finally {
             setLoading(false);
         }
-    }, [currentPage, searchTerm, filterBeasiswa, dateRange, sortOrder]);
+    }, [
+        pagination.page,
+        pagination.limit,
+        searchTerm,
+        filterBeasiswa,
+        dateRange,
+        sortOrder,
+    ]);
 
     const handleDownloadPDF = async (applicationId: string) => {
         try {
@@ -95,8 +111,12 @@ export default function SelesaiPage() {
             link.href = `/api/templates/letter/${applicationId}/pdf`;
             link.download = `Surat-Rekomendasi-${applicationId}.pdf`;
             link.click();
+            toast.success("PDF berhasil diunduh!");
         } catch (error) {
             console.error("Error downloading PDF:", error);
+            toast.error(
+                `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+            );
         }
     };
 
@@ -112,12 +132,26 @@ export default function SelesaiPage() {
                     applicationId,
                     `Surat-Rekomendasi-${applicationId}.docx`,
                 );
+                toast.success("Dokumen Word berhasil diunduh!");
+            } else {
+                toast.error("Template tidak ditemukan");
             }
         } catch (error) {
             console.error("Error downloading DOCX:", error);
+            toast.error(
+                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+            );
         } finally {
             setDownloadingId(null);
         }
+    };
+
+    const handlePageChange = (newPage: number) => {
+        setPagination((prev) => ({ ...prev, page: newPage }));
+    };
+
+    const handlePageSizeChange = (newPageSize: number) => {
+        setPagination((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
     };
 
     useEffect(() => {
@@ -145,7 +179,7 @@ export default function SelesaiPage() {
                         Daftar Surat Selesai
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
-                        Total {totalItems} surat selesai
+                        Total {pagination.total} surat selesai
                     </p>
                 </div>
             </div>
@@ -329,7 +363,10 @@ export default function SelesaiPage() {
                                         className="hover:bg-slate-50/30 transition-colors group"
                                     >
                                         <td className="px-6 py-4 text-slate-500">
-                                            {(currentPage - 1) * 10 + index + 1}
+                                            {(pagination.page - 1) *
+                                                pagination.limit +
+                                                index +
+                                                1}
                                         </td>
                                         <td className="px-6 py-4 font-bold text-slate-700">
                                             {app.formData?.namaLengkap ||
@@ -415,72 +452,16 @@ export default function SelesaiPage() {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <p className="text-xs font-bold text-slate-400">
-                            Menampilkan{" "}
-                            <span className="text-slate-600">
-                                {(currentPage - 1) * 10 + 1}-
-                                {Math.min(currentPage * 10, totalItems)}
-                            </span>{" "}
-                            dari{" "}
-                            <span className="text-slate-600">{totalItems}</span>
-                        </p>
-                        <div className="flex items-center gap-1.5">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-slate-400"
-                                onClick={() =>
-                                    setCurrentPage((p) => Math.max(1, p - 1))
-                                }
-                                disabled={currentPage === 1}
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-
-                            {Array.from(
-                                { length: Math.min(5, totalPages) },
-                                (_, i) => {
-                                    let pageNum = currentPage - 2 + i;
-                                    if (currentPage <= 2) pageNum = i + 1;
-                                    if (currentPage >= totalPages - 1)
-                                        pageNum = totalPages - 4 + i;
-
-                                    if (pageNum < 1 || pageNum > totalPages)
-                                        return null;
-
-                                    return (
-                                        <Button
-                                            key={pageNum}
-                                            className={`h-8 w-8 text-xs font-bold ${currentPage === pageNum ? "bg-undip-blue hover:bg-sky-700" : "bg-transparent text-slate-600 hover:bg-slate-100 shadow-none border-none"}`}
-                                            onClick={() =>
-                                                setCurrentPage(pageNum)
-                                            }
-                                        >
-                                            {pageNum}
-                                        </Button>
-                                    );
-                                },
-                            )}
-
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-slate-400"
-                                onClick={() =>
-                                    setCurrentPage((p) =>
-                                        Math.min(totalPages, p + 1),
-                                    )
-                                }
-                                disabled={currentPage === totalPages}
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                {/* Standard Pagination */}
+                <StandardPagination
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    pageSize={pagination.limit}
+                    totalItems={pagination.total}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                    itemLabel="surat selesai"
+                />
             </Card>
         </div>
     );

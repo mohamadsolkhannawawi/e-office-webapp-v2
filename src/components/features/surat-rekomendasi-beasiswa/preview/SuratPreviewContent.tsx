@@ -14,6 +14,7 @@ import {
     XOctagon,
     Download,
     Sparkles,
+    CheckCircle,
 } from "lucide-react";
 import { verifyApplication } from "@/lib/application-api";
 import {
@@ -1002,15 +1003,16 @@ export function SuratPreviewContent({
                                 <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
                                     <div className="flex flex-col items-center gap-2 mb-2">
                                         <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600">
-                                            <Download className="h-6 w-6" />
+                                            <CheckCircle className="h-6 w-6" />
                                         </div>
                                         <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
-                                            Dokumen Siap
+                                            Surat Selesai
                                         </h3>
                                     </div>
 
                                     <div className="space-y-3 pt-5 border-t border-slate-100 text-center">
                                         <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                                            Surat telah diterbitkan dan selesai.
                                             Klik tombol di bawah untuk mencetak
                                             atau mengunduh surat sebagai PDF
                                             atau Word.

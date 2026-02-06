@@ -145,7 +145,6 @@ export default async function PerluTindakanPage(props: {
             status,
             statusColor,
             statusIcon,
-            statusColor,
         };
     });
 

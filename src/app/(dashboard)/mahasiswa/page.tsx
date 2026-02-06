@@ -64,7 +64,7 @@ export default function MahasiswaDashboardPage() {
                 {DASHBOARD_ACTIONS.map((action, index) => (
                     <div
                         key={action.title}
-                        className={`group bg-white rounded-3xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 transition-all duration-300 animate-in slide-in-from-bottom-4 duration-700 h-full ${
+                        className={`group bg-white rounded-3xl border shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 transition-all duration-300 animate-in slide-in-from-bottom-4 h-full ${
                             action.disabled
                                 ? "opacity-60 cursor-not-allowed border-gray-200"
                                 : "hover:shadow-md hover:border-blue-100 border-gray-200"
@@ -95,7 +95,7 @@ export default function MahasiswaDashboardPage() {
                         {action.disabled ? (
                             <Button
                                 disabled
-                                className="w-full sm:w-auto sm:min-w-[200px] md:min-w-[240px] lg:w-80 bg-gray-100 text-gray-400 rounded-full py-5 sm:py-6 font-semibold text-sm"
+                                className="w-full sm:w-auto sm:min-w-50 md:min-w-60 lg:w-80 bg-gray-100 text-gray-400 rounded-full py-5 sm:py-6 font-semibold text-sm"
                             >
                                 Belum Tersedia
                             </Button>
@@ -104,7 +104,7 @@ export default function MahasiswaDashboardPage() {
                                 href={action.href}
                                 className="w-full sm:w-auto"
                             >
-                                <Button className="w-full sm:w-auto sm:min-w-[200px] md:min-w-[240px] lg:w-80 bg-undip-blue hover:bg-sky-700 text-white rounded-full py-5 sm:py-6 font-semibold shadow-sm transition-all active:scale-95 text-sm">
+                                <Button className="w-full sm:w-auto sm:min-w-50 md:min-w-60 lg:w-80 bg-undip-blue hover:bg-sky-700 text-white rounded-full py-5 sm:py-6 font-semibold shadow-sm transition-all active:scale-95 text-sm">
                                     Ajukan
                                 </Button>
                             </Link>

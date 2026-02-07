@@ -4,8 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import {
     ChevronRight,
     Filter,
-    ChevronLeft,
-    Loader2,
     Trash2,
     Play,
     FileText,
@@ -18,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
 import { Card } from "@/components/ui/card";
-import { InlineLoader, ButtonLoader } from "@/components/ui/loader";
+import { ButtonLoader } from "@/components/ui/loader";
 import { usePageLoading, useCustomLoading } from "@/contexts/LoadingContext";
 import { StandardPagination } from "@/components/ui/standard-pagination";
 import toast from "react-hot-toast";
@@ -44,7 +42,7 @@ import {
 export default function SuratDraftPage() {
     const [applications, setApplications] = useState<ApplicationSummary[]>([]);
     const [fetchError, setFetchError] = useState<string | null>(null);
-    const { isPageLoading, setPageLoading } = usePageLoading();
+    const { setPageLoading } = usePageLoading();
     const { loading: deleteLoading, setLoading: setDeleteLoading } =
         useCustomLoading("delete-draft");
     const [searchTerm, setSearchTerm] = useState("");
@@ -60,15 +58,14 @@ export default function SuratDraftPage() {
         total: 0,
         totalPages: 1,
     });
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     const fetchApplications = useCallback(
-        async (
-            page = 1,
-            search = searchTerm,
-            jenis = jenisFilter,
-            limit = pagination.limit,
-        ) => {
-            setPageLoading(true, "Memuat draft surat...");
+        async (page: number, search: string, jenis: string, limit: number) => {
+            // Only show loading for non-initial fetches
+            if (!isInitialLoad) {
+                setPageLoading(true, "Memuat draft surat...");
+            }
             setFetchError(null);
             try {
                 const { data, meta } = await getApplications({
@@ -86,16 +83,22 @@ export default function SuratDraftPage() {
                     totalPages: meta.totalPages,
                 });
             } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : "Gagal memuat draft surat";
+                const errorMessage =
+                    error instanceof Error
+                        ? error.message
+                        : "Gagal memuat draft surat";
                 console.error("Failed to fetch applications:", error);
                 setFetchError(errorMessage);
                 setApplications([]);
                 toast.error("Gagal memuat draft surat. Silakan coba lagi.");
             } finally {
-                setPageLoading(false);
+                if (!isInitialLoad) {
+                    setPageLoading(false);
+                }
+                setIsInitialLoad(false);
             }
         },
-        [setPageLoading],
+        [setPageLoading, isInitialLoad],
     );
 
     useEffect(() => {
@@ -104,6 +107,7 @@ export default function SuratDraftPage() {
         }, 500);
 
         return () => clearTimeout(delaySearch);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm, jenisFilter]);
 
     const handlePageChange = (newPage: number) => {
@@ -137,7 +141,12 @@ export default function SuratDraftPage() {
             if (res.ok) {
                 setIsDeleteDialogOpen(false);
                 setSelectedDeleteId(null);
-                fetchApplications(pagination.page);
+                fetchApplications(
+                    pagination.page,
+                    searchTerm,
+                    jenisFilter,
+                    pagination.limit,
+                );
             } else {
                 const errorData = await res.json();
                 setDeleteError(
@@ -316,7 +325,14 @@ export default function SuratDraftPage() {
                                                 </p>
                                             </div>
                                             <Button
-                                                onClick={() => fetchApplications(1, searchTerm, jenisFilter)}
+                                                onClick={() =>
+                                                    fetchApplications(
+                                                        1,
+                                                        searchTerm,
+                                                        jenisFilter,
+                                                        pagination.limit,
+                                                    )
+                                                }
                                                 className="mt-2 bg-undip-blue hover:bg-sky-700 text-white flex items-center gap-2"
                                             >
                                                 <RefreshCw className="h-4 w-4" />

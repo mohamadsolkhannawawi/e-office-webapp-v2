@@ -186,7 +186,13 @@ export function AdminDashboard({
                 <p className="text-slate-500 text-lg leading-relaxed">
                     {user?.name ? (
                         <>
-                            Selamat datang <span className="text-undip-blue font-bold">{user.name}</span>, bagian ini merupakan pusat kendali yang berisi informasi untuk mengelola semua surat Fakultas Sains dan Matematika.
+                            Selamat datang{" "}
+                            <span className="text-undip-blue font-bold">
+                                {user.name}
+                            </span>
+                            , bagian ini merupakan pusat kendali yang berisi
+                            informasi untuk mengelola semua surat Fakultas Sains
+                            dan Matematika.
                         </>
                     ) : (
                         description

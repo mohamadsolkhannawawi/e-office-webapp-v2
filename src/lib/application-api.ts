@@ -162,40 +162,51 @@ export async function getApplications(params?: {
 
         if (!response.ok) {
             let errorMessage = `Failed to fetch applications: ${response.status}`;
-            
+
             // Provide more specific error messages
             if (response.status === 401) {
-                errorMessage = "Sesi Anda telah berakhir. Silakan login kembali.";
+                errorMessage =
+                    "Sesi Anda telah berakhir. Silakan login kembali.";
             } else if (response.status === 403) {
                 errorMessage = "Anda tidak memiliki akses ke resource ini.";
             } else if (response.status === 404) {
                 errorMessage = "Resource tidak ditemukan.";
             } else if (response.status >= 500) {
-                errorMessage = "Terjadi kesalahan pada server. Silakan coba lagi nanti.";
+                errorMessage =
+                    "Terjadi kesalahan pada server. Silakan coba lagi nanti.";
             }
-            
+
             throw new Error(errorMessage);
         }
 
         const result = await response.json();
         return {
             data: result.data || [],
-            meta: result.meta || { total: 0, page: 1, limit: 10, totalPages: 0 },
+            meta: result.meta || {
+                total: 0,
+                page: 1,
+                limit: 10,
+                totalPages: 0,
+            },
         };
     } catch (error) {
         // Provide more context for different error types
         let errorMessage = "Gagal memuat data";
-        
+
         if (error instanceof TypeError && error.message === "Failed to fetch") {
-            errorMessage = "Koneksi ke server gagal. Periksa koneksi internet Anda atau hubungi administrator.";
+            errorMessage =
+                "Koneksi ke server gagal. Periksa koneksi internet Anda atau hubungi administrator.";
         } else if (error instanceof Error) {
             errorMessage = error.message;
         }
-        
+
         console.error("Get applications error:", error);
         console.error("Error details:", {
             message: errorMessage,
-            url: new URL("/api/surat-rekomendasi/applications", window.location.origin).toString(),
+            url: new URL(
+                "/api/surat-rekomendasi/applications",
+                window.location.origin,
+            ).toString(),
             params: params,
         });
         throw new Error(errorMessage);

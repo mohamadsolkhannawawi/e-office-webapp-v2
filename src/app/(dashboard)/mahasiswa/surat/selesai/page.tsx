@@ -5,14 +5,12 @@ import toast from "react-hot-toast";
 import {
     ChevronRight,
     Filter,
-    ChevronLeft,
     Loader2,
     Download,
     Eye,
     CheckCircle,
     XCircle,
     Search,
-    FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +29,7 @@ import {
 
 export default function SuratSelesaiPage() {
     const [applications, setApplications] = useState<ApplicationSummary[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [downloadingId, setDownloadingId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [jenisFilter, setJenisFilter] = useState<string>("ALL");
@@ -43,12 +41,13 @@ export default function SuratSelesaiPage() {
     });
 
     const fetchApplications = useCallback(
-        async (
-            page = 1,
-            search = searchTerm,
-            jenis = jenisFilter,
-            limit = pagination.limit,
-        ) => {
+        async (page: number, search: string, jenis: string, limit: number) => {
+            console.log("[DEBUG] fetchApplications called with:", {
+                page,
+                search,
+                jenis,
+                limit,
+            });
             setIsLoading(true);
             try {
                 const { data, meta } = await getApplications({
@@ -58,6 +57,10 @@ export default function SuratSelesaiPage() {
                     search: search || undefined,
                     jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
                 });
+                console.log("[DEBUG] API response received:", {
+                    dataLength: data.length,
+                    meta,
+                });
                 setApplications(data);
                 setPagination({
                     page: meta.page,
@@ -66,8 +69,12 @@ export default function SuratSelesaiPage() {
                     totalPages: meta.totalPages,
                 });
             } catch (error) {
-                console.error("Failed to fetch applications:", error);
+                console.error("[DEBUG] Failed to fetch applications:", error);
+                toast.error("Gagal memuat surat selesai. Silakan coba lagi.");
             } finally {
+                console.log(
+                    "[DEBUG] Finally block - setting isLoading to false",
+                );
                 setIsLoading(false);
             }
         },
@@ -99,11 +106,19 @@ export default function SuratSelesaiPage() {
     };
 
     useEffect(() => {
+        // Fetch data on component mount
+        fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        // Re-fetch when search or filter changes
         const delaySearch = setTimeout(() => {
             fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
         }, 500);
 
         return () => clearTimeout(delaySearch);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm, jenisFilter]);
 
     const handlePageChange = (newPage: number) => {

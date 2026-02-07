@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
     ChevronLeft,
     Maximize2,
@@ -672,10 +673,12 @@ export function SuratPreviewContent({
                                                         Stempel Teraplikasi
                                                     </p>
                                                     <div className="w-20 h-20 relative">
-                                                        <img
+                                                        <Image
                                                             src={upaStampUrl}
                                                             alt="Stempel"
-                                                            className="object-contain w-full h-full"
+                                                            fill
+                                                            className="object-contain"
+                                                            unoptimized
                                                         />
                                                     </div>
                                                 </div>

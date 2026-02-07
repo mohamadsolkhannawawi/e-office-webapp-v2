@@ -58,12 +58,18 @@ export default function MahasiswaDashboardPage() {
             </h1>
             {user?.name && (
                 <p className="text-base text-slate-600 animate-in slide-in-from-bottom-3 duration-700 leading-relaxed">
-                    Selamat datang <span className="font-bold text-undip-blue">{user.name}</span>, disini Anda bisa mengelola pengajuan surat dan dokumen administratif dengan lebih mudah.
+                    Selamat datang{" "}
+                    <span className="font-bold text-undip-blue">
+                        {user.name}
+                    </span>
+                    , disini Anda bisa mengelola pengajuan surat dan dokumen
+                    administratif dengan lebih mudah.
                 </p>
             )}
             {!user?.name && (
                 <p className="text-sm text-slate-500 animate-in slide-in-from-bottom-3 duration-700">
-                    Kelola pengajuan surat dan dokumen administratif Anda dengan mudah.
+                    Kelola pengajuan surat dan dokumen administratif Anda dengan
+                    mudah.
                 </p>
             )}
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,6 +21,14 @@ import {
 } from "lucide-react";
 import { getMe, UserProfile } from "@/lib/application-api";
 import toast from "react-hot-toast";
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    DialogClose,
+    DialogPortal,
+    DialogOverlay,
+} from "@/components/ui/dialog";
 
 // Format tanggal ke format Indonesia
 const formatDateToIndonesian = (dateString?: string): string => {
@@ -160,6 +169,7 @@ const ProfileTableRow = ({ label, value, icon }: ProfileTableRowProps) => {
 const ProfilePage = ({ editHref }: { editHref: string }) => {
     const [profileData, setProfileData] = useState<ProfileData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [showPhotoModal, setShowPhotoModal] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -214,15 +224,28 @@ const ProfilePage = ({ editHref }: { editHref: string }) => {
             {/* Header dengan Avatar dan Edit Button */}
             <div className="flex items-start justify-between">
                 <div className="flex items-center gap-6">
-                    <Avatar className="h-24 w-24">
-                        <AvatarImage
-                            src={profileData.image}
-                            alt={profileData.name}
-                        />
-                        <AvatarFallback className="bg-blue-600 text-white text-lg font-semibold">
-                            {getInitials(profileData.name)}
-                        </AvatarFallback>
-                    </Avatar>
+                    <button
+                        onClick={() => setShowPhotoModal(true)}
+                        className="group relative cursor-pointer transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-full"
+                        title="Klik untuk melihat foto profil"
+                    >
+                        <Avatar className="h-24 w-24">
+                            <AvatarImage
+                                src={profileData.image}
+                                alt={profileData.name}
+                            />
+                            <AvatarFallback className="bg-blue-600 text-white text-lg font-semibold">
+                                {getInitials(profileData.name)}
+                            </AvatarFallback>
+                        </Avatar>
+                        {profileData.image && (
+                            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 group-hover:bg-black/20 transition-colors">
+                                <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-xs font-medium">
+                                    Lihat
+                                </div>
+                            </div>
+                        )}
+                    </button>
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">
                             {profileData.name}
@@ -245,6 +268,66 @@ const ProfilePage = ({ editHref }: { editHref: string }) => {
                     </Button>
                 </Link>
             </div>
+
+            {/* Photo Modal Dialog */}
+            <Dialog open={showPhotoModal} onOpenChange={setShowPhotoModal}>
+                <DialogPortal>
+                    <DialogOverlay className="bg-black/50" />
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        {profileData.image ? (
+                            <div className="relative max-h-[80vh] max-w-[90vw] md:max-w-2xl lg:max-w-3xl overflow-hidden rounded-lg">
+                                <Image
+                                    src={profileData.image}
+                                    alt={profileData.name}
+                                    width={800}
+                                    height={800}
+                                    className="w-full h-auto object-contain"
+                                    priority
+                                    unoptimized
+                                />
+                                <DialogClose className="absolute top-4 right-4 rounded-full bg-white hover:bg-gray-200 transition-colors p-2 text-black z-50 shadow-lg">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <path d="M18 6l-12 12M6 6l12 12" />
+                                    </svg>
+                                </DialogClose>
+                            </div>
+                        ) : (
+                            <div className="relative flex items-center justify-center max-h-[80vh] max-w-[90vw] md:max-w-96 bg-white rounded-lg">
+                                <Avatar className="h-48 w-48">
+                                    <AvatarFallback className="bg-blue-600 text-white text-6xl font-semibold">
+                                        {getInitials(profileData.name)}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <DialogClose className="absolute top-4 right-4 rounded-full bg-white hover:bg-gray-200 transition-colors p-2 text-black z-50 shadow-lg">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <path d="M18 6l-12 12M6 6l12 12" />
+                                    </svg>
+                                </DialogClose>
+                            </div>
+                        )}
+                    </div>
+                </DialogPortal>
+            </Dialog>
 
             {/* Tabel Profil Formal - 2 Kolom */}
             <Card className="border border-gray-200 shadow-sm">

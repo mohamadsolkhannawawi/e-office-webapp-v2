@@ -172,9 +172,7 @@ export default function DetailRevisiPage() {
 
     const revisionNote = latestRevision?.note || "Harap perbaiki data Anda.";
     const revisionChecker =
-        latestRevision?.actor?.role?.name ||
-        latestRevision?.actor?.name ||
-        "Reviewer";
+        latestRevision?.role?.name || latestRevision?.actor?.name || "Reviewer";
     const revisionDate = latestRevision?.createdAt;
 
     const jenis =

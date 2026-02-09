@@ -220,7 +220,7 @@ export default function DetailSuratProsesPage() {
                         revisiHistory && (
                             <DetailRevisi
                                 checker={
-                                    revisiHistory.actor?.role?.name ||
+                                    revisiHistory.role?.name ||
                                     revisiHistory.actor?.name ||
                                     "-"
                                 }

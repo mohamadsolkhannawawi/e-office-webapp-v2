@@ -45,7 +45,10 @@ export const useAsyncOperation = () => {
             return result;
         } catch (error) {
             // Handle error
-            if (onError) onError(error);
+            const appError = error instanceof Error 
+                ? error 
+                : new Error(String(error));
+            if (onError) onError(appError);
             else console.error("Operation failed:", error);
 
             return null;

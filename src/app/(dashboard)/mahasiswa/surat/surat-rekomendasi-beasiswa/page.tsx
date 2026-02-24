@@ -21,18 +21,21 @@ const jenisBeasiswa = [
         id: "internal",
         name: "Beasiswa Internal",
         description: "Beasiswa dari universitas untuk mahasiswa berprestasi",
+        example: "Beasiswa Dana Abadi (DAD) Diponegoro",
         icon: GraduationCap,
     },
     {
         id: "external",
         name: "Beasiswa External",
         description: "Beasiswa dari pihak luar seperti pemerintah, swasta, dll",
+        example: "Beasiswa Unggulan",
         icon: Award,
     },
     {
         id: "akademik",
         name: "Beasiswa Akademik",
         description: "Beasiswa berdasarkan prestasi akademik",
+        example: "Beasiswa PPA (Peningkatan Prestasi Akademik)",
         icon: BookOpen,
     },
 ];
@@ -64,7 +67,10 @@ export default function SuratRekomendasiBeasiswaPage() {
                         Pilih jenis beasiswa yang ingin Anda ajukan
                     </p>
                 </div>
-                <Link href="/mahasiswa" className="order-1 sm:order-2 self-start sm:self-auto">
+                <Link
+                    href="/mahasiswa"
+                    className="order-1 sm:order-2 self-start sm:self-auto"
+                >
                     <Button className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-3xl inline-flex items-center gap-2">
                         <ArrowLeft className="h-4 w-4" />
                         <span className="text-sm font-semibold">Kembali</span>
@@ -92,10 +98,18 @@ export default function SuratRekomendasiBeasiswaPage() {
                                         </CardTitle>
                                     </div>
                                 </CardHeader>
-                                <CardContent>
+                                <CardContent className="space-y-3">
                                     <CardDescription>
                                         {jenis.description}
                                     </CardDescription>
+                                    <div className="border-t border-slate-200 pt-3">
+                                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                                            Contoh:
+                                        </p>
+                                        <p className="text-sm text-undip-blue font-medium group-hover:text-undip-blue transition-colors">
+                                            {jenis.example}
+                                        </p>
+                                    </div>
                                 </CardContent>
                             </Card>
                         </Link>

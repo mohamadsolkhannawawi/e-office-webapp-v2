@@ -673,33 +673,36 @@ export function AdminDetailSurat({
                                         </div>
                                     </div>
 
-                                    {initialData?.status === "COMPLETED" && (
-                                        <div className="space-y-3">
-                                            <Button
-                                                onClick={() =>
-                                                    handleDownloadPDF(id)
-                                                }
-                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
-                                            >
-                                                <Download className="h-5 w-5" />
-                                                Cetak/PDF
-                                            </Button>
-                                            <Button
-                                                onClick={() =>
-                                                    handleDownloadDOCX(id)
-                                                }
-                                                disabled={downloadingId === id}
-                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
-                                            >
-                                                {downloadingId === id ? (
-                                                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                ) : (
+                                    {initialData?.status === "COMPLETED" &&
+                                        role === "upa" && (
+                                            <div className="space-y-3">
+                                                <Button
+                                                    onClick={() =>
+                                                        handleDownloadPDF(id)
+                                                    }
+                                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
+                                                >
                                                     <Download className="h-5 w-5" />
-                                                )}
-                                                Unduh Word
-                                            </Button>
-                                        </div>
-                                    )}
+                                                    Cetak/PDF
+                                                </Button>
+                                                <Button
+                                                    onClick={() =>
+                                                        handleDownloadDOCX(id)
+                                                    }
+                                                    disabled={
+                                                        downloadingId === id
+                                                    }
+                                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
+                                                >
+                                                    {downloadingId === id ? (
+                                                        <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                    ) : (
+                                                        <Download className="h-5 w-5" />
+                                                    )}
+                                                    Unduh Word
+                                                </Button>
+                                            </div>
+                                        )}
                                 </div>
                             )}
                         </div>

@@ -7,6 +7,7 @@ export const ROLES = {
     MANAJER_TU: "manajer-tu",
     WAKIL_DEKAN_1: "wakil-dekan-1",
     UPA: "upa",
+    SUPER_ADMIN: "super-admin",
 } as const;
 
 export type RoleType = (typeof ROLES)[keyof typeof ROLES];
@@ -44,6 +45,12 @@ export const ROLE_CONFIG = {
         description: "Admin beasiswa",
         dashboardPath: "/upa",
         color: "red",
+    },
+    [ROLES.SUPER_ADMIN]: {
+        label: "Super Admin",
+        description: "Administrator Sistem",
+        dashboardPath: "/super-admin",
+        color: "slate",
     },
 } as const;
 

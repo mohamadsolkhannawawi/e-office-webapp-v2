@@ -281,22 +281,13 @@ export default function DetailPengajuanPage() {
                             </Link>
 
                             {isPublished && (
-                                <>
-                                    <Button
-                                        onClick={handleDownloadPDF}
-                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
-                                    >
-                                        <Download className="h-5 w-5" />
-                                        Cetak/PDF
-                                    </Button>
-                                    <Button
-                                        onClick={handleDownloadDOCX}
-                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
-                                    >
-                                        <Download className="h-5 w-5" />
-                                        Unduh Word
-                                    </Button>
-                                </>
+                                <Button
+                                    onClick={handleDownloadPDF}
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
+                                >
+                                    <Download className="h-5 w-5" />
+                                    Unduh PDF
+                                </Button>
                             )}
 
                             {canEdit && (

@@ -361,7 +361,7 @@ export default function SuratSelesaiPage() {
                                                                 variant="ghost"
                                                                 size="sm"
                                                                 className="h-9 px-3 gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-medium text-xs rounded-3xl"
-                                                                title="Cetak/PDF"
+                                                                title="Unduh PDF"
                                                                 onClick={() => {
                                                                     try {
                                                                         const link =
@@ -386,32 +386,7 @@ export default function SuratSelesaiPage() {
                                                                 }}
                                                             >
                                                                 <Download className="h-4 w-4" />
-                                                                PDF
-                                                            </Button>
-
-                                                            {/* Download Word Document */}
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-9 px-3 gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium text-xs rounded-3xl"
-                                                                title="Unduh Word"
-                                                                onClick={() =>
-                                                                    handleDownloadTemplate(
-                                                                        app.id,
-                                                                    )
-                                                                }
-                                                                disabled={
-                                                                    downloadingId ===
-                                                                    app.id
-                                                                }
-                                                            >
-                                                                {downloadingId ===
-                                                                app.id ? (
-                                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                                ) : (
-                                                                    <Download className="h-4 w-4" />
-                                                                )}
-                                                                Word
+                                                                Unduh PDF
                                                             </Button>
                                                         </>
                                                     )}

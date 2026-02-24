@@ -16,6 +16,7 @@ import {
     Download,
     Sparkles,
     CheckCircle,
+    Clock,
 } from "lucide-react";
 import { verifyApplication } from "@/lib/application-api";
 import {
@@ -560,34 +561,110 @@ export function SuratPreviewContent({
 
                             <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 text-center space-y-3">
                                 <div
-                                    className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${data?.status === "REJECTED" ? "bg-red-100" : "bg-amber-100"}`}
+                                    className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${
+                                        data?.status === "REJECTED"
+                                            ? "bg-red-100"
+                                            : data?.status === "COMPLETED" ||
+                                                data?.status === "PUBLISHED"
+                                              ? "bg-green-100"
+                                              : "bg-blue-100"
+                                    }`}
                                 >
                                     {data?.status === "REJECTED" ? (
                                         <XOctagon className="h-6 w-6 text-red-600" />
+                                    ) : data?.status === "COMPLETED" ||
+                                      data?.status === "PUBLISHED" ? (
+                                        <CheckCircle className="h-6 w-6 text-green-600" />
                                     ) : (
-                                        <Info className="h-6 w-6 text-amber-600" />
+                                        <Clock className="h-6 w-6 text-blue-600 animate-spin" />
                                     )}
                                 </div>
                                 <div>
                                     <p className="font-bold text-slate-700">
                                         {data?.status === "REJECTED"
                                             ? "Surat Ditolak"
-                                            : isTerminalStatus
+                                            : data?.status === "COMPLETED" ||
+                                                data?.status === "PUBLISHED"
                                               ? "Surat Selesai"
-                                              : stage === "mahasiswa"
-                                                ? "Sedang Diproses"
-                                                : "Sudah Diproses"}
+                                              : (() => {
+                                                    if (currentStep === 3) {
+                                                        return "Menunggu Verifikasi dan Tanda Tangan";
+                                                    } else if (
+                                                        currentStep === 4
+                                                    ) {
+                                                        return "Menunggu Penomoran Surat dan Publish";
+                                                    }
+                                                    const stepLabels: Record<
+                                                        number,
+                                                        string
+                                                    > = {
+                                                        1: "Supervisor Akademik",
+                                                        2: "Manajer TU",
+                                                        3: "Wakil Dekan 1",
+                                                        4: "UPA",
+                                                    };
+                                                    const pendingRole =
+                                                        stepLabels[
+                                                            currentStep
+                                                        ] || "Sistem";
+                                                    return `Menunggu Verifikasi ${pendingRole}`;
+                                                })()}
                                     </p>
                                     <p className="text-sm text-slate-500 mt-1">
                                         {data?.status === "REJECTED"
                                             ? stage === "mahasiswa"
                                                 ? "Pengajuan surat rekomendasi Anda ditolak."
                                                 : "Pengajuan ini telah ditolak."
-                                            : isTerminalStatus
+                                            : data?.status === "COMPLETED" ||
+                                                data?.status === "PUBLISHED"
                                               ? "Surat telah diterbitkan dan selesai."
                                               : stage === "mahasiswa"
-                                                ? "Surat Anda sedang dalam proses verifikasi."
-                                                : "Surat ini sudah Anda proses dan telah diteruskan ke tahap berikutnya."}
+                                                ? (() => {
+                                                      if (currentStep === 3) {
+                                                          return "Surat Anda sedang menunggu verifikasi dan penandatanganan dari Wakil Dekan 1.";
+                                                      } else if (
+                                                          currentStep === 4
+                                                      ) {
+                                                          return "Surat Anda sedang menunggu penomoran dan penerbitan dari UPA.";
+                                                      }
+                                                      const stepLabels: Record<
+                                                          number,
+                                                          string
+                                                      > = {
+                                                          1: "Supervisor Akademik",
+                                                          2: "Manajer TU",
+                                                          3: "Wakil Dekan 1",
+                                                          4: "UPA",
+                                                      };
+                                                      const pendingRole =
+                                                          stepLabels[
+                                                              currentStep
+                                                          ] || "sistem";
+                                                      return `Surat Anda sedang menunggu verifikasi dari ${pendingRole}.`;
+                                                  })()
+                                                : (() => {
+                                                      if (currentStep === 3) {
+                                                          return "Surat ini sedang menunggu verifikasi dan penandatanganan Anda.";
+                                                      } else if (
+                                                          currentStep === 4
+                                                      ) {
+                                                          return "Surat ini sedang menunggu penomoran dan penerbitan dari Anda.";
+                                                      }
+                                                      const stepLabels: Record<
+                                                          number,
+                                                          string
+                                                      > = {
+                                                          1: "Supervisor Akademik",
+                                                          2: "Manajer TU",
+                                                          3: "Wakil Dekan 1",
+                                                          4: "UPA",
+                                                      };
+                                                      const pendingRole =
+                                                          stepLabels[
+                                                              currentStep
+                                                          ] || "sistem";
+                                                      return `Surat ini sedang menunggu tindakan dari ${pendingRole}.`;
+                                                  })()}
                                     </p>
                                 </div>
                             </div>
@@ -907,91 +984,27 @@ export function SuratPreviewContent({
 
                                     <div className="space-y-3 pt-5 border-t border-slate-100 text-center">
                                         <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-                                            Klik tombol di bawah untuk mencetak
-                                            atau mengunduh surat sebagai PDF
-                                            atau Word.
+                                            Klik tombol di bawah untuk mengunduh
+                                            surat dalam format PDF.
                                         </p>
-                                        <div className="flex flex-col gap-3">
-                                            <Button
-                                                onClick={async () => {
-                                                    if (!applicationId) return;
+                                        <Button
+                                            onClick={async () => {
+                                                if (!applicationId) return;
 
-                                                    // Open PDF in new tab with loader
-                                                    await generatePDF(
-                                                        async () => {
-                                                            const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
-                                                            window.open(
-                                                                pdfUrl,
-                                                                "_blank",
-                                                            );
-                                                        },
-                                                        "Render PDF surat...",
+                                                // Open PDF in new tab with loader
+                                                await generatePDF(async () => {
+                                                    const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                                                    window.open(
+                                                        pdfUrl,
+                                                        "_blank",
                                                     );
-                                                }}
-                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
-                                            >
-                                                <Download className="h-5 w-5" />
-                                                Cetak/PDF
-                                            </Button>
-                                            <Button
-                                                onClick={async () => {
-                                                    if (!applicationId) {
-                                                        toast.error(
-                                                            "Application ID tidak ditemukan",
-                                                        );
-                                                        return;
-                                                    }
-                                                    setIsDownloadingTemplate(
-                                                        true,
-                                                    );
-                                                    try {
-                                                        // Get template ID dynamically from API
-                                                        const templateId =
-                                                            await getTemplateIdByLetterType(
-                                                                "Surat Rekomendasi Beasiswa",
-                                                            );
-                                                        if (!templateId) {
-                                                            throw new Error(
-                                                                "Template tidak ditemukan",
-                                                            );
-                                                        }
-                                                        await generateAndDownloadDocument(
-                                                            templateId,
-                                                            applicationId,
-                                                        );
-                                                        toast.success(
-                                                            "Dokumen Word berhasil diunduh!",
-                                                        );
-                                                    } catch (error) {
-                                                        console.error(
-                                                            "Download error:",
-                                                            error,
-                                                        );
-                                                        toast.error(
-                                                            `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
-                                                        );
-                                                    } finally {
-                                                        setIsDownloadingTemplate(
-                                                            false,
-                                                        );
-                                                    }
-                                                }}
-                                                disabled={isDownloadingTemplate}
-                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
-                                            >
-                                                {isDownloadingTemplate ? (
-                                                    <>
-                                                        <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                        Mengunduh...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Download className="h-5 w-5" />
-                                                        Unduh Word
-                                                    </>
-                                                )}
-                                            </Button>
-                                        </div>
+                                                }, "Render PDF surat...");
+                                            }}
+                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                                        >
+                                            <Download className="h-5 w-5" />
+                                            Unduh PDF
+                                        </Button>
                                     </div>
                                 </div>
                             </div>

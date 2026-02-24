@@ -14,6 +14,7 @@ export function middleware(request: NextRequest) {
         "/manajer-tu",
         "/wakil-dekan-1",
         "/upa",
+        "/super-admin",
         "/dashboard",
     ];
 
@@ -84,6 +85,7 @@ export function middleware(request: NextRequest) {
                 MANAJER_TU: "/manajer-tu",
                 WAKIL_DEKAN_1: "/wakil-dekan-1",
                 UPA: "/upa",
+                SUPER_ADMIN: "/super-admin",
             };
 
             // Check if user is accessing a path allowed for their role

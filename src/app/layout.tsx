@@ -34,7 +34,7 @@ export default function RootLayout({
                     <LoadingProvider>
                         {children}
                         <Toaster
-                            position="top-center"
+                            position="top-right"
                             reverseOrder={false}
                             toastOptions={{
                                 style: {

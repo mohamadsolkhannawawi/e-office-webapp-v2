@@ -76,7 +76,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (error) {
-            throw new Error(error.message || "Login failed");
+            console.error(">>> Sign-in error:", error);
+
+            // Extract error message from various possible formats
+            let errorMessage = "Login failed";
+
+            if (error.message) {
+                errorMessage = error.message;
+            } else if (typeof error === "object" && "error" in error) {
+                // Handle backend JSON response with "error" field
+                errorMessage = (error as any).error;
+            }
+
+            throw new Error(errorMessage);
         }
 
         if (data) {

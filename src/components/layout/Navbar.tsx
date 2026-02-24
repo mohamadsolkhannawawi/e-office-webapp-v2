@@ -40,6 +40,7 @@ export function Navbar({
     const showProfile = propShowProfile && !!user;
 
     const getProfileLink = () => {
+        if (pathname.startsWith("/super-admin")) return "/super-admin/profile";
         if (pathname.startsWith("/mahasiswa")) return "/mahasiswa/profile";
         if (pathname.startsWith("/supervisor-akademik"))
             return "/supervisor-akademik/profile";

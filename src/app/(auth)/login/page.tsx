@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, User } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,9 @@ export default function LoginPage() {
             const roles = (user.roles || []).map((r) => r.toUpperCase());
             console.log("User roles found (normalized):", roles);
 
-            if (roles.includes("MAHASISWA")) {
+            if (roles.includes("SUPER_ADMIN")) {
+                router.push("/super-admin");
+            } else if (roles.includes("MAHASISWA")) {
                 router.push("/mahasiswa");
             } else if (roles.includes("SUPERVISOR")) {
                 router.push("/supervisor-akademik");
@@ -138,11 +140,12 @@ export default function LoginPage() {
                     errorMessage =
                         "Akun tidak ditemukan. Pastikan email Anda sudah terdaftar";
                 } else if (
+                    errMsg.includes("deactivated") ||
                     errMsg.includes("disabled") ||
                     errMsg.includes("inactive")
                 ) {
                     errorMessage =
-                        "Akun Anda tidak aktif. Hubungi administrator untuk bantuan";
+                        "Akun Anda telah dinonaktifkan oleh administrator. Silakan hubungi administrator untuk informasi lebih lanjut";
                 } else if (
                     errMsg.includes("network") ||
                     errMsg.includes("connection")
@@ -162,51 +165,6 @@ export default function LoginPage() {
 
     return (
         <div className="flex min-h-screen flex-col bg-bg-light font-sans text-gray-800 antialiased dark:bg-bg-dark dark:text-gray-200">
-            <Toaster
-                position="top-right"
-                toastOptions={{
-                    style: {
-                        minWidth: "280px",
-                        minHeight: "auto",
-                        padding: "12px 16px",
-                        borderRadius: "8px",
-                        fontSize: "13px",
-                        fontWeight: "500",
-                    },
-                    success: {
-                        style: {
-                            background: "#10b981",
-                            color: "white",
-                            minWidth: "280px",
-                            minHeight: "auto",
-                            padding: "12px 16px",
-                            borderRadius: "8px",
-                            fontSize: "13px",
-                            fontWeight: "500",
-                        },
-                        iconTheme: {
-                            primary: "white",
-                            secondary: "#10b981",
-                        },
-                    },
-                    error: {
-                        style: {
-                            background: "#ef4444",
-                            color: "white",
-                            minWidth: "280px",
-                            minHeight: "auto",
-                            padding: "12px 16px",
-                            borderRadius: "8px",
-                            fontSize: "13px",
-                            fontWeight: "500",
-                        },
-                        iconTheme: {
-                            primary: "white",
-                            secondary: "#ef4444",
-                        },
-                    },
-                }}
-            />
             <Navbar showProfile={false} />
 
             {/* Main Content */}

@@ -16,6 +16,11 @@ import {
     Settings,
     User,
     PenTool,
+    Users,
+    Shield,
+    Database,
+    FileText,
+    FolderKanban,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,6 +59,7 @@ function useCurrentRole(): string {
     if (pathname.startsWith("/manajer-tu")) return "manajer-tu";
     if (pathname.startsWith("/wakil-dekan-1")) return "wakil-dekan-1";
     if (pathname.startsWith("/upa")) return "upa";
+    if (pathname.startsWith("/super-admin")) return "super-admin";
     return "mahasiswa";
 }
 
@@ -220,6 +226,66 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
         {
             label: "Profil Saya",
             href: "/upa/profile",
+            icon: <User size={20} />,
+        },
+    ],
+    "super-admin": [
+        {
+            label: "Dasbor",
+            href: "/super-admin",
+            icon: <LayoutDashboard size={20} />,
+        },
+        {
+            label: "Kelola Pengguna",
+            icon: <Users size={20} />,
+            submenu: [
+                {
+                    label: "Semua Pengguna",
+                    href: "/super-admin/kelola-pengguna",
+                },
+                {
+                    label: "Tambah Pengguna",
+                    href: "/super-admin/kelola-pengguna/buat",
+                },
+            ],
+        },
+        {
+            label: "Kelola Peran",
+            href: "/super-admin/kelola-peran",
+            icon: <Shield size={20} />,
+        },
+        {
+            label: "Master Data",
+            icon: <Database size={20} />,
+            submenu: [
+                {
+                    label: "Departemen",
+                    href: "/super-admin/master-data/departemen",
+                },
+                {
+                    label: "Program Studi",
+                    href: "/super-admin/master-data/prodi",
+                },
+            ],
+        },
+        {
+            label: "Audit Log",
+            href: "/super-admin/audit-log",
+            icon: <FileText size={20} />,
+        },
+        {
+            label: "Pengaturan Sistem",
+            href: "/super-admin/pengaturan-sistem",
+            icon: <Settings size={20} />,
+        },
+        {
+            label: "Manajemen Dokumen",
+            href: "/super-admin/manajemen-dokumen",
+            icon: <FolderKanban size={20} />,
+        },
+        {
+            label: "Profil Saya",
+            href: "/super-admin/profil",
             icon: <User size={20} />,
         },
     ],

@@ -30,11 +30,13 @@ const getRoleDisplayName = (roleName?: string): string | undefined => {
     if (!roleName) return undefined;
 
     const roleMap: Record<string, string> = {
+        SUPER_ADMIN: "Super Admin",
         MAHASISWA: "Mahasiswa",
         SUPERVISOR_AKADEMIK: "Supervisor Akademik",
         MANAJER_TU: "Manajer TU",
         WAKIL_DEKAN_1: "Wakil Dekan 1",
         UPA: "UPA",
+        "super-admin": "Super Admin",
         mahasiswa: "Mahasiswa",
         "supervisor-akademik": "Supervisor Akademik",
         "manajer-tu": "Manajer TU",

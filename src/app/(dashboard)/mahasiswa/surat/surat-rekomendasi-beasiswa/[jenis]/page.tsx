@@ -29,47 +29,39 @@ export default function PengajuanBaruPage() {
     const [currentStep, setCurrentStep] = useState<number>(1);
     const { user: authUser, isLoading: isAuthLoading } = useAuth();
 
-    const initialFormData: FormDataType = {
-        // Step 1: Identitas
-        namaLengkap: "",
-        role: "MAHASISWA",
-        nim: "",
-        email: "",
-        departemen: "",
-        programStudi: "",
-        tempatLahir: "",
-        tanggalLahir: "",
-        noHp: "",
-        ipk: "",
-        ips: "",
-        semester: "",
-
-        // Step 2: Detail
-        namaBeasiswa: "",
-
-        // Step 3: Lampiran
-        lampiranUtama: [],
-        lampiranTambahan: [],
-    };
-
-    const [formData, setFormData] = useState<FormDataType>(initialFormData);
+    const [formData, setFormData] = useState<FormDataType>(() => {
+        // Lazy initializer: restore from localStorage on first mount (new mode only)
+        const base: FormDataType = {
+            namaLengkap: "",
+            role: "MAHASISWA",
+            nim: "",
+            email: "",
+            departemen: "",
+            programStudi: "",
+            tempatLahir: "",
+            tanggalLahir: "",
+            noHp: "",
+            ipk: "",
+            ips: "",
+            semester: "",
+            namaBeasiswa: "",
+            lampiranUtama: [],
+            lampiranTambahan: [],
+        };
+        if (!editId && typeof window !== "undefined") {
+            try {
+                const saved = localStorage.getItem(`srb_form_${jenis}`);
+                if (saved) return { ...base, ...JSON.parse(saved) };
+            } catch {
+                // ignore parse errors
+            }
+        }
+        return base;
+    });
     const [isDataLoaded, setIsDataLoaded] = useState(false);
 
     // Consolidated Initialization Logic for Async Data
     useEffect(() => {
-        // Restore from localStorage on mount if NOT in edit mode
-        if (!editId) {
-            const saved = localStorage.getItem(`srb_form_${jenis}`);
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    setFormData((prev) => ({ ...prev, ...parsed }));
-                } catch (e) {
-                    console.error("Failed to parse saved form data", e);
-                }
-            }
-        }
-
         // Rest of initialization
         const fetchAsyncData = async () => {
             // 1. Fetch specific data based on mode
@@ -178,7 +170,7 @@ export default function PengajuanBaruPage() {
         if (!isAuthLoading) {
             fetchAsyncData();
         }
-    }, [editId, authUser, isAuthLoading, jenis]);
+    }, [editId, authUser, isAuthLoading, jenis, router]);
 
     // Update URL if ID exists (handles draft -> edit transition)
     useEffect(() => {
@@ -385,7 +377,9 @@ export default function PengajuanBaruPage() {
 
             <Stepper currentStep={currentStep} />
 
-            <div className="min-h-125 animate-in fade-in zoom-in duration-300">
+            <div
+                className={`${currentStep !== 2 ? "min-h-125" : ""} animate-in fade-in zoom-in duration-300`}
+            >
                 {renderContent()}
             </div>
 

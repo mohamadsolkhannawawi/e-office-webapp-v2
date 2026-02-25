@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronRight, Download, Eye, Loader2 } from "lucide-react";
+import { ChevronRight, Download, Eye, Loader2, PencilLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
@@ -17,6 +17,7 @@ import {
     type ApplicationDetail,
 } from "@/lib/application-api";
 import { getReceiverRole } from "@/utils/status-mapper";
+import { MahasiswaEditModal } from "@/components/features/surat-rekomendasi-beasiswa/mahasiswa/MahasiswaEditModal";
 
 // Custom Icon for EditNote if not found
 const EditNoteIcon = () => (
@@ -46,6 +47,7 @@ export default function DetailSuratProsesPage() {
     );
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -177,6 +179,11 @@ export default function DetailSuratProsesPage() {
         ((application.status as string) === "REVISION" &&
             application.currentStep === 0);
 
+    // Student can self-edit if PENDING at step 1 (Supervisor hasn't acted yet)
+    const canStudentSelfEdit =
+        (application.status as string) === "PENDING" &&
+        application.currentStep === 1;
+
     // Get jenis for editing from application data
     const jenis =
         ((application.formData as unknown as Record<string, unknown>)
@@ -267,6 +274,17 @@ export default function DetailSuratProsesPage() {
                                 </Link>
                             )}
 
+                            {/* Student Self-Edit: Only for PENDING at step 1 */}
+                            {canStudentSelfEdit && (
+                                <Button
+                                    onClick={() => setIsEditModalOpen(true)}
+                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-medium py-6 rounded-3xl flex items-center justify-center gap-2"
+                                >
+                                    <PencilLine className="h-4 w-4" />
+                                    Edit Surat
+                                </Button>
+                            )}
+
                             {canEdit && (
                                 <Button
                                     onClick={() =>
@@ -283,15 +301,46 @@ export default function DetailSuratProsesPage() {
                         </div>
                     </div>
 
-                    {/* Timeline Card */}
-                    <RiwayatSurat
-                        applicationId={application.id}
-                        status={application.status}
-                        createdAt={application.createdAt}
-                        riwayat={riwayatData}
-                    />
+                    {/* Status Card */}
+                    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+                        <h2 className="text-lg font-bold text-slate-800 mb-4">
+                            Status Surat
+                        </h2>
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-500">Status</span>
+                                <span className="font-medium text-slate-800">
+                                    {application.status}
+                                </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-500">
+                                    Langkah Saat Ini
+                                </span>
+                                <span className="font-medium text-slate-800">
+                                    {application.currentStep}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                {/* end lg:col-span-4 */}
             </div>
+            {/* end grid */}
+
+            {/* Riwayat Surat */}
+            {riwayatData && riwayatData.length > 0 && (
+                <RiwayatSurat data={riwayatData} />
+            )}
+
+            {/* Modal Edit */}
+            <MahasiswaEditModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                applicationId={id}
+                jenis={jenis}
+                scholarshipName={application.scholarshipName || ""}
+            />
         </div>
     );
 }

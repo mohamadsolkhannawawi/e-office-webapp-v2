@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import {
-    Settings,
     Database,
     Mail,
     FileText,
@@ -83,10 +81,10 @@ export default function SystemSettingsPage() {
         appUrl: "http://localhost:3000",
         maintenanceMode: false,
         emailEnabled: true,
-        emailHost: "smtp.gmail.com",
+        emailHost: "",
         emailPort: 587,
-        emailUser: "noreply@fsm.undip.ac.id",
-        emailFrom: "noreply@fsm.undip.ac.id",
+        emailUser: "",
+        emailFrom: "",
         emailFromName: "E-Office FSM UNDIP",
         notificationEnabled: true,
         notificationRetentionDays: 30,
@@ -147,7 +145,10 @@ export default function SystemSettingsPage() {
         }
     };
 
-    const updateConfig = (key: keyof SystemConfig, value: any) => {
+    const updateConfig = (
+        key: keyof SystemConfig,
+        value: SystemConfig[keyof SystemConfig],
+    ) => {
         setConfig((prev) => ({ ...prev, [key]: value }));
     };
 

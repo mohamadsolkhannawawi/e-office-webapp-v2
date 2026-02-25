@@ -18,13 +18,12 @@ import {
     MapPin,
     Calendar,
     Hash,
+    Lock,
 } from "lucide-react";
 import { getMe, UserProfile } from "@/lib/application-api";
 import toast from "react-hot-toast";
 import {
     Dialog,
-    DialogContent,
-    DialogTitle,
     DialogClose,
     DialogPortal,
     DialogOverlay,
@@ -64,19 +63,32 @@ const getRoleDisplayName = (roleName?: string): string | undefined => {
     const roleMap: Record<string, string> = {
         SUPER_ADMIN: "Super Admin",
         MAHASISWA: "Mahasiswa",
+        SUPERVISOR: "Supervisor Akademik",
         SUPERVISOR_AKADEMIK: "Supervisor Akademik",
         MANAJER_TU: "Manajer TU",
         WAKIL_DEKAN_1: "Wakil Dekan 1",
         UPA: "UPA",
         "super-admin": "Super Admin",
         mahasiswa: "Mahasiswa",
+        supervisor: "Supervisor Akademik",
         "supervisor-akademik": "Supervisor Akademik",
         "manajer-tu": "Manajer TU",
         "wakil-dekan-1": "Wakil Dekan 1",
         upa: "UPA",
     };
 
-    return roleMap[roleName] || roleName;
+    if (roleMap[roleName]) {
+        return roleMap[roleName];
+    }
+
+    // Fallback: convert snake_case to Title Case
+    return roleName
+        .split("_")
+        .map(
+            (word) =>
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+        )
+        .join(" ");
 };
 
 interface ProfileData {
@@ -168,7 +180,13 @@ const ProfileTableRow = ({ label, value, icon }: ProfileTableRowProps) => {
     );
 };
 
-const ProfilePage = ({ editHref }: { editHref: string }) => {
+const ProfilePage = ({
+    editHref,
+    changePasswordHref,
+}: {
+    editHref: string;
+    changePasswordHref?: string;
+}) => {
     const [profileData, setProfileData] = useState<ProfileData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [showPhotoModal, setShowPhotoModal] = useState(false);
@@ -260,15 +278,28 @@ const ProfilePage = ({ editHref }: { editHref: string }) => {
                         <p className="text-gray-500">{profileData.email}</p>
                     </div>
                 </div>
-                <Link href={editHref}>
-                    <Button
-                        className="gap-2 h-10 px-4 text-sm font-semibold text-white"
-                        style={{ backgroundColor: "#0078bd" }}
-                    >
-                        <Edit className="h-4 w-4" />
-                        Edit Profil
-                    </Button>
-                </Link>
+                <div className="flex items-center gap-2">
+                    <Link href={editHref}>
+                        <Button
+                            className="gap-2 h-10 px-4 text-sm font-semibold text-white"
+                            style={{ backgroundColor: "#0078bd" }}
+                        >
+                            <Edit className="h-4 w-4" />
+                            Edit Profil
+                        </Button>
+                    </Link>
+                    {changePasswordHref && (
+                        <Link href={changePasswordHref}>
+                            <Button
+                                variant="outline"
+                                className="gap-2 h-10 px-4 text-sm font-semibold border-slate-300 text-slate-700 hover:bg-slate-50"
+                            >
+                                <Lock className="h-4 w-4" />
+                                Ubah Password
+                            </Button>
+                        </Link>
+                    )}
+                </div>
             </div>
 
             {/* Photo Modal Dialog */}
@@ -350,6 +381,13 @@ const ProfilePage = ({ editHref }: { editHref: string }) => {
                             value={profileData.email}
                             icon={<Mail className="h-5 w-5" />}
                         />
+                        {profileData.userRole && (
+                            <ProfileTableRow
+                                label="Peran"
+                                value={profileData.userRole}
+                                icon={<Briefcase className="h-5 w-5" />}
+                            />
+                        )}
                         {profileData.noHp && (
                             <ProfileTableRow
                                 label="Nomor Telepon"

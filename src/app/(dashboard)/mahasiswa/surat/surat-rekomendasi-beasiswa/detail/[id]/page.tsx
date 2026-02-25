@@ -11,6 +11,7 @@ import {
     ChevronRight,
     RotateCcw,
     Download,
+    PencilLine,
 } from "lucide-react";
 import {
     IdentitasPengaju,
@@ -28,6 +29,7 @@ import {
 } from "@/lib/template-api";
 
 import { getReceiverRole } from "@/utils/status-mapper";
+import { MahasiswaEditModal } from "@/components/features/surat-rekomendasi-beasiswa/mahasiswa/MahasiswaEditModal";
 
 export default function DetailPengajuanPage() {
     const params = useParams();
@@ -41,6 +43,7 @@ export default function DetailPengajuanPage() {
     );
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -147,6 +150,11 @@ export default function DetailPengajuanPage() {
     const canEdit =
         (application.status as string) === "REVISION" ||
         (application.status as string) === "DRAFT";
+
+    // Student can self-edit if PENDING at step 1 (Supervisor hasn't acted yet)
+    const canStudentSelfEdit =
+        (application.status as string) === "PENDING" &&
+        application.currentStep === 1;
 
     const isPublished =
         (application.status as string) === "COMPLETED" ||
@@ -290,6 +298,16 @@ export default function DetailPengajuanPage() {
                                 </Button>
                             )}
 
+                            {canStudentSelfEdit && (
+                                <Button
+                                    onClick={() => setIsEditModalOpen(true)}
+                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
+                                >
+                                    <PencilLine className="h-5 w-5" />
+                                    Edit Surat
+                                </Button>
+                            )}
+
                             {canEdit && (
                                 <Button
                                     onClick={() =>
@@ -297,7 +315,7 @@ export default function DetailPengajuanPage() {
                                             `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
                                         )
                                     }
-                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
+                                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                 >
                                     <RotateCcw className="h-5 w-5" />
                                     Revisi
@@ -314,6 +332,14 @@ export default function DetailPengajuanPage() {
                     />
                 </div>
             </div>
+            {/* Modal Edit */}
+            <MahasiswaEditModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                applicationId={id}
+                jenis={jenis}
+                scholarshipName={application.scholarshipName || ""}
+            />
         </div>
     );
 }

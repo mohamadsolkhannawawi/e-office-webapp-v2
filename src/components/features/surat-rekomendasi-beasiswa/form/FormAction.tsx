@@ -19,6 +19,7 @@ import {
     updateApplication,
     createDraftApplication,
 } from "@/lib/attachment-api";
+import { submitStudentEdit } from "@/lib/application-api";
 import { FormDataType } from "@/types/form";
 
 interface ActionProps {
@@ -29,6 +30,8 @@ interface ActionProps {
     letterInstanceId?: string;
     formData?: FormDataType;
     jenis?: string;
+    /** When "student_edit", calls the student-edit endpoint instead of normal update */
+    mode?: "default" | "student_edit";
 }
 
 export function FormAction({
@@ -39,9 +42,12 @@ export function FormAction({
     letterInstanceId,
     formData,
     jenis,
+    mode = "default",
 }: ActionProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+    const isStudentEdit = mode === "student_edit";
 
     const handleSaveDraft = async () => {
         if (!formData) return;
@@ -93,23 +99,43 @@ export function FormAction({
 
         setIsSubmitting(true);
         try {
-            await updateApplication(letterInstanceId, {
-                namaBeasiswa: formData.namaBeasiswa,
-                values: {
-                    ...(formData as unknown as Record<string, unknown>),
-                    jenisBeasiswa: jenis,
-                },
-                status: "PENDING",
-            });
+            if (isStudentEdit) {
+                // Student self-edit: call the dedicated student-edit endpoint
+                await submitStudentEdit(letterInstanceId, {
+                    namaBeasiswa: formData.namaBeasiswa,
+                    values: {
+                        ...(formData as unknown as Record<string, unknown>),
+                        jenisBeasiswa: jenis,
+                    },
+                });
 
-            localStorage.removeItem(`srb_form_${jenis}`); // Clear specific local storage
+                localStorage.removeItem(`srb_form_${jenis}`);
+                router.push(
+                    `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${letterInstanceId}?from=proses`,
+                );
+            } else {
+                // Normal submission flow
+                await updateApplication(letterInstanceId, {
+                    namaBeasiswa: formData.namaBeasiswa,
+                    values: {
+                        ...(formData as unknown as Record<string, unknown>),
+                        jenisBeasiswa: jenis,
+                    },
+                    status: "PENDING",
+                });
 
-            router.push(
-                `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${letterInstanceId}`,
-            );
+                localStorage.removeItem(`srb_form_${jenis}`);
+                router.push(
+                    `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${letterInstanceId}`,
+                );
+            }
         } catch (error) {
             console.error("Failed to submit application:", error);
-            alert("Gagal mengajukan surat. Silakan coba lagi.");
+            alert(
+                isStudentEdit
+                    ? "Gagal menyimpan revisi surat. Silakan coba lagi."
+                    : "Gagal mengajukan surat. Silakan coba lagi.",
+            );
         } finally {
             setIsSubmitting(false);
         }
@@ -158,7 +184,9 @@ export function FormAction({
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel className="rounded-3xl">Batal</AlertDialogCancel>
+                            <AlertDialogCancel className="rounded-3xl">
+                                Batal
+                            </AlertDialogCancel>
                             <AlertDialogAction
                                 onClick={handleSaveDraft}
                                 className="bg-undip-blue hover:bg-sky-700 rounded-3xl"
@@ -173,7 +201,7 @@ export function FormAction({
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button
-                                className="bg-undip-blue hover:bg-sky-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200 rounded-3xl"
+                                className={`${isStudentEdit ? "bg-amber-500 hover:bg-amber-600" : "bg-undip-blue hover:bg-sky-700"} text-white h-11 px-8 font-medium shadow-sm rounded-3xl`}
                                 disabled={
                                     isSubmitting ||
                                     !!(
@@ -182,34 +210,40 @@ export function FormAction({
                                     )
                                 }
                             >
-                                Ajukan Surat
+                                {isStudentEdit
+                                    ? "Simpan Revisi"
+                                    : "Ajukan Surat"}
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>
-                                    Konfirmasi Pengajuan Surat
+                                    {isStudentEdit
+                                        ? "Konfirmasi Simpan Revisi Surat"
+                                        : "Konfirmasi Pengajuan Surat"}
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    Apakah Anda yakin ingin mengajukan surat
-                                    ini? Setelah diajukan, surat akan masuk ke
-                                    proses verifikasi dan tidak dapat diubah.
+                                    {isStudentEdit
+                                        ? 'Apakah Anda yakin ingin menyimpan perubahan? Revisi akan dicatat dalam riwayat surat sebagai "Revisi oleh Mahasiswa" dan surat tetap menunggu verifikasi Supervisor Akademik.'
+                                        : "Apakah Anda yakin ingin mengajukan surat ini? Setelah diajukan, surat akan masuk ke proses verifikasi dan tidak dapat diubah."}
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel
-                                    className="bg-red-600 hover:bg-red-700 text-white h-11 px-8 font-medium shadow-sm shadow-red-200 rounded-3xl"
-                                >
+                                <AlertDialogCancel className="bg-red-600 hover:bg-red-700 text-white h-11 px-8 font-medium shadow-sm shadow-red-200 rounded-3xl">
                                     Batal
                                 </AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={handleConfirmAjukan}
-                                    className="bg-undip-blue hover:bg-sky-700 text-white h-11 px-8 font-medium shadow-sm shadow-blue-200 rounded-3xl"
+                                    className={`${isStudentEdit ? "bg-amber-500 hover:bg-amber-600 shadow-amber-200" : "bg-undip-blue hover:bg-sky-700 shadow-blue-200"} text-white h-11 px-8 font-medium shadow-sm rounded-3xl`}
                                     disabled={isSubmitting}
                                 >
                                     {isSubmitting
-                                        ? "Mengajukan..."
-                                        : "Ya, Ajukan"}
+                                        ? isStudentEdit
+                                            ? "Menyimpan..."
+                                            : "Mengajukan..."
+                                        : isStudentEdit
+                                          ? "Ya, Simpan Revisi"
+                                          : "Ya, Ajukan"}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

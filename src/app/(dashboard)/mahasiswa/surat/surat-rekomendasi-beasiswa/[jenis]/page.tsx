@@ -22,51 +22,46 @@ export default function PengajuanBaruPage() {
     const router = useRouter();
     const jenis = params.jenis as string;
     const editId = searchParams.get("id");
+    const mode = (searchParams.get("mode") || "default") as
+        | "default"
+        | "student_edit";
 
     const [currentStep, setCurrentStep] = useState<number>(1);
     const { user: authUser, isLoading: isAuthLoading } = useAuth();
 
-    const initialFormData: FormDataType = {
-        // Step 1: Identitas
-        namaLengkap: "",
-        role: "MAHASISWA",
-        nim: "",
-        email: "",
-        departemen: "",
-        programStudi: "",
-        tempatLahir: "",
-        tanggalLahir: "",
-        noHp: "",
-        ipk: "",
-        ips: "",
-        semester: "",
-
-        // Step 2: Detail
-        namaBeasiswa: "",
-
-        // Step 3: Lampiran
-        lampiranUtama: [],
-        lampiranTambahan: [],
-    };
-
-    const [formData, setFormData] = useState<FormDataType>(initialFormData);
+    const [formData, setFormData] = useState<FormDataType>(() => {
+        // Lazy initializer: restore from localStorage on first mount (new mode only)
+        const base: FormDataType = {
+            namaLengkap: "",
+            role: "MAHASISWA",
+            nim: "",
+            email: "",
+            departemen: "",
+            programStudi: "",
+            tempatLahir: "",
+            tanggalLahir: "",
+            noHp: "",
+            ipk: "",
+            ips: "",
+            semester: "",
+            namaBeasiswa: "",
+            lampiranUtama: [],
+            lampiranTambahan: [],
+        };
+        if (!editId && typeof window !== "undefined") {
+            try {
+                const saved = localStorage.getItem(`srb_form_${jenis}`);
+                if (saved) return { ...base, ...JSON.parse(saved) };
+            } catch {
+                // ignore parse errors
+            }
+        }
+        return base;
+    });
     const [isDataLoaded, setIsDataLoaded] = useState(false);
 
     // Consolidated Initialization Logic for Async Data
     useEffect(() => {
-        // Restore from localStorage on mount if NOT in edit mode
-        if (!editId) {
-            const saved = localStorage.getItem(`srb_form_${jenis}`);
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    setFormData((prev) => ({ ...prev, ...parsed }));
-                } catch (e) {
-                    console.error("Failed to parse saved form data", e);
-                }
-            }
-        }
-
         // Rest of initialization
         const fetchAsyncData = async () => {
             // 1. Fetch specific data based on mode
@@ -175,7 +170,7 @@ export default function PengajuanBaruPage() {
         if (!isAuthLoading) {
             fetchAsyncData();
         }
-    }, [editId, authUser, isAuthLoading, jenis]);
+    }, [editId, authUser, isAuthLoading, jenis, router]);
 
     // Update URL if ID exists (handles draft -> edit transition)
     useEffect(() => {
@@ -313,18 +308,31 @@ export default function PengajuanBaruPage() {
 
     const stepInfo = getStepTitle();
 
+    const pageTitle =
+        mode === "student_edit"
+            ? "Edit Surat (Revisi Mandiri)"
+            : stepInfo.title;
+    const pageDesc =
+        mode === "student_edit"
+            ? "Edit data surat sebelum diproses oleh Supervisor Akademik. Perubahan akan dicatat dalam riwayat."
+            : stepInfo.desc;
+
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="order-2 sm:order-1">
                     <h1 className="text-2xl font-bold text-gray-900">
-                        {stepInfo.title}
+                        {pageTitle}
                     </h1>
-                    <p className="text-gray-500 mt-1">{stepInfo.desc}</p>
+                    <p className="text-gray-500 mt-1">{pageDesc}</p>
                 </div>
                 <Link
-                    href="/mahasiswa/surat/surat-rekomendasi-beasiswa"
+                    href={
+                        mode === "student_edit" && editId
+                            ? `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${editId}?from=proses`
+                            : "/mahasiswa/surat/surat-rekomendasi-beasiswa"
+                    }
                     className="order-1 sm:order-2 self-start sm:self-auto"
                 >
                     <Button className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-3xl inline-flex items-center gap-2">
@@ -334,9 +342,44 @@ export default function PengajuanBaruPage() {
                 </Link>
             </div>
 
+            {/* Student Edit notice banner */}
+            {mode === "student_edit" && (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+                    <div className="p-1.5 bg-amber-100 rounded-xl shrink-0">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 text-amber-600"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p className="text-sm font-semibold text-amber-800">
+                            Mode Revisi Mandiri
+                        </p>
+                        <p className="text-xs text-amber-700 mt-0.5">
+                            Perubahan Anda akan dicatat sebagai{" "}
+                            <strong>&ldquo;Revisi oleh Mahasiswa&rdquo;</strong>{" "}
+                            dalam riwayat surat dan dapat dilihat oleh semua
+                            pihak yang terlibat.
+                        </p>
+                    </div>
+                </div>
+            )}
+
             <Stepper currentStep={currentStep} />
 
-            <div className="min-h-125 animate-in fade-in zoom-in duration-300">
+            <div
+                className={`${currentStep !== 2 ? "min-h-125" : ""} animate-in fade-in zoom-in duration-300`}
+            >
                 {renderContent()}
             </div>
 
@@ -348,6 +391,7 @@ export default function PengajuanBaruPage() {
                 letterInstanceId={formData.letterInstanceId}
                 formData={formData}
                 jenis={jenis}
+                mode={mode}
             />
         </div>
     );

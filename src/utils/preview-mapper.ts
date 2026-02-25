@@ -71,5 +71,8 @@ export function mapApplicationToPreviewData(
 
         publishedAt: formatDate(application.publishedAt),
         qrCodeUrl: application.verification?.qrCodeUrl,
+        jenisBeasiswa:
+            (application.formData.jenisBeasiswa as string) || "internal",
+        scholarshipName: application.scholarshipName || "",
     };
 }

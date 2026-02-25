@@ -13,6 +13,7 @@ import {
     CheckCircle,
     XCircle,
     Eye,
+    PencilLine,
 } from "lucide-react";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
@@ -26,6 +27,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { MahasiswaEditModal } from "@/components/features/surat-rekomendasi-beasiswa/mahasiswa/MahasiswaEditModal";
 
 export default function SuratDalamProsesPage() {
     const [applications, setApplications] = useState<ApplicationSummary[]>([]);
@@ -37,6 +39,17 @@ export default function SuratDalamProsesPage() {
         limit: 10,
         total: 0,
         totalPages: 1,
+    });
+    const [editModal, setEditModal] = useState<{
+        open: boolean;
+        applicationId: string;
+        jenis: string;
+        scholarshipName: string;
+    }>({
+        open: false,
+        applicationId: "",
+        jenis: "internal",
+        scholarshipName: "",
     });
 
     const fetchApplications = useCallback(
@@ -349,24 +362,61 @@ export default function SuratDalamProsesPage() {
                                                 {target}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <Link
-                                                    href={
-                                                        app.status ===
-                                                        "REVISION"
-                                                            ? `/mahasiswa/surat/proses/detail/${app.id}`
-                                                            : `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}?from=proses`
-                                                    }
-                                                >
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-9 px-3 gap-2 text-white bg-undip-blue hover:bg-sky-700 hover:text-white font-medium text-xs rounded-3xl"
-                                                        title="Detail"
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Link
+                                                        href={
+                                                            app.status ===
+                                                            "REVISION"
+                                                                ? `/mahasiswa/surat/proses/detail/${app.id}`
+                                                                : `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}?from=proses`
+                                                        }
                                                     >
-                                                        <Eye className="h-4 w-4" />
-                                                        Detail
-                                                    </Button>
-                                                </Link>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-9 px-3 gap-2 text-white bg-undip-blue hover:bg-sky-700 hover:text-white font-medium text-xs rounded-3xl"
+                                                            title="Detail"
+                                                        >
+                                                            <Eye className="h-4 w-4" />
+                                                            Detail
+                                                        </Button>
+                                                    </Link>
+                                                    {/* Edit button – only when PENDING at step 1 (before Supervisor acts) */}
+                                                    {app.status === "PENDING" &&
+                                                        app.currentStep ===
+                                                            1 && (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-9 px-3 gap-2 text-white bg-amber-500 hover:bg-amber-600 hover:text-white font-medium text-xs rounded-3xl"
+                                                                title="Edit Surat"
+                                                                onClick={() =>
+                                                                    setEditModal(
+                                                                        {
+                                                                            open: true,
+                                                                            applicationId:
+                                                                                app.id,
+                                                                            jenis:
+                                                                                ((
+                                                                                    app.formData as unknown as Record<
+                                                                                        string,
+                                                                                        unknown
+                                                                                    >
+                                                                                )
+                                                                                    ?.jenisBeasiswa as string) ||
+                                                                                "internal",
+                                                                            scholarshipName:
+                                                                                app.scholarshipName ||
+                                                                                "",
+                                                                        },
+                                                                    )
+                                                                }
+                                                            >
+                                                                <PencilLine className="h-4 w-4" />
+                                                                Edit
+                                                            </Button>
+                                                        )}
+                                                </div>
                                             </td>
                                         </tr>
                                     );
@@ -387,6 +437,17 @@ export default function SuratDalamProsesPage() {
                     itemLabel="surat dalam proses"
                 />
             </Card>
+
+            {/* Edit Confirmation Modal */}
+            <MahasiswaEditModal
+                isOpen={editModal.open}
+                onClose={() =>
+                    setEditModal((prev) => ({ ...prev, open: false }))
+                }
+                applicationId={editModal.applicationId}
+                jenis={editModal.jenis}
+                scholarshipName={editModal.scholarshipName}
+            />
         </div>
     );
 }

@@ -17,6 +17,7 @@ import {
     Sparkles,
     CheckCircle,
     Clock,
+    PencilLine,
 } from "lucide-react";
 import { verifyApplication } from "@/lib/application-api";
 import {
@@ -36,6 +37,7 @@ import { AdminActionModals } from "@/components/features/surat-rekomendasi-beasi
 import { SuccessStampModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/SuccessStampModal";
 import { SignatureImage } from "@/components/ui/signature-image";
 import { ActionStatusModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/ActionStatusModal";
+import { MahasiswaEditModal } from "@/components/features/surat-rekomendasi-beasiswa/mahasiswa/MahasiswaEditModal";
 import React, { useEffect, useState } from "react";
 
 export interface PreviewData {
@@ -60,6 +62,8 @@ export interface PreviewData {
     qrCodeUrl?: string;
     stampId?: string;
     stampUrl?: string; // Kept in interface just in case data has it, but unused in component state
+    jenisBeasiswa?: string;
+    scholarshipName?: string;
 }
 
 interface SuratPreviewContentProps {
@@ -118,6 +122,7 @@ export function SuratPreviewContent({
     // Removed unused states: upaStampUrl, qrCodeUrl, leadershipConfig, docxLoadError
 
     const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     useEffect(() => {
         if (searchParams.get("autoPrint") === "true") {
@@ -148,6 +153,12 @@ export function SuratPreviewContent({
     // 1. The application is at this role's step
     // 2. The application is not in a terminal status (COMPLETED/REJECTED)
     const canTakeAction = currentStep === roleStep && !isTerminalStatus;
+
+    // Student can self-edit if PENDING at step 1 (before Supervisor Akademik acts)
+    const canStudentSelfEdit =
+        stage === "mahasiswa" &&
+        data?.status === "PENDING" &&
+        data?.currentStep === 1;
 
     const handleBack = () => {
         if (backUrl) {
@@ -1007,6 +1018,34 @@ export function SuratPreviewContent({
                                         </Button>
                                     </div>
                                 </div>
+
+                                {/* Student Self-Edit: Only for PENDING at step 1 */}
+                                {canStudentSelfEdit && (
+                                    <div className="bg-white rounded-3xl border-2 border-dashed border-amber-200 p-6 space-y-4 shadow-sm">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <div className="p-3 bg-amber-50 rounded-3xl text-amber-600">
+                                                <PencilLine className="h-6 w-6" />
+                                            </div>
+                                            <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
+                                                Edit Surat
+                                            </h3>
+                                            <p className="text-xs text-slate-500 text-center leading-relaxed">
+                                                Surat belum diproses supervisor.
+                                                Anda masih dapat mengubah isi
+                                                surat.
+                                            </p>
+                                        </div>
+                                        <Button
+                                            onClick={() =>
+                                                setIsEditModalOpen(true)
+                                            }
+                                            className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-amber-200 transition-all active:scale-95"
+                                        >
+                                            <PencilLine className="h-5 w-5" />
+                                            Edit Surat
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </>
                     ) : stage === "upa" ? (
@@ -1147,6 +1186,15 @@ export function SuratPreviewContent({
                     </div>
                 </div>
             </div>
+
+            {/* Student Self-Edit Modal */}
+            <MahasiswaEditModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                applicationId={pdfId || ""}
+                jenis={data?.jenisBeasiswa || "internal"}
+                scholarshipName={data?.scholarshipName || ""}
+            />
         </div>
     );
 }

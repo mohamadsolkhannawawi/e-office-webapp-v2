@@ -142,6 +142,17 @@ export function getStatusConfig(
         };
     }
 
+    // Action: STAFF_REVISION (Supervisor Akademik / Manajer TU edited letter data)
+    if (a === "staff_revision") {
+        return {
+            label: "Edit oleh Staff",
+            color: "text-indigo-600 bg-indigo-50 border-indigo-100",
+            iconName: "PencilLine",
+            defaultDesc:
+                "Data surat diperbarui oleh Supervisor Akademik atau Manajer TU.",
+        };
+    }
+
     // Action: SUBMIT
     if (a === "submit" || a === "create" || s === "pending") {
         return {
@@ -251,6 +262,18 @@ export function getReceiverRole(
     // Student self-revision: stays at Supervisor Akademik
     if (actionLower === "student_revision") {
         return "Supervisor Akademik";
+    }
+
+    // Staff revision: stays at same role (self-edit)
+    if (actionLower === "staff_revision") {
+        if (senderRole?.toLowerCase().includes("supervisor"))
+            return "Supervisor Akademik";
+        if (
+            senderRole?.toLowerCase().includes("manajer") ||
+            senderRole?.toLowerCase().includes("tu")
+        )
+            return "Manajer TU";
+        return "Staff";
     }
 
     return "-";

@@ -411,6 +411,43 @@ export async function submitStudentEdit(
 }
 
 /**
+ * Submit a staff edit (Supervisor Akademik / Manajer TU) for a letter at their step.
+ * Creates a "staff_revision" history entry and keeps the letter at the same step/status.
+ */
+export async function submitStaffEdit(
+    applicationId: string,
+    data: {
+        namaBeasiswa?: string;
+        values?: Record<string, unknown>;
+        catatan?: string;
+    },
+): Promise<{ success: boolean; message?: string }> {
+    try {
+        const response = await fetch(
+            `/api/surat-rekomendasi/applications/${applicationId}/staff-edit`,
+            {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            },
+        );
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(
+                error.error || `Staff edit failed (${response.status})`,
+            );
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Submit staff edit error:", error);
+        throw error;
+    }
+}
+
+/**
  * Interface untuk konfigurasi pejabat penandatangan
  */
 export interface LeadershipConfig {

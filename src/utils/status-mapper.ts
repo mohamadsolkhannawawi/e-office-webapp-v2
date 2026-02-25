@@ -131,6 +131,17 @@ export function getStatusConfig(
         };
     }
 
+    // Action: STUDENT_REVISION (self-edit before supervisor acts)
+    if (a === "student_revision") {
+        return {
+            label: "Revisi oleh Mahasiswa",
+            color: "text-amber-600 bg-amber-50 border-amber-100",
+            iconName: "RotateCcw",
+            defaultDesc:
+                "Mahasiswa melakukan revisi mandiri sebelum Supervisor Akademik memproses surat.",
+        };
+    }
+
     // Action: SUBMIT
     if (a === "submit" || a === "create" || s === "pending") {
         return {
@@ -235,6 +246,11 @@ export function getReceiverRole(
             4: "Staff UPA", // Resubmitted to UPA
         };
         return stepToRole[stepForMapping] || "-";
+    }
+
+    // Student self-revision: stays at Supervisor Akademik
+    if (actionLower === "student_revision") {
+        return "Supervisor Akademik";
     }
 
     return "-";

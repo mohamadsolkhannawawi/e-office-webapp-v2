@@ -38,6 +38,7 @@ import { SuccessStampModal } from "@/components/features/surat-rekomendasi-beasi
 import { SignatureImage } from "@/components/ui/signature-image";
 import { ActionStatusModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/ActionStatusModal";
 import { MahasiswaEditModal } from "@/components/features/surat-rekomendasi-beasiswa/mahasiswa/MahasiswaEditModal";
+import { StaffEditModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/StaffEditModal";
 import React, { useEffect, useState } from "react";
 
 export interface PreviewData {
@@ -123,6 +124,7 @@ export function SuratPreviewContent({
 
     const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isStaffEditModalOpen, setIsStaffEditModalOpen] = useState(false);
 
     useEffect(() => {
         if (searchParams.get("autoPrint") === "true") {
@@ -159,6 +161,10 @@ export function SuratPreviewContent({
         stage === "mahasiswa" &&
         data?.status === "PENDING" &&
         data?.currentStep === 1;
+
+    // Staff (SA/MTU) can edit when the letter is at their step
+    const canStaffEdit =
+        (stage === "supervisor" || stage === "manajer") && canTakeAction;
 
     const handleBack = () => {
         if (backUrl) {
@@ -967,6 +973,26 @@ export function SuratPreviewContent({
                                             status surat pengaju secara
                                             langsung.
                                         </p>
+
+                                        {canStaffEdit && (
+                                            <>
+                                                <div className="border-t border-slate-100 pt-4" />
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 text-center">
+                                                    Data Surat
+                                                </p>
+                                                <Button
+                                                    onClick={() =>
+                                                        setIsStaffEditModalOpen(
+                                                            true,
+                                                        )
+                                                    }
+                                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
+                                                >
+                                                    <PencilLine className="h-5 w-5" />
+                                                    Edit Data Surat
+                                                </Button>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1194,6 +1220,34 @@ export function SuratPreviewContent({
                 applicationId={pdfId || ""}
                 jenis={data?.jenisBeasiswa || "internal"}
                 scholarshipName={data?.scholarshipName || ""}
+            />
+
+            {/* Staff Edit Modal — Supervisor Akademik / Manajer TU */}
+            <StaffEditModal
+                isOpen={isStaffEditModalOpen}
+                onClose={() => setIsStaffEditModalOpen(false)}
+                role={
+                    stage === "supervisor"
+                        ? "supervisor-akademik"
+                        : "manajer-tu"
+                }
+                applicationId={pdfId || ""}
+                initialValues={{
+                    namaBeasiswa:
+                        data?.scholarshipName || data?.keperluan || "",
+                    namaLengkap: data?.nama || "",
+                    nim: data?.nim || "",
+                    email: data?.email || "",
+                    departemen: data?.jurusan || "",
+                    programStudi: data?.programStudi || "",
+                    tempatLahir: data?.tempatLahir || "",
+                    tanggalLahir: data?.tanggalLahir || "",
+                    noHp: data?.noHp || "",
+                    semester: data?.semester || "",
+                    ipk: data?.ipk || "",
+                    ips: data?.ips || "",
+                }}
+                onSuccess={() => setPdfRefreshTimestamp(Date.now())}
             />
         </div>
     );

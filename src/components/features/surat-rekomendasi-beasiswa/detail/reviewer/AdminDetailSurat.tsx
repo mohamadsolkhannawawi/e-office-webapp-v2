@@ -13,6 +13,7 @@ import {
     PenTool,
     ShieldCheck,
     Download,
+    PencilLine,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,7 @@ import { WD1SignatureModal } from "./WD1SignatureModal";
 import { UPANumberingModal } from "./UPANumberingModal";
 import { UPAStampModal } from "./UPAStampModal";
 import { ActionStatusModal } from "./ActionStatusModal";
+import { StaffEditModal } from "./StaffEditModal";
 import { useState } from "react";
 import { SignatureImage } from "@/components/ui/signature-image";
 import { Hash, Sparkles } from "lucide-react";
@@ -115,6 +117,7 @@ export function AdminDetailSurat({
     }>({ isOpen: false, status: "success", type: "approve" });
     const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
     const [downloadingId, setDownloadingId] = useState<string | null>(null);
+    const [isStaffEditModalOpen, setIsStaffEditModalOpen] = useState(false);
     const router = useRouter();
 
     // Determine if this role can take action based on currentStep
@@ -173,6 +176,11 @@ export function AdminDetailSurat({
         !isTerminalStatus &&
         (currentStep === roleStep ||
             (hasResubmittedAfterRevision && currentStep === roleStep));
+
+    // Staff (SA/MTU) can edit letter data while it's at their step
+    const canStaffEdit =
+        (role === "supervisor-akademik" || role === "manajer-tu") &&
+        canTakeAction;
 
     const handleDownloadPDF = async (applicationId: string) => {
         try {
@@ -477,6 +485,19 @@ export function AdminDetailSurat({
                                     Preview
                                 </Button>
                             </Link>
+
+                            {/* Edit Surat: only for SA/MTU when the letter is at their step */}
+                            {canStaffEdit && (
+                                <Button
+                                    onClick={() =>
+                                        setIsStaffEditModalOpen(true)
+                                    }
+                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
+                                >
+                                    <PencilLine className="h-5 w-5" />
+                                    Edit Data Surat
+                                </Button>
+                            )}
 
                             {/* Show action buttons only if this role can take action */}
                             {canTakeAction ? (
@@ -790,6 +811,34 @@ export function AdminDetailSurat({
                     }}
                     applicationId={id}
                     appliedStampId={upaStampId}
+                />
+            )}
+
+            {/* Staff Edit Modal — SA / MTU */}
+            {canStaffEdit && (
+                <StaffEditModal
+                    isOpen={isStaffEditModalOpen}
+                    onClose={() => setIsStaffEditModalOpen(false)}
+                    role={role as "supervisor-akademik" | "manajer-tu"}
+                    applicationId={id}
+                    initialValues={{
+                        namaBeasiswa:
+                            initialData?.scholarshipName ||
+                            initialData?.formData?.namaBeasiswa ||
+                            "",
+                        namaLengkap: initialData?.formData?.namaLengkap || "",
+                        nim: initialData?.formData?.nim || "",
+                        email: initialData?.formData?.email || "",
+                        departemen: initialData?.formData?.departemen || "",
+                        programStudi: initialData?.formData?.programStudi || "",
+                        tempatLahir: initialData?.formData?.tempatLahir || "",
+                        tanggalLahir: initialData?.formData?.tanggalLahir || "",
+                        noHp: initialData?.formData?.noHp || "",
+                        semester: initialData?.formData?.semester || "",
+                        ipk: initialData?.formData?.ipk || "",
+                        ips: initialData?.formData?.ips || "",
+                    }}
+                    onSuccess={() => router.refresh()}
                 />
             )}
         </div>

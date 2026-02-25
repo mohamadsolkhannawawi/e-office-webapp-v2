@@ -11,7 +11,7 @@ import {
     User,
     Phone,
     Loader2,
-    ChevronLeft,
+    ArrowLeft,
     Save,
     Camera,
     Upload,
@@ -277,12 +277,16 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
     return (
         <div className="space-y-6 p-6">
             {/* Header */}
-            <div className="flex items-center gap-4">
-                <Link href={backHref}>
-                    <Button variant="ghost" size="icon" className="h-10 w-10">
-                        <ChevronLeft className="h-5 w-5" />
-                    </Button>
-                </Link>
+            <div className="flex items-center gap-3">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => router.push(backHref)}
+                    className="rounded-xl"
+                    type="button"
+                >
+                    <ArrowLeft className="h-5 w-5" />
+                </Button>
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">
                         Edit Profil

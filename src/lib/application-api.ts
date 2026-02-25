@@ -374,6 +374,43 @@ export async function verifyApplication(
 }
 
 /**
+ * Submit a student self-edit for a PENDING letter (before Supervisor acts).
+ * Creates a "student_revision" history entry and keeps the letter at step 1.
+ */
+export async function submitStudentEdit(
+    applicationId: string,
+    data: {
+        namaBeasiswa?: string;
+        values?: Record<string, unknown>;
+        catatan?: string;
+    },
+): Promise<{ success: boolean; message?: string }> {
+    try {
+        const response = await fetch(
+            `/api/surat-rekomendasi/applications/${applicationId}/student-edit`,
+            {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            },
+        );
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(
+                error.error || `Student edit failed (${response.status})`,
+            );
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Submit student edit error:", error);
+        throw error;
+    }
+}
+
+/**
  * Interface untuk konfigurasi pejabat penandatangan
  */
 export interface LeadershipConfig {

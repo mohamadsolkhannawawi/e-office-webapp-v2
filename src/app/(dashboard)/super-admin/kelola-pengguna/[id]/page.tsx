@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,6 @@ import {
     listRoles,
     assignRoleToUser,
     removeRoleFromUser,
-    getUserRoles,
     listDepartments,
     listProdi,
 } from "@/lib/admin-api";
@@ -138,17 +137,10 @@ export default function EditUserPage() {
     });
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
-    useEffect(() => {
-        loadUserData();
-        loadRoles();
-        loadDepartments();
-        loadProgramStudi();
-    }, [userId]);
-
-    const loadUserData = async () => {
+    const loadUserData = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await getUser(userId);
+            const response = (await getUser(userId)) as UserData;
             setUserData(response);
 
             // Set form data
@@ -184,7 +176,14 @@ export default function EditUserPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId]);
+
+    useEffect(() => {
+        loadUserData();
+        loadRoles();
+        loadDepartments();
+        loadProgramStudi();
+    }, [userId, loadUserData]);
 
     const loadRoles = async () => {
         try {

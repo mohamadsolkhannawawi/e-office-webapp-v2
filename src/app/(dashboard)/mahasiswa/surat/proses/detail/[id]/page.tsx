@@ -330,7 +330,7 @@ export default function DetailSuratProsesPage() {
 
             {/* Riwayat Surat */}
             {riwayatData && riwayatData.length > 0 && (
-                <RiwayatSurat data={riwayatData} />
+                <RiwayatSurat riwayat={riwayatData} />
             )}
 
             {/* Modal Edit */}

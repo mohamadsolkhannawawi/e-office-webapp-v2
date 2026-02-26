@@ -65,7 +65,7 @@ interface User {
     userRole: UserRole[];
 }
 
-export default function KelolaPage() {
+function KelolaPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -582,5 +582,17 @@ export default function KelolaPage() {
                 </AlertDialogContent>
             </AlertDialog>
         </div>
+    );
+}
+
+export default function KelolaPage() {
+    return (
+        <React.Suspense
+            fallback={
+                <div className="p-8 text-center text-slate-400">Memuat...</div>
+            }
+        >
+            <KelolaPageContent />
+        </React.Suspense>
     );
 }

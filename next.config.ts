@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 
+const backendUrl = process.env.BACKEND_URL || "http://localhost:3005";
+const minioHost = process.env.NEXT_PUBLIC_MINIO_HOST || "localhost";
+const minioPort = process.env.NEXT_PUBLIC_MINIO_PORT || "9000";
+
 const nextConfig: NextConfig = {
     images: {
         remotePatterns: [
@@ -11,8 +15,8 @@ const nextConfig: NextConfig = {
             },
             {
                 protocol: "http",
-                hostname: "localhost",
-                port: "9000",
+                hostname: minioHost,
+                port: minioPort,
                 pathname: "/**",
             },
         ],
@@ -22,7 +26,7 @@ const nextConfig: NextConfig = {
             beforeFiles: [
                 {
                     source: "/api/:path*",
-                    destination: "http://localhost:3005/api/:path*",
+                    destination: `${backendUrl}/api/:path*`,
                 },
             ],
         };

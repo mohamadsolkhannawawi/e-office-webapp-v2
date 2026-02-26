@@ -6,7 +6,7 @@ import { createAuthClient } from "better-auth/react";
  * Better Auth will automatically append basePath (/api/auth) from server config
  */
 export const authClient = createAuthClient({
-    baseURL: "http://localhost:3000", // Use Frontend URL to leverage Next.js Rewrite Proxy
+    baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000", // Use Frontend URL to leverage Next.js Rewrite Proxy
 });
 
 /**

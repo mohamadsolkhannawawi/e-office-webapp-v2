@@ -11,7 +11,8 @@ export interface StatusConfig {
         | "Clock"
         | "XCircle"
         | "RotateCcw"
-        | "Check";
+        | "Check"
+        | "PencilLine";
 }
 
 // Helper to format role names to be more friendly and polite

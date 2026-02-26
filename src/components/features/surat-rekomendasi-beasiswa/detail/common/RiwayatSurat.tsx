@@ -9,6 +9,7 @@ import {
     ShieldCheck,
     User,
     PenTool,
+    PencilLine,
     Hash,
     Check,
     ArrowRight,
@@ -74,6 +75,8 @@ function TimelineItem({
                 return <Check className="h-3 w-3" />;
             case "FileText":
                 return <FileText className="h-3 w-3" />;
+            case "PencilLine":
+                return <PencilLine className="h-3 w-3" />;
             case "Clock":
             default:
                 return <Clock className="h-3 w-3" />;

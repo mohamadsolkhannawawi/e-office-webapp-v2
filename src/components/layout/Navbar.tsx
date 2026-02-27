@@ -37,7 +37,10 @@ export function Navbar({
     const pathname = usePathname();
 
     const userName = propUserName || user?.name || "User";
-    const userImage = propUserImage || user?.image || "";
+    // If user.image is a raw MinIO object path (not an http URL), use the proxy endpoint
+    const rawImage = propUserImage || user?.image || "";
+    const userImage =
+        rawImage && !rawImage.startsWith("http") ? "/api/me/photo" : rawImage;
     const showProfile = propShowProfile && !!user;
 
     const [dropdownOpen, setDropdownOpen] = useState(false);

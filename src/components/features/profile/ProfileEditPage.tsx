@@ -25,6 +25,7 @@ import {
 } from "@/lib/application-api";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 const getRoleDisplayName = (roleName?: string): string | undefined => {
     if (!roleName) return undefined;
@@ -123,6 +124,7 @@ const parseUserData = (user: UserProfile | null): ProfileData | null => {
 
 const ProfileEditPage = ({ backHref }: { backHref: string }) => {
     const router = useRouter();
+    const { refreshSession } = useAuth();
     const [profileData, setProfileData] = useState<ProfileData | null>(null);
     const [formData, setFormData] = useState<EditFormData>({
         name: "",
@@ -200,6 +202,8 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
                 setProfileData((prev) =>
                     prev ? { ...prev, image: result.imageUrl } : null,
                 );
+                // Refresh session so Navbar picks up the new photo
+                await refreshSession();
                 toast.success("Foto profil berhasil diperbarui!");
             } else {
                 toast.error(result.error || "Gagal mengupload foto profil");

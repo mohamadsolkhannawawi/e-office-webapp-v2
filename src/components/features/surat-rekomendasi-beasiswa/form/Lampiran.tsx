@@ -19,7 +19,6 @@ interface LampiranProps {
 }
 import { BsFileEarmarkArrowUp } from "react-icons/bs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -72,19 +71,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
     const isValidSize = (file: File): boolean => {
         const maxSize = 5 * 1024 * 1024; // 5MB in bytes
         return file.size <= maxSize;
-    };
-
-    const inferCategory = (file: File) => {
-        const t = (file.type || "").toLowerCase();
-        if (t.includes("pdf") || file.name.toLowerCase().endsWith(".pdf"))
-            return "File";
-        if (
-            t.includes("image") ||
-            file.name.toLowerCase().endsWith(".jpg") ||
-            file.name.toLowerCase().endsWith(".png")
-        )
-            return "Foto";
-        return "Lainnya";
     };
 
     const mainInputRef = useRef<HTMLInputElement | null>(null);
@@ -175,7 +161,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     name: res.data.filename,
                                     size: res.data.fileSize,
                                     type: res.data.mimeType,
-                                    kategori: inferCategory(file),
                                     attachmentType: res.data.attachmentType,
                                     downloadUrl: res.data.downloadUrl,
                                     createdAt: res.data.createdAt,
@@ -288,7 +273,6 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     name: res.data.filename,
                                     size: res.data.fileSize,
                                     type: res.data.mimeType,
-                                    kategori: inferCategory(file),
                                     attachmentType: res.data.attachmentType,
                                     downloadUrl: res.data.downloadUrl,
                                     createdAt: res.data.createdAt,
@@ -570,7 +554,8 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     (f: LampiranFile) =>
                                         selectedUtama === "Semua"
                                             ? true
-                                            : f.kategori === selectedUtama,
+                                            : f.attachmentType ===
+                                              selectedUtama,
                                 );
 
                                 if (filteredFiles.length === 0) {
@@ -602,16 +587,26 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                 >
                                                     <div className="flex items-center justify-between gap-4">
                                                         <div className="flex-1 min-w-0">
-                                                            <div className="text-sm font-medium text-gray-900 truncate" title={f.name}>
+                                                            <div
+                                                                className="text-sm font-medium text-gray-900 truncate"
+                                                                title={f.name}
+                                                            >
                                                                 {f.name}
                                                             </div>
                                                             <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                                                                <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                                                                    f.kategori === 'File' ? 'bg-red-100 text-red-700' :
-                                                                    f.kategori === 'Foto' ? 'bg-green-100 text-green-700' :
-                                                                    'bg-gray-100 text-gray-700'
-                                                                }`}>
-                                                                    {f.kategori || "Lainnya"}
+                                                                <span
+                                                                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                                                                        f.attachmentType ===
+                                                                        "File"
+                                                                            ? "bg-red-100 text-red-700"
+                                                                            : f.attachmentType ===
+                                                                                "Foto"
+                                                                              ? "bg-green-100 text-green-700"
+                                                                              : "bg-gray-100 text-gray-700"
+                                                                    }`}
+                                                                >
+                                                                    {f.attachmentType ||
+                                                                        "Lainnya"}
                                                                 </span>
                                                                 <span>
                                                                     {formatSize(
@@ -836,7 +831,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                         (f: LampiranFile) =>
                                             selectedTambahan === "Semua"
                                                 ? true
-                                                : f.kategori ===
+                                                : f.attachmentType ===
                                                   selectedTambahan,
                                     );
 
@@ -869,16 +864,26 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                 >
                                                     <div className="flex items-center justify-between gap-4">
                                                         <div className="flex-1 min-w-0">
-                                                            <div className="text-sm font-medium text-gray-900 truncate" title={f.name}>
+                                                            <div
+                                                                className="text-sm font-medium text-gray-900 truncate"
+                                                                title={f.name}
+                                                            >
                                                                 {f.name}
                                                             </div>
                                                             <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                                                                <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                                                                    f.kategori === 'File' ? 'bg-red-100 text-red-700' :
-                                                                    f.kategori === 'Foto' ? 'bg-green-100 text-green-700' :
-                                                                    'bg-gray-100 text-gray-700'
-                                                                }`}>
-                                                                    {f.kategori || "Lainnya"}
+                                                                <span
+                                                                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                                                                        f.attachmentType ===
+                                                                        "File"
+                                                                            ? "bg-red-100 text-red-700"
+                                                                            : f.attachmentType ===
+                                                                                "Foto"
+                                                                              ? "bg-green-100 text-green-700"
+                                                                              : "bg-gray-100 text-gray-700"
+                                                                    }`}
+                                                                >
+                                                                    {f.attachmentType ||
+                                                                        "Lainnya"}
                                                                 </span>
                                                                 <span>
                                                                     {formatSize(

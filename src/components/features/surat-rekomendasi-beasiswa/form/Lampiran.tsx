@@ -73,6 +73,23 @@ export function Lampiran({ data, setData }: LampiranProps) {
         return file.size <= maxSize;
     };
 
+    // Display helper: infer type from filename/mimeType when attachmentType is missing
+    // (covers old records stored before the backend inferred and saved attachmentType)
+    const getDisplayType = (f: LampiranFile): "File" | "Foto" | "Lainnya" => {
+        if (f.attachmentType) return f.attachmentType;
+        const name = (f.name || "").toLowerCase();
+        const type = (f.type || "").toLowerCase();
+        if (type.includes("pdf") || name.endsWith(".pdf")) return "File";
+        if (
+            type.includes("image") ||
+            name.endsWith(".jpg") ||
+            name.endsWith(".jpeg") ||
+            name.endsWith(".png")
+        )
+            return "Foto";
+        return "Lainnya";
+    };
+
     const mainInputRef = useRef<HTMLInputElement | null>(null);
     const tambahanInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -554,7 +571,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                     (f: LampiranFile) =>
                                         selectedUtama === "Semua"
                                             ? true
-                                            : f.attachmentType ===
+                                            : getDisplayType(f) ===
                                               selectedUtama,
                                 );
 
@@ -596,17 +613,22 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                             <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
                                                                 <span
                                                                     className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                                                                        f.attachmentType ===
+                                                                        getDisplayType(
+                                                                            f,
+                                                                        ) ===
                                                                         "File"
                                                                             ? "bg-red-100 text-red-700"
-                                                                            : f.attachmentType ===
+                                                                            : getDisplayType(
+                                                                                    f,
+                                                                                ) ===
                                                                                 "Foto"
                                                                               ? "bg-green-100 text-green-700"
                                                                               : "bg-gray-100 text-gray-700"
                                                                     }`}
                                                                 >
-                                                                    {f.attachmentType ||
-                                                                        "Lainnya"}
+                                                                    {getDisplayType(
+                                                                        f,
+                                                                    )}
                                                                 </span>
                                                                 <span>
                                                                     {formatSize(
@@ -831,7 +853,7 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                         (f: LampiranFile) =>
                                             selectedTambahan === "Semua"
                                                 ? true
-                                                : f.attachmentType ===
+                                                : getDisplayType(f) ===
                                                   selectedTambahan,
                                     );
 
@@ -873,17 +895,22 @@ export function Lampiran({ data, setData }: LampiranProps) {
                                                             <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
                                                                 <span
                                                                     className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                                                                        f.attachmentType ===
+                                                                        getDisplayType(
+                                                                            f,
+                                                                        ) ===
                                                                         "File"
                                                                             ? "bg-red-100 text-red-700"
-                                                                            : f.attachmentType ===
+                                                                            : getDisplayType(
+                                                                                    f,
+                                                                                ) ===
                                                                                 "Foto"
                                                                               ? "bg-green-100 text-green-700"
                                                                               : "bg-gray-100 text-gray-700"
                                                                     }`}
                                                                 >
-                                                                    {f.attachmentType ||
-                                                                        "Lainnya"}
+                                                                    {getDisplayType(
+                                                                        f,
+                                                                    )}
                                                                 </span>
                                                                 <span>
                                                                     {formatSize(

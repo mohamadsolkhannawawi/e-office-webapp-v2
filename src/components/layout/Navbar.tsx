@@ -37,16 +37,24 @@ export function Navbar({
     const pathname = usePathname();
 
     const userName = propUserName || user?.name || "User";
-    // If user.image is a raw MinIO object path (not an http URL), use the proxy endpoint
-    const rawImage = propUserImage || user?.image || "";
-    const userImage =
-        rawImage && !rawImage.startsWith("http") ? "/api/me/photo" : rawImage;
+    // Always proxy through /api/me/photo when user has an image.
+    // The proxy handles both MinIO object paths and old presigned http URLs (via redirect).
+    // propUserImage (if supplied externally) is used as-is.
+    const userImage = propUserImage || (user?.image ? "/api/me/photo" : "");
     const showProfile = propShowProfile && !!user;
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Track previous pathname in state so we can reset dropdown during render
+    // (React-documented pattern: https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes)
+    const [prevPathname, setPrevPathname] = useState(pathname);
+    if (prevPathname !== pathname) {
+        setPrevPathname(pathname);
+        setDropdownOpen(false);
+    }
 
     // Close dropdown on outside click
     useEffect(() => {
@@ -61,11 +69,6 @@ export function Navbar({
         document.addEventListener("mousedown", handleOutside);
         return () => document.removeEventListener("mousedown", handleOutside);
     }, []);
-
-    // Close dropdown on route change
-    useEffect(() => {
-        setDropdownOpen(false);
-    }, [pathname]);
 
     const getProfileLink = () => {
         if (pathname.startsWith("/super-admin")) return "/super-admin/profil";

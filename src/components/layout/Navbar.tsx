@@ -37,10 +37,10 @@ export function Navbar({
     const pathname = usePathname();
 
     const userName = propUserName || user?.name || "User";
-    // Always proxy through /api/me/photo when user has an image.
-    // The proxy handles both MinIO object paths and old presigned http URLs (via redirect).
+    // Always proxy through /api/me/photo when a user is authenticated.
+    // The endpoint returns 404 if no photo → AvatarFallback (initials) renders automatically.
     // propUserImage (if supplied externally) is used as-is.
-    const userImage = propUserImage || (user?.image ? "/api/me/photo" : "");
+    const userImage = propUserImage || (user ? "/api/me/photo" : "");
     const showProfile = propShowProfile && !!user;
 
     const [dropdownOpen, setDropdownOpen] = useState(false);

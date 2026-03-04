@@ -31,7 +31,12 @@ interface ActionModalProps {
         targetRole?: WorkflowRole | string;
     }) => void;
     type: "approve" | "revise" | "reject" | "publish";
-    role: "supervisor-akademik" | "manajer-tu" | "wakil-dekan-1" | "upa";
+    role:
+        | "supervisor-akademik"
+        | "manajer-tu"
+        | "wakil-dekan-1"
+        | "upa"
+        | "super-admin";
     data?: {
         nomorSurat?: string;
     };
@@ -64,8 +69,19 @@ export function AdminActionModals({
                     },
                     { value: "Manajer TU", label: "Manajer TU" },
                 ];
+            case "super-admin":
+                // Super Admin can revise to any step
+                return [
+                    { value: "Mahasiswa", label: "Mahasiswa (Pengaju)" },
+                    {
+                        value: "Supervisor Akademik",
+                        label: "Supervisor Akademik",
+                    },
+                    { value: "Manajer TU", label: "Manajer TU" },
+                    { value: "Wakil Dekan 1", label: "Wakil Dekan 1" },
+                ];
             default:
-                // Supervisor Akademik can only revise to Mahasiswa
+                // Supervisor Akademik / UPA can only revise to Mahasiswa
                 return [{ value: "Mahasiswa", label: "Mahasiswa (Pengaju)" }];
         }
     };

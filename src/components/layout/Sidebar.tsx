@@ -24,14 +24,6 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
@@ -234,6 +226,11 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
             label: "Dasbor",
             href: "/super-admin",
             icon: <LayoutDashboard size={20} />,
+        },
+        {
+            label: "Manajemen Surat",
+            href: "/super-admin/surat",
+            icon: <Mail size={20} />,
         },
         {
             label: "Kelola Pengguna",
@@ -516,41 +513,56 @@ export function Sidebar({
             </aside>
 
             {/* Logout Confirmation Modal */}
-            <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
-                <DialogContent className="sm:max-w-md rounded-3xl">
-                    <DialogHeader>
-                        <div>
-                            <DialogTitle className="text-xl font-bold text-gray-900 text-left mb-2">
-                                Konfirmasi Keluar
-                            </DialogTitle>
-                            <DialogDescription className="text-left text-base text-gray-600">
-                                Apakah Anda yakin ingin keluar dari akun? Anda
-                                perlu login kembali untuk mengakses sistem.
-                            </DialogDescription>
+            {showLogoutModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center">
+                    <div
+                        className="absolute inset-0 bg-black/50"
+                        onClick={() =>
+                            !isLoggingOut && setShowLogoutModal(false)
+                        }
+                    />
+                    <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 animate-in fade-in zoom-in-95 duration-150">
+                        <div className="flex flex-col items-center text-center gap-4">
+                            <div className="flex items-center justify-center w-14 h-14 rounded-full bg-red-100">
+                                <LogOut className="h-6 w-6 text-red-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-800">
+                                    Keluar dari Akun?
+                                </h3>
+                                <p className="text-sm text-slate-500 mt-1">
+                                    Anda akan keluar dari sesi ini. Pastikan
+                                    pekerjaan Anda sudah tersimpan.
+                                </p>
+                            </div>
+                            <div className="flex gap-3 w-full pt-1">
+                                <Button
+                                    variant="outline"
+                                    className="flex-1 rounded-xl"
+                                    onClick={handleLogoutCancel}
+                                    disabled={isLoggingOut}
+                                >
+                                    Batal
+                                </Button>
+                                <Button
+                                    className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white"
+                                    onClick={handleLogoutConfirm}
+                                    disabled={isLoggingOut}
+                                >
+                                    {isLoggingOut ? (
+                                        <span className="flex items-center gap-2">
+                                            <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            Keluar...
+                                        </span>
+                                    ) : (
+                                        "Ya, Keluar"
+                                    )}
+                                </Button>
+                            </div>
                         </div>
-                    </DialogHeader>
-                    <DialogFooter className="flex gap-3 sm:gap-3 mt-6">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleLogoutCancel}
-                            disabled={isLoggingOut}
-                            className="flex-1 h-11 rounded-xl font-semibold"
-                        >
-                            Batal
-                        </Button>
-                        <Button
-                            type="button"
-                            onClick={handleLogoutConfirm}
-                            disabled={isLoggingOut}
-                            className="flex-1 h-11 rounded-xl font-semibold text-white"
-                            style={{ backgroundColor: "#ef4444" }}
-                        >
-                            {isLoggingOut ? "Memproses..." : "Ya, Keluar"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

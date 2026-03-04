@@ -43,7 +43,12 @@ import {
 } from "@/lib/template-api";
 
 interface AdminDetailSuratProps {
-    role: "supervisor-akademik" | "manajer-tu" | "wakil-dekan-1" | "upa";
+    role:
+        | "supervisor-akademik"
+        | "manajer-tu"
+        | "wakil-dekan-1"
+        | "upa"
+        | "super-admin";
     id: string;
     from?: "perlu-tindakan" | "selesai" | "arsip"; // Dynamic breadcrumb source
     initialData?: ApplicationDetail & {
@@ -126,6 +131,7 @@ export function AdminDetailSurat({
         "manajer-tu": 2,
         "wakil-dekan-1": 3,
         upa: 4,
+        "super-admin": -1, // Super admin can act at any step
     };
     const roleStep = roleStepMap[role] || 0;
     const currentStep = initialData?.currentStep || 0;
@@ -169,17 +175,22 @@ export function AdminDetailSurat({
         }) || false;
 
     // Can only take action if:
-    // 1. The application is at this role's step
-    // 2. The application is not in a terminal status (COMPLETED/REJECTED)
-    // 3. OR if this role previously revised and mahasiswa has resubmitted
+    // 1. Super Admin: always if not terminal
+    // 2. Other roles: application is at this role's step and not in terminal status
     const canTakeAction =
-        !isTerminalStatus &&
-        (currentStep === roleStep ||
-            (hasResubmittedAfterRevision && currentStep === roleStep));
+        role === "super-admin"
+            ? !isTerminalStatus
+            : !isTerminalStatus &&
+              (currentStep === roleStep ||
+                  (hasResubmittedAfterRevision && currentStep === roleStep));
 
     // Staff (SA/MTU) can edit letter data while it's at their step
+    // Super Admin can edit when at step 1 (SA) or step 2 (MTU)
     const canStaffEdit =
-        (role === "supervisor-akademik" || role === "manajer-tu") &&
+        (role === "supervisor-akademik" ||
+            role === "manajer-tu" ||
+            (role === "super-admin" &&
+                (currentStep === 1 || currentStep === 2))) &&
         canTakeAction;
 
     const handleDownloadPDF = async (applicationId: string) => {
@@ -272,12 +283,20 @@ export function AdminDetailSurat({
             };
 
             // Add WD1 signature if available
-            if (role === "wakil-dekan-1" && wd1Signature) {
+            if (
+                (role === "wakil-dekan-1" ||
+                    (role === "super-admin" && currentStep === 3)) &&
+                wd1Signature
+            ) {
                 payload.signatureUrl = wd1Signature;
             }
 
             // Add UPA letter number if available
-            if (role === "upa" && upaLetterNumber) {
+            if (
+                (role === "upa" ||
+                    (role === "super-admin" && currentStep === 4)) &&
+                upaLetterNumber
+            ) {
                 payload.letterNumber = upaLetterNumber;
             }
 
@@ -294,6 +313,8 @@ export function AdminDetailSurat({
                 redirectPath = "/wakil-dekan-1/surat/perlu-tindakan";
             } else if (role === "upa") {
                 redirectPath = "/upa/surat/perlu-tindakan";
+            } else if (role === "super-admin") {
+                redirectPath = "/super-admin/surat";
             }
 
             setPendingRedirect(redirectPath);
@@ -353,7 +374,10 @@ export function AdminDetailSurat({
     const isCompleted = initialData?.status === "COMPLETED";
     const finalFrom =
         effectiveFrom || (isCompleted ? "selesai" : "perlu-tindakan");
-    const listHref = `/${role}/surat/${finalFrom}`;
+    const listHref =
+        role === "super-admin"
+            ? "/super-admin/surat"
+            : `/${role}/surat/${finalFrom}`;
     const statusLabel = finalFrom === "selesai" ? "Selesai" : "Perlu Tindakan";
 
     console.log(
@@ -469,7 +493,15 @@ export function AdminDetailSurat({
                                           ? "/manajer-tu"
                                           : role === "wakil-dekan-1"
                                             ? "/wakil-dekan-1"
-                                            : "/upa"
+                                            : role === "super-admin"
+                                              ? currentStep === 1
+                                                  ? "/supervisor-akademik"
+                                                  : currentStep === 2
+                                                    ? "/manajer-tu"
+                                                    : currentStep === 3
+                                                      ? "/wakil-dekan-1"
+                                                      : "/upa"
+                                              : "/upa"
                                 }/surat/proses/preview/${id}?stage=${
                                     role === "supervisor-akademik"
                                         ? "supervisor"
@@ -477,7 +509,15 @@ export function AdminDetailSurat({
                                           ? "manajer"
                                           : role === "wakil-dekan-1"
                                             ? "wd1"
-                                            : "upa"
+                                            : role === "super-admin"
+                                              ? currentStep === 1
+                                                  ? "supervisor"
+                                                  : currentStep === 2
+                                                    ? "manajer"
+                                                    : currentStep === 3
+                                                      ? "wd1"
+                                                      : "upa"
+                                              : "upa"
                                 }${upaLetterNumber ? `&no=${encodeURIComponent(upaLetterNumber)}` : ""}`}
                             >
                                 <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 mb-3">
@@ -502,9 +542,15 @@ export function AdminDetailSurat({
                             {/* Show action buttons only if this role can take action */}
                             {canTakeAction ? (
                                 <>
-                                    {role !== "upa" ? (
+                                    {role !== "upa" &&
+                                    !(
+                                        role === "super-admin" &&
+                                        currentStep === 4
+                                    ) ? (
                                         <>
-                                            {role === "wakil-dekan-1" && (
+                                            {(role === "wakil-dekan-1" ||
+                                                (role === "super-admin" &&
+                                                    currentStep === 3)) && (
                                                 <div className="space-y-3 mb-3">
                                                     <Button
                                                         onClick={() =>
@@ -545,10 +591,14 @@ export function AdminDetailSurat({
                                                     handleAction("approve")
                                                 }
                                                 disabled={
-                                                    role === "wakil-dekan-1" &&
+                                                    (role === "wakil-dekan-1" ||
+                                                        (role ===
+                                                            "super-admin" &&
+                                                            currentStep ===
+                                                                3)) &&
                                                     !wd1Signature
                                                 }
-                                                className={`w-full ${role === "wakil-dekan-1" && !wd1Signature ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-3xl flex items-center justify-center gap-2`}
+                                                className={`w-full ${(role === "wakil-dekan-1" || (role === "super-admin" && currentStep === 3)) && !wd1Signature ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-undip-blue hover:bg-sky-700 text-white"} font-bold py-6 rounded-3xl flex items-center justify-center gap-2`}
                                             >
                                                 <Check className="h-5 w-5" />
                                                 Setujui
@@ -695,7 +745,8 @@ export function AdminDetailSurat({
                                     </div>
 
                                     {initialData?.status === "COMPLETED" &&
-                                        role === "upa" && (
+                                        (role === "upa" ||
+                                            role === "super-admin") && (
                                             <div className="space-y-3">
                                                 <Button
                                                     onClick={() =>
@@ -798,7 +849,8 @@ export function AdminDetailSurat({
             </div>
 
             {/* UPA Stamp Modal */}
-            {role === "upa" && (
+            {(role === "upa" ||
+                (role === "super-admin" && currentStep === 4)) && (
                 <UPAStampModal
                     isOpen={isStampModalOpen}
                     onClose={() => setIsStampModalOpen(false)}
@@ -819,7 +871,13 @@ export function AdminDetailSurat({
                 <StaffEditModal
                     isOpen={isStaffEditModalOpen}
                     onClose={() => setIsStaffEditModalOpen(false)}
-                    role={role as "supervisor-akademik" | "manajer-tu"}
+                    role={
+                        role === "super-admin"
+                            ? currentStep === 2
+                                ? "manajer-tu"
+                                : "supervisor-akademik"
+                            : (role as "supervisor-akademik" | "manajer-tu")
+                    }
                     applicationId={id}
                     initialValues={{
                         namaBeasiswa:

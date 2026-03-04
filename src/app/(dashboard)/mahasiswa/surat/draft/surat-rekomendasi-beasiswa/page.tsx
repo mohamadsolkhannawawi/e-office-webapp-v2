@@ -273,13 +273,13 @@ export default function SuratDraftPage() {
                             <SelectContent>
                                 <SelectItem value="ALL">Semua Jenis</SelectItem>
                                 <SelectItem value="internal">
-                                    Beasiswa Internal
+                                    Internal
                                 </SelectItem>
-                                <SelectItem value="external">
-                                    Beasiswa Eksternal
+                                <SelectItem value="eksternal">
+                                    Eksternal
                                 </SelectItem>
                                 <SelectItem value="akademik">
-                                    Beasiswa Akademik
+                                    Akademik
                                 </SelectItem>
                             </SelectContent>
                         </Select>

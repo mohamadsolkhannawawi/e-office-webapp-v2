@@ -15,7 +15,7 @@ export interface ApplicationFormData {
     ips: string;
     namaBeasiswa?: string; // Added optional
     semester?: string; // Added optional
-    jenisBeasiswa?: string; // Added optional
+    jenisBeasiswa?: string; // Jenis/kategori beasiswa (internal, eksternal, akademik)
 }
 
 export interface ApplicationAttachment {

@@ -220,7 +220,7 @@ export default function SelesaiPage() {
                                 <SelectItem value="internal">
                                     Beasiswa Internal
                                 </SelectItem>
-                                <SelectItem value="external">
+                                <SelectItem value="eksternal">
                                     Beasiswa Eksternal
                                 </SelectItem>
                                 <SelectItem value="akademik">

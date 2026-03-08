@@ -84,6 +84,10 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
                     label: "Surat Rekomendasi Beasiswa",
                     href: "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa",
                 },
+                {
+                    label: "Surat Rekomendasi Keperluan Lain",
+                    href: "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa?jenis=keperluan_lain",
+                },
             ],
         },
         {
@@ -514,7 +518,7 @@ export function Sidebar({
 
             {/* Logout Confirmation Modal */}
             {showLogoutModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center">
+                <div className="fixed inset-0 z-100 flex items-center justify-center">
                     <div
                         className="absolute inset-0 bg-black/50"
                         onClick={() =>

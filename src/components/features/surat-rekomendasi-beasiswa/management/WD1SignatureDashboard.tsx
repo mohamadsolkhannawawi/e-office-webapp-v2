@@ -351,7 +351,7 @@ export function WD1SignatureDashboard() {
                                                     </button>
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center gap-1 group">
+                                                <div className="flex items-center gap-1">
                                                     <p className="font-semibold text-slate-800 truncate">
                                                         {signature.name ||
                                                             `Template ${signatures.indexOf(signature) + 1}`}
@@ -365,7 +365,7 @@ export function WD1SignatureDashboard() {
                                                                 ),
                                                             )
                                                         }
-                                                        className="p-1 rounded-full opacity-0 group-hover:opacity-100 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-opacity shrink-0"
+                                                        className="p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 shrink-0"
                                                         title="Ubah nama"
                                                     >
                                                         <Pencil className="h-3 w-3" />

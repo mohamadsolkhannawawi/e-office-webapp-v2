@@ -11,7 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, Loader2 } from "lucide-react";
 import { WD1SignatureSection } from "./WD1SignatureSection";
-import { saveSignatureToApplication } from "@/lib/application-api";
+import {
+    saveSignature,
+    saveSignatureToApplication,
+} from "@/lib/application-api";
 import toast from "react-hot-toast";
 
 interface WD1SignatureModalProps {
@@ -52,12 +55,25 @@ export function WD1SignatureModal({
 
         setIsSaving(true);
         try {
+            // If the signature is a base64 data URL (manual scribble or direct file upload),
+            // upload it to MinIO first so the backend gets a proper URL for document generation
+            let signatureToSave = selectedSignature;
+            if (selectedSignature.startsWith("data:")) {
+                const uploadResult = await saveSignature({
+                    url: selectedSignature,
+                    signatureType: "DRAWN",
+                });
+                if (uploadResult.success && uploadResult.data?.url) {
+                    signatureToSave = uploadResult.data.url;
+                }
+            }
+
             // If applicationId is present, save signature to application immediately to trigger regeneration
             if (applicationId) {
                 const toastId = toast.loading("Menyimpan tanda tangan...");
                 const success = await saveSignatureToApplication(
                     applicationId,
-                    selectedSignature,
+                    signatureToSave,
                 );
 
                 if (success) {
@@ -77,7 +93,7 @@ export function WD1SignatureModal({
                 }
             }
 
-            onSignatureChange(selectedSignature);
+            onSignatureChange(signatureToSave);
             setTimeout(() => {
                 onClose();
                 setSelectedSignature(null);

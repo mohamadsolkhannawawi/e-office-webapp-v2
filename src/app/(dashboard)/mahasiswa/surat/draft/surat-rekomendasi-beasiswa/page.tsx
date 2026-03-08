@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import {
     ChevronRight,
     Filter,
@@ -40,13 +41,17 @@ import {
 } from "@/components/ui/select";
 
 export default function SuratDraftPage() {
+    const searchParams = useSearchParams();
+    const urlJenis = searchParams.get("jenis") || "ALL";
+    const isKeperluanLain = urlJenis === "keperluan_lain";
+
     const [applications, setApplications] = useState<ApplicationSummary[]>([]);
     const [fetchError, setFetchError] = useState<string | null>(null);
     const { setPageLoading } = usePageLoading();
     const { loading: deleteLoading, setLoading: setDeleteLoading } =
         useCustomLoading("delete-draft");
     const [searchTerm, setSearchTerm] = useState("");
-    const [jenisFilter, setJenisFilter] = useState<string>("ALL");
+    const [jenisFilter, setJenisFilter] = useState<string>(urlJenis);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedDeleteId, setSelectedDeleteId] = useState<string | null>(
         null,
@@ -175,19 +180,27 @@ export default function SuratDraftPage() {
             {/* Breadcrumb */}
             <nav className="flex items-center text-sm font-medium text-slate-500">
                 <Link
-                    href="/mahasiswa/surat/draft/surat-rekomendasi-beasiswa"
+                    href={
+                        isKeperluanLain
+                            ? "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa?jenis=keperluan_lain"
+                            : "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa"
+                    }
                     className="hover:text-undip-blue transition-colors"
                 >
                     Draft Surat
                 </Link>
                 <ChevronRight className="mx-2 h-4 w-4" />
                 <span className="text-slate-800">
-                    Surat Rekomendasi Beasiswa
+                    {isKeperluanLain
+                        ? "Surat Rekomendasi Keperluan Lain"
+                        : "Surat Rekomendasi Beasiswa"}
                 </span>
             </nav>
             {/* Page Title */}
             <h1 className="text-2xl font-bold text-slate-800">
-                Draft Surat Rekomendasi Beasiswa
+                {isKeperluanLain
+                    ? "Draft Surat Rekomendasi Keperluan Lain"
+                    : "Draft Surat Rekomendasi Beasiswa"}
             </h1>
             <p className="text-sm text-slate-500 -mt-4">
                 Lanjutkan pengajuan surat yang telah Anda simpan sebelumnya.
@@ -256,36 +269,37 @@ export default function SuratDraftPage() {
                             />
                         </div>
 
-                        {/* Filter Jenis */}
-                        <Select
-                            value={jenisFilter}
-                            onValueChange={setJenisFilter}
-                        >
-                            <SelectTrigger
-                                className="w-full sm:w-50 h-10 border-slate-100 text-slate-600 rounded-3xl"
-                                suppressHydrationWarning
+                        {/* Filter Jenis — only shown in beasiswa context */}
+                        {!isKeperluanLain && (
+                            <Select
+                                value={jenisFilter}
+                                onValueChange={setJenisFilter}
                             >
-                                <div className="flex items-center gap-2">
-                                    <Filter className="h-4 w-4" />
-                                    <SelectValue placeholder="Jenis Draft" />
-                                </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">Semua Jenis</SelectItem>
-                                <SelectItem value="internal">
-                                    Internal
-                                </SelectItem>
-                                <SelectItem value="eksternal">
-                                    Eksternal
-                                </SelectItem>
-                                <SelectItem value="akademik">
-                                    Akademik
-                                </SelectItem>
-                                <SelectItem value="keperluan_lain">
-                                    Keperluan Lain
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
+                                <SelectTrigger
+                                    className="w-full sm:w-50 h-10 border-slate-100 text-slate-600 rounded-3xl"
+                                    suppressHydrationWarning
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <Filter className="h-4 w-4" />
+                                        <SelectValue placeholder="Jenis Beasiswa" />
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ALL">
+                                        Semua Jenis
+                                    </SelectItem>
+                                    <SelectItem value="internal">
+                                        Internal
+                                    </SelectItem>
+                                    <SelectItem value="eksternal">
+                                        Eksternal
+                                    </SelectItem>
+                                    <SelectItem value="akademik">
+                                        Akademik
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        )}
                     </div>
                 </div>
 
@@ -407,9 +421,10 @@ export default function SuratDraftPage() {
                                                                 "Surat Rekomendasi Beasiswa"}
                                                         </span>
                                                         <span className="text-xs text-slate-500 mt-0.5">
-                                                            Beasiswa{" "}
-                                                            {jenis ||
-                                                                "internal"}
+                                                            {jenis ===
+                                                            "keperluan_lain"
+                                                                ? "Keperluan Lain"
+                                                                : `Beasiswa ${jenis || "internal"}`}
                                                         </span>
                                                     </div>
                                                 </div>

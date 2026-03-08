@@ -85,16 +85,38 @@ function TimelineItem({
 
     const getRoleIcon = (role: string) => {
         const r = role.toLowerCase();
-        if (r.includes("mahasiswa")) return <User className="h-3.5 w-3.5" />;
+        if (r.includes("mahasiswa")) return <User className="h-3 w-3" />;
         if (r.includes("supervisor"))
-            return <ShieldCheck className="h-3.5 w-3.5" />;
-        if (r.includes("manajer"))
-            return <ShieldCheck className="h-3.5 w-3.5 text-undip-blue" />;
+            return <ShieldCheck className="h-3 w-3" />;
+        if (r.includes("manajer")) return <ShieldCheck className="h-3 w-3" />;
         if (r.includes("dekan") || r.includes("wd1"))
-            return <PenTool className="h-3.5 w-3.5 text-indigo-600" />;
-        if (r.includes("upa"))
-            return <Hash className="h-3.5 w-3.5 text-sky-600" />;
-        return <ShieldCheck className="h-3.5 w-3.5" />;
+            return <PenTool className="h-3 w-3" />;
+        if (r.includes("upa")) return <Hash className="h-3 w-3" />;
+        return <ShieldCheck className="h-3 w-3" />;
+    };
+
+    // Dot icon: use status-based icon for terminal/special states, role icon otherwise
+    const getDotIcon = () => {
+        const s2 = status.toLowerCase();
+        const a2 = actionType?.toLowerCase() || "";
+        if (
+            s2.includes("completed") ||
+            s2.includes("published") ||
+            s2.includes("selesai") ||
+            s2.includes("terbit")
+        )
+            return <CheckCircle2 className="h-3 w-3" />;
+        if (s2.includes("rejected") || s2.includes("tolak"))
+            return <XCircle className="h-3 w-3" />;
+        if (
+            s2.includes("revision") ||
+            s2.includes("revisi") ||
+            a2.includes("revision")
+        )
+            return <RotateCcw className="h-3 w-3" />;
+        if (a2 === "approve" || s2.includes("disetujui"))
+            return <Check className="h-3 w-3" />;
+        return getRoleIcon(senderRole);
     };
 
     // Custom defaultDesc untuk initial submission
@@ -107,14 +129,14 @@ function TimelineItem({
     return (
         <div className="flex gap-4 relative pb-8 group">
             {!isLast && (
-                <div className="absolute left-2.75 top-8 w-0.5 h-[calc(100%-24px)] bg-slate-100 group-hover:bg-blue-100 transition-colors" />
+                <div className="absolute left-2.75 top-8 w-0.5 h-[calc(100%-24px)] bg-slate-100 group-hover:bg-green-100 transition-colors" />
             )}
 
             <div className="relative shrink-0 mt-1">
                 <div
-                    className={`w-6 h-6 rounded-full border-2 border-white shadow-sm z-10 flex items-center justify-center transition-all ${config.color.split(" ")[1]}`}
+                    className={`w-6 h-6 rounded-full border-2 border-white shadow-sm z-10 flex items-center justify-center transition-all ${config.dotColor}`}
                 >
-                    {getRoleIcon(senderRole)}
+                    {getDotIcon()}
                 </div>
             </div>
 

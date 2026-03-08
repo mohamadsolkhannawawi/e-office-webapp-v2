@@ -34,50 +34,66 @@ function TimelineItem({
         if (s.includes("diajukan"))
             return {
                 color: "text-blue-600 bg-blue-50 border-blue-100",
+                dotColor: "bg-blue-400 text-white",
                 icon: <FileText className="h-3 w-3" />,
+                dotIcon: <FileText className="h-3 w-3" />,
             };
         if (
-            s.includes("disetujui") ||
             s.includes("selesai") ||
-            s.includes("publikasi")
+            s.includes("publikasi") ||
+            s.includes("terbit")
         )
             return {
                 color: "text-emerald-600 bg-emerald-50 border-emerald-100",
+                dotColor: "bg-emerald-500 text-white ring-2 ring-emerald-200",
                 icon: <CheckCircle2 className="h-3 w-3" />,
+                dotIcon: <CheckCircle2 className="h-3 w-3" />,
+            };
+        if (s.includes("disetujui"))
+            return {
+                color: "text-green-600 bg-green-50 border-green-100",
+                dotColor: "bg-green-500 text-white ring-2 ring-green-200",
+                icon: <CheckCircle2 className="h-3 w-3" />,
+                dotIcon: <CheckCircle2 className="h-3 w-3" />,
             };
         if (s.includes("ditolak"))
             return {
                 color: "text-red-600 bg-red-50 border-red-100",
+                dotColor: "bg-red-500 text-white ring-2 ring-red-200",
                 icon: <XCircle className="h-3 w-3" />,
+                dotIcon: <XCircle className="h-3 w-3" />,
             };
         if (s.includes("revisi"))
             return {
-                color: "text-orange-600 bg-orange-50 border-orange-100",
+                color: "text-amber-600 bg-amber-50 border-amber-100",
+                dotColor: "bg-amber-400 text-white ring-2 ring-amber-100",
                 icon: <RotateCcw className="h-3 w-3" />,
+                dotIcon: <RotateCcw className="h-3 w-3" />,
             };
         if (s.includes("verifikasi") || s.includes("menunggu"))
             return {
                 color: "text-amber-600 bg-amber-50 border-amber-100",
+                dotColor: "bg-amber-400 text-white",
                 icon: <Clock className="h-3 w-3" />,
+                dotIcon: <Clock className="h-3 w-3" />,
             };
         return {
             color: "text-slate-600 bg-slate-50 border-slate-100",
+            dotColor: "bg-slate-400 text-white",
             icon: <ShieldCheck className="h-3 w-3" />,
+            dotIcon: <ShieldCheck className="h-3 w-3" />,
         };
     };
 
     const getRoleIcon = (role: string) => {
         const r = role.toLowerCase();
-        if (r.includes("mahasiswa")) return <User className="h-3.5 w-3.5" />;
+        if (r.includes("mahasiswa")) return <User className="h-3 w-3" />;
         if (r.includes("supervisor"))
-            return <ShieldCheck className="h-3.5 w-3.5" />;
-        if (r.includes("manajer"))
-            return <ShieldCheck className="h-3.5 w-3.5 text-undip-blue" />;
-        if (r.includes("dekan"))
-            return <PenTool className="h-3.5 w-3.5 text-indigo-600" />;
-        if (r.includes("upa"))
-            return <Hash className="h-3.5 w-3.5 text-sky-600" />;
-        return <ShieldCheck className="h-3.5 w-3.5" />;
+            return <ShieldCheck className="h-3 w-3" />;
+        if (r.includes("manajer")) return <ShieldCheck className="h-3 w-3" />;
+        if (r.includes("dekan")) return <PenTool className="h-3 w-3" />;
+        if (r.includes("upa")) return <Hash className="h-3 w-3" />;
+        return <ShieldCheck className="h-3 w-3" />;
     };
 
     const config = getStatusConfig(status);
@@ -85,14 +101,14 @@ function TimelineItem({
     return (
         <div className="flex gap-4 relative pb-8 group">
             {!isLast && (
-                <div className="absolute left-2.75 top-8 w-0.5 h-[calc(100%-24px)] bg-slate-100 group-hover:bg-blue-100 transition-colors" />
+                <div className="absolute left-2.75 top-8 w-0.5 h-[calc(100%-24px)] bg-slate-100 group-hover:bg-green-100 transition-colors" />
             )}
 
             <div className="relative shrink-0 mt-1">
                 <div
-                    className={`w-6 h-6 rounded-full border-2 border-white shadow-sm z-10 flex items-center justify-center transition-all ${config.color.split(" ")[1]}`}
+                    className={`w-6 h-6 rounded-full border-2 border-white shadow-sm z-10 flex items-center justify-center transition-all ${config.dotColor}`}
                 >
-                    {getRoleIcon(role)}
+                    {config.dotIcon}
                 </div>
             </div>
 

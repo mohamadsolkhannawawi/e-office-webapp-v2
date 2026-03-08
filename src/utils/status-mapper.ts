@@ -4,6 +4,8 @@
 export interface StatusConfig {
     label: string;
     color: string;
+    /** Solid background + text color for the timeline dot circle */
+    dotColor: string;
     defaultDesc: string;
     iconName:
         | "FileText"
@@ -58,6 +60,7 @@ export function getStatusConfig(
         return {
             label: "Selesai / Terbit",
             color: "text-emerald-600 bg-emerald-50 border-emerald-100",
+            dotColor: "bg-emerald-500 text-white ring-2 ring-emerald-200",
             iconName: "CheckCircle2",
             defaultDesc:
                 "Dokumen telah selesai, ditandatangani, dan diterbitkan.",
@@ -69,6 +72,7 @@ export function getStatusConfig(
         return {
             label: "Diajukan",
             color: "text-slate-600 bg-slate-50 border-slate-100",
+            dotColor: "bg-slate-400 text-white",
             iconName: "FileText",
             defaultDesc: "Dokumen sedang menunggu review di tahap berikutnya.",
         };
@@ -79,6 +83,7 @@ export function getStatusConfig(
         return {
             label: "Ditolak",
             color: "text-red-600 bg-red-50 border-red-100",
+            dotColor: "bg-red-500 text-white ring-2 ring-red-200",
             iconName: "XCircle",
             defaultDesc: `Pengajuan ditolak oleh ${senderRole}.`,
         };
@@ -97,7 +102,8 @@ export function getStatusConfig(
                 : `Dokumen dikembalikan oleh ${senderRole} untuk diperbaiki.`;
         return {
             label,
-            color: "text-orange-600 bg-orange-50 border-orange-100",
+            color: "text-amber-600 bg-amber-50 border-amber-100",
+            dotColor: "bg-amber-400 text-white ring-2 ring-amber-100",
             iconName: "RotateCcw",
             defaultDesc,
         };
@@ -115,7 +121,8 @@ export function getStatusConfig(
 
         return {
             label: "Disetujui",
-            color: "text-blue-600 bg-blue-50 border-blue-100",
+            color: "text-green-600 bg-green-50 border-green-100",
+            dotColor: "bg-green-500 text-white ring-2 ring-green-200",
             iconName: "Check",
             defaultDesc: desc,
         };
@@ -125,7 +132,8 @@ export function getStatusConfig(
     if (a === "resubmit") {
         return {
             label: "Revisi Selesai",
-            color: "text-green-600 bg-green-50 border-green-100",
+            color: "text-teal-600 bg-teal-50 border-teal-100",
+            dotColor: "bg-teal-500 text-white",
             iconName: "FileText",
             defaultDesc:
                 "Revisi telah selesai dan pengajuan disubmit ulang untuk ditinjau kembali.",
@@ -137,6 +145,7 @@ export function getStatusConfig(
         return {
             label: "Revisi oleh Mahasiswa",
             color: "text-amber-600 bg-amber-50 border-amber-100",
+            dotColor: "bg-amber-400 text-white ring-2 ring-amber-100",
             iconName: "RotateCcw",
             defaultDesc:
                 "Mahasiswa melakukan revisi mandiri sebelum Supervisor Akademik memproses surat.",
@@ -148,6 +157,7 @@ export function getStatusConfig(
         return {
             label: "Edit oleh Staff",
             color: "text-indigo-600 bg-indigo-50 border-indigo-100",
+            dotColor: "bg-indigo-500 text-white",
             iconName: "PencilLine",
             defaultDesc:
                 "Data surat diperbarui oleh Supervisor Akademik atau Manajer TU.",
@@ -159,6 +169,7 @@ export function getStatusConfig(
         return {
             label: "Diajukan",
             color: "text-blue-600 bg-blue-50 border-blue-100",
+            dotColor: "bg-blue-400 text-white",
             iconName: "FileText",
             defaultDesc: "Pengajuan baru telah berhasil dikirim.",
         };
@@ -168,6 +179,7 @@ export function getStatusConfig(
     return {
         label: "Diproses",
         color: "text-slate-600 bg-slate-50 border-slate-100",
+        dotColor: "bg-slate-400 text-white",
         iconName: "Clock",
         defaultDesc: "Dokumen sedang diproses di tahap ini.",
     };

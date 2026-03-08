@@ -11,6 +11,9 @@ import {
     Shield,
     History,
     Hash,
+    Check,
+    RotateCcw,
+    ShieldCheck,
 } from "lucide-react";
 import {
     verifyLetterPublic,
@@ -117,47 +120,92 @@ function deduplicateHistory(
 function HistoryTimeline({ history }: { history: VerificationHistory[] }) {
     const dedupedHistory = deduplicateHistory(history);
 
+    const getActionConfig = (action: string) => {
+        const a = action.toUpperCase();
+        if (a === "PUBLISHED" || a === "DITERBITKAN")
+            return {
+                dotColor: "bg-emerald-500 ring-2 ring-emerald-200",
+                textColor: "text-emerald-600",
+                icon: <CheckCircle2 className="h-3 w-3 text-white" />,
+            };
+        if (
+            a === "APPROVED" ||
+            a === "APPROVE" ||
+            a === "REVIEWED" ||
+            a === "SIGNED" ||
+            a === "STAMPED" ||
+            a === "NUMBERED"
+        )
+            return {
+                dotColor: "bg-green-500 ring-2 ring-green-200",
+                textColor: "text-green-600",
+                icon: <Check className="h-3 w-3 text-white" />,
+            };
+        if (a === "REJECTED" || a === "REJECT")
+            return {
+                dotColor: "bg-red-500 ring-2 ring-red-200",
+                textColor: "text-red-600",
+                icon: <XCircle className="h-3 w-3 text-white" />,
+            };
+        if (a === "REVISION_REQUESTED" || a === "REVISION")
+            return {
+                dotColor: "bg-amber-400 ring-2 ring-amber-100",
+                textColor: "text-amber-600",
+                icon: <RotateCcw className="h-3 w-3 text-white" />,
+            };
+        if (a === "FORWARDED")
+            return {
+                dotColor: "bg-blue-400",
+                textColor: "text-blue-600",
+                icon: <ShieldCheck className="h-3 w-3 text-white" />,
+            };
+        // CREATED / SUBMITTED / default
+        return {
+            dotColor: "bg-slate-400",
+            textColor: "text-slate-600",
+            icon: <FileText className="h-3 w-3 text-white" />,
+        };
+    };
+
     return (
         <div className="space-y-6">
-            {dedupedHistory.map((item, index) => (
-                <div key={index} className="flex gap-4 relative">
-                    {index !== dedupedHistory.length - 1 && (
-                        <div className="absolute left-2.75 top-6 -bottom-6 w-0.5 bg-slate-100" />
-                    )}
-                    <div
-                        className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center border-2 bg-white ${
-                            index === 0
-                                ? "border-emerald-500"
-                                : "border-slate-200"
-                        }`}
-                    >
+            {dedupedHistory.map((item, index) => {
+                const config = getActionConfig(item.action);
+                const isLast = index === dedupedHistory.length - 1;
+                return (
+                    <div key={index} className="flex gap-4 relative">
+                        {!isLast && (
+                            <div className="absolute left-2.75 top-6 -bottom-6 w-0.5 bg-slate-100" />
+                        )}
                         <div
-                            className={`w-2 h-2 rounded-full ${
-                                index === 0 ? "bg-emerald-500" : "bg-slate-300"
-                            }`}
-                        />
-                    </div>
-                    <div className="flex-1 pb-2">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Badge
-                                variant="outline"
-                                className="text-[10px] uppercase font-bold tracking-wider px-2 py-0 border-slate-200 text-slate-500"
-                            >
-                                {getRoleLabel(item.roleName)}
-                            </Badge>
-                            <span className="text-[11px] text-slate-400 font-medium">
-                                {formatDateTime(item.timestamp)}
-                            </span>
+                            className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm shrink-0 mt-0.5 ${config.dotColor}`}
+                        >
+                            {config.icon}
                         </div>
-                        <p className="text-sm font-bold text-[#00002b]">
-                            {item.actorName}
-                        </p>
-                        <p className="text-xs text-emerald-600 font-medium">
-                            {getActionLabel(item.action)}
-                        </p>
+                        <div className="flex-1 pb-2">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Badge
+                                    variant="outline"
+                                    className="text-[10px] uppercase font-bold tracking-wider px-2 py-0 border-slate-200 text-slate-500"
+                                >
+                                    {getRoleLabel(item.roleName)}
+                                </Badge>
+                                <span className="text-[11px] text-slate-400 font-medium">
+                                    {formatDateTime(item.timestamp)}
+                                </span>
+                            </div>
+                            <p className="text-sm font-bold text-[#00002b]">
+                                {item.actorName}
+                            </p>
+                            <p
+                                className={`text-xs font-medium ${config.textColor}`}
+                            >
+                                {getActionLabel(item.action)}
+                            </p>
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }

@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
 import { SuperAdminDashboard } from "@/components/features/dashboard";
 
+export const dynamic = "force-dynamic";
+
 async function getDashboardData() {
     try {
         const headersList = await headers();

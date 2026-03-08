@@ -302,7 +302,13 @@ export default function PengajuanBaruPage() {
                     />
                 );
             case 3:
-                return <Lampiran data={formData} setData={setFormData} />;
+                return (
+                    <Lampiran
+                        data={formData}
+                        setData={setFormData}
+                        jenis={jenis}
+                    />
+                );
             case 4:
                 return <Review data={formData} />;
             default:

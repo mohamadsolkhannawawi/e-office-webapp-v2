@@ -16,6 +16,7 @@ import {
 interface LampiranProps {
     data: FormDataType;
     setData: Dispatch<SetStateAction<FormDataType>>;
+    jenis?: string;
 }
 import { BsFileEarmarkArrowUp } from "react-icons/bs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,7 +43,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-export function Lampiran({ data, setData }: LampiranProps) {
+export function Lampiran({ data, setData, jenis }: LampiranProps) {
+    const isKeperluanLain = jenis === "keperluan_lain";
     const [selectedUtama, setSelectedUtama] = useState<string>("Semua");
     const [selectedTambahan, setSelectedTambahan] = useState<string>("Semua");
     const [dragActiveMain, setDragActiveMain] = useState(false);
@@ -443,17 +445,39 @@ export function Lampiran({ data, setData }: LampiranProps) {
                             <span className="text-red-500">*</span>
                         </p>
                         <p className="text-gray-500 -mt-2">
-                            Wajib. Unggah minimal 2 dokumen pendukung utama (KTM
-                            & KHS). Format: PDF, JPG, PNG. Maks: 5MB/file.
-                            <br />
-                            <span className="text-xs text-red-500 font-semibold italic">
-                                Catatan: Pastikan mengunggah KTM dan KHS
-                                terbaru.
-                            </span>
-                            <br />
-                            <span className="text-xs text-red-500">
-                                Maksimal 5 file.
-                            </span>
+                            {isKeperluanLain ? (
+                                <>
+                                    Wajib. Unggah dokumen pendukung yang relevan
+                                    dengan keperluan pengajuan (misalnya: surat
+                                    pengantar, undangan, atau dokumen resmi
+                                    terkait). Format: PDF, JPG, PNG. Maks:
+                                    5MB/file.
+                                    <br />
+                                    <span className="text-xs text-red-500 font-semibold italic">
+                                        Catatan: Pastikan dokumen yang diunggah
+                                        sesuai dengan keperluan yang diajukan.
+                                    </span>
+                                    <br />
+                                    <span className="text-xs text-red-500">
+                                        Maksimal 5 file.
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    Wajib. Unggah minimal 2 dokumen pendukung
+                                    utama (KTM &amp; KHS). Format: PDF, JPG,
+                                    PNG. Maks: 5MB/file.
+                                    <br />
+                                    <span className="text-xs text-red-500 font-semibold italic">
+                                        Catatan: Pastikan mengunggah KTM dan KHS
+                                        terbaru.
+                                    </span>
+                                    <br />
+                                    <span className="text-xs text-red-500">
+                                        Maksimal 5 file.
+                                    </span>
+                                </>
+                            )}
                         </p>
 
                         <div

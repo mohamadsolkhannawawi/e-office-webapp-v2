@@ -678,13 +678,13 @@ export function AdminDetailSurat({
                                                                         Stempel
                                                                         Teraplikasi
                                                                     </p>
-                                                                    <div className="w-20 h-20 relative">
-                                                                        <img
+                                                                    <div className="w-20 h-20">
+                                                                        <SignatureImage
                                                                             src={
                                                                                 upaStampUrl
                                                                             }
                                                                             alt="Stempel"
-                                                                            className="object-contain w-full h-full"
+                                                                            className="object-contain w-full h-full mix-blend-multiply"
                                                                         />
                                                                     </div>
                                                                 </div>

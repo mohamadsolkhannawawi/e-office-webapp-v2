@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Edit2, CircleAlert } from "lucide-react";
+import { AlertCircle, Edit2, CircleAlert, Save, X } from "lucide-react";
 import {
     validateNamaLengkap,
     validateRole,
@@ -59,6 +59,8 @@ interface FieldProps {
     onBlur?: () => void;
     error?: string;
     onEditToggle?: () => void;
+    onSave?: () => void;
+    onCancel?: () => void;
     isEditable?: boolean;
     helperText?: string;
 }
@@ -75,6 +77,8 @@ function FormField({
     onBlur,
     error,
     onEditToggle,
+    onSave,
+    onCancel,
     isEditable,
     helperText,
 }: FieldProps) {
@@ -90,7 +94,9 @@ function FormField({
                             <button
                                 type="button"
                                 onClick={() => setShowHelper(!showHelper)}
-                                onBlur={() => setTimeout(() => setShowHelper(false), 150)}
+                                onBlur={() =>
+                                    setTimeout(() => setShowHelper(false), 150)
+                                }
                                 className="text-gray-500 hover:text-gray-700 transition-colors flex items-center"
                             >
                                 <CircleAlert className="w-4 h-4" />
@@ -103,24 +109,48 @@ function FormField({
                         </div>
                     )}
                 </div>
-                {onEditToggle && (
-                    <button
-                        type="button"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            onEditToggle();
-                        }}
-                        className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-3xl ${
-                            isEditable
-                                ? "text-amber-600 bg-amber-50 border border-amber-100"
-                                : "text-amber-600 hover:text-amber-700 hover:bg-slate-50"
-                        }`}
-                    >
-                        <Edit2 size={10} />
-                        {isEditable ? "Sedang Diedit" : "Koreksi Data"}
-                    </button>
-                )}
+                {onEditToggle &&
+                    (isEditable ? (
+                        <div className="flex items-center gap-1">
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onSave?.();
+                                }}
+                                className="text-[10px] flex items-center gap-1 bg-green-500 text-white hover:bg-green-600 font-semibold px-2.5 py-1 rounded-full transition-colors shadow-sm"
+                            >
+                                <Save size={10} />
+                                Simpan
+                            </button>
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onCancel?.();
+                                }}
+                                className="text-[10px] flex items-center gap-1 bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium px-2.5 py-1 rounded-full transition-colors"
+                            >
+                                <X size={10} />
+                                Batal
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onEditToggle();
+                            }}
+                            className="text-[11px] flex items-center gap-1.5 bg-amber-500 text-white hover:bg-amber-600 font-semibold px-3 py-1 rounded-full transition-colors shadow-sm"
+                        >
+                            <Edit2 size={10} />
+                            Koreksi Data
+                        </button>
+                    ))}
             </div>
             <div className="relative">
                 <Input
@@ -306,9 +336,26 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
     const [editableFields, setEditableFields] = useState<
         Record<string, boolean>
     >({});
+    const [fieldBackups, setFieldBackups] = useState<Record<string, unknown>>(
+        {},
+    );
 
-    const toggleEdit = (field: string) => {
-        setEditableFields((prev) => ({ ...prev, [field]: !prev[field] }));
+    const enterEdit = (field: string) => {
+        setFieldBackups((prev) => ({
+            ...prev,
+            [field]: data[field as keyof FormDataType],
+        }));
+        setEditableFields((prev) => ({ ...prev, [field]: true }));
+    };
+
+    const saveEdit = (field: string) => {
+        setEditableFields((prev) => ({ ...prev, [field]: false }));
+    };
+
+    const cancelEdit = (field: string) => {
+        const backup = fieldBackups[field];
+        setData((prev) => ({ ...prev, [field]: backup }));
+        setEditableFields((prev) => ({ ...prev, [field]: false }));
     };
 
     return (
@@ -323,7 +370,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             placeholder="Contoh: Ahmad Syaifullah"
                             readOnly
                             isEditable={editableFields.namaLengkap}
-                            onEditToggle={() => toggleEdit("namaLengkap")}
+                            onEditToggle={() => enterEdit("namaLengkap")}
+                            onSave={() => saveEdit("namaLengkap")}
+                            onCancel={() => cancelEdit("namaLengkap")}
                             helperText="Nama lengkap sesuai dengan identitas resmi Anda"
                             error={errors.namaLengkap}
                             onChange={(val) => {
@@ -366,7 +415,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             placeholder="Contoh: 24060121130089"
                             readOnly
                             isEditable={editableFields.nim}
-                            onEditToggle={() => toggleEdit("nim")}
+                            onEditToggle={() => enterEdit("nim")}
+                            onSave={() => saveEdit("nim")}
+                            onCancel={() => cancelEdit("nim")}
                             helperText="Nomor Induk Mahasiswa (14 digit)"
                             error={errors.nim}
                             onChange={(val) => {
@@ -384,7 +435,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             placeholder="Contoh: ahmadsyaifullah@students.undip.ac.id"
                             readOnly
                             isEditable={editableFields.email}
-                            onEditToggle={() => toggleEdit("email")}
+                            onEditToggle={() => enterEdit("email")}
+                            onSave={() => saveEdit("email")}
+                            onCancel={() => cancelEdit("email")}
                             helperText="Email aktif Anda. Pastikan email dapat menerima notifikasi"
                             error={errors.email}
                             onChange={(val) => {
@@ -403,7 +456,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             placeholder="Contoh: Informatika"
                             readOnly
                             isEditable={editableFields.departemen}
-                            onEditToggle={() => toggleEdit("departemen")}
+                            onEditToggle={() => enterEdit("departemen")}
+                            onSave={() => saveEdit("departemen")}
+                            onCancel={() => cancelEdit("departemen")}
                             helperText="Departemen tempat Anda kuliah"
                             error={errors.departemen}
                             onChange={(val) => {
@@ -426,7 +481,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             placeholder="Contoh: S1 - Informatika"
                             readOnly
                             isEditable={editableFields.programStudi}
-                            onEditToggle={() => toggleEdit("programStudi")}
+                            onEditToggle={() => enterEdit("programStudi")}
+                            onSave={() => saveEdit("programStudi")}
+                            onCancel={() => cancelEdit("programStudi")}
                             helperText="Jenjang dan program studi Anda (contoh: S1 - Informatika)"
                             error={errors.programStudi}
                             onChange={(val) => {
@@ -453,7 +510,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                             placeholder="Contoh: Blora"
                             readOnly
                             isEditable={editableFields.tempatLahir}
-                            onEditToggle={() => toggleEdit("tempatLahir")}
+                            onEditToggle={() => enterEdit("tempatLahir")}
+                            onSave={() => saveEdit("tempatLahir")}
+                            onCancel={() => cancelEdit("tempatLahir")}
                             helperText="Kota/kabupaten tempat Anda dilahirkan"
                             error={errors.tempatLahir}
                             onChange={(val) => {
@@ -479,20 +538,41 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                                     <span>Tanggal Lahir</span>
                                     <HelperButton text="Tanggal lahir sesuai identitas resmi Anda" />
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleEdit("tanggalLahir")}
-                                    className={`text-[10px] flex items-center gap-1.5 transition-colors px-2 py-1 rounded-3xl ${
-                                        editableFields.tanggalLahir
-                                            ? "text-amber-600 bg-amber-50 border border-amber-100"
-                                            : "text-amber-600 hover:text-amber-700 hover:bg-slate-50"
-                                    }`}
-                                >
-                                    <Edit2 size={10} />
-                                    {editableFields.tanggalLahir
-                                        ? "Sedang Diedit"
-                                        : "Koreksi Data"}
-                                </button>
+                                {editableFields.tanggalLahir ? (
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                saveEdit("tanggalLahir")
+                                            }
+                                            className="text-[10px] flex items-center gap-1 bg-green-500 text-white hover:bg-green-600 font-semibold px-2.5 py-1 rounded-full transition-colors shadow-sm"
+                                        >
+                                            <Save size={10} />
+                                            Simpan
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                cancelEdit("tanggalLahir")
+                                            }
+                                            className="text-[10px] flex items-center gap-1 bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium px-2.5 py-1 rounded-full transition-colors"
+                                        >
+                                            <X size={10} />
+                                            Batal
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            enterEdit("tanggalLahir")
+                                        }
+                                        className="text-[11px] flex items-center gap-1.5 bg-amber-500 text-white hover:bg-amber-600 font-semibold px-3 py-1 rounded-full transition-colors shadow-sm"
+                                    >
+                                        <Edit2 size={10} />
+                                        Koreksi Data
+                                    </button>
+                                )}
                             </Label>
                             <div
                                 className={
@@ -546,7 +626,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
 
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <Label className="text-sm font-semibold text-gray-700">No. HP</Label>
+                                <Label className="text-sm font-semibold text-gray-700">
+                                    No. HP
+                                </Label>
                                 <HelperButton text="Nomor HP Aktif anda. Pastikan No. HP dapat dihubungi" />
                             </div>
                             <Input
@@ -599,7 +681,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
                         </div>
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <Label className="text-sm font-semibold text-gray-700">IPK</Label>
+                                <Label className="text-sm font-semibold text-gray-700">
+                                    IPK
+                                </Label>
                                 <HelperButton text="Indeks Prestasi Kumulatif terakhir Anda (skala 0.00 - 4.00)" />
                             </div>
                             <Input
@@ -665,7 +749,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
 
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <Label className="text-sm font-semibold text-gray-700">IPS</Label>
+                                <Label className="text-sm font-semibold text-gray-700">
+                                    IPS
+                                </Label>
                                 <HelperButton text="Indeks Prestasi Semester terakhir Anda (skala 0.00 - 4.00)" />
                             </div>
                             <Input
@@ -731,7 +817,9 @@ export function InfoPengajuan({ data, setData }: InfoPengajuanProps) {
 
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <Label className="text-sm font-semibold text-gray-700">Semester</Label>
+                                <Label className="text-sm font-semibold text-gray-700">
+                                    Semester
+                                </Label>
                                 <HelperButton text="Semester kuliah Anda saat ini (contoh: 7 untuk semester tujuh)" />
                             </div>
                             <Input

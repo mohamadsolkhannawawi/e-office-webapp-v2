@@ -730,7 +730,7 @@ export function AdminDetailSurat({
                                                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
                                                 >
                                                     <Download className="h-5 w-5" />
-                                                    Cetak/PDF
+                                                    Unduh PDF
                                                 </Button>
                                             </div>
                                         )}

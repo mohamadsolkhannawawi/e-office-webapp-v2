@@ -199,7 +199,13 @@ export function SuratPreviewContent({
                 return `Menunggu Verifikasi (${pendingRole})`;
             })(),
         },
-        { label: "Jenis Surat", value: "Surat Rekomendasi Beasiswa" },
+        {
+            label: "Jenis Surat",
+            value:
+                data?.jenisBeasiswa === "keperluan_lain"
+                    ? "Surat Rekomendasi Keperluan Lain"
+                    : "Surat Rekomendasi Beasiswa",
+        },
         {
             label: "Keperluan",
             value: data?.keperluan || "-",
@@ -1120,7 +1126,7 @@ export function SuratPreviewContent({
                                                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
                                             >
                                                 <Download className="h-5 w-5" />
-                                                Cetak/PDF
+                                                Unduh PDF
                                             </Button>
                                         </div>
                                     </div>

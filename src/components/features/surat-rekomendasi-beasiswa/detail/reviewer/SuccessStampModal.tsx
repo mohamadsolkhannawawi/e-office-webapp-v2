@@ -19,7 +19,7 @@ interface SuccessStampModalProps {
 export function SuccessStampModal({ isOpen, onClose }: SuccessStampModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[400px] rounded-[32px] border-none shadow-2xl p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-100 rounded-4xl border-none shadow-2xl p-0 overflow-hidden">
                 <div className="p-8 text-center space-y-6">
                     <div className="flex justify-center">
                         <div className="relative">

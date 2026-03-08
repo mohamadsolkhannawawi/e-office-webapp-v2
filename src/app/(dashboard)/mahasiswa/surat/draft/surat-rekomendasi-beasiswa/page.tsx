@@ -281,6 +281,9 @@ export default function SuratDraftPage() {
                                 <SelectItem value="akademik">
                                     Akademik
                                 </SelectItem>
+                                <SelectItem value="keperluan_lain">
+                                    Keperluan Lain
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

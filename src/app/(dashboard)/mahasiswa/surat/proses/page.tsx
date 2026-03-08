@@ -254,6 +254,9 @@ export default function SuratDalamProsesPage() {
                                 <SelectItem value="akademik">
                                     Beasiswa Akademik
                                 </SelectItem>
+                                <SelectItem value="keperluan_lain">
+                                    Keperluan Lain
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

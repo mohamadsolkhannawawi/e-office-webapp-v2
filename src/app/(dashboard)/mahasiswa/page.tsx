@@ -1,13 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-    GraduationCap,
-    FileText,
-    Search,
-    MoreHorizontal,
-    ChevronRight,
-} from "lucide-react";
+import { GraduationCap, FileText, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 
@@ -21,28 +15,12 @@ const DASHBOARD_ACTIONS = [
         disabled: false,
     },
     {
-        title: "Surat Keterangan Aktif Kuliah",
-        description: "Bukti keaktifan mahasiswa semester ini",
+        title: "Surat Rekomendasi Keperluan Lain",
+        description: "Pengajuan surat rekomendasi untuk keperluan non-beasiswa",
         icon: <FileText className="h-5 w-5" />,
-        href: "#",
-        color: "bg-gray-50 text-gray-400",
-        disabled: true,
-    },
-    {
-        title: "Surat Izin Penelitian",
-        description: "Permohonan izin riset ke instansi terkait",
-        icon: <Search className="h-5 w-5" />,
-        href: "#",
-        color: "bg-gray-50 text-gray-400",
-        disabled: true,
-    },
-    {
-        title: "Surat Lainnya",
-        description: "Permohonan surat administrasi lainnya",
-        icon: <MoreHorizontal className="h-5 w-5" />,
-        href: "#",
-        color: "bg-gray-50 text-gray-400",
-        disabled: true,
+        href: "/mahasiswa/surat/surat-rekomendasi-beasiswa/keperluan_lain",
+        color: "bg-emerald-50 text-emerald-600",
+        disabled: false,
     },
 ];
 

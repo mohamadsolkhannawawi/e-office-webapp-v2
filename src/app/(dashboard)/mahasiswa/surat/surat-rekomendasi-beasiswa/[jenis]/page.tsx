@@ -295,7 +295,11 @@ export default function PengajuanBaruPage() {
                 return <InfoPengajuan data={formData} setData={setFormData} />;
             case 2:
                 return (
-                    <DetailPengajuan data={formData} setData={setFormData} />
+                    <DetailPengajuan
+                        data={formData}
+                        setData={setFormData}
+                        jenis={jenis}
+                    />
                 );
             case 3:
                 return <Lampiran data={formData} setData={setFormData} />;

@@ -8,6 +8,7 @@ import {
     StyleSheet,
     Image,
 } from "@react-pdf/renderer";
+import { rewriteMinioUrlAbsolute } from "@/utils/minio-url";
 import logoUndip from "@/assets/images/logo-undip-main.png";
 
 // Register fonts if needed, but standard fonts (Helvetica, Times-Roman) work out of the box.
@@ -432,12 +433,15 @@ export const SuratPDF = ({
                     <View style={styles.signatureImageContainer}>
                         {showSignature && signaturePath ? (
                             <Image
-                                src={signaturePath}
+                                src={rewriteMinioUrlAbsolute(signaturePath)}
                                 style={styles.signatureImage}
                             />
                         ) : null}
                         {showStamp && stampUrl && (
-                            <Image src={stampUrl} style={styles.stampImage} />
+                            <Image
+                                src={rewriteMinioUrlAbsolute(stampUrl)}
+                                style={styles.stampImage}
+                            />
                         )}
                     </View>
 

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import React from "react";
 import { SignatureImage } from "@/components/ui/signature-image";
+import { rewriteMinioUrl } from "@/utils/minio-url";
 import logoUndip from "@/assets/images/logo-undip-main.png";
 /* eslint-disable @next/next/no-img-element */
 
@@ -271,7 +272,7 @@ export function SuratDocument({
                                 {showStamp && stampUrl && (
                                     <div className="absolute -left-5 top-2.5 w-27.5 h-27.5 opacity-70 pointer-events-none">
                                         <img
-                                            src={stampUrl}
+                                            src={rewriteMinioUrl(stampUrl)}
                                             alt="Stamp"
                                             className="w-full h-full object-contain mix-blend-multiply"
                                             loading="lazy"

@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import React, { ImgHTMLAttributes, useState } from "react";
+import { rewriteMinioUrl } from "@/utils/minio-url";
 
 interface SignatureImageProps extends ImgHTMLAttributes<HTMLImageElement> {
     src: string;
@@ -30,8 +31,11 @@ export function SignatureImage({
         }
     };
 
+    // Rewrite localhost MinIO URLs to go through the /minio-proxy Next.js route
+    const resolvedSrc = rewriteMinioUrl(src);
+
     // If no valid src or error loading, don't render anything
-    if (!src || hasError) {
+    if (!resolvedSrc || hasError) {
         if (fallbackSrc) {
             return (
                 <img
@@ -49,7 +53,7 @@ export function SignatureImage({
     // This avoids Next.js Image optimization issues with complex query strings
     return (
         <img
-            src={src}
+            src={resolvedSrc}
             alt={alt}
             className={className}
             loading="lazy"

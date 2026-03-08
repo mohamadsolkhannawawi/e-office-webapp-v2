@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
                     source: "/api/:path*",
                     destination: `${backendUrl}/api/:path*`,
                 },
+                {
+                    // Proxy MinIO requests so that browser can fetch images
+                    // whose presigned URLs contain localhost:MINIO_PORT
+                    source: "/minio-proxy/:path*",
+                    destination: `http://${minioHost}:${minioPort}/:path*`,
+                },
             ],
         };
     },

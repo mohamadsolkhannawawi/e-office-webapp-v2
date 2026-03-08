@@ -105,19 +105,14 @@ export default function DetailRevisiPage() {
         ips: application.formData.ips,
     };
 
+    const jenisBeasiswa = application.formData.jenisBeasiswa as string;
     const detailSuratData = {
-        jenisSurat: application.letterType?.name
-            ? `${application.letterType.name}${
-                  application.formData.jenisBeasiswa
-                      ? ` (${application.formData.jenisBeasiswa})`
-                      : ""
-              }`
-            : `Surat Rekomendasi Beasiswa${
-                  application.formData.jenisBeasiswa
-                      ? ` (${application.formData.jenisBeasiswa})`
-                      : ""
-              }`,
-        keperluan: "-", // Remove scholarshipName (judul revisi) from here
+        jenisSurat:
+            jenisBeasiswa === "keperluan_lain"
+                ? "Surat Rekomendasi Keperluan Lain"
+                : application.letterType?.name || "Surat Rekomendasi Beasiswa",
+        jenis: jenisBeasiswa,
+        keperluan: application.scholarshipName || "-",
     };
 
     const lampiranData = application.attachments.map((att) => ({

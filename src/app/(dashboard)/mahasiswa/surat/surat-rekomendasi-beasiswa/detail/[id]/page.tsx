@@ -122,18 +122,13 @@ export default function DetailPengajuanPage() {
         ips: application.formData.ips,
     };
 
+    const jenisBeasiswa = application.formData.jenisBeasiswa as string;
     const detailSuratData = {
-        jenisSurat: application.letterType?.name
-            ? `${application.letterType.name}${
-                  application.formData.jenisBeasiswa
-                      ? ` (${application.formData.jenisBeasiswa})`
-                      : ""
-              }`
-            : `Surat Rekomendasi Beasiswa${
-                  application.formData.jenisBeasiswa
-                      ? ` (${application.formData.jenisBeasiswa})`
-                      : ""
-              }`,
+        jenisSurat:
+            jenisBeasiswa === "keperluan_lain"
+                ? "Surat Rekomendasi Keperluan Lain"
+                : application.letterType?.name || "Surat Rekomendasi Beasiswa",
+        jenis: jenisBeasiswa,
         namaBeasiswa: application.scholarshipName || "-",
         status: application.status,
     };

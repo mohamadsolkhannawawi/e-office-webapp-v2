@@ -9,6 +9,7 @@ import {
 
 interface ReviewProps {
     data: FormDataType;
+    jenis?: string;
 }
 
 function SummaryRow({
@@ -31,7 +32,8 @@ function SummaryRow({
     );
 }
 
-export function Review({ data }: ReviewProps) {
+export function Review({ data, jenis }: ReviewProps) {
+    const isKeperluanLain = jenis === "keperluan_lain";
     const isDataComplete = () =>
         [
             "namaLengkap",
@@ -48,8 +50,10 @@ export function Review({ data }: ReviewProps) {
             "semester",
         ].every((k) => !!data[k]);
 
+    const minAttachments = isKeperluanLain ? 1 : 2;
     const hasMainAttachments =
-        Array.isArray(data.lampiranUtama) && data.lampiranUtama.length >= 2;
+        Array.isArray(data.lampiranUtama) &&
+        data.lampiranUtama.length >= minAttachments;
 
     // Konversi file ke format FilePreviewItem
     const previewFiles: FilePreviewItem[] = [];
@@ -131,10 +135,18 @@ export function Review({ data }: ReviewProps) {
                     <div className="flex flex-col">
                         <SummaryRow
                             label="Jenis Surat"
-                            value="SRB / Surat Rekomendasi Beasiswa"
+                            value={
+                                isKeperluanLain
+                                    ? "Surat Rekomendasi Keperluan Lain"
+                                    : "Surat Rekomendasi Beasiswa"
+                            }
                         />
                         <SummaryRow
-                            label="Nama Beasiswa"
+                            label={
+                                isKeperluanLain
+                                    ? "Keperluan Pengajuan"
+                                    : "Nama Beasiswa"
+                            }
                             value={data.namaBeasiswa || "-"}
                         />
                     </div>

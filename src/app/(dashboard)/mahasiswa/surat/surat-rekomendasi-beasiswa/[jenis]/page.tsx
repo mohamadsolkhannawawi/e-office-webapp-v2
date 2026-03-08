@@ -254,9 +254,10 @@ export default function PengajuanBaruPage() {
             );
         }
         if (currentStep === 3) {
+            const minFiles = jenis === "keperluan_lain" ? 1 : 2;
             return (
                 Array.isArray(formData.lampiranUtama) &&
-                formData.lampiranUtama.length >= 2
+                formData.lampiranUtama.length >= minFiles
             );
         }
         return true;
@@ -310,7 +311,7 @@ export default function PengajuanBaruPage() {
                     />
                 );
             case 4:
-                return <Review data={formData} />;
+                return <Review data={formData} jenis={jenis} />;
             default:
                 return <InfoPengajuan data={formData} setData={setFormData} />;
         }

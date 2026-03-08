@@ -20,6 +20,7 @@ function InfoRow({ label, value }: InfoRowProps) {
 export interface DetailSuratPengajuanProps {
     data?: {
         jenisSurat: string;
+        jenis?: string;
         namaBeasiswa?: string;
         keperluan?: string;
         status?: string;
@@ -31,6 +32,10 @@ export function DetailSuratPengajuan({ data }: DetailSuratPengajuanProps) {
         jenisSurat: "Surat Rekomendasi Beasiswa",
         namaBeasiswa: "-",
     };
+    const isKeperluanLain = detail.jenis === "keperluan_lain";
+    const keperluanLabel = isKeperluanLain
+        ? "Keperluan Pengajuan"
+        : "Nama Beasiswa";
 
     return (
         <Card className="border-none shadow-sm bg-white rounded-3xl">
@@ -43,7 +48,7 @@ export function DetailSuratPengajuan({ data }: DetailSuratPengajuanProps) {
                 <div className="space-y-0">
                     <InfoRow label="Jenis Surat" value={detail.jenisSurat} />
                     <InfoRow
-                        label="Nama Beasiswa"
+                        label={keperluanLabel}
                         value={detail.namaBeasiswa || detail.keperluan || "-"}
                     />
                 </div>

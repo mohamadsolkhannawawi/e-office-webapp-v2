@@ -354,7 +354,11 @@ export function AdminDetailSurat({
     };
 
     const detailSuratData: DetailSuratPengajuanProps["data"] = {
-        jenisSurat: "Surat Rekomendasi Beasiswa",
+        jenisSurat:
+            initialData?.formData?.jenisBeasiswa === "keperluan_lain"
+                ? "Surat Rekomendasi Keperluan Lain"
+                : "Surat Rekomendasi Beasiswa",
+        jenis: initialData?.formData?.jenisBeasiswa as string,
         keperluan:
             initialData?.scholarshipName ||
             initialData?.formData?.namaBeasiswa ||

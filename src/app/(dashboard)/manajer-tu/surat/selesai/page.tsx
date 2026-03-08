@@ -114,6 +114,18 @@ export default async function SelesaiPage(props: {
                 : "Revisi Diperlukan";
             statusColor = "bg-sky-500 text-white";
             statusIcon = <RotateCw className="w-4 h-4" />;
+        } else if (app.status === "PENDING" || app.status === "IN_PROGRESS") {
+            target = stepToRole[app.currentStep] || "Diproses";
+
+            if (app.currentStep === 2) {
+                status = "Menunggu Tindakan Anda";
+                statusColor = "bg-amber-500 text-white";
+                statusIcon = <AlertCircle className="w-4 h-4" />;
+            } else {
+                status = `Diproses di ${stepToRole[app.currentStep]}`;
+                statusColor = "bg-blue-500 text-white";
+                statusIcon = <Clock className="w-4 h-4" />;
+            }
         }
 
         return {

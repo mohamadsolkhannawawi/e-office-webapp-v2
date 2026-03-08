@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
 import {
     Select,
@@ -12,12 +13,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
     ChevronRight,
     ChevronLeft,
@@ -28,6 +23,7 @@ import {
     CheckCircle,
     Download,
     Loader2,
+    X,
 } from "lucide-react";
 import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
@@ -44,7 +40,8 @@ export default function SelesaiPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterBeasiswa, setFilterBeasiswa] = useState("all");
-    const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+    const [startDateInput, setStartDateInput] = useState("");
+    const [endDateInput, setEndDateInput] = useState("");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [pagination, setPagination] = useState({
         page: 1,
@@ -52,23 +49,21 @@ export default function SelesaiPage() {
         total: 0,
         totalPages: 1,
     });
-    const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     const fetchSelesaiData = useCallback(async () => {
         setLoading(true);
         try {
-            // Convert date range to ISO format with proper times
             let startDateIso: string | undefined = undefined;
             let endDateIso: string | undefined = undefined;
 
-            if (dateRange.from) {
-                const start = new Date(dateRange.from);
+            if (startDateInput) {
+                const start = new Date(startDateInput);
                 start.setHours(0, 0, 0, 0);
                 startDateIso = start.toISOString();
             }
 
-            if (dateRange.to) {
-                const end = new Date(dateRange.to);
+            if (endDateInput) {
+                const end = new Date(endDateInput);
                 end.setHours(23, 59, 59, 999);
                 endDateIso = end.toISOString();
             }
@@ -101,7 +96,8 @@ export default function SelesaiPage() {
         pagination.limit,
         searchTerm,
         filterBeasiswa,
-        dateRange,
+        startDateInput,
+        endDateInput,
         sortOrder,
     ]);
 
@@ -117,32 +113,6 @@ export default function SelesaiPage() {
             toast.error(
                 `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
             );
-        }
-    };
-
-    const handleDownloadDOCX = async (applicationId: string) => {
-        setDownloadingId(applicationId);
-        try {
-            const templateId = await getTemplateIdByLetterType(
-                "Surat Rekomendasi Beasiswa",
-            );
-            if (templateId) {
-                await generateAndDownloadDocument(
-                    templateId,
-                    applicationId,
-                    `Surat-Rekomendasi-${applicationId}.docx`,
-                );
-                toast.success("Dokumen Word berhasil diunduh!");
-            } else {
-                toast.error("Template tidak ditemukan");
-            }
-        } catch (error) {
-            console.error("Error downloading DOCX:", error);
-            toast.error(
-                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
-            );
-        } finally {
-            setDownloadingId(null);
         }
     };
 
@@ -210,13 +180,11 @@ export default function SelesaiPage() {
                             <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
                                 <div className="flex items-center gap-2">
                                     <Filter className="h-4 w-4" />
-                                    <SelectValue placeholder="Jenis Beasiswa" />
+                                    <SelectValue placeholder="Jenis Surat" />
                                 </div>
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">
-                                    Semua Beasiswa
-                                </SelectItem>
+                                <SelectItem value="all">Semua Jenis</SelectItem>
                                 <SelectItem value="internal">
                                     Beasiswa Internal
                                 </SelectItem>
@@ -226,38 +194,60 @@ export default function SelesaiPage() {
                                 <SelectItem value="akademik">
                                     Beasiswa Akademik
                                 </SelectItem>
+                                <SelectItem value="keperluan_lain">
+                                    Keperluan Lain
+                                </SelectItem>
                             </SelectContent>
                         </Select>
 
-                        {/* Date Range Picker */}
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className="h-10 border-slate-100 text-slate-600 gap-2 w-full sm:w-50"
+                        {/* Date Range Filter */}
+                        <div className="flex items-center gap-2 bg-slate-50/50 rounded-lg p-2 border border-slate-100">
+                            <Calendar className="h-4 w-4 text-slate-400 ml-1" />
+                            <div className="flex items-center gap-2">
+                                <Label
+                                    htmlFor="startDate"
+                                    className="text-xs text-slate-500 whitespace-nowrap"
                                 >
-                                    <Calendar className="h-4 w-4" />
-                                    {dateRange.from && dateRange.to
-                                        ? `${format(dateRange.from, "dd LLL", { locale: id })} - ${format(dateRange.to, "dd LLL", { locale: id })}`
-                                        : "Rentang Tanggal"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="end">
-                                <CalendarComponent
-                                    mode="range"
-                                    selected={{
-                                        from: dateRange.from,
-                                        to: dateRange.to,
-                                    }}
-                                    onSelect={(
-                                        range:
-                                            | { from?: Date; to?: Date }
-                                            | undefined,
-                                    ) => setDateRange(range || {})}
-                                    initialFocus
+                                    Dari
+                                </Label>
+                                <Input
+                                    id="startDate"
+                                    type="date"
+                                    value={startDateInput}
+                                    onChange={(e) =>
+                                        setStartDateInput(e.target.value)
+                                    }
+                                    className="h-8 text-xs border-slate-200 w-36"
                                 />
-                            </PopoverContent>
-                        </Popover>
+                                <Label
+                                    htmlFor="endDate"
+                                    className="text-xs text-slate-500 whitespace-nowrap"
+                                >
+                                    Sampai
+                                </Label>
+                                <Input
+                                    id="endDate"
+                                    type="date"
+                                    value={endDateInput}
+                                    onChange={(e) =>
+                                        setEndDateInput(e.target.value)
+                                    }
+                                    className="h-8 text-xs border-slate-200 w-36"
+                                />
+                                {(startDateInput || endDateInput) && (
+                                    <button
+                                        onClick={() => {
+                                            setStartDateInput("");
+                                            setEndDateInput("");
+                                        }}
+                                        title="Hapus filter tanggal"
+                                        className="text-slate-400 hover:text-red-500 transition-colors"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
 
                         {/* Sort Order */}
                         <Select
@@ -287,11 +277,9 @@ export default function SelesaiPage() {
                             <tr className="bg-undip-blue border-b border-slate-100 text-[11px] uppercase text-white font-bold tracking-wider">
                                 <th className="px-6 py-4 w-12">No</th>
                                 <th className="px-6 py-4">Nama Pengaju</th>
-                                <th className="px-6 py-4">NIM</th>
-                                <th className="px-6 py-4">Beasiswa</th>
+                                <th className="px-6 py-4">Subjek Surat</th>
                                 <th className="px-6 py-4">Nomor Surat</th>
                                 <th className="px-6 py-4">Tanggal Selesai</th>
-                                <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -299,7 +287,7 @@ export default function SelesaiPage() {
                             {loading ? (
                                 <tr>
                                     <td
-                                        colSpan={8}
+                                        colSpan={6}
                                         className="px-6 py-12 text-center"
                                     >
                                         <div className="flex flex-col items-center justify-center gap-2">
@@ -328,7 +316,7 @@ export default function SelesaiPage() {
                             ) : applications.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={8}
+                                        colSpan={6}
                                         className="px-6 py-12 text-center"
                                     >
                                         <div className="flex flex-col items-center justify-center gap-2">
@@ -370,13 +358,15 @@ export default function SelesaiPage() {
                                                 index +
                                                 1}
                                         </td>
-                                        <td className="px-6 py-4 font-bold text-slate-700">
-                                            {app.formData?.namaLengkap ||
-                                                app.applicantName ||
-                                                "N/A"}
-                                        </td>
-                                        <td className="px-6 py-4 text-slate-600">
-                                            {app.formData?.nim || "-"}
+                                        <td className="px-6 py-4">
+                                            <div className="font-bold text-slate-700">
+                                                {app.formData?.namaLengkap ||
+                                                    app.applicantName ||
+                                                    "N/A"}
+                                            </div>
+                                            <div className="text-xs text-slate-400 mt-0.5">
+                                                {app.formData?.nim || "-"}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 text-slate-600">
                                             {app.scholarshipName ||
@@ -391,23 +381,15 @@ export default function SelesaiPage() {
                                                 app.updatedAt,
                                             ).toLocaleDateString("id-ID")}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <CheckCircle className="w-4 h-4 text-emerald-500" />
-                                                <span className="text-[11px] font-bold uppercase text-emerald-500">
-                                                    Terbit
-                                                </span>
-                                            </div>
-                                        </td>
                                         <td className="px-6 py-4 text-center">
-                                            <div className="flex justify-center gap-2">
+                                            <div className="flex flex-col items-center gap-2">
                                                 <Link
                                                     href={`/upa/surat/surat-rekomendasi-beasiswa/detail/${app.id}?from=selesai`}
                                                 >
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="rounded-full h-8 text-xs bg-undip-blue font-bold border-slate-100 text-white hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4"
+                                                        className="rounded-full h-8 text-xs bg-undip-blue font-bold border-slate-100 text-white hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4 w-28"
                                                     >
                                                         <Eye className="h-3.5 w-3.5" />
                                                         Detail
@@ -420,30 +402,10 @@ export default function SelesaiPage() {
                                                         )
                                                     }
                                                     size="sm"
-                                                    className="rounded-full h-8 text-xs bg-emerald-600 hover:bg-emerald-700 font-bold border-slate-100 text-white transition-all gap-1.5 px-4"
+                                                    className="rounded-full h-8 text-xs bg-emerald-600 hover:bg-emerald-700 font-bold border-slate-100 text-white transition-all gap-1.5 px-4 w-28"
                                                 >
                                                     <Download className="h-3.5 w-3.5" />
                                                     PDF
-                                                </Button>
-                                                <Button
-                                                    onClick={() =>
-                                                        handleDownloadDOCX(
-                                                            app.id,
-                                                        )
-                                                    }
-                                                    size="sm"
-                                                    disabled={
-                                                        downloadingId === app.id
-                                                    }
-                                                    className="rounded-full h-8 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 font-bold border-slate-100 text-white transition-all gap-1.5 px-4"
-                                                >
-                                                    {downloadingId ===
-                                                    app.id ? (
-                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                                    ) : (
-                                                        <Download className="h-3.5 w-3.5" />
-                                                    )}
-                                                    Word
                                                 </Button>
                                             </div>
                                         </td>

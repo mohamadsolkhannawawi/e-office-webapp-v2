@@ -58,7 +58,6 @@ export default function ArsipPage() {
         total: 0,
         totalPages: 1,
     });
-    const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     const fetchArchiveData = useCallback(async () => {
         setLoading(true);
@@ -124,32 +123,6 @@ export default function ArsipPage() {
             toast.error(
                 `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
             );
-        }
-    };
-
-    const handleDownloadDOCX = async (applicationId: string) => {
-        setDownloadingId(applicationId);
-        try {
-            const templateId = await getTemplateIdByLetterType(
-                "Surat Rekomendasi Beasiswa",
-            );
-            if (templateId) {
-                await generateAndDownloadDocument(
-                    templateId,
-                    applicationId,
-                    `Surat-Rekomendasi-${applicationId}.docx`,
-                );
-                toast.success("Dokumen Word berhasil diunduh!");
-            } else {
-                toast.error("Template tidak ditemukan");
-            }
-        } catch (error) {
-            console.error("Error downloading DOCX:", error);
-            toast.error(
-                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
-            );
-        } finally {
-            setDownloadingId(null);
         }
     };
 
@@ -372,13 +345,11 @@ export default function ArsipPage() {
                             <SelectTrigger className="w-full sm:w-50 h-10 border-slate-100 text-slate-600">
                                 <div className="flex items-center gap-2">
                                     <Filter className="h-4 w-4" />
-                                    <SelectValue placeholder="Jenis Beasiswa" />
+                                    <SelectValue placeholder="Jenis Surat" />
                                 </div>
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">
-                                    Semua Beasiswa
-                                </SelectItem>
+                                <SelectItem value="all">Semua Jenis</SelectItem>
                                 <SelectItem value="internal">
                                     Beasiswa Internal
                                 </SelectItem>
@@ -387,6 +358,9 @@ export default function ArsipPage() {
                                 </SelectItem>
                                 <SelectItem value="akademik">
                                     Beasiswa Akademik
+                                </SelectItem>
+                                <SelectItem value="keperluan_lain">
+                                    Keperluan Lain
                                 </SelectItem>
                             </SelectContent>
                         </Select>
@@ -486,11 +460,9 @@ export default function ArsipPage() {
                             <tr className="bg-undip-blue border-b border-slate-100 text-[11px] uppercase text-white font-bold tracking-wider">
                                 <th className="px-6 py-4 w-12">No</th>
                                 <th className="px-6 py-4">Nama Pengaju</th>
-                                <th className="px-6 py-4">NIM</th>
-                                <th className="px-6 py-4">Beasiswa</th>
+                                <th className="px-6 py-4">Subjek Surat</th>
                                 <th className="px-6 py-4">Nomor Surat</th>
                                 <th className="px-6 py-4">Tanggal Terbit</th>
-                                <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -498,7 +470,7 @@ export default function ArsipPage() {
                             {loading ? (
                                 <tr>
                                     <td
-                                        colSpan={8}
+                                        colSpan={6}
                                         className="px-6 py-12 text-center"
                                     >
                                         <div className="flex flex-col items-center justify-center gap-2">
@@ -527,7 +499,7 @@ export default function ArsipPage() {
                             ) : applications.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={8}
+                                        colSpan={6}
                                         className="px-6 py-12 text-center"
                                     >
                                         <div className="flex flex-col items-center justify-center gap-2">
@@ -569,13 +541,15 @@ export default function ArsipPage() {
                                                 index +
                                                 1}
                                         </td>
-                                        <td className="px-6 py-4 font-bold text-slate-700">
-                                            {app.formData?.namaLengkap ||
-                                                app.applicantName ||
-                                                "N/A"}
-                                        </td>
-                                        <td className="px-6 py-4 text-slate-600">
-                                            {app.formData?.nim || "-"}
+                                        <td className="px-6 py-4">
+                                            <div className="font-bold text-slate-700">
+                                                {app.formData?.namaLengkap ||
+                                                    app.applicantName ||
+                                                    "N/A"}
+                                            </div>
+                                            <div className="text-xs text-slate-400 mt-0.5">
+                                                {app.formData?.nim || "-"}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 text-slate-600">
                                             {app.scholarshipName ||
@@ -590,23 +564,15 @@ export default function ArsipPage() {
                                                 app.updatedAt,
                                             ).toLocaleDateString("id-ID")}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <CheckCircle className="w-4 h-4 text-emerald-500" />
-                                                <span className="text-[11px] font-bold uppercase text-emerald-500">
-                                                    Terbit
-                                                </span>
-                                            </div>
-                                        </td>
                                         <td className="px-6 py-4 text-center">
-                                            <div className="flex justify-center gap-2">
+                                            <div className="flex flex-col items-center gap-2">
                                                 <Link
                                                     href={`/upa/surat/surat-rekomendasi-beasiswa/detail/${app.id}?from=arsip`}
                                                 >
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="rounded-full h-8 text-xs bg-undip-blue font-bold border-slate-100 text-white hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4"
+                                                        className="rounded-full h-8 text-xs bg-undip-blue font-bold border-slate-100 text-white hover:bg-white hover:border-undip-blue hover:text-undip-blue transition-all gap-1.5 px-4 w-28"
                                                     >
                                                         <Eye className="h-3.5 w-3.5" />
                                                         Detail
@@ -619,30 +585,10 @@ export default function ArsipPage() {
                                                         )
                                                     }
                                                     size="sm"
-                                                    className="rounded-full h-8 text-xs bg-emerald-600 hover:bg-emerald-700 font-bold border-slate-100 text-white transition-all gap-1.5 px-4"
+                                                    className="rounded-full h-8 text-xs bg-emerald-600 hover:bg-emerald-700 font-bold border-slate-100 text-white transition-all gap-1.5 px-4 w-28"
                                                 >
                                                     <Download className="h-3.5 w-3.5" />
                                                     PDF
-                                                </Button>
-                                                <Button
-                                                    onClick={() =>
-                                                        handleDownloadDOCX(
-                                                            app.id,
-                                                        )
-                                                    }
-                                                    size="sm"
-                                                    disabled={
-                                                        downloadingId === app.id
-                                                    }
-                                                    className="rounded-full h-8 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 font-bold border-slate-100 text-white transition-all gap-1.5 px-4"
-                                                >
-                                                    {downloadingId ===
-                                                    app.id ? (
-                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                                    ) : (
-                                                        <Download className="h-3.5 w-3.5" />
-                                                    )}
-                                                    Word
                                                 </Button>
                                             </div>
                                         </td>

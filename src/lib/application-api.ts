@@ -1120,6 +1120,7 @@ export interface VerificationData {
     issuedAt: string;
     publishedAt: string | null;
     verifiedCount: number;
+    jenisBeasiswa: string | null;
     letterType: {
         id: string;
         name: string;

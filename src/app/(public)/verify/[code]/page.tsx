@@ -343,7 +343,10 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">
-                                        Perihal / Beasiswa
+                                        {documentData.jenisBeasiswa ===
+                                        "keperluan_lain"
+                                            ? "Perihal / Keperluan"
+                                            : "Perihal / Beasiswa"}
                                     </p>
                                     <p className="font-bold text-[#00002b]">
                                         {documentData.application

@@ -150,6 +150,7 @@ export default function VerifyPage() {
                                                 ?.name ||
                                                 "Surat Rekomendasi Beasiswa"}
                                         </p>
+                                        </p>
                                     </div>
                                 </div>
 

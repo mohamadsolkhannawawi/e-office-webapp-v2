@@ -48,7 +48,10 @@ export function DetailPengajuan({
     const handleValidation = (field: string, value: unknown) => {
         let result;
         if (field === "namaBeasiswa") {
-            result = validateNamaBeasiswa(value);
+            result = validateNamaBeasiswa(
+                value,
+                isKeperluanLain ? "Keperluan pengajuan" : "Nama beasiswa",
+            );
         } else {
             return;
         }
@@ -60,7 +63,10 @@ export function DetailPengajuan({
     };
 
     const validateAllFields = React.useCallback(() => {
-        const result = validateNamaBeasiswa(data.namaBeasiswa);
+        const result = validateNamaBeasiswa(
+            data.namaBeasiswa,
+            isKeperluanLain ? "Keperluan pengajuan" : "Nama beasiswa",
+        );
 
         if (!result.valid) {
             setErrors({ namaBeasiswa: result.errors[0] || "" });
@@ -69,7 +75,7 @@ export function DetailPengajuan({
 
         setErrors({});
         return true;
-    }, [data.namaBeasiswa]);
+    }, [data.namaBeasiswa, isKeperluanLain]);
 
     React.useEffect(() => {
         const customWindow = window as unknown as {

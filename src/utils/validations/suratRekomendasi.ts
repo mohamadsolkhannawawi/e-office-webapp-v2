@@ -160,11 +160,14 @@ export function validateSemester(value: unknown): ValidationResult {
     return { valid: errors.length === 0, errors };
 }
 
-export function validateNamaBeasiswa(value: unknown): ValidationResult {
+export function validateNamaBeasiswa(
+    value: unknown,
+    label = "Nama beasiswa",
+): ValidationResult {
     const errors: string[] = [];
 
     if (typeof value !== "string" || value.trim() === "") {
-        errors.push("Nama beasiswa wajib diisi");
+        errors.push(`${label} wajib diisi`);
     }
 
     return { valid: errors.length === 0, errors };

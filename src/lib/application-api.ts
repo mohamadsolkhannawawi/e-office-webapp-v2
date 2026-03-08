@@ -555,6 +555,7 @@ export async function saveSignatureToApplication(
 export interface UserSignature {
     id: string;
     url: string;
+    name?: string | null;
     signatureType: "UPLOADED" | "DRAWN" | "TEMPLATE";
     isDefault: boolean;
     checksum?: string;
@@ -653,6 +654,27 @@ export async function setDefaultSignature(id: string): Promise<boolean> {
 }
 
 /**
+ * Rename signature template
+ */
+export async function renameSignature(
+    id: string,
+    name: string | null,
+): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/signatures/${id}`, {
+            method: "PATCH",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name }),
+        });
+        return response.ok;
+    } catch (error) {
+        console.error("Rename signature error:", error);
+        return false;
+    }
+}
+
+/**
  * Delete signature template
  */
 export async function deleteSignature(id: string): Promise<boolean> {
@@ -674,6 +696,7 @@ export async function deleteSignature(id: string): Promise<boolean> {
 export interface UserStamp {
     id: string;
     url: string;
+    name?: string | null;
     stampType: "UPLOADED" | "DRAWN" | "TEMPLATE";
     isDefault: boolean;
     createdAt: string;
@@ -766,6 +789,27 @@ export async function setDefaultStamp(id: string): Promise<boolean> {
         return response.ok;
     } catch (error) {
         console.error("Set default stamp error:", error);
+        return false;
+    }
+}
+
+/**
+ * Rename stamp template
+ */
+export async function renameStamp(
+    id: string,
+    name: string | null,
+): Promise<boolean> {
+    try {
+        const response = await fetch(`/api/stamps/${id}`, {
+            method: "PATCH",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name }),
+        });
+        return response.ok;
+    } catch (error) {
+        console.error("Rename stamp error:", error);
         return false;
     }
 }

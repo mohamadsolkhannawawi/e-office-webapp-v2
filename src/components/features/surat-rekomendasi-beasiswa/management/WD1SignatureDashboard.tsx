@@ -18,6 +18,9 @@ import {
     Loader2,
     AlertCircle,
     PenTool,
+    Pencil,
+    Check,
+    X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
@@ -25,6 +28,7 @@ import {
     saveSignature,
     setDefaultSignature,
     deleteSignature,
+    renameSignature,
     UserSignature,
 } from "@/lib/application-api";
 import { SignatureImage } from "@/components/ui/signature-image";
@@ -34,6 +38,8 @@ export function WD1SignatureDashboard() {
     const [loading, setLoading] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+    const [renamingId, setRenamingId] = useState<string | null>(null);
+    const [renameValue, setRenameValue] = useState("");
 
     // Load signatures on mount
     useEffect(() => {
@@ -162,6 +168,34 @@ export function WD1SignatureDashboard() {
         }
     };
 
+    const startRename = (sig: UserSignature, index: number) => {
+        setRenamingId(sig.id);
+        setRenameValue(sig.name || `Template ${index + 1}`);
+    };
+
+    const cancelRename = () => {
+        setRenamingId(null);
+        setRenameValue("");
+    };
+
+    const handleRename = async (id: string) => {
+        const trimmed = renameValue.trim();
+        if (!trimmed) {
+            toast.error("Nama template tidak boleh kosong");
+            return;
+        }
+        const success = await renameSignature(id, trimmed);
+        if (success) {
+            setSignatures((prev) =>
+                prev.map((s) => (s.id === id ? { ...s, name: trimmed } : s)),
+            );
+            toast.success("Nama template berhasil diperbarui");
+        } else {
+            toast.error("Gagal memperbarui nama. Silakan coba lagi");
+        }
+        setRenamingId(null);
+    };
+
     return (
         <Card className="border-none shadow-sm">
             <CardHeader className="border-b">
@@ -271,13 +305,73 @@ export function WD1SignatureDashboard() {
 
                                 {/* Signature Info */}
                                 <div className="p-4 space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <div className="text-sm">
-                                            <p className="font-semibold text-slate-800">
-                                                Template{" "}
-                                                {signatures.indexOf(signature) +
-                                                    1}
-                                            </p>
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0 text-sm">
+                                            {renamingId === signature.id ? (
+                                                <div className="flex items-center gap-1">
+                                                    <input
+                                                        autoFocus
+                                                        value={renameValue}
+                                                        onChange={(e) =>
+                                                            setRenameValue(
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                        onKeyDown={(e) => {
+                                                            if (
+                                                                e.key ===
+                                                                "Enter"
+                                                            )
+                                                                handleRename(
+                                                                    signature.id,
+                                                                );
+                                                            if (
+                                                                e.key ===
+                                                                "Escape"
+                                                            )
+                                                                cancelRename();
+                                                        }}
+                                                        className="w-full text-sm font-semibold border border-undip-blue rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-undip-blue/30"
+                                                    />
+                                                    <button
+                                                        onClick={() =>
+                                                            handleRename(
+                                                                signature.id,
+                                                            )
+                                                        }
+                                                        className="p-1 rounded-full bg-green-100 hover:bg-green-200 text-green-700 shrink-0"
+                                                    >
+                                                        <Check className="h-3 w-3" />
+                                                    </button>
+                                                    <button
+                                                        onClick={cancelRename}
+                                                        className="p-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 shrink-0"
+                                                    >
+                                                        <X className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-1 group">
+                                                    <p className="font-semibold text-slate-800 truncate">
+                                                        {signature.name ||
+                                                            `Template ${signatures.indexOf(signature) + 1}`}
+                                                    </p>
+                                                    <button
+                                                        onClick={() =>
+                                                            startRename(
+                                                                signature,
+                                                                signatures.indexOf(
+                                                                    signature,
+                                                                ),
+                                                            )
+                                                        }
+                                                        className="p-1 rounded-full opacity-0 group-hover:opacity-100 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-opacity shrink-0"
+                                                        title="Ubah nama"
+                                                    >
+                                                        <Pencil className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            )}
                                             <p className="text-xs text-slate-500 mt-1">
                                                 {new Date(
                                                     signature.createdAt,
@@ -285,11 +379,9 @@ export function WD1SignatureDashboard() {
                                             </p>
                                         </div>
                                         {signature.isDefault && (
-                                            <div className="flex items-center gap-1 px-2 py-1 bg-yellow-50 border border-yellow-200 rounded-full">
-                                                <Star className="h-3 w-3 text-yellow-600 fill-yellow-600" />
-                                                <span className="text-xs font-semibold text-yellow-700">
-                                                    Default
-                                                </span>
+                                            <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-semibold shrink-0">
+                                                <Star className="h-3 w-3" />
+                                                Default
                                             </div>
                                         )}
                                     </div>
@@ -305,9 +397,9 @@ export function WD1SignatureDashboard() {
                                                         signature.id,
                                                     )
                                                 }
-                                                className="flex-1 text-xs rounded-3xl"
+                                                className="flex-1 bg-amber-400 hover:bg-amber-500 text-white hover:text-white rounded-3xl border-none"
                                             >
-                                                <Star className="h-3 w-3 mr-1" />
+                                                <Star className="h-3.5 w-3.5 mr-1" />
                                                 Jadikan Default
                                             </Button>
                                         )}
@@ -317,9 +409,10 @@ export function WD1SignatureDashboard() {
                                             onClick={() =>
                                                 handleDelete(signature.id)
                                             }
-                                            className="text-red-600 border-red-200 hover:bg-red-50 rounded-3xl"
+                                            className="flex-1 bg-red-600 hover:bg-red-700 text-white hover:text-white rounded-3xl border-none"
                                         >
-                                            <Trash2 className="h-3 w-3" />
+                                            <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                            Hapus
                                         </Button>
                                     </div>
                                 </div>

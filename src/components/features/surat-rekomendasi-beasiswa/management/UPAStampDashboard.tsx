@@ -18,6 +18,9 @@ import {
     AlertCircle,
     Star,
     Trash2,
+    Pencil,
+    Check,
+    X,
 } from "lucide-react";
 import { SignatureImage } from "@/components/ui/signature-image";
 import {
@@ -25,6 +28,7 @@ import {
     saveStamp,
     setDefaultStamp,
     deleteStamp,
+    renameStamp,
     UserStamp,
 } from "@/lib/application-api";
 
@@ -33,6 +37,8 @@ export function UPAStampDashboard() {
     const [loading, setLoading] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+    const [renamingId, setRenamingId] = useState<string | null>(null);
+    const [renameValue, setRenameValue] = useState("");
 
     // Load stamps on mount
     useEffect(() => {
@@ -164,6 +170,34 @@ export function UPAStampDashboard() {
         }
     };
 
+    const startRename = (stamp: UserStamp, index: number) => {
+        setRenamingId(stamp.id);
+        setRenameValue(stamp.name || `Stempel ${index + 1}`);
+    };
+
+    const cancelRename = () => {
+        setRenamingId(null);
+        setRenameValue("");
+    };
+
+    const handleRename = async (id: string) => {
+        const trimmed = renameValue.trim();
+        if (!trimmed) {
+            toast.error("Nama template tidak boleh kosong");
+            return;
+        }
+        const success = await renameStamp(id, trimmed);
+        if (success) {
+            setStamps((prev) =>
+                prev.map((s) => (s.id === id ? { ...s, name: trimmed } : s)),
+            );
+            toast.success("Nama template berhasil diperbarui");
+        } else {
+            toast.error("Gagal memperbarui nama. Silakan coba lagi");
+        }
+        setRenamingId(null);
+    };
+
     return (
         <div className="space-y-6">
             {/* Upload Button */}
@@ -268,12 +302,74 @@ export function UPAStampDashboard() {
 
                                 {/* Stamp Info */}
                                 <div className="p-3 space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-xs text-gray-500">
-                                                Tipe
-                                            </p>
-                                            <p className="text-sm font-medium text-gray-900">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                            {renamingId === stamp.id ? (
+                                                <div className="flex items-center gap-1">
+                                                    <input
+                                                        autoFocus
+                                                        value={renameValue}
+                                                        onChange={(e) =>
+                                                            setRenameValue(
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                        onKeyDown={(e) => {
+                                                            if (
+                                                                e.key ===
+                                                                "Enter"
+                                                            )
+                                                                handleRename(
+                                                                    stamp.id,
+                                                                );
+                                                            if (
+                                                                e.key ===
+                                                                "Escape"
+                                                            )
+                                                                cancelRename();
+                                                        }}
+                                                        className="w-full text-sm font-semibold border border-undip-blue rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-undip-blue/30"
+                                                    />
+                                                    <button
+                                                        onClick={() =>
+                                                            handleRename(
+                                                                stamp.id,
+                                                            )
+                                                        }
+                                                        className="p-1 rounded-full bg-green-100 hover:bg-green-200 text-green-700 shrink-0"
+                                                    >
+                                                        <Check className="h-3 w-3" />
+                                                    </button>
+                                                    <button
+                                                        onClick={cancelRename}
+                                                        className="p-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 shrink-0"
+                                                    >
+                                                        <X className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-1 group">
+                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                        {stamp.name ||
+                                                            `Stempel ${stamps.indexOf(stamp) + 1}`}
+                                                    </p>
+                                                    <button
+                                                        onClick={() =>
+                                                            startRename(
+                                                                stamp,
+                                                                stamps.indexOf(
+                                                                    stamp,
+                                                                ),
+                                                            )
+                                                        }
+                                                        className="p-1 rounded-full opacity-0 group-hover:opacity-100 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-opacity shrink-0"
+                                                        title="Ubah nama"
+                                                    >
+                                                        <Pencil className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            )}
+                                            <p className="text-xs text-gray-500 mt-0.5">
                                                 {stamp.stampType === "TEMPLATE"
                                                     ? "Template"
                                                     : stamp.stampType ===
@@ -283,7 +379,7 @@ export function UPAStampDashboard() {
                                             </p>
                                         </div>
                                         {stamp.isDefault && (
-                                            <div className="flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-semibold">
+                                            <div className="flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-semibold shrink-0">
                                                 <Star className="h-3 w-3" />
                                                 Default
                                             </div>

@@ -892,6 +892,7 @@ export async function saveLetterNumber(
     letterNumber: string,
 ): Promise<{
     success: boolean;
+    error?: string;
     verification?: {
         code: string;
         verifyUrl: string;
@@ -918,7 +919,12 @@ export async function saveLetterNumber(
                 response.status,
                 errorText,
             );
-            return { success: false };
+            try {
+                const errorJson = JSON.parse(errorText);
+                return { success: false, error: errorJson.error };
+            } catch {
+                return { success: false };
+            }
         }
 
         const result = await response.json();

@@ -179,12 +179,10 @@ export function UPANumberingSection({
                         }
                     }
                 } else {
-                    toast.error(
-                        "Gagal menyimpan nomor surat. Silakan coba lagi",
-                        {
-                            id: toastId,
-                        },
-                    );
+                    const errorMsg = saveResult?.error
+                        ? `Nomor surat gagal disimpan: ${saveResult.error}`
+                        : "Gagal menyimpan nomor surat. Silakan coba lagi";
+                    toast.error(errorMsg, { id: toastId });
                 }
             } else {
                 onNumberChange(letterNumber);

@@ -308,7 +308,10 @@ export function Sidebar({
     // Helper: match a submenu href (may include query params) against the current URL
     const isSubActive = (href: string) => {
         const qIdx = href.indexOf("?");
-        if (qIdx === -1) return pathname === href;
+        if (qIdx === -1) {
+            // href has no query params: only active when current URL also has no search params
+            return pathname === href && currentSearch === "";
+        }
         const hrefPath = href.slice(0, qIdx);
         const hrefSearch = href.slice(qIdx + 1);
         return pathname === hrefPath && currentSearch === hrefSearch;

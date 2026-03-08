@@ -37,10 +37,7 @@ import { Hash, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getReceiverRole } from "@/utils/status-mapper";
 import { ApplicationDetail } from "@/lib/application-api";
-import {
-    generateAndDownloadDocument,
-    getTemplateIdByLetterType,
-} from "@/lib/template-api";
+import { triggerDocxGeneration } from "@/lib/template-api";
 
 interface AdminDetailSuratProps {
     role:
@@ -121,7 +118,7 @@ export function AdminDetailSurat({
         message?: string;
     }>({ isOpen: false, status: "success", type: "approve" });
     const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
-    const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
     const [isStaffEditModalOpen, setIsStaffEditModalOpen] = useState(false);
     const router = useRouter();
 
@@ -205,32 +202,6 @@ export function AdminDetailSurat({
             toast.error(
                 `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
             );
-        }
-    };
-
-    const handleDownloadDOCX = async (applicationId: string) => {
-        setDownloadingId(applicationId);
-        try {
-            const templateId = await getTemplateIdByLetterType(
-                "Surat Rekomendasi Beasiswa",
-            );
-            if (templateId) {
-                await generateAndDownloadDocument(
-                    templateId,
-                    applicationId,
-                    `Surat-Rekomendasi-${applicationId}.docx`,
-                );
-                toast.success("Dokumen Word berhasil diunduh!");
-            } else {
-                toast.error("Template tidak ditemukan");
-            }
-        } catch (error) {
-            console.error("Error downloading DOCX:", error);
-            toast.error(
-                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
-            );
-        } finally {
-            setDownloadingId(null);
         }
     };
 
@@ -760,22 +731,6 @@ export function AdminDetailSurat({
                                                 >
                                                     <Download className="h-5 w-5" />
                                                     Cetak/PDF
-                                                </Button>
-                                                <Button
-                                                    onClick={() =>
-                                                        handleDownloadDOCX(id)
-                                                    }
-                                                    disabled={
-                                                        downloadingId === id
-                                                    }
-                                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
-                                                >
-                                                    {downloadingId === id ? (
-                                                        <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                    ) : (
-                                                        <Download className="h-5 w-5" />
-                                                    )}
-                                                    Unduh Word
                                                 </Button>
                                             </div>
                                         )}

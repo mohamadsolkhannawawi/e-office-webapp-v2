@@ -401,14 +401,38 @@ export function WD1SignatureSection({
                                                                         result.success &&
                                                                         result.data
                                                                     ) {
+                                                                        // Re-fetch to get fresh presigned URLs so images render immediately
+                                                                        const uploadedId =
+                                                                            result
+                                                                                .data
+                                                                                .id;
+                                                                        const freshData =
+                                                                            await getSignatures();
                                                                         setTemplates(
-                                                                            (
-                                                                                prev,
-                                                                            ) => [
-                                                                                result.data!,
-                                                                                ...prev,
-                                                                            ],
+                                                                            freshData,
                                                                         );
+                                                                        // Auto-select the newly uploaded template
+                                                                        const newTemplate =
+                                                                            freshData.find(
+                                                                                (
+                                                                                    t,
+                                                                                ) =>
+                                                                                    t.id ===
+                                                                                    uploadedId,
+                                                                            );
+                                                                        if (
+                                                                            newTemplate
+                                                                        ) {
+                                                                            setSelectedTemplateId(
+                                                                                newTemplate.id,
+                                                                            );
+                                                                            setPreviewImage(
+                                                                                newTemplate.url,
+                                                                            );
+                                                                            onSignatureChange(
+                                                                                newTemplate.url,
+                                                                            );
+                                                                        }
                                                                         toast.success(
                                                                             "Template berhasil diunggah",
                                                                             {

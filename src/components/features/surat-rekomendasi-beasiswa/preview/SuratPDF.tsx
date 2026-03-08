@@ -210,6 +210,7 @@ interface SuratPDFProps {
     showSignature?: boolean;
     signaturePath?: string | null;
     showStamp?: boolean;
+    stampUrl?: string | null;
     qrCodeUrl?: string;
     data?: Record<string, string>;
     leadershipConfig?: {
@@ -224,6 +225,7 @@ export const SuratPDF = ({
     showSignature,
     signaturePath,
     showStamp,
+    stampUrl,
     qrCodeUrl,
     data,
     leadershipConfig,
@@ -439,11 +441,8 @@ export const SuratPDF = ({
                                 style={styles.signatureImage}
                             />
                         ) : null}
-                        {showStamp && (
-                            <Image
-                                src="/assets/stamp-dummy.png"
-                                style={styles.stampImage}
-                            />
+                        {showStamp && stampUrl && (
+                            <Image src={stampUrl} style={styles.stampImage} />
                         )}
                     </View>
 

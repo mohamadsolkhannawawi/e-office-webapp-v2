@@ -27,6 +27,7 @@ function HelperButton({ text }: { text: string }) {
 interface DetailPengajuanProps {
     data: FormDataType;
     setData: Dispatch<SetStateAction<FormDataType>>;
+    jenis?: string;
 }
 
 import { Input } from "@/components/ui/input";
@@ -36,7 +37,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CircleAlert } from "lucide-react";
 import { validateNamaBeasiswa } from "@/utils/validations/suratRekomendasi";
 
-export function DetailPengajuan({ data, setData }: DetailPengajuanProps) {
+export function DetailPengajuan({
+    data,
+    setData,
+    jenis,
+}: DetailPengajuanProps) {
+    const isKeperluanLain = jenis === "keperluan_lain";
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleValidation = (field: string, value: unknown) => {
@@ -82,11 +88,17 @@ export function DetailPengajuan({ data, setData }: DetailPengajuanProps) {
                     <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <Label className="text-sm font-semibold text-gray-700">Jenis Surat</Label>
+                                <Label className="text-sm font-semibold text-gray-700">
+                                    Jenis Surat
+                                </Label>
                                 <HelperButton text="Jenis surat yang akan Anda ajukan (tidak dapat diubah)" />
                             </div>
                             <Input
-                                value="Surat Rekomendasi Beasiswa"
+                                value={
+                                    isKeperluanLain
+                                        ? "Surat Rekomendasi Keperluan Lain"
+                                        : "Surat Rekomendasi Beasiswa"
+                                }
                                 readOnly
                                 className="h-11 rounded-3xl bg-gray-100 text-gray-500 border-gray-200"
                             />
@@ -94,13 +106,27 @@ export function DetailPengajuan({ data, setData }: DetailPengajuanProps) {
 
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <Label className="text-sm font-semibold text-gray-700">Nama Beasiswa</Label>
-                                <HelperButton text="Nama lengkap program beasiswa yang Anda ajukan (contoh: Beasiswa Unggulan Kemendikbud 2024)" />
+                                <Label className="text-sm font-semibold text-gray-700">
+                                    {isKeperluanLain
+                                        ? "Keperluan Pengajuan"
+                                        : "Nama Beasiswa"}
+                                </Label>
+                                <HelperButton
+                                    text={
+                                        isKeperluanLain
+                                            ? "Jelaskan keperluan pengajuan surat rekomendasi Anda (contoh: Pendaftaran Magang di PT XYZ)"
+                                            : "Nama lengkap program beasiswa yang Anda ajukan (contoh: Beasiswa Unggulan Kemendikbud 2024)"
+                                    }
+                                />
                             </div>
                             <Input
                                 name="namaBeasiswa"
                                 value={data.namaBeasiswa as string}
-                                placeholder="Masukkan nama beasiswa"
+                                placeholder={
+                                    isKeperluanLain
+                                        ? "Masukkan keperluan pengajuan"
+                                        : "Masukkan nama beasiswa"
+                                }
                                 onChange={(e) => {
                                     const val = e.target.value;
                                     setData((prev) => ({

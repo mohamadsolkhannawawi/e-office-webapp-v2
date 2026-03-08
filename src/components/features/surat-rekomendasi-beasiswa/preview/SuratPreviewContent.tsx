@@ -1100,8 +1100,7 @@ export function SuratPreviewContent({
                                         <p className="text-xs text-slate-500 mb-4 leading-relaxed">
                                             Surat telah diterbitkan dan selesai.
                                             Klik tombol di bawah untuk mencetak
-                                            atau mengunduh surat sebagai PDF
-                                            atau Word.
+                                            atau mengunduh surat sebagai PDF.
                                         </p>
                                         <div className="flex flex-col gap-3">
                                             <Button
@@ -1124,64 +1123,6 @@ export function SuratPreviewContent({
                                             >
                                                 <Download className="h-5 w-5" />
                                                 Cetak/PDF
-                                            </Button>
-                                            <Button
-                                                onClick={async () => {
-                                                    if (!applicationId) {
-                                                        toast.error(
-                                                            "Application ID tidak ditemukan",
-                                                        );
-                                                        return;
-                                                    }
-                                                    setIsDownloadingTemplate(
-                                                        true,
-                                                    );
-                                                    try {
-                                                        // Get template ID dynamically from API
-                                                        const templateId =
-                                                            await getTemplateIdByLetterType(
-                                                                "Surat Rekomendasi Beasiswa",
-                                                            );
-                                                        if (!templateId) {
-                                                            throw new Error(
-                                                                "Template tidak ditemukan",
-                                                            );
-                                                        }
-                                                        await generateAndDownloadDocument(
-                                                            templateId,
-                                                            applicationId,
-                                                        );
-                                                        toast.success(
-                                                            "Dokumen Word berhasil diunduh!",
-                                                        );
-                                                    } catch (error) {
-                                                        console.error(
-                                                            "Download error:",
-                                                            error,
-                                                        );
-                                                        toast.error(
-                                                            `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
-                                                        );
-                                                    } finally {
-                                                        setIsDownloadingTemplate(
-                                                            false,
-                                                        );
-                                                    }
-                                                }}
-                                                disabled={isDownloadingTemplate}
-                                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
-                                            >
-                                                {isDownloadingTemplate ? (
-                                                    <>
-                                                        <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                        Mengunduh...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Download className="h-5 w-5" />
-                                                        Unduh Word
-                                                    </>
-                                                )}
                                             </Button>
                                         </div>
                                     </div>

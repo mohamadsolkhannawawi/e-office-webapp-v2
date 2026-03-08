@@ -88,8 +88,16 @@ export function AdminActionModals({
 
     const [reason, setReason] = useState("");
     const [targetRole, setTargetRole] = useState(getRevisionRoles()[0].value);
+    const [reasonError, setReasonError] = useState("");
 
     const handleConfirm = () => {
+        if ((type === "revise" || type === "reject") && !reason.trim()) {
+            setReasonError(
+                `Alasan ${type === "revise" ? "revisi" : "penolakan"} wajib diisi.`,
+            );
+            return;
+        }
+        setReasonError("");
         onConfirm({ reason, targetRole });
         setReason("");
         setTargetRole(getRevisionRoles()[0].value);
@@ -176,14 +184,28 @@ export function AdminActionModals({
                             <div className="space-y-3">
                                 <Label className="text-sm font-bold text-slate-700 uppercase tracking-wider">
                                     Alasan{" "}
-                                    {type === "revise" ? "Revisi" : "Penolakan"}
+                                    {type === "revise" ? "Revisi" : "Penolakan"}{" "}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Textarea
-                                    className="min-h-30 rounded-3xl border-slate-200 focus:ring-undip-blue resize-none"
+                                    className={`min-h-30 rounded-3xl border-slate-200 focus:ring-undip-blue resize-none ${reasonError ? "border-red-500 focus:ring-red-500" : ""}`}
                                     placeholder={`Tuliskan alasan ${type === "revise" ? "revisi" : "penolakan"} Anda di sini...`}
                                     value={reason}
-                                    onChange={(e) => setReason(e.target.value)}
+                                    onChange={(e) => {
+                                        setReason(e.target.value);
+                                        if (
+                                            reasonError &&
+                                            e.target.value.trim()
+                                        ) {
+                                            setReasonError("");
+                                        }
+                                    }}
                                 />
+                                {reasonError && (
+                                    <p className="text-xs text-red-500 font-medium">
+                                        {reasonError}
+                                    </p>
+                                )}
                                 <p className="text-[11px] text-slate-400 flex items-center gap-1">
                                     <AlertTriangle className="h-3 w-3" />
                                     Informasi ini akan dikirimkan sebagai

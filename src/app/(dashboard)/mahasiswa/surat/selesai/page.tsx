@@ -361,9 +361,8 @@ export default function SuratSelesaiPage() {
                                                         <>
                                                             {/* Download PDF */}
                                                             <Button
-                                                                variant="ghost"
                                                                 size="sm"
-                                                                className="h-9 px-3 gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-medium text-xs rounded-3xl"
+                                                                className="h-9 px-3 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 hover:text-white font-medium text-xs rounded-3xl"
                                                                 title="Unduh PDF"
                                                                 onClick={() => {
                                                                     try {

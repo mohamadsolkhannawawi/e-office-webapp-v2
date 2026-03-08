@@ -3,7 +3,7 @@
 import React from "react";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
     LayoutDashboard,
     Mail,
@@ -301,7 +301,18 @@ export function Sidebar({
 }: SidebarProps) {
     const { signOut } = useAuth();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const currentSearch = searchParams.toString(); // e.g. "jenis=keperluan_lain"
     const role = useCurrentRole();
+
+    // Helper: match a submenu href (may include query params) against the current URL
+    const isSubActive = (href: string) => {
+        const qIdx = href.indexOf("?");
+        if (qIdx === -1) return pathname === href;
+        const hrefPath = href.slice(0, qIdx);
+        const hrefSearch = href.slice(qIdx + 1);
+        return pathname === hrefPath && currentSearch === hrefSearch;
+    };
     const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
     const [isCollapsed, setIsCollapsed] = useState(propIsCollapsed);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -327,15 +338,15 @@ export function Sidebar({
     useEffect(() => {
         menuItems.forEach((item) => {
             if (item.submenu) {
-                const isActive = item.submenu.some(
-                    (sub) => pathname === sub.href,
+                const isActive = item.submenu.some((sub) =>
+                    isSubActive(sub.href),
                 );
                 if (isActive) {
                     setExpandedMenu(item.label);
                 }
             }
         });
-    }, [pathname, menuItems]);
+    }, [pathname, currentSearch, menuItems]);
 
     const isActive = (href?: string) => {
         if (!href) return false;
@@ -443,8 +454,9 @@ export function Sidebar({
                                                             handleLinkClick
                                                         }
                                                         className={`block px-3 py-2 text-sm rounded-2xl transition-colors ${
-                                                            pathname ===
-                                                            sub.href
+                                                            isSubActive(
+                                                                sub.href,
+                                                            )
                                                                 ? "text-white font-medium bg-undip-blue"
                                                                 : "text-slate-500 hover:text-slate-900 hover:bg-gray-50"
                                                         }`}

@@ -87,6 +87,11 @@ function SuratDraftContent() {
                     limit,
                     search: search || undefined,
                     jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
+                    // On the SRB page (not keperluan_lain), always exclude keperluan_lain
+                    // regardless of which jenisBeasiswa sub-filter is selected
+                    excludeJenisBeasiswa: !isKeperluanLain
+                        ? "keperluan_lain"
+                        : undefined,
                 });
                 setApplications(data);
                 setPagination({

@@ -132,6 +132,7 @@ export async function getApplications(params?: {
     mode?: string;
     search?: string;
     jenisBeasiswa?: string;
+    excludeJenisBeasiswa?: string;
     startDate?: string;
     endDate?: string;
     sortOrder?: "asc" | "desc";

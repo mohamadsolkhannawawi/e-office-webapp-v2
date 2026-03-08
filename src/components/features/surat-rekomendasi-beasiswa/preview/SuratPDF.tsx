@@ -8,6 +8,7 @@ import {
     StyleSheet,
     Image,
 } from "@react-pdf/renderer";
+import logoUndip from "@/assets/images/logo-undip-main.png";
 
 // Register fonts if needed, but standard fonts (Helvetica, Times-Roman) work out of the box.
 
@@ -262,13 +263,7 @@ export const SuratPDF = ({
                 <View style={styles.headerContainer}>
                     {/* Logo - Absolute Left */}
                     <View style={styles.logoContainer}>
-                        {/* Note: React-PDF requires absolute paths or base64 or precise URLs. 
-                            If running on client, /assets/undip-logo.png relative to public should work.
-                        */}
-                        <Image
-                            src="/assets/undip-logo.png"
-                            style={styles.logo}
-                        />
+                        <Image src={logoUndip.src} style={styles.logo} />
                     </View>
 
                     {/* Center Text */}

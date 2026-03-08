@@ -19,7 +19,7 @@ export function SignatureImage({
     src,
     alt,
     className = "object-contain mix-blend-multiply",
-    fallbackSrc = "/assets/signature-dummy.png",
+    fallbackSrc,
     ...props
 }: SignatureImageProps) {
     const [hasError, setHasError] = useState(false);
@@ -30,18 +30,26 @@ export function SignatureImage({
         }
     };
 
-    const imgSrc = hasError ? fallbackSrc : src;
-
-    // If it's a local asset, keep it as-is
-    if (src.startsWith("/assets/")) {
-        return <img src={src} alt={alt} className={className} {...props} />;
+    // If no valid src or error loading, don't render anything
+    if (!src || hasError) {
+        if (fallbackSrc) {
+            return (
+                <img
+                    src={fallbackSrc}
+                    alt={alt}
+                    className={className}
+                    {...props}
+                />
+            );
+        }
+        return null;
     }
 
     // For external URLs (MinIO presigned URLs), use direct img tag
     // This avoids Next.js Image optimization issues with complex query strings
     return (
         <img
-            src={imgSrc}
+            src={src}
             alt={alt}
             className={className}
             loading="lazy"

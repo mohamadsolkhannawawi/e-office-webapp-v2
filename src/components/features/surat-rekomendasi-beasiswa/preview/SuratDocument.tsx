@@ -3,6 +3,7 @@
 import Image from "next/image";
 import React from "react";
 import { SignatureImage } from "@/components/ui/signature-image";
+import logoUndip from "@/assets/images/logo-undip-main.png";
 /* eslint-disable @next/next/no-img-element */
 
 // Interface untuk konfigurasi pejabat penandatangan
@@ -93,7 +94,7 @@ export function SuratDocument({
             <div className="flex items-start gap-3 border-b-2 border-black pb-3 mb-8">
                 <div className="w-21.25 shrink-0">
                     <Image
-                        src="/assets/undip-logo.png"
+                        src={logoUndip}
                         alt="Logo UNDIP"
                         width={85}
                         height={85}
@@ -261,10 +262,7 @@ export function SuratDocument({
                                 {showSignature && (
                                     <div className="relative w-37.5 h-17.5">
                                         <SignatureImage
-                                            src={
-                                                signaturePath ||
-                                                "/assets/signature-dummy.png"
-                                            }
+                                            src={signaturePath || ""}
                                             alt="Signature"
                                             className="object-contain mix-blend-multiply opacity-90 w-full h-full"
                                         />

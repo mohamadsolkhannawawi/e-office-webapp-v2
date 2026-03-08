@@ -73,6 +73,11 @@ function SuratDraftContent() {
     });
     const [isInitialLoad, setIsInitialLoad] = useState(true);
 
+    // Sync jenisFilter when URL changes (sidebar navigation between pages)
+    useEffect(() => {
+        setJenisFilter(urlJenis);
+    }, [urlJenis]);
+
     const fetchApplications = useCallback(
         async (page: number, search: string, jenis: string, limit: number) => {
             // Only show loading for non-initial fetches
@@ -87,11 +92,11 @@ function SuratDraftContent() {
                     limit,
                     search: search || undefined,
                     jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
-                    // On the SRB page (not keperluan_lain), always exclude keperluan_lain
-                    // regardless of which jenisBeasiswa sub-filter is selected
-                    excludeJenisBeasiswa: !isKeperluanLain
-                        ? "keperluan_lain"
-                        : undefined,
+                    // Derive from jenis param (not closed-over state) so it stays fresh on navigation
+                    excludeJenisBeasiswa:
+                        jenis !== "keperluan_lain"
+                            ? "keperluan_lain"
+                            : undefined,
                 });
                 setApplications(data);
                 setPagination({

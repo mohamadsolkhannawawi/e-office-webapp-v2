@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
     ChevronRight,
@@ -41,6 +41,14 @@ import {
 } from "@/components/ui/select";
 
 export default function SuratDraftPage() {
+    return (
+        <Suspense>
+            <SuratDraftContent />
+        </Suspense>
+    );
+}
+
+function SuratDraftContent() {
     const searchParams = useSearchParams();
     const urlJenis = searchParams.get("jenis") || "ALL";
     const isKeperluanLain = urlJenis === "keperluan_lain";

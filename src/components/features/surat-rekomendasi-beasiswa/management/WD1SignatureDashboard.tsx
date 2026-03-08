@@ -89,7 +89,8 @@ export function WD1SignatureDashboard() {
                     });
 
                     if (result.success && result.data) {
-                        setSignatures((prev) => [result.data!, ...prev]);
+                        // Re-fetch to get fresh presigned URLs so images render immediately
+                        await loadSignatures();
                         toast.success(
                             "Template tanda tangan berhasil diunggah! Template siap digunakan",
                             {

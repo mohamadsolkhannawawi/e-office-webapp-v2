@@ -86,7 +86,8 @@ export function UPAStampDashboard() {
                     });
 
                     if (result.success && result.data) {
-                        setStamps((prev) => [result.data!, ...prev]);
+                        // Re-fetch to get fresh presigned URLs so images render immediately
+                        await loadStamps();
                         toast.success(
                             "Template stempel berhasil diunggah! Template siap digunakan",
                             {

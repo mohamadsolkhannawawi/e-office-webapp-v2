@@ -36,6 +36,12 @@ export function formatRoleName(role: string): string {
     if (lower.includes("upa") || lower.includes("staff")) return "Staff UPA";
     if (lower.includes("mahasiswa") || lower.includes("mhs"))
         return "Mahasiswa";
+    if (
+        lower.includes("super_admin") ||
+        lower.includes("super admin") ||
+        lower === "super-admin"
+    )
+        return "Administrator Sistem";
     return role; // Fallback
 }
 

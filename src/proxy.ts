@@ -88,21 +88,26 @@ export function proxy(request: NextRequest) {
                 SUPER_ADMIN: "/super-admin",
             };
 
-            // Check if user is accessing a path allowed for their role
-            // We iterate over the map. If the path starts with a key's value, the user MUST have that key's role.
-            for (const [role, path] of Object.entries(rolePathMap)) {
-                if (pathname.startsWith(path)) {
-                    if (!userRoles.includes(role)) {
-                        console.log(
-                            `[Middleware] RBAC Block: User with roles [${userRoles}] tried accessing ${pathname}`,
-                        );
-                        // Redirect to their own dashboard based on their first role
-                        const userRole = userRoles[0];
-                        const targetPath =
-                            rolePathMap[userRole] || "/dashboard";
-                        return NextResponse.redirect(
-                            new URL(targetPath, request.url),
-                        );
+            // Super Admin has access to all paths — skip role-path restriction
+            if (userRoles.includes("SUPER_ADMIN")) {
+                // Allow access to any protected path
+            } else {
+                // Check if user is accessing a path allowed for their role
+                // We iterate over the map. If the path starts with a key's value, the user MUST have that key's role.
+                for (const [role, path] of Object.entries(rolePathMap)) {
+                    if (pathname.startsWith(path)) {
+                        if (!userRoles.includes(role)) {
+                            console.log(
+                                `[Middleware] RBAC Block: User with roles [${userRoles}] tried accessing ${pathname}`,
+                            );
+                            // Redirect to their own dashboard based on their first role
+                            const userRole = userRoles[0];
+                            const targetPath =
+                                rolePathMap[userRole] || "/dashboard";
+                            return NextResponse.redirect(
+                                new URL(targetPath, request.url),
+                            );
+                        }
                     }
                 }
             }

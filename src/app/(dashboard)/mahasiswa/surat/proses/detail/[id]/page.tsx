@@ -296,37 +296,11 @@ export default function DetailSuratProsesPage() {
                         </div>
                     </div>
 
-                    {/* Status Card */}
-                    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-                        <h2 className="text-lg font-bold text-slate-800 mb-4">
-                            Status Surat
-                        </h2>
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Status</span>
-                                <span className="font-medium text-slate-800">
-                                    {application.status}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">
-                                    Langkah Saat Ini
-                                </span>
-                                <span className="font-medium text-slate-800">
-                                    {application.currentStep}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                    <RiwayatSurat riwayat={riwayatData} />
                 </div>
                 {/* end lg:col-span-4 */}
             </div>
             {/* end grid */}
-
-            {/* Riwayat Surat */}
-            {riwayatData && riwayatData.length > 0 && (
-                <RiwayatSurat riwayat={riwayatData} />
-            )}
 
             {/* Modal Edit */}
             <MahasiswaEditModal

@@ -317,7 +317,20 @@ export function AdminDetailSurat({
         departemen: initialData?.formData?.departemen || "N/A",
         programStudi: initialData?.formData?.programStudi || "N/A",
         tempatLahir: initialData?.formData?.tempatLahir || "N/A",
-        tanggalLahir: initialData?.formData?.tanggalLahir || "N/A",
+        tanggalLahir: (() => {
+            const raw = initialData?.formData?.tanggalLahir;
+            if (!raw) return "N/A";
+            try {
+                return new Intl.DateTimeFormat("id-ID", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                    timeZone: "UTC",
+                }).format(new Date(raw));
+            } catch {
+                return String(raw);
+            }
+        })(),
         noHp: initialData?.formData?.noHp || "N/A",
         semester: initialData?.formData?.semester || "N/A",
         ipk: initialData?.formData?.ipk || "N/A",

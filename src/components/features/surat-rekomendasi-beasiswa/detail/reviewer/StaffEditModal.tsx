@@ -43,6 +43,22 @@ interface StaffEditModalProps {
 
 type Step = "form" | "confirm" | "loading";
 
+/** Normalize any date string to YYYY-MM-DD so <input type="date"> can display it */
+function toDateInputValue(dateStr?: string): string {
+    if (!dateStr) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    try {
+        const d = new Date(dateStr);
+        if (!isNaN(d.getTime())) {
+            const y = d.getUTCFullYear();
+            const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+            const day = String(d.getUTCDate()).padStart(2, "0");
+            return `${y}-${m}-${day}`;
+        }
+    } catch {}
+    return "";
+}
+
 export function StaffEditModal({
     isOpen,
     onClose,
@@ -73,7 +89,7 @@ export function StaffEditModal({
         initialValues?.tempatLahir || "",
     );
     const [tanggalLahir, setTanggalLahir] = useState(
-        initialValues?.tanggalLahir || "",
+        toDateInputValue(initialValues?.tanggalLahir),
     );
     const [noHp, setNoHp] = useState(initialValues?.noHp || "");
     const [semester, setSemester] = useState(
@@ -84,30 +100,34 @@ export function StaffEditModal({
     const [catatan, setCatatan] = useState("");
     const [step, setStep] = useState<Step>("form");
 
+    /** Reset all local fields to the original initialValues (no data leaks on cancel) */
+    const resetToInitial = () => {
+        setNamaBeasiswa(initialValues?.namaBeasiswa || "");
+        setNamaLengkap(initialValues?.namaLengkap || "");
+        setNim(initialValues?.nim || "");
+        setEmail(initialValues?.email || "");
+        setDepartemen(initialValues?.departemen || "");
+        setProgramStudi(initialValues?.programStudi || "");
+        setTempatLahir(initialValues?.tempatLahir || "");
+        setTanggalLahir(toDateInputValue(initialValues?.tanggalLahir));
+        setNoHp(initialValues?.noHp || "");
+        setSemester(String(initialValues?.semester || ""));
+        setIpk(String(initialValues?.ipk || ""));
+        setIps(String(initialValues?.ips || ""));
+        setCatatan("");
+        setStep("form");
+    };
+
     const handleClose = () => {
         if (step === "loading") return;
-        setStep("form");
-        setCatatan("");
+        resetToInitial();
         onClose();
     };
 
     /** Reset all fields to initialValues when dialog opens; close when it closes */
     const handleOpenChange = (open: boolean) => {
         if (open) {
-            setNamaBeasiswa(initialValues?.namaBeasiswa || "");
-            setNamaLengkap(initialValues?.namaLengkap || "");
-            setNim(initialValues?.nim || "");
-            setEmail(initialValues?.email || "");
-            setDepartemen(initialValues?.departemen || "");
-            setProgramStudi(initialValues?.programStudi || "");
-            setTempatLahir(initialValues?.tempatLahir || "");
-            setTanggalLahir(initialValues?.tanggalLahir || "");
-            setNoHp(initialValues?.noHp || "");
-            setSemester(String(initialValues?.semester || ""));
-            setIpk(String(initialValues?.ipk || ""));
-            setIps(String(initialValues?.ips || ""));
-            setCatatan("");
-            setStep("form");
+            resetToInitial();
         } else {
             handleClose();
         }

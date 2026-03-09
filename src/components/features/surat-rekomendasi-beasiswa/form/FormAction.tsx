@@ -21,6 +21,7 @@ import {
 } from "@/lib/attachment-api";
 import { submitStudentEdit } from "@/lib/application-api";
 import { FormDataType } from "@/types/form";
+import { showError, showSuccess } from "@/lib/toast-helpers";
 
 interface ActionProps {
     currentStep: number;
@@ -85,7 +86,7 @@ export function FormAction({
             // alert("Draft tersimpan.");
         } catch (error) {
             console.error("Failed to save draft:", error);
-            alert("Gagal menyimpan draft.");
+            showError("Gagal menyimpan draft. Silakan coba lagi.");
         } finally {
             setIsSubmitting(false);
         }
@@ -131,10 +132,16 @@ export function FormAction({
             }
         } catch (error) {
             console.error("Failed to submit application:", error);
-            alert(
-                isStudentEdit
-                    ? "Gagal menyimpan revisi surat. Silakan coba lagi."
-                    : "Gagal mengajukan surat. Silakan coba lagi.",
+            const errMsg = error instanceof Error ? error.message : "";
+            const isForbidden =
+                errMsg.includes("403") ||
+                errMsg.toLowerCase().includes("forbidden");
+            showError(
+                isForbidden
+                    ? "Anda tidak memiliki izin untuk melakukan aksi ini. Silakan hubungi administrator."
+                    : isStudentEdit
+                      ? "Gagal menyimpan revisi surat. Silakan coba lagi."
+                      : "Gagal mengajukan surat. Silakan coba lagi.",
             );
         } finally {
             setIsSubmitting(false);

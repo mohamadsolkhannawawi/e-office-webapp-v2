@@ -190,7 +190,7 @@ export function Lampiran({ data, setData, jenis }: LampiranProps) {
                     }
                 } catch (err) {
                     console.error("Upload error:", err);
-                    alert(
+                    setErrorMessage(
                         `Gagal upload ${file.name}: ${
                             err instanceof Error ? err.message : String(err)
                         }`,

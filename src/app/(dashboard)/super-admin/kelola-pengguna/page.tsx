@@ -439,23 +439,23 @@ function KelolaPageContent() {
                                                     size="sm"
                                                     variant="outline"
                                                     title={
-                                                        user.emailVerified
+                                                        user.isActive
                                                             ? "Nonaktifkan pengguna"
                                                             : "Aktifkan pengguna"
                                                     }
                                                     className={
-                                                        user.emailVerified
+                                                        user.isActive
                                                             ? "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                                                             : "border-gray-300 bg-gray-50 text-gray-500 hover:bg-gray-100"
                                                     }
                                                     onClick={() =>
                                                         handleToggleStatus(
                                                             user.id,
-                                                            user.emailVerified,
+                                                            user.isActive,
                                                         )
                                                     }
                                                 >
-                                                    {user.emailVerified ? (
+                                                    {user.isActive ? (
                                                         <ToggleRight className="h-4 w-4" />
                                                     ) : (
                                                         <ToggleLeft className="h-4 w-4" />

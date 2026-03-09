@@ -29,6 +29,12 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import toast from "react-hot-toast";
+import {
+    getDocumentStatistics,
+    cleanupAllDocuments,
+    cleanupOrphanedDocuments,
+    cleanupTempFiles,
+} from "@/lib/admin-api";
 
 interface FileStatistics {
     totalFiles: number;
@@ -80,15 +86,7 @@ export default function DocumentManagementPage() {
     const loadStatistics = async () => {
         try {
             setLoading(true);
-            const response = await fetch("/api/admin/documents/statistics", {
-                credentials: "include",
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to fetch statistics");
-            }
-
-            const data = await response.json();
+            const data = await getDocumentStatistics();
             if (data.success) {
                 setStats(data.data);
             }
@@ -103,38 +101,26 @@ export default function DocumentManagementPage() {
     const handleCleanup = async (type: "all" | "orphaned" | "temp") => {
         try {
             setProcessing(true);
-            let endpoint = "";
+            let data: { success: boolean; data: CleanupResult };
             let successMessage = "";
 
             switch (type) {
                 case "all":
-                    endpoint = "/api/admin/documents/cleanup-all";
+                    data = await cleanupAllDocuments();
                     successMessage = "Cleanup dokumen duplikat berhasil";
                     break;
                 case "orphaned":
-                    endpoint = "/api/admin/documents/cleanup-orphaned";
+                    data = await cleanupOrphanedDocuments();
                     successMessage = "Cleanup file orphaned berhasil";
                     break;
                 case "temp":
-                    endpoint = "/api/admin/documents/cleanup-temp";
+                    data = await cleanupTempFiles();
                     successMessage = "Cleanup file temporary berhasil";
                     break;
             }
 
-            const response = await fetch(endpoint, {
-                method: "POST",
-                credentials: "include",
-            });
-
-            if (!response.ok) {
-                throw new Error("Cleanup failed");
-            }
-
-            const data = await response.json();
             if (data.success) {
-                const result = data.data as CleanupResult;
-
-                // Show detailed results
+                const result = data.data;
                 if (result.saved) {
                     toast.success(
                         `${successMessage}\n${result.saved.files} file dihapus (${result.saved.sizeMB} MB dihemat)`,
@@ -146,13 +132,15 @@ export default function DocumentManagementPage() {
                 } else {
                     toast.success(successMessage);
                 }
-
-                // Reload statistics
                 await loadStatistics();
             }
         } catch (error) {
             console.error("Error during cleanup:", error);
-            toast.error("Gagal melakukan cleanup");
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Gagal melakukan cleanup",
+            );
         } finally {
             setProcessing(false);
             setConfirmDialog({

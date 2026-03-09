@@ -1013,41 +1013,67 @@ export function SuratPreviewContent({
                             </div>
 
                             <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
-                                <div className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
-                                    <div className="flex flex-col items-center gap-2 mb-2">
-                                        <div className="p-3 bg-emerald-50 rounded-3xl text-emerald-600">
-                                            <Download className="h-6 w-6" />
+                                {data?.status === "PUBLISHED" ||
+                                data?.status === "COMPLETED" ? (
+                                    <div className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                        <div className="flex flex-col items-center gap-2 mb-2">
+                                            <div className="p-3 bg-emerald-50 rounded-3xl text-emerald-600">
+                                                <Download className="h-6 w-6" />
+                                            </div>
+                                            <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
+                                                Dokumen Siap
+                                            </h3>
                                         </div>
-                                        <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
-                                            Dokumen Siap
-                                        </h3>
-                                    </div>
 
-                                    <div className="space-y-3 pt-5 border-t border-slate-100 text-center">
-                                        <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-                                            Klik tombol di bawah untuk mengunduh
-                                            surat dalam format PDF.
-                                        </p>
-                                        <Button
-                                            onClick={async () => {
-                                                if (!applicationId) return;
+                                        <div className="space-y-3 pt-5 border-t border-slate-100 text-center">
+                                            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                                                Klik tombol di bawah untuk
+                                                mengunduh surat dalam format
+                                                PDF.
+                                            </p>
+                                            <Button
+                                                onClick={async () => {
+                                                    if (!applicationId) return;
 
-                                                // Open PDF in new tab with loader
-                                                await generatePDF(async () => {
-                                                    const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
-                                                    window.open(
-                                                        pdfUrl,
-                                                        "_blank",
+                                                    // Open PDF in new tab with loader
+                                                    await generatePDF(
+                                                        async () => {
+                                                            const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                                                            window.open(
+                                                                pdfUrl,
+                                                                "_blank",
+                                                            );
+                                                        },
+                                                        "Render PDF surat...",
                                                     );
-                                                }, "Render PDF surat...");
-                                            }}
-                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
-                                        >
-                                            <Download className="h-5 w-5" />
-                                            Unduh PDF
-                                        </Button>
+                                                }}
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                                            >
+                                                <Download className="h-5 w-5" />
+                                                Unduh PDF
+                                            </Button>
+                                        </div>
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-6 space-y-6 shadow-sm">
+                                        <div className="flex flex-col items-center gap-2 mb-2">
+                                            <div className="p-3 bg-slate-50 rounded-3xl text-slate-400">
+                                                <Clock className="h-6 w-6" />
+                                            </div>
+                                            <h3 className="font-bold text-slate-800 tracking-tight text-sm uppercase">
+                                                Surat Sedang Diproses
+                                            </h3>
+                                        </div>
+                                        <div className="pt-5 border-t border-slate-100 text-center">
+                                            <p className="text-xs text-slate-500 leading-relaxed">
+                                                Surat Anda masih dalam proses
+                                                verifikasi. Unduhan PDF akan
+                                                tersedia setelah surat
+                                                diterbitkan oleh Staff UPA.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Student Self-Edit: Only for PENDING at step 1 */}
                                 {canStudentSelfEdit && (

@@ -1,6 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { AlertCircle, User, MessageSquare } from "lucide-react";
+import { formatRoleName } from "@/utils/status-mapper";
 
 interface DetailRevisiProps {
     checker: string;
@@ -35,16 +36,17 @@ export function DetailRevisi({
             </div>
             <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4 text-slate-600" />
-                <span className="text-slate-700">{checker}</span>
+                <span className="text-slate-700">
+                    {formatRoleName(checker)}
+                </span>
                 <span className="mx-2 text-slate-400">|</span>
                 <MessageSquare className="h-4 w-4 text-orange-600" />
                 <span className="text-orange-900 font-medium whitespace-pre-wrap">
-                    {comment}
+                    {comment.replace(/\s*\[ke\s+[^\]]+\]/gi, "").trim()}
                 </span>
             </div>
             <div className="text-xs text-blue-800 mt-1">
-                Perbaiki pengajuan sesuai komentar di atas, dengan klik tombol
-                {" "}
+                Perbaiki pengajuan sesuai komentar di atas, dengan klik tombol{" "}
                 <span className="font-bold">Revisi</span>.
             </div>
         </Card>

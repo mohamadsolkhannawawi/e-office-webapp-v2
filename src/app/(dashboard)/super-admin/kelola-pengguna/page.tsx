@@ -61,7 +61,7 @@ interface User {
     id: string;
     name: string;
     email: string;
-    emailVerified: boolean;
+    isActive: boolean;
     userRole: UserRole[];
 }
 
@@ -342,6 +342,7 @@ function KelolaPageContent() {
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead className="w-12">No</TableHead>
                                 <TableHead>Nama</TableHead>
                                 <TableHead>Email</TableHead>
                                 <TableHead>Role</TableHead>
@@ -355,7 +356,7 @@ function KelolaPageContent() {
                             {isLoading ? (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={5}
+                                        colSpan={6}
                                         className="text-center"
                                     >
                                         Memuat data...
@@ -364,15 +365,20 @@ function KelolaPageContent() {
                             ) : users.length === 0 ? (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={5}
+                                        colSpan={6}
                                         className="text-center"
                                     >
                                         Tidak ada data pengguna
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                users.map((user) => (
+                                users.map((user, index) => (
                                     <TableRow key={user.id}>
+                                        <TableCell className="text-gray-500">
+                                            {(meta.page - 1) * meta.limit +
+                                                index +
+                                                1}
+                                        </TableCell>
                                         <TableCell className="font-medium">
                                             {user.name}
                                         </TableCell>
@@ -394,7 +400,7 @@ function KelolaPageContent() {
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            {user.emailVerified ? (
+                                            {user.isActive ? (
                                                 <Badge className="bg-emerald-100 text-emerald-700">
                                                     Aktif
                                                 </Badge>
@@ -432,6 +438,16 @@ function KelolaPageContent() {
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
+                                                    title={
+                                                        user.emailVerified
+                                                            ? "Nonaktifkan pengguna"
+                                                            : "Aktifkan pengguna"
+                                                    }
+                                                    className={
+                                                        user.emailVerified
+                                                            ? "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                                            : "border-gray-300 bg-gray-50 text-gray-500 hover:bg-gray-100"
+                                                    }
                                                     onClick={() =>
                                                         handleToggleStatus(
                                                             user.id,

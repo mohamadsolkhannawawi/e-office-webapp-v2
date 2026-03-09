@@ -40,7 +40,7 @@ interface UserData {
     id: string;
     name: string;
     email: string;
-    emailVerified: boolean;
+    isActive: boolean;
     createdAt: string;
     userRole: Array<{
         role: {
@@ -417,12 +417,12 @@ export default function EditUserPage() {
                             <div className="flex items-center gap-2">
                                 <Badge
                                     className={
-                                        userData.emailVerified
+                                        userData.isActive
                                             ? "bg-emerald-100 text-emerald-700"
                                             : "bg-red-100 text-red-700"
                                     }
                                 >
-                                    {userData.emailVerified
+                                    {userData.isActive
                                         ? "Aktif"
                                         : "Tidak Aktif"}
                                 </Badge>

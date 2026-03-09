@@ -333,6 +333,7 @@ export function SuperAdminDashboard({
                     icon={<Shield />}
                     colorClass="text-violet-500"
                     iconBgClass="bg-violet-50"
+                    href="/super-admin/kelola-peran"
                 />
             </div>
 
@@ -345,6 +346,7 @@ export function SuperAdminDashboard({
                     icon={<Building2 />}
                     colorClass="text-sky-500"
                     iconBgClass="bg-sky-50"
+                    href="/super-admin/master-data/departemen"
                 />
                 <StatCard
                     label="Program Studi"
@@ -353,6 +355,7 @@ export function SuperAdminDashboard({
                     icon={<Database />}
                     colorClass="text-amber-500"
                     iconBgClass="bg-amber-50"
+                    href="/super-admin/master-data/prodi"
                 />
                 <StatCard
                     label="Storage Terpakai"
@@ -361,6 +364,7 @@ export function SuperAdminDashboard({
                     icon={<HardDrive />}
                     colorClass="text-pink-500"
                     iconBgClass="bg-pink-50"
+                    href="/super-admin/manajemen-dokumen"
                 />
             </div>
 

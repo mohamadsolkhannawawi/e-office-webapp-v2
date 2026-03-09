@@ -430,11 +430,6 @@ export default function SystemSettingsPage() {
     );
 }
 
-
-    useEffect(() => {
-        loadConfig();
-    }, []);
-
     const loadConfig = async () => {
         try {
             setLoading(true);

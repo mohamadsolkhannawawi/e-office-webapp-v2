@@ -482,13 +482,7 @@ export function AdminDetailSurat({
                                           : role === "wakil-dekan-1"
                                             ? "/wakil-dekan-1"
                                             : role === "super-admin"
-                                              ? currentStep === 1
-                                                  ? "/supervisor-akademik"
-                                                  : currentStep === 2
-                                                    ? "/manajer-tu"
-                                                    : currentStep === 3
-                                                      ? "/wakil-dekan-1"
-                                                      : "/upa"
+                                              ? "/super-admin"
                                               : "/upa"
                                 }/surat/proses/preview/${id}?stage=${
                                     role === "supervisor-akademik"

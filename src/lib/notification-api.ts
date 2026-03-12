@@ -3,6 +3,8 @@
  * Mengelola semua operasi notifikasi dari frontend
  */
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export interface Notification {
     id: string;
     userId: string;
@@ -29,7 +31,7 @@ export async function getNotifications(options?: {
             params.append("unreadOnly", String(options.unreadOnly));
 
         const response = await fetch(
-            `/api/notifications${params.toString() ? "?" + params.toString() : ""}`,
+            `${BASE_PATH}/api/notifications${params.toString() ? "?" + params.toString() : ""}`,
             {
                 method: "GET",
                 credentials: "include",
@@ -55,7 +57,7 @@ export async function getNotifications(options?: {
  */
 export async function getUnreadCount(): Promise<{ data: { unread: number } }> {
     try {
-        const response = await fetch("/api/notifications/count", {
+        const response = await fetch(`${BASE_PATH}/api/notifications/count`, {
             method: "GET",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -80,7 +82,7 @@ export async function markNotificationAsRead(
 ): Promise<{ success: boolean }> {
     try {
         const response = await fetch(
-            `/api/notifications/${notificationId}/read`,
+            `${BASE_PATH}/api/notifications/${notificationId}/read`,
             {
                 method: "PATCH",
                 credentials: "include",
@@ -108,7 +110,7 @@ export async function markAllNotificationsAsRead(): Promise<{
     success: boolean;
 }> {
     try {
-        const response = await fetch("/api/notifications/read-all", {
+        const response = await fetch(`${BASE_PATH}/api/notifications/read-all`, {
             method: "PATCH",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -132,7 +134,7 @@ export async function deleteNotification(
     notificationId: string,
 ): Promise<{ success: boolean }> {
     try {
-        const response = await fetch(`/api/notifications/${notificationId}`, {
+        const response = await fetch(`${BASE_PATH}/api/notifications/${notificationId}`, {
             method: "DELETE",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -158,7 +160,7 @@ export async function deleteAllNotifications(): Promise<{
     success: boolean;
 }> {
     try {
-        const response = await fetch("/api/notifications/delete-all", {
+        const response = await fetch(`${BASE_PATH}/api/notifications/delete-all`, {
             method: "DELETE",
             credentials: "include",
             headers: { "Content-Type": "application/json" },

@@ -19,6 +19,8 @@ import {
 } from "@/lib/application-api";
 import { useRouter } from "next/navigation";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export function NotificationBell() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -40,7 +42,7 @@ export function NotificationBell() {
         const fetchUserRoles = async () => {
             try {
                 // Fetch user roles from session/auth
-                const response = await fetch("/api/auth/get-session", {
+                const response = await fetch(`${BASE_PATH}/api/auth/get-session`, {
                     credentials: "include",
                 });
                 if (response.ok) {

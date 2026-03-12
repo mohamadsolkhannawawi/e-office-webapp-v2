@@ -2,6 +2,8 @@
  * API client untuk fetching application data
  */
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export interface ApplicationFormData {
     namaLengkap: string;
     email: string;
@@ -142,7 +144,7 @@ export async function getApplications(params?: {
 }> {
     try {
         const url = new URL(
-            "/api/surat-rekomendasi/applications",
+            `${BASE_PATH}/api/surat-rekomendasi/applications`,
             window.location.origin,
         );
         if (params) {
@@ -205,7 +207,7 @@ export async function getApplications(params?: {
         console.error("Error details:", {
             message: errorMessage,
             url: new URL(
-                "/api/surat-rekomendasi/applications",
+                `${BASE_PATH}/api/surat-rekomendasi/applications`,
                 window.location.origin,
             ).toString(),
             params: params,
@@ -222,7 +224,7 @@ export async function getApplicationById(
 ): Promise<ApplicationDetail> {
     try {
         const response = await fetch(
-            `/api/surat-rekomendasi/applications/${applicationId}`,
+            `${BASE_PATH}/api/surat-rekomendasi/applications/${applicationId}`,
             {
                 method: "GET",
                 credentials: "include",
@@ -253,7 +255,7 @@ export async function getApplicationByIdOrCreate(
 ): Promise<ApplicationDetail & { isNewDraft?: boolean }> {
     try {
         const response = await fetch(
-            `/api/surat-rekomendasi/applications/${applicationId}/or-create`,
+            `${BASE_PATH}/api/surat-rekomendasi/applications/${applicationId}/or-create`,
             {
                 method: "GET",
                 credentials: "include",
@@ -300,7 +302,7 @@ export async function getStats(): Promise<{
     };
 }> {
     try {
-        const response = await fetch("/api/surat-rekomendasi/stats", {
+        const response = await fetch(`${BASE_PATH}/api/surat-rekomendasi/stats`, {
             method: "GET",
             credentials: "include",
             headers: {
@@ -351,7 +353,7 @@ export async function verifyApplication(
 ): Promise<{ success: boolean; data: Record<string, unknown> }> {
     try {
         const response = await fetch(
-            `/api/surat-rekomendasi/applications/${applicationId}/verify`,
+            `${BASE_PATH}/api/surat-rekomendasi/applications/${applicationId}/verify`,
             {
                 method: "POST",
                 credentials: "include",
@@ -388,7 +390,7 @@ export async function submitStudentEdit(
 ): Promise<{ success: boolean; message?: string }> {
     try {
         const response = await fetch(
-            `/api/surat-rekomendasi/applications/${applicationId}/student-edit`,
+            `${BASE_PATH}/api/surat-rekomendasi/applications/${applicationId}/student-edit`,
             {
                 method: "POST",
                 credentials: "include",
@@ -425,7 +427,7 @@ export async function submitStaffEdit(
 ): Promise<{ success: boolean; message?: string }> {
     try {
         const response = await fetch(
-            `/api/surat-rekomendasi/applications/${applicationId}/staff-edit`,
+            `${BASE_PATH}/api/surat-rekomendasi/applications/${applicationId}/staff-edit`,
             {
                 method: "POST",
                 credentials: "include",
@@ -465,7 +467,7 @@ export async function getLetterConfig(
 ): Promise<LeadershipConfig | null> {
     try {
         const response = await fetch(
-            `/api/master/letterConfig/letter-config/${key}`,
+            `${BASE_PATH}/api/master/letterConfig/letter-config/${key}`,
             {
                 method: "GET",
                 credentials: "include",
@@ -497,7 +499,7 @@ export async function updateLetterConfig(
 ): Promise<boolean> {
     try {
         const response = await fetch(
-            `/api/master/letterConfig/letter-config/${key}`,
+            `${BASE_PATH}/api/master/letterConfig/letter-config/${key}`,
             {
                 method: "PUT",
                 credentials: "include",
@@ -528,7 +530,7 @@ export async function saveSignatureToApplication(
 ): Promise<boolean> {
     try {
         const response = await fetch(
-            `/api/surat-rekomendasi/applications/${applicationId}/signature`,
+            `${BASE_PATH}/api/surat-rekomendasi/applications/${applicationId}/signature`,
             {
                 method: "PUT",
                 credentials: "include",
@@ -568,7 +570,7 @@ export interface UserSignature {
  */
 export async function getSignatures(): Promise<UserSignature[]> {
     try {
-        const response = await fetch("/api/signatures", {
+        const response = await fetch(`${BASE_PATH}/api/signatures`, {
             method: "GET",
             credentials: "include",
         });
@@ -598,7 +600,7 @@ export async function saveSignature(data: {
     error?: string;
 }> {
     try {
-        const response = await fetch("/api/signatures", {
+        const response = await fetch(`${BASE_PATH}/api/signatures`, {
             method: "POST",
             credentials: "include",
             headers: {
@@ -642,7 +644,7 @@ export async function saveSignature(data: {
  */
 export async function setDefaultSignature(id: string): Promise<boolean> {
     try {
-        const response = await fetch(`/api/signatures/${id}/default`, {
+        const response = await fetch(`${BASE_PATH}/api/signatures/${id}/default`, {
             method: "PATCH",
             credentials: "include",
         });
@@ -662,7 +664,7 @@ export async function renameSignature(
     name: string | null,
 ): Promise<boolean> {
     try {
-        const response = await fetch(`/api/signatures/${id}`, {
+        const response = await fetch(`${BASE_PATH}/api/signatures/${id}`, {
             method: "PATCH",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -680,7 +682,7 @@ export async function renameSignature(
  */
 export async function deleteSignature(id: string): Promise<boolean> {
     try {
-        const response = await fetch(`/api/signatures/${id}`, {
+        const response = await fetch(`${BASE_PATH}/api/signatures/${id}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -709,7 +711,7 @@ export interface UserStamp {
  */
 export async function getStamps(): Promise<UserStamp[]> {
     try {
-        const response = await fetch("/api/stamps", {
+        const response = await fetch(`${BASE_PATH}/api/stamps`, {
             method: "GET",
             credentials: "include",
         });
@@ -738,7 +740,7 @@ export async function saveStamp(data: {
     error?: string;
 }> {
     try {
-        const response = await fetch("/api/stamps", {
+        const response = await fetch(`${BASE_PATH}/api/stamps`, {
             method: "POST",
             credentials: "include",
             headers: {
@@ -782,7 +784,7 @@ export async function saveStamp(data: {
  */
 export async function setDefaultStamp(id: string): Promise<boolean> {
     try {
-        const response = await fetch(`/api/stamps/${id}/default`, {
+        const response = await fetch(`${BASE_PATH}/api/stamps/${id}/default`, {
             method: "PATCH",
             credentials: "include",
         });
@@ -802,7 +804,7 @@ export async function renameStamp(
     name: string | null,
 ): Promise<boolean> {
     try {
-        const response = await fetch(`/api/stamps/${id}`, {
+        const response = await fetch(`${BASE_PATH}/api/stamps/${id}`, {
             method: "PATCH",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -820,7 +822,7 @@ export async function renameStamp(
  */
 export async function deleteStamp(id: string): Promise<boolean> {
     try {
-        const response = await fetch(`/api/stamps/${id}`, {
+        const response = await fetch(`${BASE_PATH}/api/stamps/${id}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -840,7 +842,7 @@ export async function applyStampToLetter(
     stampId: string,
 ): Promise<boolean> {
     try {
-        const response = await fetch(`/api/stamps/apply/${applicationId}`, {
+        const response = await fetch(`${BASE_PATH}/api/stamps/apply/${applicationId}`, {
             method: "PUT",
             credentials: "include",
             headers: {
@@ -864,7 +866,7 @@ export async function previewLetterNumber(
 ): Promise<string | null> {
     try {
         const response = await fetch(
-            `/api/master/letter-number/preview?type=${type}`,
+            `${BASE_PATH}/api/master/letter-number/preview?type=${type}`,
             {
                 method: "GET",
                 credentials: "include",
@@ -901,7 +903,7 @@ export async function saveLetterNumber(
 } | null> {
     try {
         const response = await fetch(
-            `/api/master/letter-numbering/${applicationId}`,
+            `${BASE_PATH}/api/master/letter-numbering/${applicationId}`,
             {
                 method: "PUT",
                 credentials: "include",
@@ -953,7 +955,7 @@ export async function generateLetterNumber(
     };
 } | null> {
     try {
-        const response = await fetch(`/api/master/letter-number/generate`, {
+        const response = await fetch(`${BASE_PATH}/api/master/letter-number/generate`, {
             method: "POST",
             credentials: "include",
             headers: {
@@ -1006,7 +1008,7 @@ export async function getNotifications(options?: {
         if (options?.limit) params.set("limit", String(options.limit));
         if (options?.unreadOnly) params.set("unreadOnly", "true");
 
-        const response = await fetch(`/api/notifications?${params}`, {
+        const response = await fetch(`${BASE_PATH}/api/notifications?${params}`, {
             method: "GET",
             credentials: "include",
         });
@@ -1025,7 +1027,7 @@ export async function getNotifications(options?: {
  */
 export async function getUnreadNotificationCount(): Promise<number> {
     try {
-        const response = await fetch("/api/notifications/count", {
+        const response = await fetch(`${BASE_PATH}/api/notifications/count`, {
             method: "GET",
             credentials: "include",
         });
@@ -1044,7 +1046,7 @@ export async function getUnreadNotificationCount(): Promise<number> {
  */
 export async function markNotificationAsRead(id: string): Promise<boolean> {
     try {
-        const response = await fetch(`/api/notifications/${id}/read`, {
+        const response = await fetch(`${BASE_PATH}/api/notifications/${id}/read`, {
             method: "PATCH",
             credentials: "include",
         });
@@ -1060,7 +1062,7 @@ export async function markNotificationAsRead(id: string): Promise<boolean> {
  */
 export async function markAllNotificationsAsRead(): Promise<boolean> {
     try {
-        const response = await fetch("/api/notifications/read-all", {
+        const response = await fetch(`${BASE_PATH}/api/notifications/read-all`, {
             method: "PATCH",
             credentials: "include",
         });
@@ -1076,7 +1078,7 @@ export async function markAllNotificationsAsRead(): Promise<boolean> {
  */
 export async function deleteNotification(id: string): Promise<boolean> {
     try {
-        const response = await fetch(`/api/notifications/${id}`, {
+        const response = await fetch(`${BASE_PATH}/api/notifications/${id}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -1092,7 +1094,7 @@ export async function deleteNotification(id: string): Promise<boolean> {
  */
 export async function deleteAllNotifications(): Promise<boolean> {
     try {
-        const response = await fetch("/api/notifications/delete-all", {
+        const response = await fetch(`${BASE_PATH}/api/notifications/delete-all`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -1212,7 +1214,7 @@ export interface UserProfile {
  */
 export async function getMe(): Promise<UserProfile | null> {
     try {
-        const response = await fetch("/api/me", {
+        const response = await fetch(`${BASE_PATH}/api/me`, {
             method: "GET",
             credentials: "include",
         });
@@ -1231,10 +1233,12 @@ export async function getMe(): Promise<UserProfile | null> {
 export async function updateProfile(data: {
     name: string;
     noHp?: string;
+    tempatLahir?: string;
+    tanggalLahir?: string;
     image?: string;
 }): Promise<boolean> {
     try {
-        const response = await fetch("/api/me", {
+        const response = await fetch(`${BASE_PATH}/api/me`, {
             method: "PUT",
             credentials: "include",
             headers: {
@@ -1259,7 +1263,7 @@ export async function uploadProfilePhoto(imageData: string): Promise<{
     error?: string;
 }> {
     try {
-        const response = await fetch("/api/me/photo", {
+        const response = await fetch(`${BASE_PATH}/api/me/photo`, {
             method: "POST",
             credentials: "include",
             headers: {

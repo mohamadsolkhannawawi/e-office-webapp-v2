@@ -21,6 +21,7 @@ import { ButtonLoader } from "@/components/ui/loader";
 import { usePageLoading, useCustomLoading } from "@/contexts/LoadingContext";
 import { StandardPagination } from "@/components/ui/standard-pagination";
 import toast from "react-hot-toast";
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -39,6 +40,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export default function SuratDraftPage() {
     return (
@@ -155,7 +158,7 @@ function SuratDraftContent() {
         setDeleteLoading(true, "Menghapus draft...");
         try {
             const res = await fetch(
-                `/api/surat-rekomendasi/applications/${selectedDeleteId}`,
+                `${BASE_PATH}/api/surat-rekomendasi/applications/${selectedDeleteId}`,
                 {
                     method: "DELETE",
                     credentials: "include",

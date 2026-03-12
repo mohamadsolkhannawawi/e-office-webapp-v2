@@ -6,6 +6,8 @@ import { getApplicationByIdOrCreate } from "@/lib/application-api";
 
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Stepper } from "@/components/features/surat-rekomendasi-beasiswa/form/Stepper";
@@ -115,7 +117,7 @@ export default function PengajuanBaruPage() {
             } else if (!isAuthLoading && authUser) {
                 // New Mode: Fetch profile details to pre-fill if identity is missing
                 try {
-                    const res = await fetch("/api/me", {
+                    const res = await fetch(`${BASE_PATH}/api/me`, {
                         credentials: "include",
                     });
                     if (res.ok) {

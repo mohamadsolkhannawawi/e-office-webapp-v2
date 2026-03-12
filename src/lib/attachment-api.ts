@@ -3,6 +3,8 @@
  * Digunakan di Lampiran.tsx untuk upload files ke backend MinIO
  */
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 interface UploadAttachmentResponse {
     success: boolean;
     data: {
@@ -35,7 +37,7 @@ export async function uploadAttachment(
         formData.append("category", category);
 
         const response = await fetch(
-            `/api/surat-rekomendasi/${letterInstanceId}/upload`,
+            `${BASE_PATH}/api/surat-rekomendasi/${letterInstanceId}/upload`,
             {
                 method: "POST",
                 body: formData,
@@ -74,7 +76,7 @@ export async function uploadAttachment(
 export async function deleteAttachment(attachmentId: string): Promise<boolean> {
     try {
         const response = await fetch(
-            `/api/surat-rekomendasi/attachments/${attachmentId}`,
+            `${BASE_PATH}/api/surat-rekomendasi/attachments/${attachmentId}`,
             {
                 method: "DELETE",
                 credentials: "include",
@@ -115,7 +117,7 @@ export async function getAttachments(
 ): Promise<UploadAttachmentResponse["data"][]> {
     try {
         const response = await fetch(
-            `/api/surat-rekomendasi/${letterInstanceId}/attachments`,
+            `${BASE_PATH}/api/surat-rekomendasi/${letterInstanceId}/attachments`,
             {
                 method: "GET",
                 credentials: "include",
@@ -158,7 +160,7 @@ export async function createApplication(
     values: Record<string, unknown>,
 ): Promise<{ id: string; scholarshipName: string }> {
     try {
-        const response = await fetch("/api/surat-rekomendasi/applications", {
+        const response = await fetch(`${BASE_PATH}/api/surat-rekomendasi/applications`, {
             method: "POST",
             credentials: "include",
             headers: {
@@ -204,7 +206,7 @@ export async function createDraftApplication(
 ): Promise<{ id: string; scholarshipName: string }> {
     try {
         const response = await fetch(
-            "/api/surat-rekomendasi/applications/draft",
+            `${BASE_PATH}/api/surat-rekomendasi/applications/draft`,
             {
                 method: "POST",
                 credentials: "include",
@@ -263,7 +265,7 @@ export async function updateApplication(
 ): Promise<any> {
     try {
         const response = await fetch(
-            `/api/surat-rekomendasi/applications/${id}`,
+            `${BASE_PATH}/api/surat-rekomendasi/applications/${id}`,
             {
                 method: "PUT",
                 credentials: "include",

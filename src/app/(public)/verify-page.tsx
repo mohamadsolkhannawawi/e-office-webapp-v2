@@ -13,6 +13,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 interface VerificationResult {
     isValid: boolean;
     letterNumber: string;
@@ -44,7 +46,7 @@ export default function VerifyPage() {
             try {
                 setLoading(true);
                 const response = await fetch(
-                    `/api/surat-rekomendasi/verify/${code}`,
+                    `${BASE_PATH}/api/surat-rekomendasi/verify/${code}`,
                     {
                         method: "GET",
                         headers: {

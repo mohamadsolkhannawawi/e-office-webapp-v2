@@ -69,6 +69,8 @@ interface ProfileData {
 interface EditFormData {
     name: string;
     noHp: string;
+    tempatLahir: string;
+    tanggalLahir: string;
 }
 
 const parseUserData = (user: UserProfile | null): ProfileData | null => {
@@ -129,6 +131,8 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
     const [formData, setFormData] = useState<EditFormData>({
         name: "",
         noHp: "",
+        tempatLahir: "",
+        tanggalLahir: "",
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -146,6 +150,10 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
                     setFormData({
                         name: parsed.name,
                         noHp: parsed.noHp || "",
+                        tempatLahir: parsed.tempatLahir || "",
+                        tanggalLahir: parsed.tanggalLahir
+                            ? new Date(parsed.tanggalLahir).toISOString().split("T")[0]
+                            : "",
                     });
                 }
             } catch (error) {
@@ -235,6 +243,8 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
             const success = await updateProfile({
                 name: formData.name,
                 noHp: formData.noHp,
+                tempatLahir: formData.tempatLahir || undefined,
+                tanggalLahir: formData.tanggalLahir || undefined,
             });
 
             if (success) {
@@ -405,6 +415,38 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
                                     />
                                 </div>
                             </div>
+
+                            {profileData.isMahasiswa && (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="tempatLahir" className="font-semibold">
+                                            Tempat Lahir
+                                        </Label>
+                                        <Input
+                                            id="tempatLahir"
+                                            name="tempatLahir"
+                                            value={formData.tempatLahir}
+                                            onChange={handleInputChange}
+                                            className="h-10"
+                                            placeholder="Contoh: Semarang"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="tanggalLahir" className="font-semibold">
+                                            Tanggal Lahir
+                                        </Label>
+                                        <Input
+                                            id="tanggalLahir"
+                                            name="tanggalLahir"
+                                            type="date"
+                                            value={formData.tanggalLahir}
+                                            onChange={handleInputChange}
+                                            className="h-10"
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         {/* Read-only Fields */}

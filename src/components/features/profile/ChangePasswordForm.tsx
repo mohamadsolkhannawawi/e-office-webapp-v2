@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 interface ChangePasswordFormProps {
     /** The URL to redirect back to (e.g. "/mahasiswa/profile") */
     backHref: string;
@@ -175,7 +177,7 @@ export default function ChangePasswordForm({
         setLoading(true);
 
         try {
-            const res = await fetch("/api/user/change-password", {
+            const res = await fetch(`${BASE_PATH}/api/user/change-password`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

@@ -5,6 +5,8 @@ const minioHost = process.env.NEXT_PUBLIC_MINIO_HOST || "localhost";
 const minioPort = process.env.NEXT_PUBLIC_MINIO_PORT || "9000";
 
 const nextConfig: NextConfig = {
+    basePath: "/persuratan-rekomendasi",
+    skipTrailingSlashRedirect: true,
     images: {
         remotePatterns: [
             {

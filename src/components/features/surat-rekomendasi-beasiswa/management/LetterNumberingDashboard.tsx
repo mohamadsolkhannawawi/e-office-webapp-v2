@@ -25,6 +25,8 @@ import {
     Calendar,
 } from "lucide-react";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 interface PublishedNumber {
     applicationId: string;
     letterNumber: string;
@@ -73,7 +75,7 @@ export function LetterNumberingDashboard() {
         setLoading(true);
         try {
             const response = await fetch(
-                `/api/master/letter-numbering/published?year=${year}`,
+                `${BASE_PATH}/api/master/letter-numbering/published?year=${year}`,
             );
             if (response.ok) {
                 const json = await response.json();
@@ -100,7 +102,7 @@ export function LetterNumberingDashboard() {
         const month = new Date().getMonth() + 1;
         try {
             const response = await fetch(
-                `/api/master/letter-numbering/next-suggestion?year=${year}&month=${month}`,
+                `${BASE_PATH}/api/master/letter-numbering/next-suggestion?year=${year}&month=${month}`,
             );
             if (response.ok) {
                 const json = await response.json();
@@ -118,7 +120,7 @@ export function LetterNumberingDashboard() {
         setIsValidating(true);
         try {
             const response = await fetch(
-                `/api/master/letter-numbering/validate`,
+                `${BASE_PATH}/api/master/letter-numbering/validate`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -163,7 +165,7 @@ export function LetterNumberingDashboard() {
 
         try {
             const response = await fetch(
-                `/api/master/letter-numbering/${editingId}`,
+                `${BASE_PATH}/api/master/letter-numbering/${editingId}`,
                 {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },

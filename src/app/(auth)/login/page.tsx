@@ -303,8 +303,11 @@ export default function LoginPage() {
                                 type="button"
                                 className="w-full border-gray-300 py-6 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 rounded-3xl"
                                 disabled={isLoading}
+                                asChild
                             >
-                                Masuk dengan SSO UNDIP
+                                <a href="https://apps-fsm.undip.ac.id/sso_api/users/login-with-sso-undip">
+                                    Masuk dengan SSO
+                                </a>
                             </Button>
                         </form>
                     </div>

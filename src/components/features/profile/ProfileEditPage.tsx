@@ -8,538 +8,528 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import {
-    User,
-    Phone,
-    Loader2,
-    ArrowLeft,
-    Save,
-    Camera,
-    Upload,
+  User,
+  Phone,
+  Loader2,
+  ArrowLeft,
+  Save,
+  Camera,
+  Upload,
 } from "lucide-react";
 import {
-    getMe,
-    updateProfile,
-    UserProfile,
-    uploadProfilePhoto,
-    fileToBase64,
+  getMe,
+  updateProfile,
+  UserProfile,
+  uploadProfilePhoto,
+  fileToBase64,
 } from "@/lib/application-api";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 const getRoleDisplayName = (roleName?: string): string | undefined => {
-    if (!roleName) return undefined;
+  if (!roleName) return undefined;
 
-    const roleMap: Record<string, string> = {
-        SUPER_ADMIN: "Super Admin",
-        MAHASISWA: "Mahasiswa",
-        SUPERVISOR_AKADEMIK: "Supervisor Akademik",
-        MANAJER_TU: "Manajer TU",
-        WAKIL_DEKAN_1: "Wakil Dekan 1",
-        UPA: "UPA",
-        "super-admin": "Super Admin",
-        mahasiswa: "Mahasiswa",
-        "supervisor-akademik": "Supervisor Akademik",
-        "manajer-tu": "Manajer TU",
-        "wakil-dekan-1": "Wakil Dekan 1",
-        upa: "UPA",
-    };
+  const roleMap: Record<string, string> = {
+    SUPER_ADMIN: "Super Admin",
+    MAHASISWA: "Mahasiswa",
+    SUPERVISOR_AKADEMIK: "Supervisor Akademik",
+    MANAJER_TU: "Manajer TU",
+    WAKIL_DEKAN_1: "Wakil Dekan 1",
+    UPA: "UPA",
+    "super-admin": "Super Admin",
+    mahasiswa: "Mahasiswa",
+    "supervisor-akademik": "Supervisor Akademik",
+    "manajer-tu": "Manajer TU",
+    "wakil-dekan-1": "Wakil Dekan 1",
+    upa: "UPA",
+  };
 
-    return roleMap[roleName] || roleName;
+  return roleMap[roleName] || roleName;
 };
 
 interface ProfileData {
-    name: string;
-    email: string;
-    image?: string;
-    userRole?: string;
-    noHp?: string;
-    identifier?: string;
-    identifierLabel?: string;
-    tahunMasuk?: number;
-    alamat?: string;
-    tempatLahir?: string;
-    tanggalLahir?: string;
-    departemen?: string;
-    programStudi?: string;
-    jabatan?: string;
-    isMahasiswa?: boolean;
+  name: string;
+  email: string;
+  image?: string;
+  userRole?: string;
+  noHp?: string;
+  identifier?: string;
+  identifierLabel?: string;
+  tahunMasuk?: number;
+  alamat?: string;
+  tempatLahir?: string;
+  tanggalLahir?: string;
+  departemen?: string;
+  programStudi?: string;
+  jabatan?: string;
+  isMahasiswa?: boolean;
 }
 
 interface EditFormData {
-    name: string;
-    noHp: string;
-    tempatLahir: string;
-    tanggalLahir: string;
+  name: string;
+  noHp: string;
+  tempatLahir: string;
+  tanggalLahir: string;
 }
 
 const parseUserData = (user: UserProfile | null): ProfileData | null => {
-    if (!user) return null;
+  if (!user) return null;
 
-    const isMahasiswa = !!user.mahasiswa;
+  const isMahasiswa = !!user.mahasiswa;
 
-    const alamat = isMahasiswa ? user.mahasiswa?.alamat : undefined;
+  const alamat = isMahasiswa ? user.mahasiswa?.alamat : undefined;
 
-    const tempatLahir = isMahasiswa ? user.mahasiswa?.tempatLahir : undefined;
+  const tempatLahir = isMahasiswa ? user.mahasiswa?.tempatLahir : undefined;
 
-    const tanggalLahir = isMahasiswa ? user.mahasiswa?.tanggalLahir : undefined;
+  const tanggalLahir = isMahasiswa ? user.mahasiswa?.tanggalLahir : undefined;
 
-    const tahunMasuk =
-        isMahasiswa && user.mahasiswa?.tahunMasuk
-            ? parseInt(user.mahasiswa.tahunMasuk)
-            : undefined;
+  const tahunMasuk =
+    isMahasiswa && user.mahasiswa?.tahunMasuk
+      ? parseInt(user.mahasiswa.tahunMasuk)
+      : undefined;
 
-    const jabatan = !isMahasiswa ? user.pegawai?.jabatan : undefined;
+  const jabatan = !isMahasiswa ? user.pegawai?.jabatan : undefined;
 
-    const identifier = isMahasiswa ? user.mahasiswa?.nim : user.pegawai?.nip;
+  const identifier = isMahasiswa ? user.mahasiswa?.nim : user.pegawai?.nip;
 
-    const identifierLabel = isMahasiswa ? "NIM" : "NIP";
+  const identifierLabel = isMahasiswa ? "NIM" : "NIP";
 
-    const departemen = isMahasiswa
-        ? user.mahasiswa?.programStudi?.name
-        : user.pegawai?.departemen?.name;
+  const departemen = isMahasiswa
+    ? user.mahasiswa?.programStudi?.name
+    : user.pegawai?.departemen?.name;
 
-    const programStudi = isMahasiswa
-        ? user.mahasiswa?.programStudi?.name
-        : user.pegawai?.programStudi?.name;
+  const programStudi = isMahasiswa
+    ? user.mahasiswa?.programStudi?.name
+    : user.pegawai?.programStudi?.name;
 
-    const noHp = isMahasiswa ? user.mahasiswa?.noHp : user.pegawai?.noHp;
+  const noHp = isMahasiswa ? user.mahasiswa?.noHp : user.pegawai?.noHp;
 
-    return {
-        name: user.name,
-        email: user.email || "",
-        image: user.image,
-        userRole: getRoleDisplayName(user.userRole?.[0]?.role?.name),
-        noHp,
-        identifier,
-        identifierLabel,
-        tahunMasuk,
-        alamat,
-        tempatLahir,
-        tanggalLahir,
-        departemen,
-        programStudi,
-        jabatan,
-        isMahasiswa,
-    };
+  return {
+    name: user.name,
+    email: user.email || "",
+    image: user.image,
+    userRole: getRoleDisplayName(user.userRole?.[0]?.role?.name),
+    noHp,
+    identifier,
+    identifierLabel,
+    tahunMasuk,
+    alamat,
+    tempatLahir,
+    tanggalLahir,
+    departemen,
+    programStudi,
+    jabatan,
+    isMahasiswa,
+  };
 };
 
 const ProfileEditPage = ({ backHref }: { backHref: string }) => {
-    const router = useRouter();
-    const { refreshSession } = useAuth();
-    const [profileData, setProfileData] = useState<ProfileData | null>(null);
-    const [formData, setFormData] = useState<EditFormData>({
-        name: "",
-        noHp: "",
-        tempatLahir: "",
-        tanggalLahir: "",
-    });
-    const [isLoading, setIsLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false);
-    const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
-    const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const router = useRouter();
+  const { refreshSession } = useAuth();
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [formData, setFormData] = useState<EditFormData>({
+    name: "",
+    noHp: "",
+    tempatLahir: "",
+    tanggalLahir: "",
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                setIsLoading(true);
-                const response = await getMe();
-                const parsed = parseUserData(response);
-                setProfileData(parsed);
-                if (parsed) {
-                    setFormData({
-                        name: parsed.name,
-                        noHp: parsed.noHp || "",
-                        tempatLahir: parsed.tempatLahir || "",
-                        tanggalLahir: parsed.tanggalLahir
-                            ? new Date(parsed.tanggalLahir).toISOString().split("T")[0]
-                            : "",
-                    });
-                }
-            } catch (error) {
-                console.error("Error fetching profile:", error);
-                toast.error(
-                    "Gagal memuat data profil. Silakan refresh halaman atau hubungi administrator",
-                );
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchProfile();
-    }, []);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    const handlePhotoChange = async (
-        e: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        // Validate file type
-        if (!file.type.startsWith("image/")) {
-            toast.error("File harus berupa gambar!");
-            return;
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getMe();
+        const parsed = parseUserData(response);
+        setProfileData(parsed);
+        if (parsed) {
+          setFormData({
+            name: parsed.name,
+            noHp: parsed.noHp || "",
+            tempatLahir: parsed.tempatLahir || "",
+            tanggalLahir: parsed.tanggalLahir
+              ? new Date(parsed.tanggalLahir).toISOString().split("T")[0]
+              : "",
+          });
         }
-
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error("Ukuran gambar tidak boleh lebih dari 5MB!");
-            return;
-        }
-
-        try {
-            setIsUploadingPhoto(true);
-
-            // Convert to base64 for preview
-            const base64 = await fileToBase64(file);
-            setPreviewImage(base64);
-
-            // Upload photo
-            const result = await uploadProfilePhoto(base64);
-
-            if (result.success && result.imageUrl) {
-                // Update the profileData to reflect the new image
-                setProfileData((prev) =>
-                    prev ? { ...prev, image: result.imageUrl } : null,
-                );
-                // Refresh session so Navbar picks up the new photo
-                await refreshSession();
-                toast.success("Foto profil berhasil diperbarui!");
-            } else {
-                toast.error(result.error || "Gagal mengupload foto profil");
-                setPreviewImage(null);
-            }
-        } catch (error) {
-            console.error("Photo upload error:", error);
-            toast.error("Terjadi kesalahan saat mengupload foto");
-            setPreviewImage(null);
-        } finally {
-            setIsUploadingPhoto(false);
-        }
-    };
-
-    const getInitials = (name: string): string => {
-        return name
-            .split(" ")
-            .map((word) => word[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2);
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSaving(true);
-
-        try {
-            const success = await updateProfile({
-                name: formData.name,
-                noHp: formData.noHp,
-                tempatLahir: formData.tempatLahir || undefined,
-                tanggalLahir: formData.tanggalLahir || undefined,
-            });
-
-            if (success) {
-                toast.success(
-                    "Profil berhasil diperbarui! Data Anda telah tersimpan",
-                );
-                router.push(backHref);
-            } else {
-                toast.error(
-                    "Gagal memperbarui profil. Periksa koneksi internet Anda",
-                );
-            }
-        } catch (error) {
-            console.error("Error updating profile:", error);
-            toast.error(
-                "Terjadi kesalahan sistem. Silakan coba lagi atau hubungi administrator",
-            );
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    if (isLoading) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            </div>
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        toast.error(
+          "Gagal memuat data profil. Silakan refresh halaman atau hubungi administrator",
         );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("File harus berupa gambar!");
+      return;
     }
 
-    if (!profileData) {
-        return (
-            <div className="space-y-4 p-6">
-                <h1 className="text-2xl font-bold text-gray-900">
-                    Edit Profil
-                </h1>
-                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-                    Gagal memuat data profil. Silakan coba lagi nanti.
-                </div>
-            </div>
-        );
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ukuran gambar tidak boleh lebih dari 5MB!");
+      return;
     }
 
+    try {
+      setIsUploadingPhoto(true);
+
+      // Convert to base64 for preview
+      const base64 = await fileToBase64(file);
+      setPreviewImage(base64);
+
+      // Upload photo
+      const result = await uploadProfilePhoto(base64);
+
+      if (result.success && result.imageUrl) {
+        // Update the profileData to reflect the new image
+        setProfileData((prev) =>
+          prev ? { ...prev, image: result.imageUrl } : null,
+        );
+        // Refresh session so Navbar picks up the new photo
+        await refreshSession();
+        toast.success("Foto profil berhasil diperbarui!");
+      } else {
+        toast.error(result.error || "Gagal mengupload foto profil");
+        setPreviewImage(null);
+      }
+    } catch (error) {
+      console.error("Photo upload error:", error);
+      toast.error("Terjadi kesalahan saat mengupload foto");
+      setPreviewImage(null);
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
+  const getInitials = (name: string): string => {
+    return name
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+
+    try {
+      const success = await updateProfile({
+        name: formData.name,
+        noHp: formData.noHp,
+        tempatLahir: formData.tempatLahir || undefined,
+        tanggalLahir: formData.tanggalLahir || undefined,
+      });
+
+      if (success) {
+        toast.success("Profil berhasil diperbarui! Data Anda telah tersimpan");
+        router.push(backHref);
+      } else {
+        toast.error("Gagal memperbarui profil. Periksa koneksi internet Anda");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error(
+        "Terjadi kesalahan sistem. Silakan coba lagi atau hubungi administrator",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
     return (
-        <div className="space-y-6 p-6">
-            {/* Header */}
-            <div className="flex items-center gap-3">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => router.push(backHref)}
-                    className="rounded-xl"
-                    type="button"
-                >
-                    <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">
-                        Edit Profil
-                    </h1>
-                    <p className="text-gray-600">
-                        Perbarui informasi profil Anda
-                    </p>
-                </div>
-            </div>
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
-            {/* Profile Info Card */}
-            <Card className="border border-gray-200 shadow-sm">
-                <CardHeader className="border-b border-gray-200 bg-gray-50 px-0 py-0">
-                    <CardTitle className="px-6 py-4 text-lg font-semibold text-gray-900">
-                        Informasi Pribadi
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Profile Avatar and Basic Info */}
-                        <div className="flex items-center gap-6 pb-6 border-b border-gray-200">
-                            <div className="relative">
-                                <Avatar className="h-20 w-20">
-                                    <AvatarImage
-                                        src={previewImage || profileData.image}
-                                        alt={profileData.name}
-                                    />
-                                    <AvatarFallback className="bg-blue-600 text-white text-lg font-semibold">
-                                        {getInitials(profileData.name)}
-                                    </AvatarFallback>
-                                </Avatar>
+  if (!profileData) {
+    return (
+      <div className="space-y-4 p-6">
+        <h1 className="text-2xl font-bold text-gray-900">Edit Profil</h1>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+          Gagal memuat data profil. Silakan coba lagi nanti.
+        </div>
+      </div>
+    );
+  }
 
-                                {/* Upload Photo Button */}
-                                <div className="absolute -bottom-1 -right-1">
-                                    <label
-                                        htmlFor="photo-upload"
-                                        className={`
+  return (
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push(backHref)}
+          className="rounded-xl"
+          type="button"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
+            Edit Profil
+          </h1>
+          <p className="text-sm text-gray-600">
+            Perbarui informasi profil Anda
+          </p>
+        </div>
+      </div>
+
+      {/* Profile Info Card */}
+      <Card className="border border-gray-200 shadow-sm">
+        <CardHeader className="border-b border-gray-200 bg-gray-50 px-0 py-0">
+          <CardTitle className="px-6 py-4 text-lg font-semibold text-gray-900">
+            Informasi Pribadi
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Profile Avatar and Basic Info */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-6 border-b border-gray-200">
+              <div className="relative">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage
+                    src={previewImage || profileData.image}
+                    alt={profileData.name}
+                  />
+                  <AvatarFallback className="bg-blue-600 text-white text-lg font-semibold">
+                    {getInitials(profileData.name)}
+                  </AvatarFallback>
+                </Avatar>
+
+                {/* Upload Photo Button */}
+                <div className="absolute -bottom-1 -right-1">
+                  <label
+                    htmlFor="photo-upload"
+                    className={`
                                             inline-flex items-center justify-center 
                                             h-8 w-8 rounded-full bg-blue-600 text-white 
                                             shadow-md cursor-pointer hover:bg-blue-700 
                                             transition-colors duration-200
                                             ${isUploadingPhoto ? "opacity-50 cursor-not-allowed" : ""}
                                         `}
-                                    >
-                                        {isUploadingPhoto ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                            <Camera className="h-4 w-4" />
-                                        )}
-                                    </label>
-                                    <input
-                                        id="photo-upload"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handlePhotoChange}
-                                        disabled={isUploadingPhoto}
-                                        className="hidden"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">
-                                    {profileData.userRole}
-                                </p>
-                                <p className="text-gray-500">
-                                    {profileData.email}
-                                </p>
-                                <p className="text-xs text-gray-400 mt-1">
-                                    Klik ikon kamera untuk mengubah foto profil
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Form Fields */}
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name" className="font-semibold">
-                                    Nama Lengkap
-                                </Label>
-                                <div className="relative">
-                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                        <User className="h-5 w-5" />
-                                    </div>
-                                    <Input
-                                        id="name"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                        className="pl-10 h-10"
-                                        placeholder="Nama lengkap"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="noHp" className="font-semibold">
-                                    Nomor Telepon
-                                </Label>
-                                <div className="relative">
-                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                        <Phone className="h-5 w-5" />
-                                    </div>
-                                    <Input
-                                        id="noHp"
-                                        name="noHp"
-                                        value={formData.noHp}
-                                        onChange={handleInputChange}
-                                        className="pl-10 h-10"
-                                        placeholder="Contoh: 081234567890"
-                                        type="tel"
-                                    />
-                                </div>
-                            </div>
-
-                            {profileData.isMahasiswa && (
-                                <>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="tempatLahir" className="font-semibold">
-                                            Tempat Lahir
-                                        </Label>
-                                        <Input
-                                            id="tempatLahir"
-                                            name="tempatLahir"
-                                            value={formData.tempatLahir}
-                                            onChange={handleInputChange}
-                                            className="h-10"
-                                            placeholder="Contoh: Semarang"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="tanggalLahir" className="font-semibold">
-                                            Tanggal Lahir
-                                        </Label>
-                                        <Input
-                                            id="tanggalLahir"
-                                            name="tanggalLahir"
-                                            type="date"
-                                            value={formData.tanggalLahir}
-                                            onChange={handleInputChange}
-                                            className="h-10"
-                                        />
-                                    </div>
-                                </>
-                            )}
-                        </div>
-
-                        {/* Read-only Fields */}
-                        <div className="space-y-4 pt-6 border-t border-gray-200">
-                            <h3 className="font-semibold text-gray-900">
-                                Informasi Institusi (Tidak dapat diubah)
-                            </h3>
-
-                            {profileData.identifier && (
-                                <div className="space-y-1">
-                                    <Label className="text-sm font-medium text-gray-500">
-                                        {profileData.identifierLabel}
-                                    </Label>
-                                    <p className="text-gray-900 font-medium">
-                                        {profileData.identifier}
-                                    </p>
-                                </div>
-                            )}
-
-                            {profileData.departemen && (
-                                <div className="space-y-1">
-                                    <Label className="text-sm font-medium text-gray-500">
-                                        Departemen
-                                    </Label>
-                                    <p className="text-gray-900 font-medium">
-                                        {profileData.departemen}
-                                    </p>
-                                </div>
-                            )}
-
-                            {profileData.programStudi && (
-                                <div className="space-y-1">
-                                    <Label className="text-sm font-medium text-gray-500">
-                                        Program Studi
-                                    </Label>
-                                    <p className="text-gray-900 font-medium">
-                                        {profileData.programStudi}
-                                    </p>
-                                </div>
-                            )}
-
-                            {profileData.jabatan && (
-                                <div className="space-y-1">
-                                    <Label className="text-sm font-medium text-gray-500">
-                                        Jabatan
-                                    </Label>
-                                    <p className="text-gray-900 font-medium">
-                                        {profileData.jabatan}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-3 justify-end pt-6 border-t border-gray-200">
-                            <Link href={backHref}>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="h-10 px-6 text-sm font-semibold"
-                                >
-                                    Batal
-                                </Button>
-                            </Link>
-                            <Button
-                                type="submit"
-                                disabled={isSaving}
-                                className="h-10 px-6 text-sm font-semibold gap-2 text-white"
-                                style={{ backgroundColor: "#0078bd" }}
-                            >
-                                {isSaving ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                    <Save className="h-4 w-4" />
-                                )}
-                                {isSaving ? "Menyimpan..." : "Simpan"}
-                            </Button>
-                        </div>
-                    </form>
-                </CardContent>
-            </Card>
-
-            {/* Info Alert */}
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                <p className="text-sm text-blue-900">
-                    <span className="font-semibold">Catatan:</span> Informasi
-                    institusi seperti departemen, program studi, dan jabatan
-                    tidak dapat diubah di sini. Jika ada ketidaksesuaian,
-                    silakan hubungi operator untuk sinkronisasi ulang.
+                  >
+                    {isUploadingPhoto ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Camera className="h-4 w-4" />
+                    )}
+                  </label>
+                  <input
+                    id="photo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                    disabled={isUploadingPhoto}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  {profileData.userRole}
                 </p>
+                <p className="text-gray-500">{profileData.email}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Klik ikon kamera untuk mengubah foto profil
+                </p>
+              </div>
             </div>
-        </div>
-    );
+
+            {/* Form Fields */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="font-semibold">
+                  Nama Lengkap
+                </Label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <User className="h-5 w-5" />
+                  </div>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="pl-10 h-10"
+                    placeholder="Nama lengkap"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="noHp" className="font-semibold">
+                  Nomor Telepon
+                </Label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <Phone className="h-5 w-5" />
+                  </div>
+                  <Input
+                    id="noHp"
+                    name="noHp"
+                    value={formData.noHp}
+                    onChange={handleInputChange}
+                    className="pl-10 h-10"
+                    placeholder="Contoh: 081234567890"
+                    type="tel"
+                  />
+                </div>
+              </div>
+
+              {profileData.isMahasiswa && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="tempatLahir" className="font-semibold">
+                      Tempat Lahir
+                    </Label>
+                    <Input
+                      id="tempatLahir"
+                      name="tempatLahir"
+                      value={formData.tempatLahir}
+                      onChange={handleInputChange}
+                      className="h-10"
+                      placeholder="Contoh: Semarang"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tanggalLahir" className="font-semibold">
+                      Tanggal Lahir
+                    </Label>
+                    <Input
+                      id="tanggalLahir"
+                      name="tanggalLahir"
+                      type="date"
+                      value={formData.tanggalLahir}
+                      onChange={handleInputChange}
+                      className="h-10"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Read-only Fields */}
+            <div className="space-y-4 pt-6 border-t border-gray-200">
+              <h3 className="font-semibold text-gray-900">
+                Informasi Institusi (Tidak dapat diubah)
+              </h3>
+
+              {profileData.identifier && (
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium text-gray-500">
+                    {profileData.identifierLabel}
+                  </Label>
+                  <p className="text-gray-900 font-medium">
+                    {profileData.identifier}
+                  </p>
+                </div>
+              )}
+
+              {profileData.departemen && (
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium text-gray-500">
+                    Departemen
+                  </Label>
+                  <p className="text-gray-900 font-medium">
+                    {profileData.departemen}
+                  </p>
+                </div>
+              )}
+
+              {profileData.programStudi && (
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium text-gray-500">
+                    Program Studi
+                  </Label>
+                  <p className="text-gray-900 font-medium">
+                    {profileData.programStudi}
+                  </p>
+                </div>
+              )}
+
+              {profileData.jabatan && (
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium text-gray-500">
+                    Jabatan
+                  </Label>
+                  <p className="text-gray-900 font-medium">
+                    {profileData.jabatan}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-6 border-t border-gray-200">
+              <Link href={backHref}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-10 px-6 text-sm font-semibold w-full sm:w-auto"
+                >
+                  Batal
+                </Button>
+              </Link>
+              <Button
+                type="submit"
+                disabled={isSaving}
+                className="h-10 px-6 text-sm font-semibold gap-2 text-white w-full sm:w-auto"
+                style={{ backgroundColor: "#0078bd" }}
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {isSaving ? "Menyimpan..." : "Simpan"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Info Alert */}
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+        <p className="text-sm text-blue-900">
+          <span className="font-semibold">Catatan:</span> Informasi institusi
+          seperti departemen, program studi, dan jabatan tidak dapat diubah di
+          sini. Jika ada ketidaksesuaian, silakan hubungi operator untuk
+          sinkronisasi ulang.
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default ProfileEditPage;

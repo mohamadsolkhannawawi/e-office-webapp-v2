@@ -1,3 +1,5 @@
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export interface Template {
     id: string;
     name: string;
@@ -42,7 +44,7 @@ export async function getTemplateByLetterType(
 ): Promise<{ success: boolean; data?: Template; error?: string }> {
     try {
         const response = await fetch(
-            `/api/templates/by-letter-type/${encodeURIComponent(letterTypeName)}`,
+            `${BASE_PATH}/api/templates/by-letter-type/${encodeURIComponent(letterTypeName)}`,
             {
                 method: "GET",
                 headers: {
@@ -97,7 +99,7 @@ export async function getTemplates(): Promise<{
     data: Template[];
 }> {
     try {
-        const response = await fetch("/api/templates", {
+        const response = await fetch(`${BASE_PATH}/api/templates`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -122,7 +124,7 @@ export async function getTemplate(
     id: string,
 ): Promise<{ success: boolean; data: Template }> {
     try {
-        const response = await fetch(`/api/templates/${id}`, {
+        const response = await fetch(`${BASE_PATH}/api/templates/${id}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -150,7 +152,7 @@ export async function generateDocument(
     request: DocumentGenerationRequest,
 ): Promise<DocumentGenerationResponse> {
     try {
-        const response = await fetch(`/api/templates/generate/${templateId}`, {
+        const response = await fetch(`${BASE_PATH}/api/templates/generate/${templateId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -207,7 +209,7 @@ export async function downloadPreGeneratedDocument(
         );
 
         const response = await fetch(
-            `/api/templates/letter/${letterInstanceId}/download`,
+            `${BASE_PATH}/api/templates/letter/${letterInstanceId}/download`,
             {
                 method: "GET",
             },
@@ -307,7 +309,7 @@ export async function getDocxPreviewStatus(
 ): Promise<PreviewStatus> {
     try {
         const response = await fetch(
-            `/api/templates/letter/${letterInstanceId}/preview-status`,
+            `${BASE_PATH}/api/templates/letter/${letterInstanceId}/preview-status`,
             {
                 method: "GET",
             },
@@ -334,7 +336,7 @@ export async function triggerDocxGeneration(
 ): Promise<{ success: boolean; error?: string }> {
     try {
         const response = await fetch(
-            `/api/templates/letter/${letterInstanceId}/generate`,
+            `${BASE_PATH}/api/templates/letter/${letterInstanceId}/generate`,
             {
                 method: "POST",
                 headers: {
@@ -379,7 +381,7 @@ export async function fetchDocxForPreview(
 
     try {
         const response = await fetch(
-            `/api/templates/letter/${letterInstanceId}/preview`,
+            `${BASE_PATH}/api/templates/letter/${letterInstanceId}/preview`,
             {
                 method: "GET",
                 signal: controller.signal,

@@ -3,14 +3,14 @@
 import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import {
-    ChevronRight,
-    Filter,
-    Loader2,
-    Download,
-    Eye,
-    CheckCircle,
-    XCircle,
-    Search,
+  ChevronRight,
+  Filter,
+  Loader2,
+  Download,
+  Eye,
+  CheckCircle,
+  XCircle,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,399 +20,361 @@ import { generateAndDownloadDocument } from "@/lib/template-api";
 import { Card } from "@/components/ui/card";
 import { StandardPagination } from "@/components/ui/standard-pagination";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 
 export default function SuratSelesaiPage() {
-    const [applications, setApplications] = useState<ApplicationSummary[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [downloadingId, setDownloadingId] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [jenisFilter, setJenisFilter] = useState<string>("ALL");
-    const [pagination, setPagination] = useState({
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 1,
-    });
+  const [applications, setApplications] = useState<ApplicationSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [jenisFilter, setJenisFilter] = useState<string>("ALL");
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+  });
 
-    const fetchApplications = useCallback(
-        async (page: number, search: string, jenis: string, limit: number) => {
-            console.log("[DEBUG] fetchApplications called with:", {
-                page,
-                search,
-                jenis,
-                limit,
-            });
-            setIsLoading(true);
-            try {
-                const { data, meta } = await getApplications({
-                    status: "FINISHED",
-                    page,
-                    limit,
-                    search: search || undefined,
-                    jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
-                });
-                console.log("[DEBUG] API response received:", {
-                    dataLength: data.length,
-                    meta,
-                });
-                setApplications(data);
-                setPagination({
-                    page: meta.page,
-                    limit: meta.limit,
-                    total: meta.total,
-                    totalPages: meta.totalPages,
-                });
-            } catch (error) {
-                console.error("[DEBUG] Failed to fetch applications:", error);
-                toast.error("Gagal memuat surat selesai. Silakan coba lagi.");
-            } finally {
-                console.log(
-                    "[DEBUG] Finally block - setting isLoading to false",
-                );
-                setIsLoading(false);
-            }
-        },
-        [],
-    );
+  const fetchApplications = useCallback(
+    async (page: number, search: string, jenis: string, limit: number) => {
+      console.log("[DEBUG] fetchApplications called with:", {
+        page,
+        search,
+        jenis,
+        limit,
+      });
+      setIsLoading(true);
+      try {
+        const { data, meta } = await getApplications({
+          status: "FINISHED",
+          page,
+          limit,
+          search: search || undefined,
+          jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
+        });
+        console.log("[DEBUG] API response received:", {
+          dataLength: data.length,
+          meta,
+        });
+        setApplications(data);
+        setPagination({
+          page: meta.page,
+          limit: meta.limit,
+          total: meta.total,
+          totalPages: meta.totalPages,
+        });
+      } catch (error) {
+        console.error("[DEBUG] Failed to fetch applications:", error);
+        toast.error("Gagal memuat surat selesai. Silakan coba lagi.");
+      } finally {
+        console.log("[DEBUG] Finally block - setting isLoading to false");
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
 
-    // Handle template document download
-    const handleDownloadTemplate = async (applicationId: string) => {
-        setDownloadingId(applicationId);
-        try {
-            // Template ID untuk surat rekomendasi beasiswa - nanti bisa dinamis
-            const templateId = "cml1v2sev0010oau4yy2at0jh"; // Hard coded for now
+  // Handle template document download
+  const handleDownloadTemplate = async (applicationId: string) => {
+    setDownloadingId(applicationId);
+    try {
+      // Template ID untuk surat rekomendasi beasiswa - nanti bisa dinamis
+      const templateId = "cml1v2sev0010oau4yy2at0jh"; // Hard coded for now
 
-            await generateAndDownloadDocument(
-                templateId,
-                applicationId,
-                `surat-rekomendasi-beasiswa-${applicationId}.docx`,
-            );
+      await generateAndDownloadDocument(
+        templateId,
+        applicationId,
+        `surat-rekomendasi-beasiswa-${applicationId}.docx`,
+      );
 
-            toast.success("Dokumen Word berhasil diunduh!");
-        } catch (error) {
-            console.error("Failed to download template:", error);
-            toast.error(
-                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
-            );
-        } finally {
-            setDownloadingId(null);
-        }
+      toast.success("Dokumen Word berhasil diunduh!");
+    } catch (error) {
+      console.error("Failed to download template:", error);
+      toast.error(
+        `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+      );
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch data on component mount
+    fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Re-fetch when search or filter changes
+    const delaySearch = setTimeout(() => {
+      fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
+    }, 500);
+
+    return () => clearTimeout(delaySearch);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, jenisFilter]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      fetchApplications(newPage, searchTerm, jenisFilter, pagination.limit);
+    }
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPagination((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
+    fetchApplications(1, searchTerm, jenisFilter, newPageSize);
+  };
+
+  const getStatusInfo = (status: string, app?: ApplicationSummary) => {
+    if (status === "COMPLETED") {
+      const roleText = app?.lastActorRole ? ` ${app.lastActorRole}` : "";
+      return {
+        label: `Diterbitkan${roleText ? " oleh" : ""}${roleText}`,
+        color: "bg-emerald-500 text-white",
+        icon: <CheckCircle className="h-3.5 w-3.5" />,
+      };
+    }
+    if (status === "REJECTED") {
+      const roleText = app?.lastActorRole ? ` ${app.lastActorRole}` : "";
+      return {
+        label: `Ditolak${roleText ? " oleh" : ""}${roleText}`,
+        color: "bg-red-500 text-white",
+        icon: <XCircle className="h-3.5 w-3.5" />,
+      };
+    }
+    return {
+      label: status,
+      color: "bg-slate-500 text-white",
+      icon: <CheckCircle className="h-3.5 w-3.5" />,
     };
+  };
 
-    useEffect(() => {
-        // Fetch data on component mount
-        fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Breadcrumb */}
+      <nav className="flex items-center text-sm font-medium text-slate-500">
+        <Link
+          href="/mahasiswa/surat/selesai"
+          className="hover:text-undip-blue transition-colors"
+        >
+          Surat Saya
+        </Link>
+        <ChevronRight className="mx-2 h-4 w-4" />
+        <span className="text-slate-800">Surat Selesai</span>
+      </nav>
 
-    useEffect(() => {
-        // Re-fetch when search or filter changes
-        const delaySearch = setTimeout(() => {
-            fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
-        }, 500);
+      {/* Page Title */}
+      <h1 className="text-2xl font-bold text-slate-800">Surat Selesai</h1>
+      <p className="text-sm text-slate-500 -mt-4">
+        Surat-surat rekomendasi beasiswa yang telah selesai diproses.
+      </p>
 
-        return () => clearTimeout(delaySearch);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchTerm, jenisFilter]);
+      {/* Combined Filters and Table Card */}
+      <Card className="border-none shadow-sm overflow-hidden bg-white rounded-3xl py-0 gap-0">
+        {/* Filters Section */}
+        <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
+          <div className="flex flex-wrap gap-3 items-center">
+            {/* Search */}
+            <div className="relative flex-1 min-w-50">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                placeholder="Cari surat selesai..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full rounded-3xl"
+              />
+            </div>
 
-    const handlePageChange = (newPage: number) => {
-        if (newPage >= 1 && newPage <= pagination.totalPages) {
-            fetchApplications(
-                newPage,
-                searchTerm,
-                jenisFilter,
-                pagination.limit,
-            );
-        }
-    };
-
-    const handlePageSizeChange = (newPageSize: number) => {
-        setPagination((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
-        fetchApplications(1, searchTerm, jenisFilter, newPageSize);
-    };
-
-    const getStatusInfo = (status: string, app?: ApplicationSummary) => {
-        if (status === "COMPLETED") {
-            const roleText = app?.lastActorRole ? ` ${app.lastActorRole}` : "";
-            return {
-                label: `Diterbitkan${roleText ? " oleh" : ""}${roleText}`,
-                color: "text-green-600 bg-green-50",
-                icon: <CheckCircle className="h-3.5 w-3.5" />,
-            };
-        }
-        if (status === "REJECTED") {
-            const roleText = app?.lastActorRole ? ` ${app.lastActorRole}` : "";
-            return {
-                label: `Ditolak${roleText ? " oleh" : ""}${roleText}`,
-                color: "text-red-600 bg-red-50",
-                icon: <XCircle className="h-3.5 w-3.5" />,
-            };
-        }
-        return {
-            label: status,
-            color: "text-slate-600 bg-slate-50",
-            icon: <CheckCircle className="h-3.5 w-3.5" />,
-        };
-    };
-
-    return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Breadcrumb */}
-            <nav className="flex items-center text-sm font-medium text-slate-500">
-                <Link
-                    href="/mahasiswa/surat/selesai"
-                    className="hover:text-undip-blue transition-colors"
-                >
-                    Surat Saya
-                </Link>
-                <ChevronRight className="mx-2 h-4 w-4" />
-                <span className="text-slate-800">Surat Selesai</span>
-            </nav>
-
-            {/* Page Title */}
-            <h1 className="text-2xl font-bold text-slate-800">Surat Selesai</h1>
-            <p className="text-sm text-slate-500 -mt-4">
-                Surat-surat rekomendasi beasiswa yang telah selesai diproses.
-            </p>
-
-            {/* Combined Filters and Table Card */}
-            <Card className="border-none shadow-sm overflow-hidden bg-white rounded-3xl py-0 gap-0">
-                {/* Filters Section */}
-                <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
-                    <div className="flex flex-wrap gap-3 items-center">
-                        {/* Search */}
-                        <div className="relative flex-1 min-w-50">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <Input
-                                placeholder="Cari surat selesai..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full rounded-3xl"
-                            />
-                        </div>
-
-                        {/* Filter Jenis */}
-                        <Select
-                            value={jenisFilter}
-                            onValueChange={setJenisFilter}
-                        >
-                            <SelectTrigger
-                                className="w-full sm:w-50 h-10 border-slate-100 text-slate-600 rounded-3xl"
-                                suppressHydrationWarning
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Filter className="h-4 w-4" />
-                                    <SelectValue placeholder="Jenis Surat" />
-                                </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">Semua Jenis</SelectItem>
-                                <SelectItem value="internal">
-                                    Beasiswa Internal
-                                </SelectItem>
-                                <SelectItem value="eksternal">
-                                    Beasiswa Eksternal
-                                </SelectItem>
-                                <SelectItem value="akademik">
-                                    Beasiswa Akademik
-                                </SelectItem>
-                                <SelectItem value="keperluan_lain">
-                                    Keperluan Lain
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+            {/* Filter Jenis */}
+            <Select value={jenisFilter} onValueChange={setJenisFilter}>
+              <SelectTrigger
+                className="w-full sm:w-50 h-10 border-slate-100 text-slate-600 rounded-3xl"
+                suppressHydrationWarning
+              >
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue placeholder="Jenis Surat" />
                 </div>
-
-                {/* Table Section */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm border-collapse">
-                        <thead className="bg-undip-blue border-b border-slate-100">
-                            <tr>
-                                <th className="px-6 py-4 font-semibold text-white w-12">
-                                    No
-                                </th>
-                                <th className="px-6 py-4 font-semibold text-white min-w-50">
-                                    Subjek Surat
-                                </th>
-                                <th className="px-6 py-4 font-semibold text-white min-w-50">
-                                    Tanggal Pengajuan
-                                </th>
-                                <th className="px-6 py-4 font-semibold text-white min-w-50">
-                                    Status
-                                </th>
-                                <th className="px-6 py-4 font-semibold text-white w-24">
-                                    Aksi
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {isLoading ? (
-                                <tr>
-                                    <td
-                                        colSpan={5}
-                                        className="px-6 py-12 text-center text-slate-500"
-                                    >
-                                        <div className="flex justify-center items-center gap-2">
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                            Loading data...
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : applications.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={5}
-                                        className="px-6 py-12 text-center"
-                                    >
-                                        <div className="flex flex-col items-center justify-center gap-2">
-                                            <div className="text-slate-400">
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className="h-16 w-16 mx-auto mb-2"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={1.5}
-                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            <p className="text-slate-600 font-medium">
-                                                Tidak ada surat yang selesai.
-                                            </p>
-                                            <p className="text-slate-400 text-sm">
-                                                Belum ada surat yang telah
-                                                diselesaikan.
-                                            </p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                applications.map((app, index) => {
-                                    const status = getStatusInfo(
-                                        app.status,
-                                        app,
-                                    );
-
-                                    return (
-                                        <tr
-                                            key={app.id}
-                                            className="hover:bg-slate-50/50 transition-colors group"
-                                        >
-                                            <td className="px-6 py-4 text-slate-500 text-sm font-medium">
-                                                {(pagination.page - 1) *
-                                                    pagination.limit +
-                                                    index +
-                                                    1}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="font-semibold text-slate-800 group-hover:text-undip-blue transition-colors">
-                                                    {app.scholarshipName ||
-                                                        app.letterType?.name ||
-                                                        "Surat Rekomendasi Beasiswa"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-slate-600 text-sm">
-                                                {new Date(
-                                                    app.createdAt,
-                                                ).toLocaleDateString("id-ID", {
-                                                    day: "numeric",
-                                                    month: "long",
-                                                    year: "numeric",
-                                                })}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div
-                                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${status.color}`}
-                                                >
-                                                    {status.icon}
-                                                    {status.label}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <Link
-                                                        href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}?from=selesai`}
-                                                    >
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-9 px-3 gap-2 text-white bg-undip-blue hover:bg-sky-700 hover:text-white font-medium text-xs rounded-3xl"
-                                                            title="Detail"
-                                                        >
-                                                            <Eye className="h-4 w-4" />
-                                                            Detail
-                                                        </Button>
-                                                    </Link>
-
-                                                    {app.status ===
-                                                        "COMPLETED" && (
-                                                        <>
-                                                            {/* Download PDF */}
-                                                            <Button
-                                                                size="sm"
-                                                                className="h-9 px-3 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 hover:text-white font-medium text-xs rounded-3xl"
-                                                                title="Unduh PDF"
-                                                                onClick={() => {
-                                                                    try {
-                                                                        const link =
-                                                                            document.createElement(
-                                                                                "a",
-                                                                            );
-                                                                        link.href = `/api/templates/letter/${app.id}/pdf`;
-                                                                        link.download = `${app.scholarshipName || "Surat"}-${app.id}.pdf`;
-                                                                        link.click();
-                                                                        toast.success(
-                                                                            "PDF berhasil diunduh!",
-                                                                        );
-                                                                    } catch (error) {
-                                                                        console.error(
-                                                                            "Error downloading PDF:",
-                                                                            error,
-                                                                        );
-                                                                        toast.error(
-                                                                            `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
-                                                                        );
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Download className="h-4 w-4" />
-                                                                Unduh PDF
-                                                            </Button>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Standard Pagination */}
-                <StandardPagination
-                    currentPage={pagination.page}
-                    totalPages={pagination.totalPages}
-                    pageSize={pagination.limit}
-                    totalItems={pagination.total}
-                    onPageChange={handlePageChange}
-                    onPageSizeChange={handlePageSizeChange}
-                    itemLabel="surat selesai"
-                />
-            </Card>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Semua Jenis</SelectItem>
+                <SelectItem value="internal">Beasiswa Internal</SelectItem>
+                <SelectItem value="eksternal">Beasiswa Eksternal</SelectItem>
+                <SelectItem value="akademik">Beasiswa Akademik</SelectItem>
+                <SelectItem value="keperluan_lain">Keperluan Lain</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-    );
+
+        {/* Table Section */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead className="bg-undip-blue border-b border-slate-100">
+              <tr>
+                <th className="px-6 py-4 font-semibold text-white w-12">No</th>
+                <th className="px-6 py-4 font-semibold text-white min-w-50">
+                  Subjek Surat
+                </th>
+                <th className="px-6 py-4 font-semibold text-white min-w-50">
+                  Tanggal Pengajuan
+                </th>
+                <th className="px-6 py-4 font-semibold text-white min-w-50">
+                  Status
+                </th>
+                <th className="px-6 py-4 font-semibold text-white w-24">
+                  Aksi
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {isLoading ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-6 py-12 text-center text-slate-500"
+                  >
+                    <div className="flex justify-center items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading data...
+                    </div>
+                  </td>
+                </tr>
+              ) : applications.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="text-slate-400">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-16 w-16 mx-auto mb-2"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </div>
+                      <p className="text-slate-600 font-medium">
+                        Tidak ada surat yang selesai.
+                      </p>
+                      <p className="text-slate-400 text-sm">
+                        Belum ada surat yang telah diselesaikan.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                applications.map((app, index) => {
+                  const status = getStatusInfo(app.status, app);
+
+                  return (
+                    <tr
+                      key={app.id}
+                      className="hover:bg-slate-50/50 transition-colors group"
+                    >
+                      <td className="px-6 py-4 text-slate-500 text-sm font-medium">
+                        {(pagination.page - 1) * pagination.limit + index + 1}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-semibold text-slate-800 group-hover:text-undip-blue transition-colors">
+                          {app.scholarshipName ||
+                            app.letterType?.name ||
+                            "Surat Rekomendasi Beasiswa"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-600 text-sm">
+                        {new Date(app.createdAt).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${status.color}`}
+                        >
+                          {status.icon}
+                          {status.label}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <Link
+                            href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}?from=selesai`}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-9 px-3 gap-2 text-white bg-undip-blue hover:bg-sky-700 hover:text-white font-medium text-xs rounded-3xl"
+                              title="Detail"
+                            >
+                              <Eye className="h-4 w-4" />
+                              Detail
+                            </Button>
+                          </Link>
+
+                          {app.status === "COMPLETED" && (
+                            <>
+                              {/* Download PDF */}
+                              <Button
+                                size="sm"
+                                className="h-9 px-3 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 hover:text-white font-medium text-xs rounded-3xl"
+                                title="Unduh PDF"
+                                onClick={() => {
+                                  try {
+                                    const link = document.createElement("a");
+                                    link.href = `/api/templates/letter/${app.id}/pdf`;
+                                    link.download = `${app.scholarshipName || "Surat"}-${app.id}.pdf`;
+                                    link.click();
+                                    toast.success("PDF berhasil diunduh!");
+                                  } catch (error) {
+                                    console.error(
+                                      "Error downloading PDF:",
+                                      error,
+                                    );
+                                    toast.error(
+                                      `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+                                    );
+                                  }
+                                }}
+                              >
+                                <Download className="h-4 w-4" />
+                                Unduh PDF
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Standard Pagination */}
+        <StandardPagination
+          currentPage={pagination.page}
+          totalPages={pagination.totalPages}
+          pageSize={pagination.limit}
+          totalItems={pagination.total}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          itemLabel="surat selesai"
+        />
+      </Card>
+    </div>
+  );
 }

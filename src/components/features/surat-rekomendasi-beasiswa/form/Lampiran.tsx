@@ -42,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { rewriteMinioUrl } from "@/utils/minio-url";
 
 export function Lampiran({ data, setData, jenis }: LampiranProps) {
   const isKeperluanLain = jenis === "keperluan_lain";
@@ -371,7 +372,7 @@ export function Lampiran({ data, setData, jenis }: LampiranProps) {
       if (t.includes("pdf") || attachment.name.toLowerCase().endsWith(".pdf"))
         setPreviewType("pdf");
       else setPreviewType("image");
-      setPreviewUrl(attachment.downloadUrl);
+      setPreviewUrl(rewriteMinioUrl(attachment.downloadUrl));
       return;
     }
 

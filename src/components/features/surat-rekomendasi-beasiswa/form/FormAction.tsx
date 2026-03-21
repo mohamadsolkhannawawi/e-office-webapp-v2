@@ -58,8 +58,52 @@ export function FormAction({
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [showDraftSuccess, setShowDraftSuccess] = React.useState(false);
   const [draftRedirectPath, setDraftRedirectPath] = React.useState("");
+  const [showSubmitSuccess, setShowSubmitSuccess] = React.useState(false);
+  const [submitRedirectPath, setSubmitRedirectPath] = React.useState("");
+  const [submitSuccessTitle, setSubmitSuccessTitle] = React.useState("");
+  const [submitSuccessMessage, setSubmitSuccessMessage] = React.useState("");
+  const draftIconRef = React.useRef<HTMLDivElement | null>(null);
+  const submitIconRef = React.useRef<HTMLDivElement | null>(null);
 
   const isStudentEdit = mode === "student_edit";
+  const draftListPath =
+    jenis === "keperluan_lain"
+      ? "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa?jenis=keperluan_lain"
+      : "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa";
+
+  React.useEffect(() => {
+    if (!showDraftSuccess || !draftIconRef.current) return;
+    const anim = draftIconRef.current.animate(
+      [
+        { transform: "translateY(10px) scale(0.8)", opacity: 0.2 },
+        { transform: "translateY(-2px) scale(1.08)", opacity: 1, offset: 0.6 },
+        { transform: "translateY(0) scale(1)", opacity: 1 },
+      ],
+      {
+        duration: 620,
+        easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        fill: "both",
+      },
+    );
+    return () => anim.cancel();
+  }, [showDraftSuccess]);
+
+  React.useEffect(() => {
+    if (!showSubmitSuccess || !submitIconRef.current) return;
+    const anim = submitIconRef.current.animate(
+      [
+        { transform: "translateY(12px) scale(0.78)", opacity: 0.2 },
+        { transform: "translateY(-2px) scale(1.1)", opacity: 1, offset: 0.6 },
+        { transform: "translateY(0) scale(1)", opacity: 1 },
+      ],
+      {
+        duration: 640,
+        easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        fill: "both",
+      },
+    );
+    return () => anim.cancel();
+  }, [showSubmitSuccess]);
 
   const handleSaveDraft = async () => {
     if (!formData) return;
@@ -76,9 +120,7 @@ export function FormAction({
           },
           status: "DRAFT",
         });
-        setDraftRedirectPath(
-          "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa",
-        );
+        setDraftRedirectPath(draftListPath);
         setShowDraftSuccess(true);
       } else {
         // Create new
@@ -86,9 +128,7 @@ export function FormAction({
           ...(formData as unknown as Record<string, unknown>),
           jenisBeasiswa: jenis,
         });
-        setDraftRedirectPath(
-          "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa",
-        );
+        setDraftRedirectPath(draftListPath);
         setShowDraftSuccess(true);
       }
     } catch (error) {
@@ -118,9 +158,14 @@ export function FormAction({
         });
 
         localStorage.removeItem(`srb_form_${jenis}`);
-        router.push(
+        setSubmitSuccessTitle("Revisi Berhasil Disimpan!");
+        setSubmitSuccessMessage(
+          "Perubahan surat Anda sudah tersimpan dan akan diteruskan ke proses verifikasi berikutnya.",
+        );
+        setSubmitRedirectPath(
           `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${letterInstanceId}?from=proses`,
         );
+        setShowSubmitSuccess(true);
       } else {
         // Normal submission flow
         await updateApplication(letterInstanceId, {
@@ -133,9 +178,14 @@ export function FormAction({
         });
 
         localStorage.removeItem(`srb_form_${jenis}`);
-        router.push(
+        setSubmitSuccessTitle("Pengajuan Berhasil!");
+        setSubmitSuccessMessage(
+          "Surat Anda berhasil diajukan dan masuk ke tahap verifikasi. Anda dapat memantau progresnya pada daftar surat dalam proses.",
+        );
+        setSubmitRedirectPath(
           `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${letterInstanceId}`,
         );
+        setShowSubmitSuccess(true);
       }
     } catch (error) {
       console.error("Failed to submit application:", error);
@@ -168,7 +218,9 @@ export function FormAction({
       <Dialog open={showDraftSuccess} onOpenChange={setShowDraftSuccess}>
         <DialogContent className="max-w-sm rounded-2xl sm:rounded-2xl text-center">
           <DialogHeader className="items-center gap-3">
-            <CheckCircle2 className="h-14 w-14 text-green-500" />
+            <div ref={draftIconRef}>
+              <CheckCircle2 className="h-14 w-14 text-green-500" />
+            </div>
             <DialogTitle className="text-xl font-bold text-gray-900">
               Draft Tersimpan!
             </DialogTitle>
@@ -194,6 +246,34 @@ export function FormAction({
               className="w-full rounded-3xl h-11"
             >
               Lanjut Isi Form
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Submit Success Modal */}
+      <Dialog open={showSubmitSuccess} onOpenChange={setShowSubmitSuccess}>
+        <DialogContent className="max-w-sm rounded-2xl sm:rounded-2xl text-center">
+          <DialogHeader className="items-center gap-3">
+            <div ref={submitIconRef}>
+              <CheckCircle2 className="h-14 w-14 text-undip-blue" />
+            </div>
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              {submitSuccessTitle}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-gray-600">
+              {submitSuccessMessage}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col gap-2 sm:flex-col mt-2">
+            <Button
+              onClick={() => {
+                setShowSubmitSuccess(false);
+                router.push(submitRedirectPath);
+              }}
+              className="w-full bg-undip-blue hover:bg-sky-700 text-white rounded-3xl h-11"
+            >
+              Lihat Detail Surat
             </Button>
           </DialogFooter>
         </DialogContent>

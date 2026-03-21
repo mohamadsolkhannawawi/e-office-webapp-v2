@@ -39,10 +39,14 @@ export function Navbar({
   const pathname = usePathname();
 
   const userName = propUserName || user?.name || "User";
-  // Always proxy through /api/me/photo when a user is authenticated.
-  // The endpoint returns 404 if no photo → AvatarFallback (initials) renders automatically.
-  // propUserImage (if supplied externally) is used as-is.
-  const userImage = propUserImage || (user ? `${BASE_PATH}/api/me/photo` : "");
+  // Always proxy through /api/me/photo and attach user-scoped query params
+  // so browser cache never leaks photo across different authenticated accounts.
+  // The endpoint returns 404 if no photo → AvatarFallback renders automatically.
+  const userImage =
+    propUserImage ||
+    (user
+      ? `${BASE_PATH}/api/me/photo?uid=${encodeURIComponent(user.id)}&v=${encodeURIComponent(user.image || "none")}`
+      : "");
   const showProfile = propShowProfile && !!user;
 
   const [dropdownOpen, setDropdownOpen] = useState(false);

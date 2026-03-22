@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
@@ -10,7 +10,7 @@ import {
   Eye,
   CheckCircle,
   XCircle,
-  Pencarian,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,10 +18,10 @@ import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
 import { generateAndDownloadDocument } from "@/lib/template-api";
 import { Card } from "@/components/ui/card";
-import { StandardPaginasi } from "@/components/ui/standard-pagination";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 import {
   Select,
-  SelectKonten,
+  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -181,9 +181,9 @@ export default function SuratSelesaiPage() {
         {/* Bagian Filter */}
         <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
           <div className="flex flex-wrap gap-3 items-center">
-            {/* Pencarian */}
+            {/* Search */}
             <div className="relative flex-1 min-w-50">
-              <Pencarian className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Cari surat selesai..."
                 value={searchTerm}
@@ -203,13 +203,13 @@ export default function SuratSelesaiPage() {
                   <SelectValue placeholder="Jenis Surat" />
                 </div>
               </SelectTrigger>
-              <SelectKonten>
+              <SelectContent>
                 <SelectItem value="ALL">Semua Jenis</SelectItem>
                 <SelectItem value="internal">Beasiswa Internal</SelectItem>
                 <SelectItem value="eksternal">Beasiswa Eksternal</SelectItem>
                 <SelectItem value="akademik">Beasiswa Akademik</SelectItem>
                 <SelectItem value="keperluan_lain">Keperluan Lain</SelectItem>
-              </SelectKonten>
+              </SelectContent>
             </Select>
           </div>
         </div>
@@ -367,7 +367,7 @@ export default function SuratSelesaiPage() {
         </div>
 
         {/* Paginasi Standar */}
-        <StandardPaginasi
+        <StandardPagination
           currentPage={pagination.page}
           totalPages={pagination.totalPages}
           pageSize={pagination.limit}

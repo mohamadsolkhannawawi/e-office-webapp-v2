@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
@@ -10,7 +10,7 @@ import {
   Eye,
   CheckCircle,
   XCircle,
-  Search,
+  Pencarian,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,10 +18,10 @@ import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
 import { generateAndDownloadDocument } from "@/lib/template-api";
 import { Card } from "@/components/ui/card";
-import { StandardPagination } from "@/components/ui/standard-pagination";
+import { StandardPaginasi } from "@/components/ui/standard-pagination";
 import {
   Select,
-  SelectContent,
+  SelectKonten,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -33,9 +33,9 @@ export default function SuratSelesaiPage() {
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setPencarianTerm] = useState("");
   const [jenisFilter, setJenisFilter] = useState<string>("ALL");
-  const [pagination, setPagination] = useState({
+  const [pagination, setPaginasi] = useState({
     page: 1,
     limit: 10,
     total: 0,
@@ -64,7 +64,7 @@ export default function SuratSelesaiPage() {
           meta,
         });
         setApplications(data);
-        setPagination({
+        setPaginasi({
           page: meta.page,
           limit: meta.limit,
           total: meta.total,
@@ -81,12 +81,12 @@ export default function SuratSelesaiPage() {
     [],
   );
 
-  // Handle template document download
+  // Tangani proses unduhan dokumen template
   const handleDownloadTemplate = async (applicationId: string) => {
     setDownloadingId(applicationId);
     try {
-      // Template ID untuk surat rekomendasi beasiswa - nanti bisa dinamis
-      const templateId = "cml1v2sev0010oau4yy2at0jh"; // Hard coded for now
+      // ID template untuk surat rekomendasi beasiswa - nanti bisa dibuat dinamis
+      const templateId = "cml1v2sev0010oau4yy2at0jh"; // Masih hard-coded untuk sementara
 
       await generateAndDownloadDocument(
         templateId,
@@ -106,18 +106,18 @@ export default function SuratSelesaiPage() {
   };
 
   useEffect(() => {
-    // Fetch data on component mount
+    // Ambil data saat komponen pertama kali dimuat
     fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    // Re-fetch when search or filter changes
-    const delaySearch = setTimeout(() => {
+    // Ambil ulang data saat pencarian atau filter berubah
+    const delayPencarian = setTimeout(() => {
       fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
     }, 500);
 
-    return () => clearTimeout(delaySearch);
+    return () => clearTimeout(delayPencarian);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, jenisFilter]);
 
@@ -128,7 +128,7 @@ export default function SuratSelesaiPage() {
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
-    setPagination((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
+    setPaginasi((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
     fetchApplications(1, searchTerm, jenisFilter, newPageSize);
   };
 
@@ -170,24 +170,24 @@ export default function SuratSelesaiPage() {
         <span className="text-slate-800">Surat Selesai</span>
       </nav>
 
-      {/* Page Title */}
+      {/* Judul Halaman */}
       <h1 className="text-2xl font-bold text-slate-800">Surat Selesai</h1>
       <p className="text-sm text-slate-500 -mt-4">
         Surat-surat rekomendasi beasiswa yang telah selesai diproses.
       </p>
 
-      {/* Combined Filters and Table Card */}
+      {/* Gabungan Filter dan Kartu Tabel */}
       <Card className="border-none shadow-sm overflow-hidden bg-white rounded-3xl py-0 gap-0">
-        {/* Filters Section */}
+        {/* Bagian Filter */}
         <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
           <div className="flex flex-wrap gap-3 items-center">
-            {/* Search */}
+            {/* Pencarian */}
             <div className="relative flex-1 min-w-50">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Pencarian className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Cari surat selesai..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setPencarianTerm(e.target.value)}
                 className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full rounded-3xl"
               />
             </div>
@@ -203,18 +203,18 @@ export default function SuratSelesaiPage() {
                   <SelectValue placeholder="Jenis Surat" />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectKonten>
                 <SelectItem value="ALL">Semua Jenis</SelectItem>
                 <SelectItem value="internal">Beasiswa Internal</SelectItem>
                 <SelectItem value="eksternal">Beasiswa Eksternal</SelectItem>
                 <SelectItem value="akademik">Beasiswa Akademik</SelectItem>
                 <SelectItem value="keperluan_lain">Keperluan Lain</SelectItem>
-              </SelectContent>
+              </SelectKonten>
             </Select>
           </div>
         </div>
 
-        {/* Table Section */}
+        {/* Bagian Tabel */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead className="bg-undip-blue border-b border-slate-100">
@@ -328,7 +328,7 @@ export default function SuratSelesaiPage() {
 
                           {app.status === "COMPLETED" && (
                             <>
-                              {/* Download PDF */}
+                              {/* Unduh PDF */}
                               <Button
                                 size="sm"
                                 className="h-9 px-3 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 hover:text-white font-medium text-xs rounded-3xl"
@@ -366,8 +366,8 @@ export default function SuratSelesaiPage() {
           </table>
         </div>
 
-        {/* Standard Pagination */}
-        <StandardPagination
+        {/* Paginasi Standar */}
+        <StandardPaginasi
           currentPage={pagination.page}
           totalPages={pagination.totalPages}
           pageSize={pagination.limit}

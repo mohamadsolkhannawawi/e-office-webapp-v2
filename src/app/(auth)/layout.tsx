@@ -1,7 +1,8 @@
+// Layout sederhana untuk grup halaman autentikasi.
 export default function AuthLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    return <>{children}</>;
+  return <>{children}</>;
 }

@@ -29,14 +29,13 @@ export default function LoginPage() {
     user: currentUser,
     isAuthenticated,
     isLoading: authLoading,
-    refreshSession, // Add this
+    refreshSession, // Memuat ulang session agar role terbaru ikut terambil
   } = useAuth();
 
-  // AuthClient is already imported from context or lib, but we need it here for direct usage
-  // Import directly at top level is better, let's use the one from @/lib/auth-client
+  // Gunakan authClient secara langsung untuk mengambil session terbaru setelah login.
   const router = useRouter();
 
-  // Redirection helper
+  // Helper untuk redirect berdasarkan role pengguna.
   const redirectToDashboard = React.useCallback(
     (user: AuthUser) => {
       console.log("Redirect helper called with:", user);
@@ -63,14 +62,14 @@ export default function LoginPage() {
     [router],
   );
 
-  // Auto-redirect if already logged in
+  // Redirect otomatis jika pengguna sudah login.
   React.useEffect(() => {
     if (!authLoading && isAuthenticated && currentUser) {
       redirectToDashboard(currentUser);
     }
   }, [isAuthenticated, currentUser, authLoading, redirectToDashboard]);
 
-  // Check for logout success flag and show notification
+  // Cek penanda logout berhasil lalu tampilkan notifikasi.
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const logoutSuccess = sessionStorage.getItem("logout_success");
@@ -97,12 +96,10 @@ export default function LoginPage() {
       await signIn(email, password);
       toast.success("Login berhasil! Selamat datang di E-Office FSM UNDIP");
 
-      // FETCH LATEST SESSION TO GET ROLES (Manual Handler only intercepts getSession)
+      // Ambil session terbaru untuk mendapatkan role (manual handler hanya mengintersep getSession).
       await refreshSession();
 
-      // Get the updated user from context manually or via a helper if needed.
-      // Since refreshSession updates the context state, we might need to wait for it or fetch directly.
-      // Let's fetch directly to be safe and fast.
+      // Ambil user terbaru secara langsung agar lebih aman dan cepat.
       const sessionData = await authClient.getSession();
 
       if (sessionData.data?.user) {
@@ -113,7 +110,7 @@ export default function LoginPage() {
     } catch (error) {
       console.error("Login error:", error);
 
-      // Pesan error yang lebih spesifik
+      // Gunakan pesan error yang lebih spesifik sesuai penyebab.
       let errorMessage = "Login gagal. Silakan coba lagi";
 
       if (error instanceof Error) {
@@ -159,10 +156,10 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-col bg-bg-light font-sans text-gray-800 antialiased dark:bg-bg-dark dark:text-gray-200">
       <Navbar showProfile={false} />
 
-      {/* Main Content */}
+      {/* Konten utama */}
       <main className="flex grow items-center justify-center p-4 md:p-6">
         <div className="flex w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-card-light shadow-xl dark:bg-card-dark md:flex-row md:min-h-96">
-          {/* Left Panel */}
+          {/* Panel kiri */}
           <div className="flex w-full flex-col items-center justify-center border-b border-gray-100 p-4 md:p-8 text-center dark:border-gray-700 dark:bg-gray-900 md:w-1/2 md:border-b-0 md:border-r">
             <div className="relative mb-3 h-32 w-32 md:h-40 md:w-40">
               <Image
@@ -182,7 +179,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Right Panel - Sign In Form */}
+          {/* Panel kanan - Form masuk */}
           <div className="flex w-full flex-col justify-center bg-card-light p-6 dark:bg-card-dark md:w-1/2 md:p-8">
             <div className="mb-6 text-center md:text-left">
               <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">

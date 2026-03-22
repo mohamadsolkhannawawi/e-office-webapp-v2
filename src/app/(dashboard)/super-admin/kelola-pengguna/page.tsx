@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter, usePencarianParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Pencarian,
+  Search,
   Plus,
   User,
   Edit,
@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
-  SelectKonten,
+  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -37,7 +37,7 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogKonten,
+  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
@@ -68,7 +68,7 @@ interface User {
 
 function KelolaPageKonten() {
   const router = useRouter();
-  const searchParams = usePencarianParams();
+  const searchParams = useSearchParams();
 
   const [users, setUsers] = useState<User[]>([]);
   const [meta, setMeta] = useState({
@@ -148,7 +148,7 @@ function KelolaPageKonten() {
   }, [loadUsers]);
 
   const handlePencarian = () => {
-    const params = new URLPencarianParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams.toString());
     if (search) params.set("search", search);
     else params.delete("search");
     params.set("page", "1");
@@ -156,7 +156,7 @@ function KelolaPageKonten() {
   };
 
   const handleFilterChange = (type: string, value: string) => {
-    const params = new URLPencarianParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams.toString());
     if (value && value !== "all") params.set(type, value);
     else params.delete(type);
     params.set("page", "1");
@@ -276,7 +276,7 @@ function KelolaPageKonten() {
                   className="flex-1"
                 />
                 <Button onClick={handlePencarian} variant="outline">
-                  <Pencarian className="h-4 w-4" />
+                  <Search className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -288,7 +288,7 @@ function KelolaPageKonten() {
                 <SelectTrigger>
                   <SelectValue placeholder="Semua Role" />
                 </SelectTrigger>
-                <SelectKonten>
+                <SelectContent>
                   <SelectItem value="all">Semua Role</SelectItem>
                   <SelectItem value="MAHASISWA">Mahasiswa</SelectItem>
                   <SelectItem value="SUPERVISOR">Supervisor</SelectItem>
@@ -296,7 +296,7 @@ function KelolaPageKonten() {
                   <SelectItem value="WAKIL_DEKAN_1">Wakil Dekan 1</SelectItem>
                   <SelectItem value="UPA">UPA</SelectItem>
                   <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
-                </SelectKonten>
+                </SelectContent>
               </Select>
               <Select
                 value={searchParams.get("status") || "all"}
@@ -305,11 +305,11 @@ function KelolaPageKonten() {
                 <SelectTrigger>
                   <SelectValue placeholder="Semua Status" />
                 </SelectTrigger>
-                <SelectKonten>
+                <SelectContent>
                   <SelectItem value="all">Semua Status</SelectItem>
                   <SelectItem value="active">Aktif</SelectItem>
                   <SelectItem value="inactive">Tidak Aktif</SelectItem>
-                </SelectKonten>
+                </SelectContent>
               </Select>
             </div>
           </div>
@@ -451,7 +451,7 @@ function KelolaPageKonten() {
                   size="sm"
                   disabled={meta.page === 1}
                   onClick={() => {
-                    const params = new URLPencarianParams(searchParams.toString());
+                    const params = new URLSearchParams(searchParams.toString());
                     params.set("page", String(meta.page - 1));
                     router.push(`?${params.toString()}`);
                   }}
@@ -466,7 +466,7 @@ function KelolaPageKonten() {
                   size="sm"
                   disabled={meta.page === meta.totalPages}
                   onClick={() => {
-                    const params = new URLPencarianParams(searchParams.toString());
+                    const params = new URLSearchParams(searchParams.toString());
                     params.set("page", String(meta.page + 1));
                     router.push(`?${params.toString()}`);
                   }}
@@ -486,7 +486,7 @@ function KelolaPageKonten() {
           !open && setDeleteDialog({ open: false, userId: "", userName: "" })
         }
       >
-        <AlertDialogKonten>
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
             <AlertDialogDescription>
@@ -504,7 +504,7 @@ function KelolaPageKonten() {
               Hapus
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogKonten>
+        </AlertDialogContent>
       </AlertDialog>
 
       {/* Dialog Reset Password */}
@@ -520,7 +520,7 @@ function KelolaPageKonten() {
           })
         }
       >
-        <AlertDialogKonten>
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Password Direset</AlertDialogTitle>
             <AlertDialogDescription>
@@ -538,7 +538,7 @@ function KelolaPageKonten() {
           <AlertDialogFooter>
             <AlertDialogAction>Tutup</AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogKonten>
+        </AlertDialogContent>
       </AlertDialog>
     </div>
   );

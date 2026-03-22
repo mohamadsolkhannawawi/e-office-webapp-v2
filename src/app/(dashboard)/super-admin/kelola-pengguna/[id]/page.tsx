@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardKonten, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +30,7 @@ import {
 } from "@/lib/admin-api";
 import {
   Select,
-  SelectKonten,
+  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -371,7 +371,7 @@ export default function EditUserPage() {
               Informasi Dasar
             </CardTitle>
           </CardHeader>
-          <CardKonten className="space-y-4">
+          <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">Nama Lengkap</Label>
@@ -418,7 +418,7 @@ export default function EditUserPage() {
                 </span>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
 
         {/* Role Management */}
@@ -429,7 +429,7 @@ export default function EditUserPage() {
               Kelola Role
             </CardTitle>
           </CardHeader>
-          <CardKonten className="space-y-4">
+          <CardContent className="space-y-4">
             <div className="grid gap-3 md:grid-cols-2">
               {availableRoles.map((role) => (
                 <div
@@ -450,7 +450,7 @@ export default function EditUserPage() {
                 </div>
               ))}
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
 
         {/* Mahasiswa Data */}
@@ -462,7 +462,7 @@ export default function EditUserPage() {
                 Data Mahasiswa
               </CardTitle>
             </CardHeader>
-            <CardKonten className="space-y-4">
+            <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="nim">NIM</Label>
@@ -625,13 +625,13 @@ export default function EditUserPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Pilih Departemen" />
                     </SelectTrigger>
-                    <SelectKonten>
+                    <SelectContent>
                       {departments.map((dept) => (
                         <SelectItem key={dept.id} value={dept.id}>
                           {dept.name}
                         </SelectItem>
                       ))}
-                    </SelectKonten>
+                    </SelectContent>
                   </Select>
                 </div>
 
@@ -653,13 +653,13 @@ export default function EditUserPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Pilih Program Studi" />
                     </SelectTrigger>
-                    <SelectKonten>
+                    <SelectContent>
                       {filteredProdi.map((prodi) => (
                         <SelectItem key={prodi.id} value={prodi.id}>
                           {prodi.name}
                         </SelectItem>
                       ))}
-                    </SelectKonten>
+                    </SelectContent>
                   </Select>
                   {!formData.mahasiswaData.departemenId && (
                     <p className="text-xs text-gray-500">
@@ -668,7 +668,7 @@ export default function EditUserPage() {
                   )}
                 </div>
               </div>
-            </CardKonten>
+            </CardContent>
           </Card>
         )}
 
@@ -681,7 +681,7 @@ export default function EditUserPage() {
                 Data Pegawai
               </CardTitle>
             </CardHeader>
-            <CardKonten className="space-y-4">
+            <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="nip">NIP</Label>
@@ -755,13 +755,13 @@ export default function EditUserPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Pilih Departemen" />
                     </SelectTrigger>
-                    <SelectKonten>
+                    <SelectContent>
                       {departments.map((dept) => (
                         <SelectItem key={dept.id} value={dept.id}>
                           {dept.name}
                         </SelectItem>
                       ))}
-                    </SelectKonten>
+                    </SelectContent>
                   </Select>
                 </div>
 
@@ -783,13 +783,13 @@ export default function EditUserPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Pilih Program Studi" />
                     </SelectTrigger>
-                    <SelectKonten>
+                    <SelectContent>
                       {filteredProdi.map((prodi) => (
                         <SelectItem key={prodi.id} value={prodi.id}>
                           {prodi.name}
                         </SelectItem>
                       ))}
-                    </SelectKonten>
+                    </SelectContent>
                   </Select>
                   {!formData.pegawaiData.departemenId && (
                     <p className="text-xs text-gray-500">
@@ -798,7 +798,7 @@ export default function EditUserPage() {
                   )}
                 </div>
               </div>
-            </CardKonten>
+            </CardContent>
           </Card>
         )}
 

@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardKonten, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,7 +29,7 @@ import {
 } from "@/lib/admin-api";
 import {
     Select,
-    SelectKonten,
+    SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
@@ -348,7 +348,7 @@ export default function CreateUserPage() {
                             Informasi Dasar
                         </CardTitle>
                     </CardHeader>
-                    <CardKonten className="space-y-4">
+                    <CardContent className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="name">
@@ -434,7 +434,7 @@ export default function CreateUserPage() {
                                 </div>
                             </div>
                         </div>
-                    </CardKonten>
+                    </CardContent>
                 </Card>
 
                 {/* Roles */}
@@ -446,7 +446,7 @@ export default function CreateUserPage() {
                             <span className="text-red-500">*</span>
                         </CardTitle>
                     </CardHeader>
-                    <CardKonten>
+                    <CardContent>
                         <div className="grid gap-3 md:grid-cols-2">
                             {availableRoles.map((role) => (
                                 <div
@@ -476,7 +476,7 @@ export default function CreateUserPage() {
                                 Pilih minimal satu role untuk pengguna
                             </p>
                         )}
-                    </CardKonten>
+                    </CardContent>
                 </Card>
 
                 {/* Mahasiswa Data */}
@@ -488,7 +488,7 @@ export default function CreateUserPage() {
                                 Data Mahasiswa
                             </CardTitle>
                         </CardHeader>
-                        <CardKonten className="space-y-4">
+                        <CardContent className="space-y-4">
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="nim">
@@ -697,7 +697,7 @@ export default function CreateUserPage() {
                                         <SelectTrigger>
                                             <SelectValue placeholder="Pilih Departemen" />
                                         </SelectTrigger>
-                                        <SelectKonten>
+                                        <SelectContent>
                                             {departments.map((dept) => (
                                                 <SelectItem
                                                     key={dept.id}
@@ -706,7 +706,7 @@ export default function CreateUserPage() {
                                                     {dept.name}
                                                 </SelectItem>
                                             ))}
-                                        </SelectKonten>
+                                        </SelectContent>
                                     </Select>
                                 </div>
 
@@ -735,7 +735,7 @@ export default function CreateUserPage() {
                                         <SelectTrigger>
                                             <SelectValue placeholder="Pilih Program Studi" />
                                         </SelectTrigger>
-                                        <SelectKonten>
+                                        <SelectContent>
                                             {filteredProdiMahasiswa.map(
                                                 (prodi) => (
                                                     <SelectItem
@@ -746,11 +746,11 @@ export default function CreateUserPage() {
                                                     </SelectItem>
                                                 ),
                                             )}
-                                        </SelectKonten>
+                                        </SelectContent>
                                     </Select>
                                 </div>
                             </div>
-                        </CardKonten>
+                        </CardContent>
                     </Card>
                 )}
 
@@ -763,7 +763,7 @@ export default function CreateUserPage() {
                                 Data Pegawai
                             </CardTitle>
                         </CardHeader>
-                        <CardKonten className="space-y-4">
+                        <CardContent className="space-y-4">
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="nip">NIP</Label>
@@ -841,7 +841,7 @@ export default function CreateUserPage() {
                                         <SelectTrigger>
                                             <SelectValue placeholder="Pilih Departemen" />
                                         </SelectTrigger>
-                                        <SelectKonten>
+                                        <SelectContent>
                                             {departments.map((dept) => (
                                                 <SelectItem
                                                     key={dept.id}
@@ -850,7 +850,7 @@ export default function CreateUserPage() {
                                                     {dept.name}
                                                 </SelectItem>
                                             ))}
-                                        </SelectKonten>
+                                        </SelectContent>
                                     </Select>
                                 </div>
 
@@ -878,7 +878,7 @@ export default function CreateUserPage() {
                                         <SelectTrigger>
                                             <SelectValue placeholder="Pilih Program Studi" />
                                         </SelectTrigger>
-                                        <SelectKonten>
+                                        <SelectContent>
                                             {filteredProdiPegawai.map(
                                                 (prodi) => (
                                                     <SelectItem
@@ -889,11 +889,11 @@ export default function CreateUserPage() {
                                                     </SelectItem>
                                                 ),
                                             )}
-                                        </SelectKonten>
+                                        </SelectContent>
                                     </Select>
                                 </div>
                             </div>
-                        </CardKonten>
+                        </CardContent>
                     </Card>
                 )}
 

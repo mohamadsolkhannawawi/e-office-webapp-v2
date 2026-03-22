@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardKonten, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Shield,
@@ -66,7 +66,7 @@ export default function RoleManagementPage() {
   };
 
   const loadRoleDetails = async (roleId: string) => {
-    if (roleDetails.has(roleId)) return; // Already loaded
+    if (roleDetails.has(roleId)) return; // Sudah dimuat
 
     try {
       setLoadingDetails((prev) => new Set(prev).add(roleId));
@@ -150,10 +150,10 @@ export default function RoleManagementPage() {
         </p>
       </div>
 
-      {/* Statistics Cards */}
+      {/* Kartu Statistik */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardContent className="pt-6">
+          <CardKonten className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-undip-blue/10 p-3">
                 <Shield className="h-6 w-6 text-undip-blue" />
@@ -165,11 +165,11 @@ export default function RoleManagementPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </CardKonten>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardContent className="pt-6">
+          <CardKonten className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-green-100 p-3">
                 <Users className="h-6 w-6 text-green-600" />
@@ -181,11 +181,11 @@ export default function RoleManagementPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </CardKonten>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardContent className="pt-6">
+          <CardKonten className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-purple-100 p-3">
                 <Lock className="h-6 w-6 text-purple-600" />
@@ -197,11 +197,11 @@ export default function RoleManagementPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </CardKonten>
         </Card>
       </div>
 
-      {/* Roles List */}
+      {/* Daftar Peran */}
       <Card className="border-gray-200 shadow-sm rounded-3xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -209,7 +209,7 @@ export default function RoleManagementPage() {
             Daftar Role di Sistem
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardKonten>
           <div className="space-y-3">
             {roles.map((role) => {
               const isExpanded = expandedRoles.has(role.id);
@@ -221,7 +221,7 @@ export default function RoleManagementPage() {
                   key={role.id}
                   className="border border-gray-200 rounded-xl overflow-hidden"
                 >
-                  {/* Role Header */}
+                  {/* Header Peran */}
                   <div className="bg-gray-50 p-3 sm:p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
@@ -264,7 +264,7 @@ export default function RoleManagementPage() {
                     </div>
                   </div>
 
-                  {/* Expanded Role Details */}
+                  {/* Detail Peran (Expanded) */}
                   {isExpanded && detail && (
                     <div className="p-4 bg-white border-t border-gray-200">
                       <div className="space-y-3">
@@ -304,8 +304,9 @@ export default function RoleManagementPage() {
               <p className="text-slate-500">Tidak ada role di sistem</p>
             </div>
           )}
-        </CardContent>
+        </CardKonten>
       </Card>
     </div>
   );
 }
+

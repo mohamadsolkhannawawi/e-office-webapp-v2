@@ -4,423 +4,383 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-    Upload,
-    Trash2,
-    Star,
-    Loader2,
-    AlertCircle,
-    PenTool,
-    Pencil,
-    Check,
-    X,
+  Upload,
+  Trash2,
+  Star,
+  Loader2,
+  AlertCircle,
+  PenTool,
+  Pencil,
+  Check,
+  X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
-    getSignatures,
-    saveSignature,
-    setDefaultSignature,
-    deleteSignature,
-    renameSignature,
-    UserSignature,
+  getSignatures,
+  saveSignature,
+  setDefaultSignature,
+  deleteSignature,
+  renameSignature,
+  UserSignature,
 } from "@/lib/application-api";
 import { SignatureImage } from "@/components/ui/signature-image";
 
 export function WD1SignatureDashboard() {
-    const [signatures, setSignatures] = useState<UserSignature[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-    const [renamingId, setRenamingId] = useState<string | null>(null);
-    const [renameValue, setRenameValue] = useState("");
+  const [signatures, setSignatures] = useState<UserSignature[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
-    // Load signatures on mount
-    useEffect(() => {
-        loadSignatures();
-    }, []);
+  // Load signatures on mount
+  useEffect(() => {
+    loadSignatures();
+  }, []);
 
-    const loadSignatures = async () => {
-        setLoading(true);
+  const loadSignatures = async () => {
+    setLoading(true);
+    try {
+      const data = await getSignatures();
+      setSignatures(data);
+    } catch (error) {
+      toast.error(
+        "Gagal memuat template tanda tangan. Silakan refresh halaman atau hubungi administrator",
+      );
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        toast.error(
+          "Ukuran file terlalu besar! File maksimal 5MB. Silakan kompres gambar Anda",
+        );
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        toast.error(
+          "File harus berupa gambar! Format yang didukung: JPG, PNG, GIF",
+        );
+        return;
+      }
+
+      setIsUploading(true);
+      const toastId = toast.loading("Mengunggah template tanda tangan...");
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
         try {
-            const data = await getSignatures();
-            setSignatures(data);
-        } catch (error) {
-            toast.error(
-                "Gagal memuat template tanda tangan. Silakan refresh halaman atau hubungi administrator",
+          const result = await saveSignature({
+            url: reader.result as string,
+            signatureType: "TEMPLATE",
+          });
+
+          if (result.success && result.data) {
+            // Re-fetch to get fresh presigned URLs so images render immediately
+            await loadSignatures();
+            toast.success(
+              "Template tanda tangan berhasil diunggah! Template siap digunakan",
+              {
+                id: toastId,
+              },
             );
-            console.error(error);
+            setUploadDialogOpen(false);
+          } else {
+            toast.error(
+              result.error ||
+                "Gagal mengunggah template. Periksa file dan coba lagi",
+              {
+                id: toastId,
+              },
+            );
+          }
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Terjadi kesalahan";
+          console.error("Template upload error:", error);
+          toast.error(errorMessage, { id: toastId });
         } finally {
-            setLoading(false);
+          setIsUploading(false);
         }
-    };
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            // Validate file size (max 5MB)
-            const maxSize = 5 * 1024 * 1024; // 5MB
-            if (file.size > maxSize) {
-                toast.error(
-                    "Ukuran file terlalu besar! File maksimal 5MB. Silakan kompres gambar Anda",
-                );
-                return;
-            }
+  const handleSetDefault = async (id: string) => {
+    try {
+      const success = await setDefaultSignature(id);
+      if (success) {
+        setSignatures((prev) =>
+          prev.map((sig) => ({ ...sig, isDefault: sig.id === id })),
+        );
+        toast.success(
+          "Template berhasil dijadikan default! Template ini akan digunakan secara otomatis",
+        );
+      } else {
+        toast.error("Gagal mengatur template default. Silakan coba lagi");
+      }
+    } catch (error) {
+      console.error("Set default error:", error);
+      toast.error(
+        "Terjadi kesalahan sistem saat mengatur default. Hubungi administrator",
+      );
+    }
+  };
 
-            // Validate file type
-            if (!file.type.startsWith("image/")) {
-                toast.error(
-                    "File harus berupa gambar! Format yang didukung: JPG, PNG, GIF",
-                );
-                return;
-            }
+  const handleDelete = async (id: string) => {
+    try {
+      const success = await deleteSignature(id);
+      if (success) {
+        setSignatures((prev) => prev.filter((sig) => sig.id !== id));
+        toast.success("Template berhasil dihapus dari sistem");
+      } else {
+        toast.error("Gagal menghapus template. Silakan coba lagi");
+      }
+    } catch (error) {
+      console.error("Delete template error:", error);
+      toast.error(
+        "Terjadi kesalahan sistem saat menghapus template. Hubungi administrator",
+      );
+    }
+  };
 
-            setIsUploading(true);
-            const toastId = toast.loading(
-                "Mengunggah template tanda tangan...",
-            );
+  const startRename = (sig: UserSignature, index: number) => {
+    setRenamingId(sig.id);
+    setRenameValue(sig.name || `Template ${index + 1}`);
+  };
 
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                try {
-                    const result = await saveSignature({
-                        url: reader.result as string,
-                        signatureType: "TEMPLATE",
-                    });
+  const cancelRename = () => {
+    setRenamingId(null);
+    setRenameValue("");
+  };
 
-                    if (result.success && result.data) {
-                        // Re-fetch to get fresh presigned URLs so images render immediately
-                        await loadSignatures();
-                        toast.success(
-                            "Template tanda tangan berhasil diunggah! Template siap digunakan",
-                            {
-                                id: toastId,
-                            },
-                        );
-                        setUploadDialogOpen(false);
-                    } else {
-                        toast.error(
-                            result.error ||
-                                "Gagal mengunggah template. Periksa file dan coba lagi",
-                            {
-                                id: toastId,
-                            },
-                        );
-                    }
-                } catch (error) {
-                    const errorMessage =
-                        error instanceof Error
-                            ? error.message
-                            : "Terjadi kesalahan";
-                    console.error("Template upload error:", error);
-                    toast.error(errorMessage, { id: toastId });
-                } finally {
-                    setIsUploading(false);
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+  const handleRename = async (id: string) => {
+    const trimmed = renameValue.trim();
+    if (!trimmed) {
+      toast.error("Nama template tidak boleh kosong");
+      return;
+    }
+    const success = await renameSignature(id, trimmed);
+    if (success) {
+      setSignatures((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, name: trimmed } : s)),
+      );
+      toast.success("Nama template berhasil diperbarui");
+    } else {
+      toast.error("Gagal memperbarui nama. Silakan coba lagi");
+    }
+    setRenamingId(null);
+  };
 
-    const handleSetDefault = async (id: string) => {
-        try {
-            const success = await setDefaultSignature(id);
-            if (success) {
-                setSignatures((prev) =>
-                    prev.map((sig) => ({ ...sig, isDefault: sig.id === id })),
-                );
-                toast.success(
-                    "Template berhasil dijadikan default! Template ini akan digunakan secara otomatis",
-                );
-            } else {
-                toast.error(
-                    "Gagal mengatur template default. Silakan coba lagi",
-                );
-            }
-        } catch (error) {
-            console.error("Set default error:", error);
-            toast.error(
-                "Terjadi kesalahan sistem saat mengatur default. Hubungi administrator",
-            );
-        }
-    };
+  return (
+    <Card className="border-none shadow-sm">
+      <CardHeader className="border-b">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-3xl my-auto shrink-0">
+              <PenTool className="h-6 w-6 text-undip-blue" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg text-slate-800">
+                Daftar Template Tanda Tangan
+              </CardTitle>
+              <p className="text-xs text-slate-500 mt-1">
+                Kelola dan organisir template tanda tangan Anda
+              </p>
+            </div>
+          </div>
+          <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full sm:w-auto bg-undip-blue hover:bg-sky-700 rounded-3xl">
+                <Upload className="h-4 w-4 mr-2" />
+                Upload Template Baru
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md rounded-3xl">
+              <DialogHeader>
+                <DialogTitle>Upload Template Tanda Tangan</DialogTitle>
+                <DialogDescription>
+                  Pilih file gambar tanda tangan untuk dijadikan template.
+                  Format PNG dengan background transparan disarankan.
+                </DialogDescription>
+              </DialogHeader>
 
-    const handleDelete = async (id: string) => {
-        try {
-            const success = await deleteSignature(id);
-            if (success) {
-                setSignatures((prev) => prev.filter((sig) => sig.id !== id));
-                toast.success("Template berhasil dihapus dari sistem");
-            } else {
-                toast.error("Gagal menghapus template. Silakan coba lagi");
-            }
-        } catch (error) {
-            console.error("Delete template error:", error);
-            toast.error(
-                "Terjadi kesalahan sistem saat menghapus template. Hubungi administrator",
-            );
-        }
-    };
-
-    const startRename = (sig: UserSignature, index: number) => {
-        setRenamingId(sig.id);
-        setRenameValue(sig.name || `Template ${index + 1}`);
-    };
-
-    const cancelRename = () => {
-        setRenamingId(null);
-        setRenameValue("");
-    };
-
-    const handleRename = async (id: string) => {
-        const trimmed = renameValue.trim();
-        if (!trimmed) {
-            toast.error("Nama template tidak boleh kosong");
-            return;
-        }
-        const success = await renameSignature(id, trimmed);
-        if (success) {
-            setSignatures((prev) =>
-                prev.map((s) => (s.id === id ? { ...s, name: trimmed } : s)),
-            );
-            toast.success("Nama template berhasil diperbarui");
-        } else {
-            toast.error("Gagal memperbarui nama. Silakan coba lagi");
-        }
-        setRenamingId(null);
-    };
-
-    return (
-        <Card className="border-none shadow-sm">
-            <CardHeader className="border-b">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-3xl">
-                            <PenTool className="h-6 w-6 text-undip-blue" />
-                        </div>
-                        <div>
-                            <CardTitle className="text-lg text-slate-800">
-                                Daftar Template Tanda Tangan
-                            </CardTitle>
-                            <p className="text-xs text-slate-500 mt-1">
-                                Kelola dan organisir template tanda tangan Anda
-                            </p>
-                        </div>
-                    </div>
-                    <Dialog
-                        open={uploadDialogOpen}
-                        onOpenChange={setUploadDialogOpen}
-                    >
-                        <DialogTrigger asChild>
-                            <Button className="bg-undip-blue hover:bg-sky-700 rounded-3xl">
-                                <Upload className="h-4 w-4 mr-2" />
-                                Upload Template Baru
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-md rounded-3xl">
-                            <DialogHeader>
-                                <DialogTitle>
-                                    Upload Template Tanda Tangan
-                                </DialogTitle>
-                                <DialogDescription>
-                                    Pilih file gambar tanda tangan untuk
-                                    dijadikan template. Format PNG dengan
-                                    background transparan disarankan.
-                                </DialogDescription>
-                            </DialogHeader>
-
-                            <div className="space-y-4">
-                                <div className="border-2 border-dashed border-slate-200 rounded-3xl p-6 flex flex-col items-center justify-center hover:border-undip-blue transition-colors cursor-pointer">
-                                    <input
-                                        id="file-upload"
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleFileUpload}
-                                        disabled={isUploading}
-                                    />
-                                    <label
-                                        htmlFor="file-upload"
-                                        className="flex flex-col items-center cursor-pointer"
-                                    >
-                                        <Upload className="h-8 w-8 text-undip-blue mb-2" />
-                                        <p className="font-semibold text-sm">
-                                            {isUploading
-                                                ? "Sedang mengunggah..."
-                                                : "Klik atau seret file di sini"}
-                                        </p>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            PNG, JPG, GIF (max 5MB)
-                                        </p>
-                                    </label>
-                                </div>
-
-                                {isUploading && (
-                                    <div className="flex items-center justify-center">
-                                        <Loader2 className="h-5 w-5 animate-spin text-undip-blue" />
-                                    </div>
-                                )}
-                            </div>
-                        </DialogContent>
-                    </Dialog>
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-slate-200 rounded-3xl p-6 flex flex-col items-center justify-center hover:border-undip-blue transition-colors cursor-pointer">
+                  <input
+                    id="file-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                    disabled={isUploading}
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="flex flex-col items-center cursor-pointer"
+                  >
+                    <Upload className="h-8 w-8 text-undip-blue mb-2" />
+                    <p className="font-semibold text-sm">
+                      {isUploading
+                        ? "Sedang mengunggah..."
+                        : "Klik atau seret file di sini"}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      PNG, JPG, GIF (max 5MB)
+                    </p>
+                  </label>
                 </div>
-            </CardHeader>
 
-            <CardContent className="pt-6">
-                {loading ? (
-                    <div className="flex items-center justify-center py-12">
-                        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-                    </div>
-                ) : signatures.length === 0 ? (
-                    <div className="text-center py-12 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
-                        <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                        <p className="text-gray-500">
-                            Belum ada template tanda tangan
-                        </p>
-                        <p className="text-sm text-gray-400 mt-1">
-                            Upload template pertama Anda untuk memulai
-                        </p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {signatures.map((signature) => (
-                            <div
-                                key={signature.id}
-                                className="border border-slate-200 rounded-3xl overflow-hidden hover:shadow-md transition-shadow bg-white"
-                            >
-                                {/* Signature Preview */}
-                                <div className="aspect-video bg-gray-50 flex items-center justify-center border-b p-4">
-                                    <SignatureImage
-                                        src={signature.url}
-                                        alt="Signature Preview"
-                                        className="object-contain w-full h-full"
-                                    />
-                                </div>
-
-                                {/* Signature Info */}
-                                <div className="p-4 space-y-3">
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1 min-w-0 text-sm">
-                                            {renamingId === signature.id ? (
-                                                <div className="flex items-center gap-1">
-                                                    <input
-                                                        autoFocus
-                                                        value={renameValue}
-                                                        onChange={(e) =>
-                                                            setRenameValue(
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        onKeyDown={(e) => {
-                                                            if (
-                                                                e.key ===
-                                                                "Enter"
-                                                            )
-                                                                handleRename(
-                                                                    signature.id,
-                                                                );
-                                                            if (
-                                                                e.key ===
-                                                                "Escape"
-                                                            )
-                                                                cancelRename();
-                                                        }}
-                                                        className="w-full text-sm font-semibold border border-undip-blue rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-undip-blue/30"
-                                                    />
-                                                    <button
-                                                        onClick={() =>
-                                                            handleRename(
-                                                                signature.id,
-                                                            )
-                                                        }
-                                                        className="p-1 rounded-full bg-green-100 hover:bg-green-200 text-green-700 shrink-0"
-                                                    >
-                                                        <Check className="h-3 w-3" />
-                                                    </button>
-                                                    <button
-                                                        onClick={cancelRename}
-                                                        className="p-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 shrink-0"
-                                                    >
-                                                        <X className="h-3 w-3" />
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center gap-1">
-                                                    <p className="font-semibold text-slate-800 truncate">
-                                                        {signature.name ||
-                                                            `Template ${signatures.indexOf(signature) + 1}`}
-                                                    </p>
-                                                    <button
-                                                        onClick={() =>
-                                                            startRename(
-                                                                signature,
-                                                                signatures.indexOf(
-                                                                    signature,
-                                                                ),
-                                                            )
-                                                        }
-                                                        className="p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 shrink-0"
-                                                        title="Ubah nama"
-                                                    >
-                                                        <Pencil className="h-3 w-3" />
-                                                    </button>
-                                                </div>
-                                            )}
-                                            <p className="text-xs text-slate-500 mt-1">
-                                                {new Date(
-                                                    signature.createdAt,
-                                                ).toLocaleDateString("id-ID")}
-                                            </p>
-                                        </div>
-                                        {signature.isDefault && (
-                                            <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-semibold shrink-0">
-                                                <Star className="h-3 w-3" />
-                                                Default
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Actions */}
-                                    <div className="flex gap-2 pt-2 border-t border-slate-100">
-                                        {!signature.isDefault && (
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() =>
-                                                    handleSetDefault(
-                                                        signature.id,
-                                                    )
-                                                }
-                                                className="flex-1 bg-amber-400 hover:bg-amber-500 text-white hover:text-white rounded-3xl border-none"
-                                            >
-                                                <Star className="h-3.5 w-3.5 mr-1" />
-                                                Jadikan Default
-                                            </Button>
-                                        )}
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() =>
-                                                handleDelete(signature.id)
-                                            }
-                                            className="flex-1 bg-red-600 hover:bg-red-700 text-white hover:text-white rounded-3xl border-none"
-                                        >
-                                            <Trash2 className="h-3.5 w-3.5 mr-1" />
-                                            Hapus
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                {isUploading && (
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-undip-blue" />
+                  </div>
                 )}
-            </CardContent>
-        </Card>
-    );
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </CardHeader>
+
+      <CardContent className="pt-6">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+          </div>
+        ) : signatures.length === 0 ? (
+          <div className="text-center py-12 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+            <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+            <p className="text-gray-500">Belum ada template tanda tangan</p>
+            <p className="text-sm text-gray-400 mt-1">
+              Upload template pertama Anda untuk memulai
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {signatures.map((signature) => (
+              <div
+                key={signature.id}
+                className="border border-slate-200 rounded-3xl overflow-hidden hover:shadow-md transition-shadow bg-white"
+              >
+                {/* Signature Preview */}
+                <div className="aspect-video bg-gray-50 flex items-center justify-center border-b p-4">
+                  <SignatureImage
+                    src={signature.url}
+                    alt="Signature Preview"
+                    className="object-contain w-full h-full"
+                  />
+                </div>
+
+                {/* Signature Info */}
+                <div className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0 text-sm">
+                      {renamingId === signature.id ? (
+                        <div className="flex items-center gap-1">
+                          <input
+                            autoFocus
+                            value={renameValue}
+                            onChange={(e) => setRenameValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleRename(signature.id);
+                              if (e.key === "Escape") cancelRename();
+                            }}
+                            className="w-full text-sm font-semibold border border-undip-blue rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-undip-blue/30"
+                          />
+                          <button
+                            onClick={() => handleRename(signature.id)}
+                            className="p-1 rounded-full bg-green-100 hover:bg-green-200 text-green-700 shrink-0"
+                          >
+                            <Check className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={cancelRename}
+                            className="p-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 shrink-0"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <p className="font-semibold text-slate-800 truncate">
+                            {signature.name ||
+                              `Template ${signatures.indexOf(signature) + 1}`}
+                          </p>
+                          <button
+                            onClick={() =>
+                              startRename(
+                                signature,
+                                signatures.indexOf(signature),
+                              )
+                            }
+                            className="p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 shrink-0"
+                            title="Ubah nama"
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )}
+                      <p className="text-xs text-slate-500 mt-1">
+                        {new Date(signature.createdAt).toLocaleDateString(
+                          "id-ID",
+                        )}
+                      </p>
+                    </div>
+                    {signature.isDefault && (
+                      <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-semibold shrink-0">
+                        <Star className="h-3 w-3" />
+                        Default
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2 pt-2 border-t border-slate-100">
+                    {!signature.isDefault && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSetDefault(signature.id)}
+                        className="flex-1 bg-amber-400 hover:bg-amber-500 text-white hover:text-white rounded-3xl border-none"
+                      >
+                        <Star className="h-3.5 w-3.5 mr-1" />
+                        Jadikan Default
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDelete(signature.id)}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white hover:text-white rounded-3xl border-none"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1" />
+                      Hapus
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 }

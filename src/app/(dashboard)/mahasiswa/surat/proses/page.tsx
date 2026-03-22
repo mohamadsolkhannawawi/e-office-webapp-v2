@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePencarianParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   ChevronRight,
   Filter,
   Loader2,
-  Search,
+  Pencarian,
   Clock,
   AlertCircle,
   RotateCw,
@@ -20,24 +20,24 @@ import Link from "next/link";
 import { getApplications, ApplicationSummary } from "@/lib/application-api";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { StandardPagination } from "@/components/ui/standard-pagination";
+import { StandardPaginasi } from "@/components/ui/standard-pagination";
 import {
   Select,
-  SelectContent,
+  SelectKonten,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { MahasiswaEditModal } from "@/components/features/surat-rekomendasi-beasiswa/mahasiswa/MahasiswaEditModal";
 
-function SuratDalamProsesContent() {
-  const searchParams = useSearchParams();
+function SuratDalamProsesKonten() {
+  const searchParams = usePencarianParams();
   const urlJenis = searchParams.get("jenis") || "ALL";
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setPencarianTerm] = useState("");
   const [jenisFilter, setJenisFilter] = useState<string>(urlJenis);
-  const [pagination, setPagination] = useState({
+  const [pagination, setPaginasi] = useState({
     page: 1,
     limit: 10,
     total: 0,
@@ -76,7 +76,7 @@ function SuratDalamProsesContent() {
           jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
         });
         setApplications(data);
-        setPagination({
+        setPaginasi({
           page: meta.page,
           limit: meta.limit,
           total: meta.total,
@@ -92,11 +92,11 @@ function SuratDalamProsesContent() {
   );
 
   useEffect(() => {
-    const delaySearch = setTimeout(() => {
+    const delayPencarian = setTimeout(() => {
       fetchApplications(1, searchTerm, jenisFilter);
     }, 500);
 
-    return () => clearTimeout(delaySearch);
+    return () => clearTimeout(delayPencarian);
   }, [searchTerm, jenisFilter, fetchApplications]);
 
   const handlePageChange = (newPage: number) => {
@@ -106,7 +106,7 @@ function SuratDalamProsesContent() {
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
-    setPagination((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
+    setPaginasi((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
     fetchApplications(1, searchTerm, jenisFilter, newPageSize);
   };
 
@@ -206,24 +206,24 @@ function SuratDalamProsesContent() {
         <span className="text-slate-800">Surat Dalam Proses</span>
       </nav>
 
-      {/* Page Title */}
+      {/* Judul Halaman */}
       <h1 className="text-2xl font-bold text-slate-800">Surat Dalam Proses</h1>
       <p className="text-sm text-slate-500 -mt-4">
         Daftar surat rekomendasi beasiswa yang sedang dalam proses
       </p>
 
-      {/* Combined Filters and Table Card */}
+      {/* Gabungan Filter dan Kartu Tabel */}
       <Card className="border-none shadow-sm overflow-hidden bg-white rounded-3xl py-0 gap-0">
-        {/* Filters Section */}
+        {/* Bagian Filter */}
         <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
           <div className="flex flex-wrap gap-3 items-center">
-            {/* Search */}
+            {/* Pencarian */}
             <div className="relative flex-1 min-w-50">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Pencarian className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Cari surat..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setPencarianTerm(e.target.value)}
                 className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full rounded-3xl"
               />
             </div>
@@ -239,18 +239,18 @@ function SuratDalamProsesContent() {
                   <SelectValue placeholder="Jenis Surat" />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectKonten>
                 <SelectItem value="ALL">Semua Jenis</SelectItem>
                 <SelectItem value="internal">Beasiswa Internal</SelectItem>
                 <SelectItem value="eksternal">Beasiswa Eksternal</SelectItem>
                 <SelectItem value="akademik">Beasiswa Akademik</SelectItem>
                 <SelectItem value="keperluan_lain">Keperluan Lain</SelectItem>
-              </SelectContent>
+              </SelectKonten>
             </Select>
           </div>
         </div>
 
-        {/* Table Section */}
+        {/* Bagian Tabel */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead className="bg-undip-blue border-b border-slate-100">
@@ -361,7 +361,7 @@ function SuratDalamProsesContent() {
                               Detail
                             </Button>
                           </Link>
-                          {/* Edit button – only when PENDING at step 1 (before Supervisor acts) */}
+                          {/* Edit button â€“ only when PENDING at step 1 (before Supervisor acts) */}
                           {app.status === "PENDING" &&
                             app.currentStep === 1 && (
                               <Button
@@ -398,8 +398,8 @@ function SuratDalamProsesContent() {
           </table>
         </div>
 
-        {/* Standard Pagination */}
-        <StandardPagination
+        {/* Paginasi Standar */}
+        <StandardPaginasi
           currentPage={pagination.page}
           totalPages={pagination.totalPages}
           pageSize={pagination.limit}
@@ -410,7 +410,7 @@ function SuratDalamProsesContent() {
         />
       </Card>
 
-      {/* Edit Confirmation Modal */}
+      {/* Modal Konfirmasi Edit */}
       <MahasiswaEditModal
         isOpen={editModal.open}
         onClose={() => setEditModal((prev) => ({ ...prev, open: false }))}
@@ -434,7 +434,8 @@ export default function SuratDalamProsesPage() {
         </div>
       }
     >
-      <SuratDalamProsesContent />
+      <SuratDalamProsesKonten />
     </Suspense>
   );
 }
+

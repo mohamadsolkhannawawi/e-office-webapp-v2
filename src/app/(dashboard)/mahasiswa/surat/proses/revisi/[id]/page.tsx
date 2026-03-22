@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -150,8 +150,8 @@ export default function DetailRevisiPage() {
         };
     });
 
-    // Find the revisions note
-    // Look for the latest history entry with status REVISION or action revision
+    // Cari catatan revisi
+    // Cari entri riwayat terbaru dengan status REVISION atau aksi revision
     const latestRevision = application.history
         ?.filter(
             (h) =>
@@ -196,9 +196,9 @@ export default function DetailRevisiPage() {
             </nav>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Left Column */}
+                {/* Kolom Kiri */}
                 <div className="lg:col-span-8 space-y-6">
-                    {/* Detail Revisi Section */}
+                    {/* Bagian Detail Revisi */}
                     {latestRevision && (
                         <DetailRevisi
                             checker={revisionChecker}
@@ -255,7 +255,7 @@ export default function DetailRevisiPage() {
                     <LampiranSurat data={lampiranData} />
                 </div>
 
-                {/* Right Column */}
+                {/* Kolom Kanan */}
                 <div className="lg:col-span-4 space-y-6">
                     <Button
                         onClick={() =>
@@ -280,3 +280,4 @@ export default function DetailRevisiPage() {
         </div>
     );
 }
+

@@ -2,94 +2,94 @@ import { test, expect } from "@playwright/test";
 import { loginAs, USERS } from "./utils";
 
 test.describe("Feature Verification", () => {
-    test.setTimeout(60000);
+  test.setTimeout(60000);
 
-    test("Profile Management", async ({ page }) => {
-        // Test with Mahasiswa (example)
-        await loginAs(page, "MAHASISWA");
+  test("Profile Management", async ({ page }) => {
+    // Uji dengan akun Mahasiswa (contoh)
+    await loginAs(page, "MAHASISWA");
 
-        // Go to Profile (Assuming /profile or via dropdown)
-        // Check for specific profile data visibility
-        // Ideally we would edit and save, but just checking visibility is good for now
-        // Assuming there is a profile menu or link
-        // Based on user request "feature profile", it might be under /mahasiswa/profile or similar
-        // Let's guess the URL: /mahasiswa/profile
-        // If not, we might need to find the link in navbar
+    // Buka halaman Profile (asumsi /profile atau lewat dropdown)
+    // Cek visibilitas data profil tertentu
+    // Idealnya kita edit dan simpan, tapi untuk saat ini cukup cek visibilitas
+    // Asumsikan ada menu atau tautan profile
+    // Berdasarkan permintaan user "feature profile", kemungkinan ada di /mahasiswa/profile atau sejenisnya
+    // Gunakan tebakan URL: /mahasiswa/profile
+    // Jika tidak ada, cari tautan di navbar
 
-        // Trying direct navigation if possible, or look for 'Profile' in UI
-        const profileLink = page.locator('a[href*="profile"]');
-        if (await profileLink.first().isVisible()) {
-            await profileLink.first().click();
-        } else {
-            await page.goto("/mahasiswa/profile");
-        }
+    // Coba navigasi langsung jika memungkinkan, atau cari 'Profile' di UI
+    const profileLink = page.locator('a[href*="profile"]');
+    if (await profileLink.first().isVisible()) {
+      await profileLink.first().click();
+    } else {
+      await page.goto("/mahasiswa/profile");
+    }
 
-        await expect(page.getByText(USERS.MAHASISWA.name)).toBeVisible();
-        await expect(page.getByText(USERS.MAHASISWA.email)).toBeVisible();
+    await expect(page.getByText(USERS.MAHASISWA.name)).toBeVisible();
+    await expect(page.getByText(USERS.MAHASISWA.email)).toBeVisible();
 
-        // Check if there's an Edit button
-        if (
-            await page
-                .locator('button:has-text("Edit"), button:has-text("Ubah")')
-                .isVisible()
-        ) {
-            // Perform simple edit test if safe
-        }
-    });
+    // Cek apakah ada tombol Edit
+    if (
+      await page
+        .locator('button:has-text("Edit"), button:has-text("Ubah")')
+        .isVisible()
+    ) {
+      // Lakukan uji edit sederhana jika aman
+    }
+  });
 
-    test("WD1 Signature Methods", async ({ page }) => {
-        await loginAs(page, "WAKIL_DEKAN_1");
-        // We need a letter to sign to access the signature UI.
-        // This makes it dependent on having a pending letter.
-        // For E2E, we might need to create one relevant letter first or mock the page.
-        // Skipping if too complex to setup state, or we rely on the main flow to cover "Template" method.
-        // Here we just want to verify the UI options exist if possible.
+  test("WD1 Signature Methods", async ({ page }) => {
+    await loginAs(page, "WAKIL_DEKAN_1");
+    // Kita membutuhkan surat untuk ditandatangani agar bisa mengakses UI tanda tangan.
+    // Artinya test bergantung pada keberadaan surat yang pending.
+    // Untuk E2E, mungkin perlu membuat surat relevan dulu atau mock halaman.
+    // Lewati jika setup state terlalu kompleks, atau andalkan main flow untuk mencakup metode "Template".
+    // Di sini kita hanya ingin memverifikasi opsi UI ada jika memungkinkan.
 
-        // Alternatively, go to Settings/Signature if exists
-        // /wakil-dekan-1/pengaturan/tanda-tangan (Guess)
-        await page.goto("/wakil-dekan-1/profile"); // Or wherever signature config is
+    // Alternatifnya, buka Settings/Signature jika ada
+    // /wakil-dekan-1/pengaturan/tanda-tangan (perkiraan)
+    await page.goto("/wakil-dekan-1/profile"); // Atau lokasi konfigurasi tanda tangan lainnya
 
-        // if signature configuration is in profile
-        if (await page.locator("text=Tanda Tangan").isVisible()) {
-            await expect(page.locator("text=Upload")).toBeVisible();
-            await expect(page.locator("text=Canvas")).toBeVisible();
-        }
-    });
+    // Jika konfigurasi tanda tangan berada di profile
+    if (await page.locator("text=Tanda Tangan").isVisible()) {
+      await expect(page.locator("text=Upload")).toBeVisible();
+      await expect(page.locator("text=Canvas")).toBeVisible();
+    }
+  });
 
-    test("Search and Filter Logic", async ({ page }) => {
-        await loginAs(page, "SUPERVISOR");
-        await page.goto("/supervisor-akademik/surat/perlu-tindakan");
+  test("Search and Filter Logic", async ({ page }) => {
+    await loginAs(page, "SUPERVISOR");
+    await page.goto("/supervisor-akademik/surat/perlu-tindakan");
 
-        // 1. Text Search
-        const searchInput = page.getByPlaceholder(/Cari|Search/i);
-        await expect(searchInput).toBeVisible();
-        await searchInput.fill("NonExistentStudentName123");
-        await page.keyboard.press("Enter");
-        await expect(page.getByText("Tidak ada data")).toBeVisible(); // Warning: Text might differ ("No data", etc.)
+    // 1. Pencarian Teks
+    const searchInput = page.getByPlaceholder(/Cari|Search/i);
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill("NonExistentStudentName123");
+    await page.keyboard.press("Enter");
+    await expect(page.getByText("Tidak ada data")).toBeVisible(); // Perhatian: teks bisa berbeda ("No data", dll.)
 
-        await searchInput.fill("");
-        await page.keyboard.press("Enter");
+    await searchInput.fill("");
+    await page.keyboard.press("Enter");
 
-        // 2. Status Filter (if dropdown exists)
-        // Assuming a select/combobox for status
-        const statusFilter = page.locator(
-            'button[role="combobox"]:has-text("Status"), select[name="status"]',
-        );
-        if (await statusFilter.isVisible()) {
-            // Test interaction
-            await statusFilter.click();
-            // Select "Menunggu"
-            // Verify list
-        }
+    // 2. Filter Status (jika dropdown tersedia)
+    // Asumsikan ada select/combobox untuk status
+    const statusFilter = page.locator(
+      'button[role="combobox"]:has-text("Status"), select[name="status"]',
+    );
+    if (await statusFilter.isVisible()) {
+      // Uji interaksi
+      await statusFilter.click();
+      // Pilih "Menunggu"
+      // Verifikasi daftar
+    }
 
-        // 3. Date Range Filter
-        // Check for DatePicker with range
-        const dateRange = page.locator(
-            'button:has-text("Rentang Waktu"), input[placeholder="Pilih tanggal"]',
-        );
-        if (await dateRange.isVisible()) {
-            await expect(dateRange).toBeVisible();
-            // Maybe click and pick dates
-        }
-    });
+    // 3. Filter Rentang Tanggal
+    // Cek DatePicker dengan rentang
+    const dateRange = page.locator(
+      'button:has-text("Rentang Waktu"), input[placeholder="Pilih tanggal"]',
+    );
+    if (await dateRange.isVisible()) {
+      await expect(dateRange).toBeVisible();
+      // Opsional klik dan pilih tanggal
+    }
+  });
 });

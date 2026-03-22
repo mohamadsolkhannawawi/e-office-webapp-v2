@@ -246,6 +246,11 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
       });
 
       if (success) {
+        await refreshSession();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("profile-updated"));
+        }
+        router.refresh();
         toast.success("Profil berhasil diperbarui! Data Anda telah tersimpan");
         router.push(backHref);
       } else {

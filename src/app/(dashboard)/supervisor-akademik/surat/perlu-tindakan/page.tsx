@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { LetterList } from "@/components/features/dashboard/LetterList";
 import {
     ChevronRight,
@@ -47,7 +47,7 @@ async function getActionRequiredApplications(searchParams: PencarianParams) {
             queryParams.endDate = String(searchParams.endDate);
         }
 
-        const query = new URLPencarianParams(queryParams);
+        const query = new URLSearchParams(queryParams);
 
         const res = await fetch(
             `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,

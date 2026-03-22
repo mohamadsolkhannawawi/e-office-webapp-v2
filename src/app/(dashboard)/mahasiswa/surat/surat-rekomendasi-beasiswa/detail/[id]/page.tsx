@@ -31,6 +31,8 @@ import {
 import { getReceiverRole } from "@/utils/status-mapper";
 import { MahasiswaEditModal } from "@/components/features/surat-rekomendasi-beasiswa/mahasiswa/MahasiswaEditModal";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export default function DetailPengajuanPage() {
   const params = useParams();
   const router = useRouter();
@@ -161,7 +163,7 @@ export default function DetailPengajuanPage() {
   const handleDownloadPDF = async () => {
     try {
       const link = document.createElement("a");
-      link.href = `/api/templates/letter/${id}/pdf`;
+      link.href = `${BASE_PATH}/api/templates/letter/${id}/pdf`;
       link.download = `${application.formData.namaLengkap}-SuratRekomendasi.pdf`;
       link.click();
       toast.success("PDF berhasil diunduh!");

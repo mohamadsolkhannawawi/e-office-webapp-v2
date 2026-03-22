@@ -27,6 +27,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export default function SuratSelesaiPage() {
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -334,7 +336,7 @@ export default function SuratSelesaiPage() {
                                 onClick={() => {
                                   try {
                                     const link = document.createElement("a");
-                                    link.href = `/api/templates/letter/${app.id}/pdf`;
+                                    link.href = `${BASE_PATH}/api/templates/letter/${app.id}/pdf`;
                                     link.download = `${app.scholarshipName || "Surat"}-${app.id}.pdf`;
                                     link.click();
                                     toast.success("PDF berhasil diunduh!");

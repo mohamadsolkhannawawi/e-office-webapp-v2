@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { MahasiswaEditModal } from "@/components/features/surat-rekomendasi-beasiswa/mahasiswa/MahasiswaEditModal";
 
-export default function SuratDalamProsesPage() {
+function SuratDalamProsesContent() {
   const searchParams = useSearchParams();
   const urlJenis = searchParams.get("jenis") || "ALL";
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
@@ -419,5 +419,22 @@ export default function SuratDalamProsesPage() {
         scholarshipName={editModal.scholarshipName}
       />
     </div>
+  );
+}
+
+export default function SuratDalamProsesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-100">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <p className="text-gray-600">Memuat data...</p>
+          </div>
+        </div>
+      }
+    >
+      <SuratDalamProsesContent />
+    </Suspense>
   );
 }

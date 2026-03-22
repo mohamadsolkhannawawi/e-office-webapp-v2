@@ -1,7 +1,7 @@
 /**
- * Rewrites a MinIO presigned URL that uses `localhost` to route through
- * the Next.js /minio-proxy path, so the browser can access it even when
- * MinIO is only reachable as `localhost` from the server.
+ * Menulis ulang URL presigned MinIO yang memakai `localhost` agar lewat
+ * path /minio-proxy di Next.js, sehingga browser tetap bisa mengakses
+ * walaupun MinIO hanya terjangkau sebagai `localhost` dari server.
  *
  * e.g. http://localhost:9000/e-office-srb/signature/file.png?X-Amz-...
  *   →  /minio-proxy/e-office-srb/signature/file.png?X-Amz-...
@@ -33,7 +33,7 @@ function normalizeApiPath(pathname: string, search = ""): string | null {
 export function rewriteMinioUrl(url: string | undefined | null): string {
   if (!url) return "";
 
-  // Normalize relative proxy path (with or without basePath) when Next.js basePath is enabled.
+  // Normalisasi path proxy relatif (dengan/ tanpa basePath) saat basePath Next.js aktif.
   if (url.startsWith("/")) {
     const proxyPath = extractProxyPath(url);
     if (proxyPath) return withBasePath(proxyPath);
@@ -45,7 +45,7 @@ export function rewriteMinioUrl(url: string | undefined | null): string {
   try {
     const parsed = new URL(url);
 
-    // If backend already returns proxy URL (possibly with basePath), normalize it.
+    // Jika backend sudah mengembalikan URL proxy (mungkin dengan basePath), normalisasi.
     const proxyPath = extractProxyPath(parsed.pathname, parsed.search);
     if (proxyPath) {
       return withBasePath(proxyPath);
@@ -58,14 +58,14 @@ export function rewriteMinioUrl(url: string | undefined | null): string {
       return withBasePath(`${PROXY_SEGMENT}${parsed.pathname}${parsed.search}`);
     }
   } catch {
-    // Not a parseable URL, return as-is
+    // URL tidak bisa di-parse, kembalikan apa adanya
   }
   return url;
 }
 
 /**
- * Same as rewriteMinioUrl but returns an absolute URL using window.location.origin.
- * Use this where relative paths are not supported (e.g. @react-pdf/renderer Image).
+ * Sama seperti rewriteMinioUrl tetapi mengembalikan URL absolut memakai window.location.origin.
+ * Gunakan di tempat yang tidak mendukung path relatif (mis. @react-pdf/renderer Image).
  */
 export function rewriteMinioUrlAbsolute(
   url: string | undefined | null,

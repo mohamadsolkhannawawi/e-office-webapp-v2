@@ -260,61 +260,66 @@ export function LetterList({
               />
             </div>
 
-            {/* Date Range Filter - Stylish Design */}
-            <div className="flex items-center gap-2 bg-slate-50/50 rounded-3xl p-2 border border-slate-100">
-              <Calendar className="h-4 w-4 text-slate-400 ml-1" />
-
+            {/* Date Range Filter - Responsive */}
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center gap-2 bg-slate-50/50 rounded-3xl p-2 border border-slate-100">
               <div className="flex items-center gap-2">
-                <Label
-                  htmlFor="startDate"
-                  className="text-xs font-medium text-slate-600 whitespace-nowrap"
-                >
-                  Dari
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="startDate"
-                    type="date"
-                    className="h-9 w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
-                    value={startDateInput}
-                    onChange={(e) => handleStartDateChange(e.target.value)}
-                    max={endDateInput || undefined}
-                  />
-                </div>
+                <Calendar className="h-4 w-4 text-slate-400 ml-1" />
               </div>
 
-              <div className="h-4 w-px bg-slate-200" />
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Label
+                    htmlFor="startDate"
+                    className="text-xs font-medium text-slate-600 whitespace-nowrap"
+                  >
+                    Dari
+                  </Label>
+                  <div className="relative flex-1 sm:flex-none">
+                    <Input
+                      id="startDate"
+                      type="date"
+                      className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
+                      value={startDateInput}
+                      onChange={(e) => handleStartDateChange(e.target.value)}
+                      max={endDateInput || undefined}
+                    />
+                  </div>
+                </div>
 
-              <div className="flex items-center gap-2">
-                <Label
-                  htmlFor="endDate"
-                  className="text-xs font-medium text-slate-600 whitespace-nowrap"
-                >
-                  Sampai
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="endDate"
-                    type="date"
-                    className="h-9 w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
-                    value={endDateInput}
-                    onChange={(e) => handleEndDateChange(e.target.value)}
-                    min={startDateInput || undefined}
-                  />
+                <div className="hidden sm:block h-4 w-px bg-slate-200" />
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Label
+                    htmlFor="endDate"
+                    className="text-xs font-medium text-slate-600 whitespace-nowrap"
+                  >
+                    Sampai
+                  </Label>
+                  <div className="relative flex-1 sm:flex-none">
+                    <Input
+                      id="endDate"
+                      type="date"
+                      className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
+                      value={endDateInput}
+                      onChange={(e) => handleEndDateChange(e.target.value)}
+                      min={startDateInput || undefined}
+                    />
+                  </div>
                 </div>
               </div>
 
               {(startDateInput || endDateInput) && (
                 <>
-                  <div className="h-4 w-px bg-slate-200" />
+                  <div className="hidden sm:block h-4 w-px bg-slate-200" />
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50"
+                    className="h-8 px-2 gap-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-full"
                     onClick={clearDateFilter}
                     title="Hapus filter tanggal"
                   >
                     <X className="h-3.5 w-3.5" />
+                    <span className="text-xs font-medium">Hapus filter</span>
                   </Button>
                 </>
               )}

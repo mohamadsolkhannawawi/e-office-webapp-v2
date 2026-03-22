@@ -171,7 +171,7 @@ const ProfileTableRow = ({ label, value, icon }: ProfileTableRowProps) => {
         <span>{label}</span>
       </div>
       <div className="flex items-center px-4 py-3 sm:px-6 sm:py-4 text-gray-900 sm:w-2/3 min-w-0">
-        <span className="break-words min-w-0">{value || "-"}</span>
+        <span className="wrap-break-word min-w-0">{value || "-"}</span>
       </div>
     </div>
   );
@@ -261,7 +261,7 @@ const ProfilePage = ({
             )}
           </button>
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-3xl font-bold text-gray-900 break-words">
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-900 wrap-break-word">
               {profileData.name}
             </h1>
             {profileData.userRole && (

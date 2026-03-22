@@ -6,335 +6,334 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import {
-    ArrowLeft,
-    Loader2,
-    ChevronRight,
-    RotateCcw,
-    Download,
-    PencilLine,
+  ArrowLeft,
+  Loader2,
+  ChevronRight,
+  RotateCcw,
+  Download,
+  PencilLine,
 } from "lucide-react";
 import {
-    IdentitasPengaju,
-    DetailSuratPengajuan,
-    LampiranSurat,
-    RiwayatSurat,
+  IdentitasPengaju,
+  DetailSuratPengajuan,
+  LampiranSurat,
+  RiwayatSurat,
 } from "@/components/features/surat-rekomendasi-beasiswa/detail/common";
 import {
-    getApplicationById,
-    type ApplicationDetail,
+  getApplicationById,
+  type ApplicationDetail,
 } from "@/lib/application-api";
 import {
-    generateAndDownloadDocument,
-    getTemplateIdByLetterType,
+  generateAndDownloadDocument,
+  getTemplateIdByLetterType,
 } from "@/lib/template-api";
 
 import { getReceiverRole } from "@/utils/status-mapper";
 import { MahasiswaEditModal } from "@/components/features/surat-rekomendasi-beasiswa/mahasiswa/MahasiswaEditModal";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export default function DetailPengajuanPage() {
-    const params = useParams();
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const id = params.id as string;
-    const from = searchParams.get("from") || "proses"; // default to proses
+  const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = params.id as string;
+  const from = searchParams.get("from") || "proses"; // default to proses
 
-    const [application, setApplication] = useState<ApplicationDetail | null>(
-        null,
-    );
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [application, setApplication] = useState<ApplicationDetail | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    useEffect(() => {
-        if (!id) return;
+  useEffect(() => {
+    if (!id) return;
 
-        async function fetchApplication() {
-            try {
-                setLoading(true);
-                const data = await getApplicationById(id);
-                setApplication(data);
-            } catch (err) {
-                console.error("Error fetching application:", err);
-                setError(
-                    err instanceof Error
-                        ? err.message
-                        : "Gagal memuat data pengajuan",
-                );
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchApplication();
-    }, [id]);
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-100">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                    <p className="text-gray-600">Memuat data...</p>
-                </div>
-            </div>
+    async function fetchApplication() {
+      try {
+        setLoading(true);
+        const data = await getApplicationById(id);
+        setApplication(data);
+      } catch (err) {
+        console.error("Error fetching application:", err);
+        setError(
+          err instanceof Error ? err.message : "Gagal memuat data pengajuan",
         );
+      } finally {
+        setLoading(false);
+      }
     }
 
-    if (error || !application) {
-        return (
-            <div className="flex items-center justify-center min-h-100">
-                <div className="text-center">
-                    <p className="text-red-600 mb-4">
-                        {error || "Pengajuan tidak ditemukan"}
-                    </p>
-                    <Button onClick={() => router.back()}>Kembali</Button>
-                </div>
-            </div>
-        );
-    }
+    fetchApplication();
+  }, [id]);
 
-    const formatDate = (dateStr?: string) => {
-        if (!dateStr) return "-";
-        try {
-            const date = new Date(dateStr);
-            return new Intl.DateTimeFormat("id-ID", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-            }).format(date);
-        } catch {
-            return dateStr;
-        }
-    };
-
-    // Map application data ke format komponen
-    const identitasData = {
-        namaLengkap: application.formData.namaLengkap,
-        nim: application.formData.nim,
-        role: application.createdBy?.mahasiswa ? "Mahasiswa" : "Pegawai",
-        email: application.formData.email,
-        departemen: application.formData.departemen,
-        programStudi: application.formData.programStudi,
-        tempatLahir: application.formData.tempatLahir,
-        tanggalLahir: formatDate(application.formData.tanggalLahir),
-        noHp: application.formData.noHp,
-        semester: application.formData.semester || "-",
-        ipk: application.formData.ipk,
-        ips: application.formData.ips,
-    };
-
-    const jenisBeasiswa = application.formData.jenisBeasiswa as string;
-    const detailSuratData = {
-        jenisSurat:
-            jenisBeasiswa === "keperluan_lain"
-                ? "Surat Rekomendasi Keperluan Lain"
-                : application.letterType?.name || "Surat Rekomendasi Beasiswa",
-        jenis: jenisBeasiswa,
-        namaBeasiswa: application.scholarshipName || "-",
-        status: application.status,
-    };
-
-    const lampiranData = application.attachments.map((att) => ({
-        id: att.id,
-        name: att.filename,
-        type: att.mimeType,
-        size: att.fileSize,
-        category: att.category,
-        downloadUrl: att.downloadUrl,
-    }));
-
-    const canEdit =
-        (application.status as string) === "REVISION" ||
-        (application.status as string) === "DRAFT";
-
-    // Student can self-edit if PENDING at step 1 (Supervisor hasn't acted yet)
-    const canStudentSelfEdit =
-        (application.status as string) === "PENDING" &&
-        application.currentStep === 1;
-
-    const isPublished =
-        (application.status as string) === "COMPLETED" ||
-        (application.status as string) === "PUBLISHED";
-
-    // Get jenis for editing from application data
-    const jenis =
-        ((application.formData as unknown as Record<string, unknown>)
-            .jenisBeasiswa as string) || "internal";
-
-    const handleDownloadPDF = async () => {
-        try {
-            const link = document.createElement("a");
-            link.href = `/api/templates/letter/${id}/pdf`;
-            link.download = `${application.formData.namaLengkap}-SuratRekomendasi.pdf`;
-            link.click();
-            toast.success("PDF berhasil diunduh!");
-        } catch (error) {
-            console.error("Error downloading PDF:", error);
-            toast.error(
-                `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
-            );
-        }
-    };
-
-    const handleDownloadDOCX = async () => {
-        try {
-            const templateId = await getTemplateIdByLetterType(
-                application.letterType?.name || "surat-rekomendasi-beasiswa",
-            );
-            if (templateId) {
-                await generateAndDownloadDocument(
-                    templateId,
-                    id,
-                    `${application.formData.namaLengkap}-SuratRekomendasi.docx`,
-                );
-                toast.success("Dokumen Word berhasil diunduh!");
-            } else {
-                toast.error("Template tidak ditemukan");
-            }
-        } catch (error) {
-            console.error("Error downloading DOCX:", error);
-            toast.error(
-                `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
-            );
-        }
-    };
-
-    const riwayatData = application.history?.map((h) => ({
-        senderRole: h.role?.name || h.actor.name,
-        receiverRole: getReceiverRole(
-            h.action,
-            application.currentStep,
-            h.note,
-            h.role?.name || h.actor.name,
-        ),
-        status: h.status,
-        date: new Date(h.createdAt).toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-        }),
-        time: new Date(h.createdAt).toLocaleTimeString("id-ID", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-        }),
-        catatan: h.note,
-        actionType: h.action,
-    }));
-
+  if (loading) {
     return (
-        <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-            {/* Breadcrumb - Dynamic based on from parameter */}
-            <nav className="flex items-center text-sm font-medium text-slate-500 mb-4">
-                <Link
-                    href="/mahasiswa/surat/proses"
-                    className="hover:text-undip-blue transition-colors"
-                >
-                    Surat Saya
-                </Link>
-                <ChevronRight className="mx-2 h-4 w-4" />
-                <Link
-                    href={
-                        from === "selesai"
-                            ? "/mahasiswa/surat/selesai"
-                            : "/mahasiswa/surat/proses"
-                    }
-                    className="hover:text-undip-blue transition-colors"
-                >
-                    {from === "selesai"
-                        ? "Surat Selesai"
-                        : "Surat Dalam Proses"}
-                </Link>
-                <ChevronRight className="mx-2 h-4 w-4" />
-                <span className="text-slate-800">Detail Pengajuan</span>
-            </nav>
-
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="w-full">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                        {application.scholarshipName ||
-                            "Surat Rekomendasi Beasiswa"}
-                    </h1>
-                    <p className="text-sm text-gray-600">Detail Pengajuan</p>
-                </div>
-            </div>
-
-            {/* Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
-                    <IdentitasPengaju data={identitasData} />
-                    <DetailSuratPengajuan data={detailSuratData} />
-                    <LampiranSurat data={lampiranData} />
-                </div>
-
-                <div className="lg:col-span-1 space-y-6">
-                    {/* Aksi Card */}
-                    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-                        <h2 className="font-bold text-slate-800 mb-4 uppercase tracking-wider text-sm">
-                            Aksi
-                        </h2>
-                        <div className="space-y-4">
-                            <Link
-                                href={`/mahasiswa/surat/proses/preview/${id}?stage=mahasiswa`}
-                                className="block"
-                            >
-                                <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 mb-3">
-                                    Preview
-                                </Button>
-                            </Link>
-
-                            {isPublished && (
-                                <Button
-                                    onClick={handleDownloadPDF}
-                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
-                                >
-                                    <Download className="h-5 w-5" />
-                                    Unduh PDF
-                                </Button>
-                            )}
-
-                            {canStudentSelfEdit && (
-                                <Button
-                                    onClick={() => setIsEditModalOpen(true)}
-                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
-                                >
-                                    <PencilLine className="h-5 w-5" />
-                                    Edit Surat
-                                </Button>
-                            )}
-
-                            {canEdit && (
-                                <Button
-                                    onClick={() =>
-                                        router.push(
-                                            `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
-                                        )
-                                    }
-                                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
-                                >
-                                    <RotateCcw className="h-5 w-5" />
-                                    Revisi
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-
-                    <RiwayatSurat
-                        applicationId={application.id}
-                        status={application.status}
-                        createdAt={application.createdAt}
-                        riwayat={riwayatData}
-                    />
-                </div>
-            </div>
-            {/* Modal Edit */}
-            <MahasiswaEditModal
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                applicationId={id}
-                jenis={jenis}
-                scholarshipName={application.scholarshipName || ""}
-            />
+      <div className="flex items-center justify-center min-h-100">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-gray-600">Memuat data...</p>
         </div>
+      </div>
     );
+  }
+
+  if (error || !application) {
+    return (
+      <div className="flex items-center justify-center min-h-100">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">
+            {error || "Pengajuan tidak ditemukan"}
+          </p>
+          <Button onClick={() => router.back()}>Kembali</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "-";
+    try {
+      const date = new Date(dateStr);
+      return new Intl.DateTimeFormat("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(date);
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // Map application data ke format komponen
+  const identitasData = {
+    namaLengkap: application.formData.namaLengkap,
+    nim: application.formData.nim,
+    role: application.createdBy?.mahasiswa ? "Mahasiswa" : "Pegawai",
+    email: application.formData.email,
+    departemen: application.formData.departemen,
+    programStudi: application.formData.programStudi,
+    tempatLahir: application.formData.tempatLahir,
+    tanggalLahir: formatDate(application.formData.tanggalLahir),
+    noHp: application.formData.noHp,
+    semester: application.formData.semester || "-",
+    ipk: application.formData.ipk,
+    ips: application.formData.ips,
+  };
+
+  const jenisBeasiswa = application.formData.jenisBeasiswa as string;
+  const detailSuratData = {
+    jenisSurat:
+      jenisBeasiswa === "keperluan_lain"
+        ? "Surat Rekomendasi Keperluan Lain"
+        : application.letterType?.name || "Surat Rekomendasi Beasiswa",
+    jenis: jenisBeasiswa,
+    namaBeasiswa: application.scholarshipName || "-",
+    status: application.status,
+  };
+
+  const lampiranData = application.attachments.map((att) => ({
+    id: att.id,
+    name: att.filename,
+    type: att.mimeType,
+    size: att.fileSize,
+    category: att.category,
+    downloadUrl: att.downloadUrl,
+  }));
+
+  const canEdit =
+    (application.status as string) === "REVISION" ||
+    (application.status as string) === "DRAFT";
+
+  // Student can self-edit if PENDING at step 1 (Supervisor hasn't acted yet)
+  const canStudentSelfEdit =
+    (application.status as string) === "PENDING" &&
+    application.currentStep === 1;
+
+  const isPublished =
+    (application.status as string) === "COMPLETED" ||
+    (application.status as string) === "PUBLISHED";
+
+  // Get jenis for editing from application data
+  const jenis =
+    ((application.formData as unknown as Record<string, unknown>)
+      .jenisBeasiswa as string) || "internal";
+
+  const handleDownloadPDF = async () => {
+    try {
+      const link = document.createElement("a");
+      link.href = `${BASE_PATH}/api/templates/letter/${id}/pdf`;
+      link.download = `${application.formData.namaLengkap}-SuratRekomendasi.pdf`;
+      link.click();
+      toast.success("PDF berhasil diunduh!");
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      toast.error(
+        `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+      );
+    }
+  };
+
+  const handleDownloadDOCX = async () => {
+    try {
+      const templateId = await getTemplateIdByLetterType(
+        application.letterType?.name || "surat-rekomendasi-beasiswa",
+      );
+      if (templateId) {
+        await generateAndDownloadDocument(
+          templateId,
+          id,
+          `${application.formData.namaLengkap}-SuratRekomendasi.docx`,
+        );
+        toast.success("Dokumen Word berhasil diunduh!");
+      } else {
+        toast.error("Template tidak ditemukan");
+      }
+    } catch (error) {
+      console.error("Error downloading DOCX:", error);
+      toast.error(
+        `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+      );
+    }
+  };
+
+  const riwayatData = application.history?.map((h) => ({
+    senderRole: h.role?.name || h.actor.name,
+    receiverRole: getReceiverRole(
+      h.action,
+      application.currentStep,
+      h.note,
+      h.role?.name || h.actor.name,
+    ),
+    status: h.status,
+    date: new Date(h.createdAt).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }),
+    time: new Date(h.createdAt).toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }),
+    catatan: h.note,
+    actionType: h.action,
+  }));
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500 pb-10">
+      {/* Breadcrumb - Dynamic based on from parameter */}
+      <nav className="mb-4 flex items-center overflow-x-auto whitespace-nowrap text-sm font-medium text-slate-500">
+        <Link
+          href="/mahasiswa/surat/proses"
+          className="whitespace-nowrap transition-colors hover:text-undip-blue"
+        >
+          Surat Saya
+        </Link>
+        <ChevronRight className="mx-2 h-4 w-4" />
+        <Link
+          href={
+            from === "selesai"
+              ? "/mahasiswa/surat/selesai"
+              : "/mahasiswa/surat/proses"
+          }
+          className="whitespace-nowrap transition-colors hover:text-undip-blue"
+        >
+          {from === "selesai" ? "Surat Selesai" : "Surat Dalam Proses"}
+        </Link>
+        <ChevronRight className="mx-2 h-4 w-4" />
+        <span className="whitespace-nowrap text-slate-800">
+          Detail Pengajuan
+        </span>
+      </nav>
+
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="w-full">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            {application.scholarshipName || "Surat Rekomendasi Beasiswa"}
+          </h1>
+          <p className="text-sm text-gray-600">Detail Pengajuan</p>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <IdentitasPengaju data={identitasData} />
+          <DetailSuratPengajuan data={detailSuratData} />
+          <LampiranSurat data={lampiranData} />
+        </div>
+
+        <div className="lg:col-span-1 space-y-6">
+          {/* Aksi Card */}
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+            <h2 className="font-bold text-slate-800 mb-4 uppercase tracking-wider text-sm">
+              Aksi
+            </h2>
+            <div className="space-y-4">
+              <Link
+                href={`/mahasiswa/surat/proses/preview/${id}?stage=mahasiswa`}
+                className="block"
+              >
+                <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2 mb-3">
+                  Preview
+                </Button>
+              </Link>
+
+              {isPublished && (
+                <Button
+                  onClick={handleDownloadPDF}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
+                >
+                  <Download className="h-5 w-5" />
+                  Unduh PDF
+                </Button>
+              )}
+
+              {canStudentSelfEdit && (
+                <Button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
+                >
+                  <PencilLine className="h-5 w-5" />
+                  Edit Surat
+                </Button>
+              )}
+
+              {canEdit && (
+                <Button
+                  onClick={() =>
+                    router.push(
+                      `/mahasiswa/surat/surat-rekomendasi-beasiswa/${jenis}?id=${id}`,
+                    )
+                  }
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-6 rounded-3xl flex items-center justify-center gap-2"
+                >
+                  <RotateCcw className="h-5 w-5" />
+                  Revisi
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <RiwayatSurat
+            applicationId={application.id}
+            status={application.status}
+            createdAt={application.createdAt}
+            riwayat={riwayatData}
+          />
+        </div>
+      </div>
+      {/* Modal Edit */}
+      <MahasiswaEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        applicationId={id}
+        jenis={jenis}
+        scholarshipName={application.scholarshipName || ""}
+      />
+    </div>
+  );
 }

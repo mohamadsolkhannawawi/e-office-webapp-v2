@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardKonten, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,7 @@ import {
   FileText,
   Calendar,
   Filter,
-  Pencarian,
+  Search,
   Loader2,
   User,
   Activity,
@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import {
   Select,
-  SelectKonten,
+  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -318,7 +318,7 @@ export default function AuditLogPage() {
       {/* Kartu Statistik */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-undip-blue/10 p-3">
                 <FileText className="h-6 w-6 text-undip-blue" />
@@ -330,11 +330,11 @@ export default function AuditLogPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-green-100 p-3">
                 <User className="h-6 w-6 text-green-600" />
@@ -346,11 +346,11 @@ export default function AuditLogPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-blue-100 p-3">
                 <Activity className="h-6 w-6 text-blue-600" />
@@ -360,11 +360,11 @@ export default function AuditLogPage() {
                 <p className="text-2xl font-bold text-slate-800">{todayLogs}</p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-purple-100 p-3">
                 <Activity className="h-6 w-6 text-purple-600" />
@@ -376,7 +376,7 @@ export default function AuditLogPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
       </div>
 
@@ -388,7 +388,7 @@ export default function AuditLogPage() {
             Filter Audit Log
           </CardTitle>
         </CardHeader>
-        <CardKonten>
+        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>User</Label>
@@ -404,14 +404,14 @@ export default function AuditLogPage() {
                 <SelectTrigger>
                   <SelectValue placeholder="Semua User" />
                 </SelectTrigger>
-                <SelectKonten>
+                <SelectContent>
                   <SelectItem value="all">Semua User</SelectItem>
                   {users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name}
                     </SelectItem>
                   ))}
-                </SelectKonten>
+                </SelectContent>
               </Select>
             </div>
 
@@ -463,7 +463,7 @@ export default function AuditLogPage() {
               onClick={applyFilters}
               className="bg-undip-blue hover:bg-undip-blue/90"
             >
-              <Pencarian className="h-4 w-4 mr-2" />
+              <Search className="h-4 w-4 mr-2" />
               Terapkan Filter
             </Button>
             {hasActiveFilters && (
@@ -477,7 +477,7 @@ export default function AuditLogPage() {
               </Button>
             )}
           </div>
-        </CardKonten>
+        </CardContent>
       </Card>
 
       {/* Audit Logs List */}
@@ -493,7 +493,7 @@ export default function AuditLogPage() {
             </div>
           </div>
         </CardHeader>
-        <CardKonten>
+        <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-undip-blue" />
@@ -543,7 +543,7 @@ export default function AuditLogPage() {
                               <span className="font-medium text-slate-700">
                                 {log.actor.name}
                               </span>
-                              <span className="text-slate-400">â€¢</span>
+                              <span className="text-slate-400">•</span>
                               <span className="text-slate-500">
                                 {log.actor.email}
                               </span>
@@ -557,7 +557,7 @@ export default function AuditLogPage() {
                                 </span>
                                 {log.letterInstance.letterNumber && (
                                   <>
-                                    <span className="text-slate-400">â€¢</span>
+                                    <span className="text-slate-400">•</span>
                                     <span className="font-mono text-slate-500">
                                       {log.letterInstance.letterNumber}
                                     </span>
@@ -626,7 +626,7 @@ export default function AuditLogPage() {
               )}
             </>
           )}
-        </CardKonten>
+        </CardContent>
       </Card>
     </div>
   );

@@ -369,7 +369,7 @@ export default function MahasiswaDashboardPage() {
                         {index + 1}
                       </td>
                       <td className="px-4 py-3 text-slate-800 font-semibold">
-                        <div className="line-clamp-1">
+                        <div className="wrap-break-word md:line-clamp-1">
                           {app.scholarshipName || "Surat Rekomendasi"}
                         </div>
                       </td>

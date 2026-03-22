@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, usePencarianParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -36,7 +36,7 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 export default function DetailPengajuanPage() {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = usePencarianParams();
   const id = params.id as string;
   const from = searchParams.get("from") || "proses"; // default to proses
 
@@ -106,7 +106,7 @@ export default function DetailPengajuanPage() {
     }
   };
 
-  // Map application data ke format komponen
+  // Petakan data pengajuan ke format komponen
   const identitasData = {
     namaLengkap: application.formData.namaLengkap,
     nim: application.formData.nim,
@@ -146,7 +146,7 @@ export default function DetailPengajuanPage() {
     (application.status as string) === "REVISION" ||
     (application.status as string) === "DRAFT";
 
-  // Student can self-edit if PENDING at step 1 (Supervisor hasn't acted yet)
+  // Mahasiswa dapat mengedit mandiri jika status PENDING di langkah 1 (Supervisor belum mengambil aksi)
   const canStudentSelfEdit =
     (application.status as string) === "PENDING" &&
     application.currentStep === 1;
@@ -155,7 +155,7 @@ export default function DetailPengajuanPage() {
     (application.status as string) === "COMPLETED" ||
     (application.status as string) === "PUBLISHED";
 
-  // Get jenis for editing from application data
+  // Ambil jenis untuk keperluan edit dari data pengajuan
   const jenis =
     ((application.formData as unknown as Record<string, unknown>)
       .jenisBeasiswa as string) || "internal";
@@ -258,7 +258,7 @@ export default function DetailPengajuanPage() {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Konten */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <IdentitasPengaju data={identitasData} />
@@ -267,7 +267,7 @@ export default function DetailPengajuanPage() {
         </div>
 
         <div className="lg:col-span-1 space-y-6">
-          {/* Aksi Card */}
+          {/* Kartu Aksi */}
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
             <h2 className="font-bold text-slate-800 mb-4 uppercase tracking-wider text-sm">
               Aksi

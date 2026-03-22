@@ -1,7 +1,7 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import {
     Card,
-    CardContent,
+    CardKonten,
     CardDescription,
     CardHeader,
     CardTitle,
@@ -15,7 +15,7 @@ import {
     ChevronRight,
 } from "lucide-react";
 
-// TODO: Fetch from API
+// TODO: Ambil dari API
 const jenisBeasiswa = [
     {
         id: "internal",
@@ -98,7 +98,7 @@ export default function SuratRekomendasiBeasiswaPage() {
                                         </CardTitle>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="space-y-3">
+                                <CardKonten className="space-y-3">
                                     <CardDescription>
                                         {jenis.description}
                                     </CardDescription>
@@ -110,7 +110,7 @@ export default function SuratRekomendasiBeasiswaPage() {
                                             {jenis.example}
                                         </p>
                                     </div>
-                                </CardContent>
+                                </CardKonten>
                             </Card>
                         </Link>
                     );
@@ -119,3 +119,4 @@ export default function SuratRekomendasiBeasiswaPage() {
         </div>
     );
 }
+

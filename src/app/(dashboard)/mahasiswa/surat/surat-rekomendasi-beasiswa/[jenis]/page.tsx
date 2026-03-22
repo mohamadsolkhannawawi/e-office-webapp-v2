@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { useParams, usePencarianParams, useRouter } from "next/navigation";
 import { getApplicationByIdOrCreate } from "@/lib/application-api";
 
 import Link from "next/link";
@@ -20,7 +20,7 @@ import type { FormDataType } from "@/types/form";
 
 export default function PengajuanBaruPage() {
   const params = useParams();
-  const searchParams = useSearchParams();
+  const searchParams = usePencarianParams();
   const router = useRouter();
   const jenis = params.jenis as string;
   const editId = searchParams.get("id");
@@ -33,7 +33,7 @@ export default function PengajuanBaruPage() {
   const { user: authUser, isLoading: isAuthLoading } = useAuth();
 
   const [formData, setFormData] = useState<FormDataType>(() => {
-    // Lazy initializer: restore from localStorage on first mount (new mode only)
+    // Inisialisasi lazy: pulihkan dari localStorage saat mount pertama (hanya mode baru)
     const base: FormDataType = {
       namaLengkap: "",
       role: "MAHASISWA",
@@ -56,27 +56,27 @@ export default function PengajuanBaruPage() {
         const saved = localStorage.getItem(`srb_form_${jenis}`);
         if (saved) return { ...base, ...JSON.parse(saved) };
       } catch {
-        // ignore parse errors
+        // abaikan parse error
       }
     }
     return base;
   });
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  // Consolidated Initialization Logic for Async Data
+  // Logika inisialisasi terpusat untuk data async
   useEffect(() => {
-    // Rest of initialization
+    // Sisa proses inisialisasi
     const fetchAsyncData = async () => {
-      // 1. Fetch specific data based on mode
+      // 1. Ambil data spesifik berdasarkan mode
       if (editId) {
-        // Edit Mode: Fetch existing application or create new draft if not found
+        // Mode Edit: ambil pengajuan yang ada atau buat draft baru jika tidak ditemukan
         try {
           const data = await getApplicationByIdOrCreate(editId);
 
-          // If new draft was created, update URL with new ID
+          // Jika draft baru dibuat, perbarui URL dengan ID baru
           if (data.isNewDraft) {
             console.log(
-              "📝 [PengajuanBaruPage] New draft created, updating URL with new ID:",
+              "[INFO] [PengajuanBaruPage] New draft created, updating URL with new ID:",
               data.id,
             );
             router.replace(
@@ -113,7 +113,7 @@ export default function PengajuanBaruPage() {
           console.error("Failed to fetch or create application for edit:", err);
         }
       } else if (!isAuthLoading && authUser) {
-        // New Mode: Fetch profile details to pre-fill if identity is missing
+        // Mode Baru: ambil detail profil untuk pre-fill jika identitas belum lengkap
         try {
           const res = await fetch(`${BASE_PATH}/api/me`, {
             credentials: "include",
@@ -121,7 +121,7 @@ export default function PengajuanBaruPage() {
           if (res.ok) {
             const user = await res.json();
             setFormData((prev) => {
-              // Only update if current state is missing these basic fields
+              // Perbarui hanya jika state saat ini belum memiliki field dasar tersebut
               const updated = {
                 ...prev,
                 namaLengkap:
@@ -159,7 +159,7 @@ export default function PengajuanBaruPage() {
     }
   }, [editId, authUser, isAuthLoading, jenis, router]);
 
-  // Update URL if ID exists (handles draft -> edit transition)
+  // Perbarui URL jika ID tersedia (menangani transisi draft -> edit)
   useEffect(() => {
     if (formData.letterInstanceId && !editId) {
       const newUrl = `${window.location.pathname}?id=${formData.letterInstanceId}`;
@@ -167,14 +167,14 @@ export default function PengajuanBaruPage() {
     }
   }, [formData.letterInstanceId, editId]);
 
-  // Save to localStorage on change (only for "New" mode)
+  // Simpan ke localStorage saat berubah (hanya untuk mode "Baru")
   useEffect(() => {
     if (!editId && isDataLoaded) {
       localStorage.setItem(`srb_form_${jenis}`, JSON.stringify(formData));
     }
   }, [formData, editId, jenis, isDataLoaded]);
 
-  // Define interface for window validation functions
+  // Definisikan interface untuk fungsi validasi pada window
   interface ValidationWindow extends Window {
     __validateInfoPengajuan?: () => boolean;
     __validateDetailPengajuan?: () => boolean;
@@ -280,7 +280,7 @@ export default function PengajuanBaruPage() {
     }
   };
 
-  const renderContent = () => {
+  const renderKonten = () => {
     switch (currentStep) {
       case 1:
         return <InfoPengajuan data={formData} setData={setFormData} />;
@@ -340,7 +340,7 @@ export default function PengajuanBaruPage() {
         </Link>
       </div>
 
-      {/* Student Edit notice banner */}
+      {/* Banner notifikasi edit mahasiswa */}
       {mode === "student_edit" && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
           <div className="p-1.5 bg-amber-100 rounded-xl shrink-0">
@@ -377,7 +377,7 @@ export default function PengajuanBaruPage() {
       <div
         className={`${currentStep !== 2 ? "min-h-125" : ""} animate-in fade-in zoom-in duration-300`}
       >
-        {renderContent()}
+        {renderKonten()}
       </div>
 
       <FormAction

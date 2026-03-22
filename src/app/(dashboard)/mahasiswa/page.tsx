@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -202,9 +202,9 @@ export default function MahasiswaDashboardPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-in fade-in duration-500">
-      {/* Breadcrumb - Hidden on dashboard */}
+      {/* Breadcrumb - disembunyikan pada dashboard */}
 
-      {/* Page Title */}
+      {/* Judul Halaman */}
       <h1 className="text-2xl font-bold text-slate-800 animate-in slide-in-from-bottom-3 duration-700">
         Dashboard
       </h1>
@@ -222,7 +222,7 @@ export default function MahasiswaDashboardPage() {
         </p>
       )}
 
-      {/* Actions Grid */}
+      {/* Grid Aksi */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
         {DASHBOARD_ACTIONS.map((action, index) => (
           <div
@@ -284,7 +284,7 @@ export default function MahasiswaDashboardPage() {
         ))}
       </div>
 
-      {/* Statistics */}
+      {/* Statistik */}
       <div className="space-y-3">
         <h2 className="text-lg font-bold text-slate-800">Statistik Surat</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -311,7 +311,7 @@ export default function MahasiswaDashboardPage() {
         </div>
       </div>
 
-      {/* Latest Applications */}
+      {/* Pengajuan Terbaru */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-800">
@@ -408,3 +408,4 @@ export default function MahasiswaDashboardPage() {
     </div>
   );
 }
+

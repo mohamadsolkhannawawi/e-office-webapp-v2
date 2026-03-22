@@ -1,11 +1,16 @@
 import type { NextConfig } from "next";
+import { fileURLToPath } from "url";
 
 const backendUrl = process.env.BACKEND_URL || "http://localhost:3005";
 const minioHost = process.env.NEXT_PUBLIC_MINIO_HOST || "localhost";
 const minioPort = process.env.NEXT_PUBLIC_MINIO_PORT || "9000";
+const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 
 const nextConfig: NextConfig = {
   basePath: "/persuratan-rekomendasi",
+  turbopack: {
+    root: projectRoot,
+  },
   skipTrailingSlashRedirect: true,
   redirects: async () => {
     return [

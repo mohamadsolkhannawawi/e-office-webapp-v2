@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardKonten, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Shield,
@@ -153,7 +153,7 @@ export default function RoleManagementPage() {
       {/* Kartu Statistik */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-undip-blue/10 p-3">
                 <Shield className="h-6 w-6 text-undip-blue" />
@@ -165,11 +165,11 @@ export default function RoleManagementPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-green-100 p-3">
                 <Users className="h-6 w-6 text-green-600" />
@@ -181,11 +181,11 @@ export default function RoleManagementPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-purple-100 p-3">
                 <Lock className="h-6 w-6 text-purple-600" />
@@ -197,7 +197,7 @@ export default function RoleManagementPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
       </div>
 
@@ -209,7 +209,7 @@ export default function RoleManagementPage() {
             Daftar Role di Sistem
           </CardTitle>
         </CardHeader>
-        <CardKonten>
+        <CardContent>
           <div className="space-y-3">
             {roles.map((role) => {
               const isExpanded = expandedRoles.has(role.id);
@@ -304,7 +304,7 @@ export default function RoleManagementPage() {
               <p className="text-slate-500">Tidak ada role di sistem</p>
             </div>
           )}
-        </CardKonten>
+        </CardContent>
       </Card>
     </div>
   );

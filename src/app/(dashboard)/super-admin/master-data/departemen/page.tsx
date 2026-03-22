@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardKonten, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,12 +15,12 @@ import {
   Users,
   GraduationCap,
   BookOpen,
-  Search,
+  Pencarian,
   X,
 } from "lucide-react";
 import {
   Dialog,
-  DialogContent,
+  DialogKonten,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -30,7 +30,7 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
+  AlertDialogKonten,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
@@ -59,16 +59,16 @@ export default function DepartemenPage() {
   const [filteredDepartments, setFilteredDepartments] = useState<Department[]>(
     [],
   );
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setPencarianQuery] = useState("");
 
-  // Dialog states
+  // State dialog
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedDept, setSelectedDept] = useState<Department | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Form data
+  // Data formulir
   const [formData, setFormData] = useState({
     name: "",
     code: "",
@@ -79,7 +79,7 @@ export default function DepartemenPage() {
   }, []);
 
   useEffect(() => {
-    // Filter departments based on search query
+    // Filter departemen berdasarkan query pencarian
     if (searchQuery.trim() === "") {
       setFilteredDepartments(departments);
     } else {
@@ -257,10 +257,10 @@ export default function DepartemenPage() {
         </div>
       </div>
 
-      {/* Statistics Cards */}
+      {/* Kartu Statistik */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardContent className="pt-6">
+          <CardKonten className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-undip-blue/10 p-3">
                 <Building2 className="h-6 w-6 text-undip-blue" />
@@ -272,11 +272,11 @@ export default function DepartemenPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </CardKonten>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardContent className="pt-6">
+          <CardKonten className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-green-100 p-3">
                 <BookOpen className="h-6 w-6 text-green-600" />
@@ -288,11 +288,11 @@ export default function DepartemenPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </CardKonten>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardContent className="pt-6">
+          <CardKonten className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-blue-100 p-3">
                 <GraduationCap className="h-6 w-6 text-blue-600" />
@@ -304,11 +304,11 @@ export default function DepartemenPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </CardKonten>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardContent className="pt-6">
+          <CardKonten className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-purple-100 p-3">
                 <Users className="h-6 w-6 text-purple-600" />
@@ -320,11 +320,11 @@ export default function DepartemenPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </CardKonten>
         </Card>
       </div>
 
-      {/* Search and List */}
+      {/* Pencarian dan Daftar */}
       <Card className="border-gray-200 shadow-sm rounded-3xl">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -332,18 +332,18 @@ export default function DepartemenPage() {
               <Building2 className="h-5 w-5 text-undip-blue" />
               Daftar Departemen
             </CardTitle>
-            {/* Search */}
+            {/* Pencarian */}
             <div className="relative w-full sm:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Pencarian className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Cari departemen..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => setPencarianQuery(e.target.value)}
                 className="pl-10 pr-10"
               />
               {searchQuery && (
                 <button
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => setPencarianQuery("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   <X className="h-4 w-4" />
@@ -352,7 +352,7 @@ export default function DepartemenPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardKonten>
           <div className="space-y-3">
             {filteredDepartments.map((dept) => (
               <div
@@ -372,8 +372,8 @@ export default function DepartemenPage() {
                         {dept.code}
                       </Badge>
                       <span className="text-sm text-slate-500">
-                        {dept.prodiCount} Prodi • {dept.mahasiswaCount}{" "}
-                        Mahasiswa • {dept.pegawaiCount} Pegawai
+                        {dept.prodiCount} Prodi â€¢ {dept.mahasiswaCount}{" "}
+                        Mahasiswa â€¢ {dept.pegawaiCount} Pegawai
                       </span>
                     </div>
                   </div>
@@ -410,12 +410,12 @@ export default function DepartemenPage() {
               </p>
             </div>
           )}
-        </CardContent>
+        </CardKonten>
       </Card>
 
-      {/* Create Dialog */}
+      {/* Dialog Tambah */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent>
+        <DialogKonten>
           <form onSubmit={handleCreate}>
             <DialogHeader>
               <DialogTitle>Tambah Departemen Baru</DialogTitle>
@@ -485,12 +485,12 @@ export default function DepartemenPage() {
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
+        </DialogKonten>
       </Dialog>
 
-      {/* Edit Dialog */}
+      {/* Dialog Edit */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogKonten>
           <form onSubmit={handleEdit}>
             <DialogHeader>
               <DialogTitle>Edit Departemen</DialogTitle>
@@ -560,12 +560,12 @@ export default function DepartemenPage() {
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
+        </DialogKonten>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Dialog Konfirmasi Hapus */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent>
+        <AlertDialogKonten>
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Departemen?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -577,7 +577,7 @@ export default function DepartemenPage() {
                   selectedDept.pegawaiCount > 0) && (
                   <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                     <p className="text-sm text-amber-800 font-semibold">
-                      ⚠️ Peringatan:
+                      âš ï¸ Peringatan:
                     </p>
                     <p className="text-sm text-amber-700 mt-1">
                       Departemen ini memiliki {selectedDept.prodiCount} program
@@ -606,7 +606,7 @@ export default function DepartemenPage() {
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogKonten>
       </AlertDialog>
     </div>
   );

@@ -1,4 +1,4 @@
-﻿import { headers } from "next/headers";
+import { headers } from "next/headers";
 import { AdminDashboard } from "@/components/features/dashboard";
 import { ApplicationSummary } from "@/lib/application-api";
 import {
@@ -59,7 +59,7 @@ async function getDashboardData(searchParams: PencarianParams) {
       queryParams.endDate = String(searchParams.endDate);
     }
 
-    const query = new URLPencarianParams(queryParams);
+    const query = new URLSearchParams(queryParams);
 
     const appsRes = await fetch(
       `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,

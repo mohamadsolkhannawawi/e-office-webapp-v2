@@ -4,16 +4,16 @@ import { useContext } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 
 /**
- * Custom hook to access auth context
- * Must be used within AuthProvider
+ * Custom hook untuk mengakses auth context
+ * Harus digunakan di dalam AuthProvider
  */
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }
 
-// Re-export AuthContext for direct access if needed
+// Re-export AuthContext untuk akses langsung jika diperlukan
 export { AuthContext } from "@/contexts/AuthContext";

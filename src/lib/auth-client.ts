@@ -1,47 +1,47 @@
 import { createAuthClient } from "better-auth/react";
 
 /**
- * Better Auth Client for Frontend
- * Configured to connect to backend via Next.js Proxy (port 3000 -> 3005)
- * Better Auth will automatically append basePath (/api/auth) from server config
+ * Better Auth Client untuk frontend
+ * Dikonfigurasi untuk terhubung ke backend via Next.js Proxy (port 3000 -> 3005)
+ * Better Auth otomatis menambahkan basePath (/api/auth) dari konfigurasi server
  */
 export const authClient = createAuthClient({
-    // Use current browser origin so auth requests always go to same origin (avoids CORS).
-    // Falls back to env var for SSR, then localhost for local dev.
-    baseURL:
-        typeof window !== "undefined"
-            ? `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/auth`
-            : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  // Gunakan origin browser saat ini agar request auth selalu ke origin yang sama (hindari CORS).
+  // Fallback ke env var untuk SSR, lalu localhost untuk development lokal.
+  baseURL:
+    typeof window !== "undefined"
+      ? `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/auth`
+      : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
 });
 
 /**
- * Auth helper functions
+ * Fungsi helper auth
  */
 export const auth = {
-    // Sign in with email and password
-    signIn: async (email: string, password: string) => {
-        return await authClient.signIn.email({
-            email,
-            password,
-        });
-    },
+  // Login dengan email dan password
+  signIn: async (email: string, password: string) => {
+    return await authClient.signIn.email({
+      email,
+      password,
+    });
+  },
 
-    // Sign out
-    signOut: async () => {
-        return await authClient.signOut();
-    },
+  // Logout
+  signOut: async () => {
+    return await authClient.signOut();
+  },
 
-    // Get current session
-    getSession: async () => {
-        return await authClient.getSession();
-    },
+  // Ambil session saat ini
+  getSession: async () => {
+    return await authClient.getSession();
+  },
 
-    // Sign up (register)
-    signUp: async (email: string, password: string, name: string) => {
-        return await authClient.signUp.email({
-            email,
-            password,
-            name,
-        });
-    },
+  // Daftar (register)
+  signUp: async (email: string, password: string, name: string) => {
+    return await authClient.signUp.email({
+      email,
+      password,
+      name,
+    });
+  },
 };

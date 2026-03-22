@@ -12,6 +12,8 @@ import logoNavbar from "@/assets/images/logo-undip-navbar.png";
 import { useRef, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 const NotificationBell = dynamic(
     () =>
         import("@/components/layout/NotificationBell").then(
@@ -40,7 +42,7 @@ export function Navbar({
     // Always proxy through /api/me/photo when a user is authenticated.
     // The endpoint returns 404 if no photo → AvatarFallback (initials) renders automatically.
     // propUserImage (if supplied externally) is used as-is.
-    const userImage = propUserImage || (user ? "/api/me/photo" : "");
+    const userImage = propUserImage || (user ? `${BASE_PATH}/api/me/photo` : "");
     const showProfile = propShowProfile && !!user;
 
     const [dropdownOpen, setDropdownOpen] = useState(false);

@@ -1,4 +1,5 @@
 import React from "react";
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 import type { FormDataType, LampiranFile } from "@/types/form";
 import { FaCheckCircle } from "react-icons/fa";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -65,7 +66,7 @@ export function Review({ data, jenis }: ReviewProps) {
                 type: f.type || "",
                 size: f.size || 0,
                 file: f.file,
-                url: f.downloadUrl, // Use downloadUrl from MinIO upload
+                url: f.downloadUrl ? `${BASE_PATH}${f.downloadUrl}` : undefined,
             });
         });
     }
@@ -77,7 +78,7 @@ export function Review({ data, jenis }: ReviewProps) {
                 type: f.type || "",
                 size: f.size || 0,
                 file: f.file,
-                url: f.downloadUrl, // Use downloadUrl from MinIO upload
+                url: f.downloadUrl ? `${BASE_PATH}${f.downloadUrl}` : undefined,
             });
         });
     }

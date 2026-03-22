@@ -10,7 +10,7 @@ export const authClient = createAuthClient({
     // Falls back to env var for SSR, then localhost for local dev.
     baseURL:
         typeof window !== "undefined"
-            ? `${window.location.origin}/persuratan-rekomendasi/api/auth`
+            ? `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/auth`
             : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
 });
 

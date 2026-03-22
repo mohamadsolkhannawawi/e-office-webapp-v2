@@ -176,7 +176,7 @@ export async function generateDocument(
  */
 export async function downloadDocument(downloadUrl: string): Promise<Blob> {
     try {
-        const response = await fetch(downloadUrl, {
+        const response = await fetch(`${BASE_PATH}${downloadUrl}`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,

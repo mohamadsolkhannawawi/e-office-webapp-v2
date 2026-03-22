@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 function SSOCallbackComponent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -23,7 +25,7 @@ function SSOCallbackComponent() {
             try {
                 // 1. Set httpOnly cookie
                 const res = await fetch(
-                    `/persuratan-rekomendasi/api/auth/sso/set-session?token=${encodeURIComponent(token)}`,
+                    `${BASE_PATH}/api/auth/sso/set-session?token=${encodeURIComponent(token)}`,
                     { credentials: "include" },
                 );
 

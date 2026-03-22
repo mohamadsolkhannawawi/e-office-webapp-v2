@@ -6,6 +6,8 @@ import React, {
     useState,
 } from "react";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 import type { FormDataType, LampiranFile } from "@/types/form";
 import {
     uploadAttachment,
@@ -384,7 +386,7 @@ export function Lampiran({ data, setData, jenis }: LampiranProps) {
             )
                 setPreviewType("pdf");
             else setPreviewType("image");
-            setPreviewUrl(attachment.downloadUrl);
+            setPreviewUrl(`${BASE_PATH}${attachment.downloadUrl}`);
             return;
         }
 

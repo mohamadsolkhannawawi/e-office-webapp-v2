@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
@@ -64,7 +66,7 @@ export function LampiranSurat({ data }: LampiranSuratProps) {
             type: file.type,
             size:
                 typeof file.size === "string" ? parseInt(file.size) : file.size,
-            url: file.downloadUrl || file.url, // Prioritaskan downloadUrl dari MinIO
+            url: file.downloadUrl ? `${BASE_PATH}${file.downloadUrl}` : file.url, // Prioritaskan downloadUrl dari MinIO
             kategori: inferCategory(file),
         }));
 

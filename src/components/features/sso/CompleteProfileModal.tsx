@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 interface ProgramStudi {
     id: string;
     name: string;
@@ -62,7 +64,7 @@ export default function CompleteProfileModal() {
 
     // 1. Check profile completeness on mount
     useEffect(() => {
-        fetch("/persuratan-rekomendasi/api/me/profile-incomplete", {
+        fetch(`${BASE_PATH}/api/me/profile-incomplete`, {
             credentials: "include",
         })
             .then((r) => r.json())
@@ -95,7 +97,7 @@ export default function CompleteProfileModal() {
     // 2. Load departments when modal becomes visible
     useEffect(() => {
         if (status !== "incomplete") return;
-        fetch("/persuratan-rekomendasi/api/me/departments", {
+        fetch(`${BASE_PATH}/api/me/departments`, {
             credentials: "include",
         })
             .then((r) => r.json())
@@ -130,7 +132,7 @@ export default function CompleteProfileModal() {
             }
 
             const res = await fetch(
-                "/persuratan-rekomendasi/api/me/complete-profile",
+                `${BASE_PATH}/api/me/complete-profile`,
                 {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },

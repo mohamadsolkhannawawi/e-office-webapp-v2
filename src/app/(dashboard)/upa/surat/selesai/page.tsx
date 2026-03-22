@@ -35,6 +35,8 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { StandardPagination } from "@/components/ui/standard-pagination";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export default function SelesaiPage() {
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,7 +105,7 @@ export default function SelesaiPage() {
   const handleDownloadPDF = async (applicationId: string) => {
     try {
       const link = document.createElement("a");
-      link.href = `/api/templates/letter/${applicationId}/pdf`;
+      link.href = `${BASE_PATH}/api/templates/letter/${applicationId}/pdf`;
       link.download = `Surat-Rekomendasi-${applicationId}.pdf`;
       link.click();
       toast.success("PDF berhasil diunduh!");

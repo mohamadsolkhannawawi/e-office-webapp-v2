@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardKonten, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   getLetterConfig,
   updateLetterConfig,
@@ -99,7 +99,7 @@ export default function UpaSettingsPage() {
               <CardTitle className="text-lg">Wakil Dekan 1</CardTitle>
             </div>
           </CardHeader>
-          <CardKonten>
+          <CardContent>
             <form onSubmit={handleSaveWd1} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="wd1Name">Nama Lengkap & Gelar</Label>
@@ -169,7 +169,7 @@ export default function UpaSettingsPage() {
                 </Button>
               </div>
             </form>
-          </CardKonten>
+          </CardContent>
         </Card>
       </div>
     </div>

@@ -1,211 +1,203 @@
-import { headers } from "next/headers";
+﻿import { headers } from "next/headers";
 import { AdminDashboard } from "@/components/features/dashboard";
 import { ApplicationSummary } from "@/lib/application-api";
 import {
-    CheckCircle,
-    XCircle,
-    RotateCw,
-    AlertCircle,
-    Clock,
+  CheckCircle,
+  XCircle,
+  RotateCw,
+  AlertCircle,
+  Clock,
 } from "lucide-react";
 
-type SearchParams = { [key: string]: string | string[] | undefined };
+type PencarianParams = { [key: string]: string | string[] | undefined };
 
-async function getDashboardData(searchParams: SearchParams) {
-    try {
-        const headersList = await headers();
-        const cookie = headersList.get("cookie");
+async function getDashboardData(searchParams: PencarianParams) {
+  try {
+    const headersList = await headers();
+    const cookie = headersList.get("cookie");
 
-        const apiUrl =
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
-        // 1. Fetch Stats (role-based stats for Manajer TU)
-        const statsRes = await fetch(`${apiUrl}/api/surat-rekomendasi/stats`, {
-            headers: { Cookie: cookie || "" },
-            cache: "no-store",
-        });
-        const statsJson = await statsRes.json();
-        const statsData = statsJson.data || {
-            perluTindakan: 0,
-            selesaiBulanIni: 0,
-            totalBulanIni: 0,
-            trend: [],
-            distribution: {
-                pending: 0,
-                inProgress: 0,
-                revision: 0,
-                completed: 0,
-                rejected: 0,
-            },
-        };
+    // 1. Ambil statistik (berbasis role untuk Manajer TU)
+    const statsRes = await fetch(`${apiUrl}/api/surat-rekomendasi/stats`, {
+      headers: { Cookie: cookie || "" },
+      cache: "no-store",
+    });
+    const statsJson = await statsRes.json();
+    const statsData = statsJson.data || {
+      perluTindakan: 0,
+      selesaiBulanIni: 0,
+      totalBulanIni: 0,
+      trend: [],
+      distribution: {
+        pending: 0,
+        inProgress: 0,
+        revision: 0,
+        completed: 0,
+        rejected: 0,
+      },
+    };
 
-        // 2. Fetch Recent Letters for table (automatically scoped by backend for reviewer role)
-        // Build query params - only include date params if they have valid values
-        const queryParams: Record<string, string> = {
-            status: String(searchParams.status || ""),
-            search: String(searchParams.search || ""),
-            page: String(searchParams.page || "1"),
-            limit: String(searchParams.limit || "10"),
-            sortOrder: String(searchParams.sortOrder || "desc"),
-        };
+    // 2. Ambil surat terbaru untuk tabel (otomatis difilter backend sesuai role reviewer)
+    // Susun query params - hanya sertakan parameter tanggal jika nilainya valid
+    const queryParams: Record<string, string> = {
+      status: String(searchParams.status || ""),
+      search: String(searchParams.search || ""),
+      page: String(searchParams.page || "1"),
+      limit: String(searchParams.limit || "10"),
+      sortOrder: String(searchParams.sortOrder || "desc"),
+    };
 
-        // Only add date params if they exist and are not empty
-        if (
-            searchParams.startDate &&
-            String(searchParams.startDate).trim() !== ""
-        ) {
-            queryParams.startDate = String(searchParams.startDate);
-        }
-        if (
-            searchParams.endDate &&
-            String(searchParams.endDate).trim() !== ""
-        ) {
-            queryParams.endDate = String(searchParams.endDate);
-        }
-
-        const query = new URLSearchParams(queryParams);
-
-        const appsRes = await fetch(
-            `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,
-            {
-                headers: { Cookie: cookie || "" },
-                cache: "no-store",
-            },
-        );
-        const appsJson = await appsRes.json();
-        const appsData = appsJson.data || [];
-        const appsMeta = appsJson.meta || {
-            total: 0,
-            page: 1,
-            limit: 10,
-            totalPages: 0,
-        };
-
-        return {
-            stats: {
-                actionRequired: statsData.perluTindakan || 0,
-                completedMonth: statsData.selesaiBulanIni || 0,
-                totalMonth: statsData.totalBulanIni || 0,
-                trend: statsData.trend || [],
-                distribution: statsData.distribution || {
-                    pending: 0,
-                    inProgress: 0,
-                    revision: 0,
-                    completed: 0,
-                    rejected: 0,
-                },
-            },
-            recentLetters: appsData.map((app: ApplicationSummary) => {
-                const stepToRole: Record<number, string> = {
-                    1: "Supervisor Akademik",
-                    2: "Manajer TU",
-                    3: "Wakil Dekan 1",
-                    4: "UPA",
-                };
-
-                let target = "Selesai";
-                let status = "Proses";
-                let statusColor = "bg-undip-blue";
-                let statusIcon: React.ReactNode = null;
-
-                if (app.status === "COMPLETED") {
-                    target = "Selesai";
-                    status = app.lastActorRole
-                        ? `Diterbitkan oleh ${app.lastActorRole}`
-                        : "Selesai";
-                    statusColor = "bg-emerald-500 text-white";
-                    statusIcon = <CheckCircle className="w-4 h-4" />;
-                } else if (app.status === "REJECTED") {
-                    target = "Ditolak";
-                    status = app.lastActorRole
-                        ? `Ditolak oleh ${app.lastActorRole}`
-                        : "Ditolak";
-                    statusColor = "bg-red-500 text-white";
-                    statusIcon = <XCircle className="w-4 h-4" />;
-                } else if (app.status === "REVISION") {
-                    // Target adalah step berikutnya dari currentStep saat ini
-                    const nextStep = app.currentStep + 1;
-                    target = stepToRole[nextStep] || "Selesai";
-                    status = app.lastRevisionFromRole
-                        ? `Revisi dari ${app.lastRevisionFromRole}`
-                        : "Revisi Diperlukan";
-                    statusColor = "bg-sky-500 text-white";
-                    statusIcon = <RotateCw className="w-4 h-4" />;
-                } else if (
-                    app.status === "PENDING" ||
-                    app.status === "IN_PROGRESS"
-                ) {
-                    target = stepToRole[app.currentStep] || "Diproses";
-
-                    if (app.currentStep === 2) {
-                        status = "Perlu Tindakan";
-                        statusColor = "bg-amber-500 text-white";
-                        statusIcon = <AlertCircle className="w-4 h-4" />;
-                    } else {
-                        status = `Diproses di ${stepToRole[app.currentStep]}`;
-                        statusColor = "bg-blue-500 text-white";
-                        statusIcon = <Clock className="w-4 h-4" />;
-                    }
-                }
-
-                return {
-                    id: app.id,
-                    applicant:
-                        app.applicantName || app.formData?.namaLengkap || "N/A",
-                    subject:
-                        app.scholarshipName ||
-                        app.letterType?.name ||
-                        "Surat Rekomendasi Beasiswa",
-                    date: new Date(app.createdAt).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                    }),
-                    target,
-                    status,
-                    statusColor,
-                    statusIcon,
-                };
-            }),
-            meta: appsMeta,
-        };
-    } catch (error) {
-        console.error("Dashboard data fetch error:", error);
-        return {
-            stats: {
-                actionRequired: 0,
-                completedMonth: 0,
-                totalMonth: 0,
-                trend: [],
-                distribution: {
-                    pending: 0,
-                    inProgress: 0,
-                    completed: 0,
-                    rejected: 0,
-                },
-            },
-            recentLetters: [],
-            meta: { total: 0, page: 1, limit: 5, totalPages: 0 },
-        };
+    // Tambahkan parameter tanggal hanya jika ada dan tidak kosong
+    if (
+      searchParams.startDate &&
+      String(searchParams.startDate).trim() !== ""
+    ) {
+      queryParams.startDate = String(searchParams.startDate);
     }
+    if (searchParams.endDate && String(searchParams.endDate).trim() !== "") {
+      queryParams.endDate = String(searchParams.endDate);
+    }
+
+    const query = new URLPencarianParams(queryParams);
+
+    const appsRes = await fetch(
+      `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,
+      {
+        headers: { Cookie: cookie || "" },
+        cache: "no-store",
+      },
+    );
+    const appsJson = await appsRes.json();
+    const appsData = appsJson.data || [];
+    const appsMeta = appsJson.meta || {
+      total: 0,
+      page: 1,
+      limit: 10,
+      totalPages: 0,
+    };
+
+    return {
+      stats: {
+        actionRequired: statsData.perluTindakan || 0,
+        completedMonth: statsData.selesaiBulanIni || 0,
+        totalMonth: statsData.totalBulanIni || 0,
+        trend: statsData.trend || [],
+        distribution: statsData.distribution || {
+          pending: 0,
+          inProgress: 0,
+          revision: 0,
+          completed: 0,
+          rejected: 0,
+        },
+      },
+      recentLetters: appsData.map((app: ApplicationSummary) => {
+        const stepToRole: Record<number, string> = {
+          1: "Supervisor Akademik",
+          2: "Manajer TU",
+          3: "Wakil Dekan 1",
+          4: "UPA",
+        };
+
+        let target = "Selesai";
+        let status = "Proses";
+        let statusColor = "bg-undip-blue";
+        let statusIcon: React.ReactNode = null;
+
+        if (app.status === "COMPLETED") {
+          target = "Selesai";
+          status = app.lastActorRole
+            ? `Diterbitkan oleh ${app.lastActorRole}`
+            : "Selesai";
+          statusColor = "bg-emerald-500 text-white";
+          statusIcon = <CheckCircle className="w-4 h-4" />;
+        } else if (app.status === "REJECTED") {
+          target = "Ditolak";
+          status = app.lastActorRole
+            ? `Ditolak oleh ${app.lastActorRole}`
+            : "Ditolak";
+          statusColor = "bg-red-500 text-white";
+          statusIcon = <XCircle className="w-4 h-4" />;
+        } else if (app.status === "REVISION") {
+          // Target adalah step berikutnya dari currentStep saat ini
+          const nextStep = app.currentStep + 1;
+          target = stepToRole[nextStep] || "Selesai";
+          status = app.lastRevisionFromRole
+            ? `Revisi dari ${app.lastRevisionFromRole}`
+            : "Revisi Diperlukan";
+          statusColor = "bg-sky-500 text-white";
+          statusIcon = <RotateCw className="w-4 h-4" />;
+        } else if (app.status === "PENDING" || app.status === "IN_PROGRESS") {
+          target = stepToRole[app.currentStep] || "Diproses";
+
+          if (app.currentStep === 2) {
+            status = "Perlu Tindakan";
+            statusColor = "bg-amber-500 text-white";
+            statusIcon = <AlertCircle className="w-4 h-4" />;
+          } else {
+            status = `Diproses di ${stepToRole[app.currentStep]}`;
+            statusColor = "bg-blue-500 text-white";
+            statusIcon = <Clock className="w-4 h-4" />;
+          }
+        }
+
+        return {
+          id: app.id,
+          applicant: app.applicantName || app.formData?.namaLengkap || "N/A",
+          subject:
+            app.scholarshipName ||
+            app.letterType?.name ||
+            "Surat Rekomendasi Beasiswa",
+          date: new Date(app.createdAt).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+          target,
+          status,
+          statusColor,
+          statusIcon,
+        };
+      }),
+      meta: appsMeta,
+    };
+  } catch (error) {
+    console.error("Dashboard data fetch error:", error);
+    return {
+      stats: {
+        actionRequired: 0,
+        completedMonth: 0,
+        totalMonth: 0,
+        trend: [],
+        distribution: {
+          pending: 0,
+          inProgress: 0,
+          completed: 0,
+          rejected: 0,
+        },
+      },
+      recentLetters: [],
+      meta: { total: 0, page: 1, limit: 5, totalPages: 0 },
+    };
+  }
 }
 
 export default async function ManajerTUPage(props: {
-    searchParams: Promise<SearchParams>;
+  searchParams: Promise<PencarianParams>;
 }) {
-    const searchParams = await props.searchParams;
-    const data = await getDashboardData(searchParams);
+  const searchParams = await props.searchParams;
+  const data = await getDashboardData(searchParams);
 
-    return (
-        <AdminDashboard
-            roleName="Manajer TU"
-            rolePath="manajer-tu"
-            title="Dashboard Persuratan"
-            description="Pusat kendali untuk mengelola semua surat Fakultas Sains dan Matematika."
-            stats={data.stats}
-            recentLetters={data.recentLetters}
-            meta={data.meta}
-            detailBasePath="surat-rekomendasi-beasiswa"
-        />
-    );
+  return (
+    <AdminDashboard
+      roleName="Manajer TU"
+      rolePath="manajer-tu"
+      title="Dashboard Persuratan"
+      description="Pusat kendali untuk mengelola semua surat Fakultas Sains dan Matematika."
+      stats={data.stats}
+      recentLetters={data.recentLetters}
+      meta={data.meta}
+      detailBasePath="surat-rekomendasi-beasiswa"
+    />
+  );
 }

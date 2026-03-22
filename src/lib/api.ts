@@ -1,17 +1,17 @@
 import { treaty } from "@elysiajs/eden";
 
 /**
- * API client configured to:
- * - Send cookies automatically (credentials: "include")
- * - Connect to backend API
+ * API client dikonfigurasi untuk:
+ * - Mengirim cookie otomatis (credentials: "include")
+ * - Terhubung ke API backend
  *
- * Note: Using untyped client as backend is deployed separately
+ * Catatan: Menggunakan client tanpa tipe karena backend dideploy terpisah
  */
 export const client = treaty(
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
-    {
-        fetch: {
-            credentials: "include", // Enable sending cookies with requests
-        },
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+  {
+    fetch: {
+      credentials: "include", // Aktifkan pengiriman cookie pada request
     },
+  },
 );

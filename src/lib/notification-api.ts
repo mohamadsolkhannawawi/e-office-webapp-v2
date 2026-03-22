@@ -6,175 +6,172 @@
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export interface Notification {
-    id: string;
-    userId: string;
-    title: string;
-    message: string;
-    type: string;
-    isRead: boolean;
-    entityId?: string;
-    letterInstanceId?: string; // 🔴 TAMBAHAN
-    createdAt: string;
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  entityId?: string;
+  letterInstanceId?: string; // 🔴 TAMBAHAN
+  createdAt: string;
 }
 
 /**
- * Get all notifications for current user
+ * Ambil semua notifikasi untuk user saat ini
  */
 export async function getNotifications(options?: {
-    limit?: number;
-    unreadOnly?: boolean;
+  limit?: number;
+  unreadOnly?: boolean;
 }): Promise<{ data: Notification[] }> {
-    try {
-        const params = new URLSearchParams();
-        if (options?.limit) params.append("limit", String(options.limit));
-        if (options?.unreadOnly)
-            params.append("unreadOnly", String(options.unreadOnly));
+  try {
+    const params = new URLSearchParams();
+    if (options?.limit) params.append("limit", String(options.limit));
+    if (options?.unreadOnly)
+      params.append("unreadOnly", String(options.unreadOnly));
 
-        const response = await fetch(
-            `${BASE_PATH}/api/notifications${params.toString() ? "?" + params.toString() : ""}`,
-            {
-                method: "GET",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-            },
-        );
+    const response = await fetch(
+      `${BASE_PATH}/api/notifications${params.toString() ? "?" + params.toString() : ""}`,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
 
-        if (!response.ok) {
-            throw new Error(
-                `Failed to fetch notifications: ${response.status}`,
-            );
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Error fetching notifications:", error);
-        throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to fetch notifications: ${response.status}`);
     }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    throw error;
+  }
 }
 
 /**
- * Get unread notification count
+ * Ambil jumlah notifikasi yang belum dibaca
  */
 export async function getUnreadCount(): Promise<{ data: { unread: number } }> {
-    try {
-        const response = await fetch(`${BASE_PATH}/api/notifications/count`, {
-            method: "GET",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-        });
+  try {
+    const response = await fetch(`${BASE_PATH}/api/notifications/count`, {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
 
-        if (!response.ok) {
-            throw new Error(`Failed to get unread count: ${response.status}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Error fetching unread count:", error);
-        throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to get unread count: ${response.status}`);
     }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching unread count:", error);
+    throw error;
+  }
 }
 
 /**
- * Mark notification as read
+ * Tandai notifikasi sebagai sudah dibaca
  */
 export async function markNotificationAsRead(
-    notificationId: string,
+  notificationId: string,
 ): Promise<{ success: boolean }> {
-    try {
-        const response = await fetch(
-            `${BASE_PATH}/api/notifications/${notificationId}/read`,
-            {
-                method: "PATCH",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-            },
-        );
+  try {
+    const response = await fetch(
+      `${BASE_PATH}/api/notifications/${notificationId}/read`,
+      {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
 
-        if (!response.ok) {
-            throw new Error(
-                `Failed to mark notification as read: ${response.status}`,
-            );
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Error marking notification as read:", error);
-        throw error;
+    if (!response.ok) {
+      throw new Error(
+        `Failed to mark notification as read: ${response.status}`,
+      );
     }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error marking notification as read:", error);
+    throw error;
+  }
 }
 
 /**
- * Mark all notifications as read
+ * Tandai semua notifikasi sebagai sudah dibaca
  */
 export async function markAllNotificationsAsRead(): Promise<{
-    success: boolean;
+  success: boolean;
 }> {
-    try {
-        const response = await fetch(`${BASE_PATH}/api/notifications/read-all`, {
-            method: "PATCH",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-        });
+  try {
+    const response = await fetch(`${BASE_PATH}/api/notifications/read-all`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
 
-        if (!response.ok) {
-            throw new Error(`Failed to mark all as read: ${response.status}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Error marking all as read:", error);
-        throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to mark all as read: ${response.status}`);
     }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error marking all as read:", error);
+    throw error;
+  }
 }
 
 /**
- * Delete notification by id
+ * Hapus notifikasi berdasarkan id
  */
 export async function deleteNotification(
-    notificationId: string,
+  notificationId: string,
 ): Promise<{ success: boolean }> {
-    try {
-        const response = await fetch(`${BASE_PATH}/api/notifications/${notificationId}`, {
-            method: "DELETE",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-        });
+  try {
+    const response = await fetch(
+      `${BASE_PATH}/api/notifications/${notificationId}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
 
-        if (!response.ok) {
-            throw new Error(
-                `Failed to delete notification: ${response.status}`,
-            );
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Error deleting notification:", error);
-        throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to delete notification: ${response.status}`);
     }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error deleting notification:", error);
+    throw error;
+  }
 }
 
 /**
- * Delete all notifications
+ * Hapus semua notifikasi
  */
 export async function deleteAllNotifications(): Promise<{
-    success: boolean;
+  success: boolean;
 }> {
-    try {
-        const response = await fetch(`${BASE_PATH}/api/notifications/delete-all`, {
-            method: "DELETE",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-        });
+  try {
+    const response = await fetch(`${BASE_PATH}/api/notifications/delete-all`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
 
-        if (!response.ok) {
-            throw new Error(
-                `Failed to delete all notifications: ${response.status}`,
-            );
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Error deleting all notifications:", error);
-        throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to delete all notifications: ${response.status}`);
     }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error deleting all notifications:", error);
+    throw error;
+  }
 }

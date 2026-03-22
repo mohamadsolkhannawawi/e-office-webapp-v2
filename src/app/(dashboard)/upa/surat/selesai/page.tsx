@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
 import {
   Select,
-  SelectKonten,
+  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -16,7 +16,7 @@ import {
 import {
   ChevronRight,
   ChevronLeft,
-  Pencarian,
+  Search,
   Calendar,
   Filter,
   Eye,
@@ -33,7 +33,7 @@ import {
 } from "@/lib/template-api";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { StandardPaginasi } from "@/components/ui/standard-pagination";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
@@ -162,9 +162,9 @@ export default function SelesaiPage() {
             Daftar Surat Selesai
           </h2>
           <div className="flex flex-wrap gap-3 items-center">
-            {/* Pencarian */}
+            {/* Search */}
             <div className="relative flex-1 min-w-50">
-              <Pencarian className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Cari nama/NIM..."
                 value={searchTerm}
@@ -181,13 +181,13 @@ export default function SelesaiPage() {
                   <SelectValue placeholder="Jenis Surat" />
                 </div>
               </SelectTrigger>
-              <SelectKonten>
+              <SelectContent>
                 <SelectItem value="all">Semua Jenis</SelectItem>
                 <SelectItem value="internal">Beasiswa Internal</SelectItem>
                 <SelectItem value="eksternal">Beasiswa Eksternal</SelectItem>
                 <SelectItem value="akademik">Beasiswa Akademik</SelectItem>
                 <SelectItem value="keperluan_lain">Keperluan Lain</SelectItem>
-              </SelectKonten>
+              </SelectContent>
             </Select>
 
             {/* Date Range Filter */}
@@ -255,10 +255,10 @@ export default function SelesaiPage() {
                   <SelectValue placeholder="Urutkan" />
                 </div>
               </SelectTrigger>
-              <SelectKonten>
+              <SelectContent>
                 <SelectItem value="desc">Terbaru</SelectItem>
                 <SelectItem value="asc">Terlama</SelectItem>
-              </SelectKonten>
+              </SelectContent>
             </Select>
           </div>
         </div>
@@ -392,7 +392,7 @@ export default function SelesaiPage() {
         </div>
 
         {/* Paginasi Standar */}
-        <StandardPaginasi
+        <StandardPagination
           currentPage={pagination.page}
           totalPages={pagination.totalPages}
           pageSize={pagination.limit}

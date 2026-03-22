@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -86,7 +86,7 @@ export default function LoaderShowcase() {
                 </p>
             </div>
 
-            {/* Demo Grid */}
+            {/* Grid Demo */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {demos.map((demo) => (
                     <Card key={demo.id} className="p-4">
@@ -108,7 +108,7 @@ export default function LoaderShowcase() {
                 ))}
             </div>
 
-            {/* Code Examples */}
+            {/* Contoh Kode */}
             <Card className="p-6">
                 <h2 className="text-lg font-semibold mb-4">Contoh Kode</h2>
                 <div className="space-y-4 text-sm">
@@ -133,7 +133,7 @@ export default function LoaderShowcase() {
                 </div>
             </Card>
 
-            {/* Size Comparison */}
+            {/* Perbandingan Ukuran */}
             <Card className="p-6">
                 <h2 className="text-lg font-semibold mb-4">
                     Perbandingan Ukuran
@@ -158,7 +158,7 @@ export default function LoaderShowcase() {
                 </div>
             </Card>
 
-            {/* Variant Comparison */}
+            {/* Perbandingan Varian */}
             <Card className="p-6">
                 <h2 className="text-lg font-semibold mb-4">
                     Perbandingan Varian
@@ -181,3 +181,4 @@ export default function LoaderShowcase() {
         </div>
     );
 }
+

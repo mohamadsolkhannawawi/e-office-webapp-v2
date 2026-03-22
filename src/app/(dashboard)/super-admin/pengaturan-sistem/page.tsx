@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardKonten, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -144,7 +144,7 @@ export default function SystemSettingsPage() {
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-green-100 p-3">
                 <CheckCircle2 className="h-6 w-6 text-green-600" />
@@ -154,10 +154,10 @@ export default function SystemSettingsPage() {
                 <p className="text-2xl font-bold text-slate-800">Aktif</p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-undip-blue/10 p-3">
                 <FileText className="h-6 w-6 text-undip-blue" />
@@ -169,10 +169,10 @@ export default function SystemSettingsPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-purple-100 p-3">
                 <Building2 className="h-6 w-6 text-purple-600" />
@@ -184,7 +184,7 @@ export default function SystemSettingsPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
       </div>
 
@@ -217,7 +217,7 @@ export default function SystemSettingsPage() {
               </Button>
             </div>
           </CardHeader>
-          <CardKonten>
+          <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
               {KOP_FIELDS.map(({ field, label }) => (
                 <div key={field} className="space-y-2">
@@ -231,7 +231,7 @@ export default function SystemSettingsPage() {
                 </div>
               ))}
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
       )}
     </div>

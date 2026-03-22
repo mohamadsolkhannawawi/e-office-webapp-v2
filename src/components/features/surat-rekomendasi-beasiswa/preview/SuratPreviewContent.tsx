@@ -41,6 +41,8 @@ import { MahasiswaEditModal } from "@/components/features/surat-rekomendasi-beas
 import { StaffEditModal } from "@/components/features/surat-rekomendasi-beasiswa/detail/reviewer/StaffEditModal";
 import React, { useEffect, useState } from "react";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export interface PreviewData {
   nama?: string;
   nim?: string;
@@ -620,7 +622,7 @@ export function SuratPreviewContent({
                 </div>
               )}
               <iframe
-                src={`/api/templates/letter/${pdfId}/pdf?t=${pdfRefreshTimestamp}#toolbar=0&navpanes=0&scrollbar=1`}
+                src={`${BASE_PATH}/api/templates/letter/${pdfId}/pdf?t=${pdfRefreshTimestamp}#toolbar=0&navpanes=0&scrollbar=1`}
                 className="h-full w-full border-0"
                 title="Preview Surat"
                 onLoad={() => {
@@ -1091,7 +1093,7 @@ export function SuratPreviewContent({
 
                           // Open PDF in new tab with loader
                           await generatePDF(async () => {
-                            const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                            const pdfUrl = `${BASE_PATH}/api/templates/letter/${applicationId}/pdf`;
                             window.open(pdfUrl, "_blank");
                           }, "Render PDF surat...");
                         }}
@@ -1181,7 +1183,7 @@ export function SuratPreviewContent({
 
                           // Open PDF in new tab with loader
                           await generatePDF(async () => {
-                            const pdfUrl = `/api/templates/letter/${applicationId}/pdf`;
+                            const pdfUrl = `${BASE_PATH}/api/templates/letter/${applicationId}/pdf`;
                             window.open(pdfUrl, "_blank");
                           }, "Render PDF surat...");
                         }}

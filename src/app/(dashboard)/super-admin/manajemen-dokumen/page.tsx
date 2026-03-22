@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardKonten, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -22,7 +22,7 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
+  AlertDialogKonten,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
@@ -30,13 +30,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import toast from "react-hot-toast";
 import {
-  getDocumentStatistics,
+  getDocumentStatistik,
   cleanupAllDocuments,
   cleanupOrphanedDocuments,
   cleanupTempFiles,
 } from "@/lib/admin-api";
 
-interface FileStatistics {
+interface FileStatistik {
   totalFiles: number;
   totalSizeMB: string;
   filesByLetterInstance: Record<string, number>;
@@ -65,7 +65,7 @@ interface CleanupResult {
 
 export default function DocumentManagementPage() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<FileStatistics | null>(null);
+  const [stats, setStats] = useState<FileStatistik | null>(null);
   const [processing, setProcessing] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
@@ -80,13 +80,13 @@ export default function DocumentManagementPage() {
   });
 
   useEffect(() => {
-    loadStatistics();
+    loadStatistik();
   }, []);
 
-  const loadStatistics = async () => {
+  const loadStatistik = async () => {
     try {
       setLoading(true);
-      const data = await getDocumentStatistics();
+      const data = await getDocumentStatistik();
       if (data.success) {
         setStats(data.data);
       }
@@ -132,7 +132,7 @@ export default function DocumentManagementPage() {
         } else {
           toast.success(successMessage);
         }
-        await loadStatistics();
+        await loadStatistik();
       }
     } catch (error) {
       console.error("Error during cleanup:", error);
@@ -191,7 +191,7 @@ export default function DocumentManagementPage() {
           </p>
         </div>
         <Button
-          onClick={loadStatistics}
+          onClick={loadStatistik}
           variant="outline"
           disabled={loading}
           className="rounded-xl"
@@ -203,10 +203,10 @@ export default function DocumentManagementPage() {
         </Button>
       </div>
 
-      {/* Statistics Cards */}
+      {/* Kartu Statistik */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardContent className="pt-6">
+          <CardKonten className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-undip-blue/10 p-3">
                 <FileText className="h-6 w-6 text-undip-blue" />
@@ -218,11 +218,11 @@ export default function DocumentManagementPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </CardKonten>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardContent className="pt-6">
+          <CardKonten className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-purple-100 p-3">
                 <HardDrive className="h-6 w-6 text-purple-600" />
@@ -234,11 +234,11 @@ export default function DocumentManagementPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </CardKonten>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardContent className="pt-6">
+          <CardKonten className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-blue-100 p-3">
                 <Files className="h-6 w-6 text-blue-600" />
@@ -250,11 +250,11 @@ export default function DocumentManagementPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </CardKonten>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardContent className="pt-6">
+          <CardKonten className="pt-6">
             <div className="flex items-center gap-4">
               <div
                 className={`rounded-full p-3 ${
@@ -274,7 +274,7 @@ export default function DocumentManagementPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </CardKonten>
         </Card>
       </div>
 
@@ -286,7 +286,7 @@ export default function DocumentManagementPage() {
             Operasi Cleanup
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardKonten className="space-y-4">
           {/* Cleanup All Duplicates */}
           <div className="flex flex-col gap-3 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4 min-w-0">
@@ -395,7 +395,7 @@ export default function DocumentManagementPage() {
               Cleanup
             </Button>
           </div>
-        </CardContent>
+        </CardKonten>
       </Card>
 
       {/* File Distribution */}
@@ -407,7 +407,7 @@ export default function DocumentManagementPage() {
               Distribusi File per Surat
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardKonten>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {Object.entries(stats.filesByLetterInstance)
                 .sort(([, a], [, b]) => b - a)
@@ -445,13 +445,13 @@ export default function DocumentManagementPage() {
                 {Object.keys(stats.filesByLetterInstance).length} surat
               </p>
             )}
-          </CardContent>
+          </CardKonten>
         </Card>
       )}
 
       {/* Info Card */}
       <Card className="border-blue-200 bg-blue-50 shadow-sm rounded-3xl">
-        <CardContent className="pt-6">
+        <CardKonten className="pt-6">
           <div className="flex items-start gap-4">
             <div className="rounded-full bg-undip-blue/10 p-2">
               <CheckCircle2 className="h-5 w-5 text-undip-blue" />
@@ -462,25 +462,25 @@ export default function DocumentManagementPage() {
               </h3>
               <ul className="space-y-1 text-sm text-slate-600">
                 <li>
-                  • Cleanup dokumen duplikat akan menyimpan hanya versi terbaru
+                  â€¢ Cleanup dokumen duplikat akan menyimpan hanya versi terbaru
                   dari setiap surat
                 </li>
                 <li>
-                  • File orphaned adalah file yang ada di storage tetapi tidak
+                  â€¢ File orphaned adalah file yang ada di storage tetapi tidak
                   ada di database
                 </li>
                 <li>
-                  • File temporary otomatis dihapus setelah 1 jam untuk
+                  â€¢ File temporary otomatis dihapus setelah 1 jam untuk
                   menghemat storage
                 </li>
                 <li>
-                  • Setiap surat seharusnya hanya memiliki 2 file: 1 DOCX dan 1
+                  â€¢ Setiap surat seharusnya hanya memiliki 2 file: 1 DOCX dan 1
                   PDF
                 </li>
               </ul>
             </div>
           </div>
-        </CardContent>
+        </CardKonten>
       </Card>
 
       {/* Confirmation Dialog */}
@@ -496,7 +496,7 @@ export default function DocumentManagementPage() {
           })
         }
       >
-        <AlertDialogContent>
+        <AlertDialogKonten>
           <AlertDialogHeader>
             <AlertDialogTitle>{confirmDialog.title}</AlertDialogTitle>
             <AlertDialogDescription>
@@ -527,8 +527,9 @@ export default function DocumentManagementPage() {
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogKonten>
       </AlertDialog>
     </div>
   );
 }
+

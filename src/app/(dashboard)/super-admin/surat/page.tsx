@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { LetterList } from "@/components/features/dashboard/LetterList";
 import {
     ChevronRight,
@@ -12,7 +12,7 @@ import { headers } from "next/headers";
 import { ApplicationSummary } from "@/lib/application-api";
 import Link from "next/link";
 
-type SearchParams = { [key: string]: string | string[] | undefined };
+type PencarianParams = { [key: string]: string | string[] | undefined };
 
 const stepToRole: Record<number, string> = {
     1: "Supervisor Akademik",
@@ -21,7 +21,7 @@ const stepToRole: Record<number, string> = {
     4: "UPA",
 };
 
-async function getAllApplications(searchParams: SearchParams) {
+async function getAllApplications(searchParams: PencarianParams) {
     try {
         const headersList = await headers();
         const cookie = headersList.get("cookie");
@@ -29,7 +29,7 @@ async function getAllApplications(searchParams: SearchParams) {
         const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
-        // Super admin fetches ALL letters with no step/mode filter
+        // Super admin mengambil SEMUA surat tanpa filter step/mode
         const queryParams: Record<string, string> = {
             search: (searchParams.search as string) || "",
             page: (searchParams.page as string) || "1",
@@ -37,12 +37,12 @@ async function getAllApplications(searchParams: SearchParams) {
             sortOrder: (searchParams.sortOrder as string) || "desc",
         };
 
-        // Optional status filter
+        // Filter status opsional
         if (searchParams.status && String(searchParams.status).trim() !== "") {
             queryParams.status = String(searchParams.status);
         }
 
-        // Optional date filters
+        // Filter tanggal opsional
         if (
             searchParams.startDate &&
             String(searchParams.startDate).trim() !== ""
@@ -56,7 +56,7 @@ async function getAllApplications(searchParams: SearchParams) {
             queryParams.endDate = String(searchParams.endDate);
         }
 
-        const query = new URLSearchParams(queryParams);
+        const query = new URLPencarianParams(queryParams);
 
         const res = await fetch(
             `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,
@@ -83,7 +83,7 @@ async function getAllApplications(searchParams: SearchParams) {
 }
 
 export default async function SuperAdminSuratPage(props: {
-    searchParams: Promise<SearchParams>;
+    searchParams: Promise<PencarianParams>;
 }) {
     const searchParams = await props.searchParams;
     const { data, meta } = await getAllApplications(searchParams);
@@ -173,3 +173,4 @@ export default async function SuperAdminSuratPage(props: {
         </div>
     );
 }
+

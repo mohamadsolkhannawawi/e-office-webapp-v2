@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+﻿import { headers } from "next/headers";
 import { SuperAdminDashboard } from "@/components/features/dashboard";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +35,7 @@ async function getDashboardData() {
             `${apiUrl}/api/admin/system/stats`,
         );
 
-        // Fetch system stats
+        // Ambil statistik sistem
         const statsRes = await fetch(`${apiUrl}/api/admin/system/stats`, {
             headers: { Cookie: cookie || "" },
             cache: "no-store",
@@ -49,7 +49,7 @@ async function getDashboardData() {
                 body: errorText,
             });
 
-            // If 401/403, return empty data (permission issue)
+            // Jika 401/403, kembalikan data kosong (masalah izin)
             if (statsRes.status === 401 || statsRes.status === 403) {
                 console.log(
                     "[Dashboard] Permission denied - returning empty stats",
@@ -77,7 +77,7 @@ async function getDashboardData() {
         const statsData = await statsRes.json();
         console.log("Stats data received:", statsData);
 
-        // Fetch recent audit logs to show as "recent activities"
+        // Ambil audit log terbaru untuk ditampilkan sebagai "aktivitas terbaru"
         const logsRes = await fetch(
             `${apiUrl}/api/admin/system/audit-logs?limit=10`,
             {
@@ -129,3 +129,4 @@ export default async function SuperAdminDashboardPage() {
         />
     );
 }
+

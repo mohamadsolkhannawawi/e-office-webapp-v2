@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
 import {
   Select,
-  SelectContent,
+  SelectKonten,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -16,7 +16,7 @@ import {
 import {
   ChevronRight,
   ChevronLeft,
-  Search,
+  Pencarian,
   Calendar,
   Filter,
   Eye,
@@ -33,19 +33,19 @@ import {
 } from "@/lib/template-api";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { StandardPagination } from "@/components/ui/standard-pagination";
+import { StandardPaginasi } from "@/components/ui/standard-pagination";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export default function SelesaiPage() {
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setPencarianTerm] = useState("");
   const [filterBeasiswa, setFilterBeasiswa] = useState("all");
   const [startDateInput, setStartDateInput] = useState("");
   const [endDateInput, setEndDateInput] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [pagination, setPagination] = useState({
+  const [pagination, setPaginasi] = useState({
     page: 1,
     limit: 10,
     total: 0,
@@ -81,7 +81,7 @@ export default function SelesaiPage() {
         sortOrder: sortOrder,
       });
       setApplications(result.data);
-      setPagination({
+      setPaginasi({
         page: result.meta.page,
         limit: result.meta.limit,
         total: result.meta.total,
@@ -118,11 +118,11 @@ export default function SelesaiPage() {
   };
 
   const handlePageChange = (newPage: number) => {
-    setPagination((prev) => ({ ...prev, page: newPage }));
+    setPaginasi((prev) => ({ ...prev, page: newPage }));
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
-    setPagination((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
+    setPaginasi((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
   };
 
   useEffect(() => {
@@ -155,20 +155,20 @@ export default function SelesaiPage() {
         </div>
       </div>
 
-      {/* Filters and Table Card */}
+      {/* Filter dan Kartu Tabel */}
       <Card className="border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 overflow-hidden bg-white rounded-3xl py-0 gap-0">
         <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
           <h2 className="text-xl font-bold text-slate-800">
             Daftar Surat Selesai
           </h2>
           <div className="flex flex-wrap gap-3 items-center">
-            {/* Search */}
+            {/* Pencarian */}
             <div className="relative flex-1 min-w-50">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Pencarian className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Cari nama/NIM..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setPencarianTerm(e.target.value)}
                 className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full"
               />
             </div>
@@ -181,13 +181,13 @@ export default function SelesaiPage() {
                   <SelectValue placeholder="Jenis Surat" />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectKonten>
                 <SelectItem value="all">Semua Jenis</SelectItem>
                 <SelectItem value="internal">Beasiswa Internal</SelectItem>
                 <SelectItem value="eksternal">Beasiswa Eksternal</SelectItem>
                 <SelectItem value="akademik">Beasiswa Akademik</SelectItem>
                 <SelectItem value="keperluan_lain">Keperluan Lain</SelectItem>
-              </SelectContent>
+              </SelectKonten>
             </Select>
 
             {/* Date Range Filter */}
@@ -255,15 +255,15 @@ export default function SelesaiPage() {
                   <SelectValue placeholder="Urutkan" />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectKonten>
                 <SelectItem value="desc">Terbaru</SelectItem>
                 <SelectItem value="asc">Terlama</SelectItem>
-              </SelectContent>
+              </SelectKonten>
             </Select>
           </div>
         </div>
 
-        {/* Table Section */}
+        {/* Bagian Tabel */}
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -391,8 +391,8 @@ export default function SelesaiPage() {
           </table>
         </div>
 
-        {/* Standard Pagination */}
-        <StandardPagination
+        {/* Paginasi Standar */}
+        <StandardPaginasi
           currentPage={pagination.page}
           totalPages={pagination.totalPages}
           pageSize={pagination.limit}
@@ -405,3 +405,4 @@ export default function SelesaiPage() {
     </div>
   );
 }
+

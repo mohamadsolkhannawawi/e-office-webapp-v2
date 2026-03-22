@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { LetterList } from "@/components/features/dashboard/LetterList";
 import {
     ChevronRight,
@@ -12,9 +12,9 @@ import { headers } from "next/headers";
 import { ApplicationSummary } from "@/lib/application-api";
 import Link from "next/link";
 
-type SearchParams = { [key: string]: string | string[] | undefined };
+type PencarianParams = { [key: string]: string | string[] | undefined };
 
-async function getActionRequiredApplications(searchParams: SearchParams) {
+async function getActionRequiredApplications(searchParams: PencarianParams) {
     try {
         const headersList = await headers();
         const cookie = headersList.get("cookie");
@@ -22,7 +22,7 @@ async function getActionRequiredApplications(searchParams: SearchParams) {
         const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
-        // Build query params - only include date params if they have valid values
+        // Susun query params - hanya sertakan parameter tanggal jika nilainya valid
         const queryParams: Record<string, string> = {
             mode: "pending",
             currentStep: "4", // UPA
@@ -33,7 +33,7 @@ async function getActionRequiredApplications(searchParams: SearchParams) {
             sortOrder: (searchParams.sortOrder as string) || "desc",
         };
 
-        // Only add date params if they exist and are not empty
+        // Tambahkan parameter tanggal hanya jika ada dan tidak kosong
         if (
             searchParams.startDate &&
             String(searchParams.startDate).trim() !== ""
@@ -47,7 +47,7 @@ async function getActionRequiredApplications(searchParams: SearchParams) {
             queryParams.endDate = String(searchParams.endDate);
         }
 
-        const query = new URLSearchParams(queryParams);
+        const query = new URLPencarianParams(queryParams);
 
         const res = await fetch(
             `${apiUrl}/api/surat-rekomendasi/applications?${query.toString()}`,
@@ -74,7 +74,7 @@ async function getActionRequiredApplications(searchParams: SearchParams) {
 }
 
 export default async function PerluTindakanPage(props: {
-    searchParams: Promise<SearchParams>;
+    searchParams: Promise<PencarianParams>;
 }) {
     const searchParams = await props.searchParams;
     const { data, meta } = await getActionRequiredApplications(searchParams);
@@ -169,3 +169,4 @@ export default async function PerluTindakanPage(props: {
         </div>
     );
 }
+

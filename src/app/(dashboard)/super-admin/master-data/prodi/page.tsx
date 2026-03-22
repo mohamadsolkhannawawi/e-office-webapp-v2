@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardKonten, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,14 +14,14 @@ import {
   Loader2,
   Users,
   GraduationCap,
-  Pencarian,
+  Search,
   X,
   BookOpen,
   Filter,
 } from "lucide-react";
 import {
   Dialog,
-  DialogKonten,
+  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -31,7 +31,7 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogKonten,
+  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Select,
-  SelectKonten,
+  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -289,7 +289,7 @@ export default function ProdiPage() {
       {/* Kartu Statistik */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-undip-blue/10 p-3">
                 <BookOpen className="h-6 w-6 text-undip-blue" />
@@ -301,11 +301,11 @@ export default function ProdiPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-green-100 p-3">
                 <Building2 className="h-6 w-6 text-green-600" />
@@ -317,11 +317,11 @@ export default function ProdiPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-blue-100 p-3">
                 <GraduationCap className="h-6 w-6 text-blue-600" />
@@ -333,11 +333,11 @@ export default function ProdiPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
 
         <Card className="border-gray-200 shadow-sm rounded-3xl">
-          <CardKonten className="pt-6">
+          <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-purple-100 p-3">
                 <Users className="h-6 w-6 text-purple-600" />
@@ -349,11 +349,11 @@ export default function ProdiPage() {
                 </p>
               </div>
             </div>
-          </CardKonten>
+          </CardContent>
         </Card>
       </div>
 
-      {/* Pencarian, Filter and List */}
+      {/* Search, Filter and List */}
       <Card className="border-gray-200 shadow-sm rounded-3xl">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -371,19 +371,19 @@ export default function ProdiPage() {
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Filter Departemen" />
                 </SelectTrigger>
-                <SelectKonten>
+                <SelectContent>
                   <SelectItem value="all">Semua Departemen</SelectItem>
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name}
                     </SelectItem>
                   ))}
-                </SelectKonten>
+                </SelectContent>
               </Select>
 
-              {/* Pencarian */}
+              {/* Search */}
               <div className="relative w-full sm:w-72">
-                <Pencarian className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Cari program studi..."
                   value={searchQuery}
@@ -415,7 +415,7 @@ export default function ProdiPage() {
             </div>
           </div>
         </CardHeader>
-        <CardKonten>
+        <CardContent>
           <div className="space-y-3">
             {filteredProdi.map((p) => (
               <div
@@ -440,7 +440,7 @@ export default function ProdiPage() {
                         {p.departemen.name}
                       </Badge>
                       <span className="text-xs text-slate-500 sm:text-sm">
-                        {p.mahasiswaCount} Mahasiswa â€¢ {p.pegawaiCount}{" "}
+                        {p.mahasiswaCount} Mahasiswa • {p.pegawaiCount}{" "}
                         Pegawai
                       </span>
                     </div>
@@ -478,12 +478,12 @@ export default function ProdiPage() {
               </p>
             </div>
           )}
-        </CardKonten>
+        </CardContent>
       </Card>
 
       {/* Dialog Tambah */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogKonten>
+        <DialogContent>
           <form onSubmit={handleCreate}>
             <DialogHeader>
               <DialogTitle>Tambah Program Studi Baru</DialogTitle>
@@ -508,13 +508,13 @@ export default function ProdiPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="Pilih departemen" />
                   </SelectTrigger>
-                  <SelectKonten>
+                  <SelectContent>
                     {departments.map((dept) => (
                       <SelectItem key={dept.id} value={dept.id}>
                         {dept.name} ({dept.code})
                       </SelectItem>
                     ))}
-                  </SelectKonten>
+                  </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
@@ -578,12 +578,12 @@ export default function ProdiPage() {
               </Button>
             </DialogFooter>
           </form>
-        </DialogKonten>
+        </DialogContent>
       </Dialog>
 
       {/* Dialog Edit */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogKonten>
+        <DialogContent>
           <form onSubmit={handleEdit}>
             <DialogHeader>
               <DialogTitle>Edit Program Studi</DialogTitle>
@@ -608,13 +608,13 @@ export default function ProdiPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="Pilih departemen" />
                   </SelectTrigger>
-                  <SelectKonten>
+                  <SelectContent>
                     {departments.map((dept) => (
                       <SelectItem key={dept.id} value={dept.id}>
                         {dept.name} ({dept.code})
                       </SelectItem>
                     ))}
-                  </SelectKonten>
+                  </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
@@ -678,12 +678,12 @@ export default function ProdiPage() {
               </Button>
             </DialogFooter>
           </form>
-        </DialogKonten>
+        </DialogContent>
       </Dialog>
 
       {/* Dialog Konfirmasi Hapus */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogKonten>
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Program Studi?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -695,7 +695,7 @@ export default function ProdiPage() {
                   selectedProdi.pegawaiCount > 0) && (
                   <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                     <p className="text-sm text-amber-800 font-semibold">
-                      âš ï¸ Peringatan:
+                      ⚠️ Peringatan:
                     </p>
                     <p className="text-sm text-amber-700 mt-1">
                       Program studi ini memiliki {selectedProdi.mahasiswaCount}{" "}
@@ -723,7 +723,7 @@ export default function ProdiPage() {
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogKonten>
+        </AlertDialogContent>
       </AlertDialog>
     </div>
   );

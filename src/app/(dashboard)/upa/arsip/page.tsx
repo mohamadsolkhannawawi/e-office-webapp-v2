@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import toast from "react-hot-toast";
 import {
   Select,
-  SelectContent,
+  SelectKonten,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -15,7 +15,7 @@ import {
 import {
   FileSpreadsheet,
   FileText,
-  Search,
+  Pencarian,
   Filter,
   Eye,
   CheckCircle,
@@ -31,7 +31,7 @@ import {
   getTemplateIdByLetterType,
 } from "@/lib/template-api";
 import { Label } from "@/components/ui/label";
-import { StandardPagination } from "@/components/ui/standard-pagination";
+import { StandardPaginasi } from "@/components/ui/standard-pagination";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
@@ -49,12 +49,12 @@ interface ExportData {
 export default function ArsipPage() {
   const [applications, setApplications] = useState<ApplicationSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setPencarianTerm] = useState("");
   const [filterBeasiswa, setFilterBeasiswa] = useState("all");
   const [startDateInput, setStartDateInput] = useState("");
   const [endDateInput, setEndDateInput] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [pagination, setPagination] = useState({
+  const [pagination, setPaginasi] = useState({
     page: 1,
     limit: 10,
     total: 0,
@@ -64,7 +64,7 @@ export default function ArsipPage() {
   const fetchArchiveData = useCallback(async () => {
     setLoading(true);
     try {
-      // Convert date inputs to ISO format with proper times
+      // Konversi input tanggal ke format ISO dengan waktu yang sesuai
       let startDateIso: string | undefined = undefined;
       let endDateIso: string | undefined = undefined;
 
@@ -91,7 +91,7 @@ export default function ArsipPage() {
         sortOrder: sortOrder,
       });
       setApplications(result.data);
-      setPagination({
+      setPaginasi({
         page: result.meta.page,
         limit: result.meta.limit,
         total: result.meta.total,
@@ -128,18 +128,18 @@ export default function ArsipPage() {
   };
 
   const handlePageChange = (newPage: number) => {
-    setPagination((prev) => ({ ...prev, page: newPage }));
+    setPaginasi((prev) => ({ ...prev, page: newPage }));
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
-    setPagination((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
+    setPaginasi((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
   };
 
   useEffect(() => {
     fetchArchiveData();
   }, [fetchArchiveData]);
 
-  // Prepare data for export
+  // Siapkan data untuk ekspor
   const prepareExportData = (): ExportData[] => {
     return applications.map((app, index) => ({
       no: index + 1,
@@ -152,7 +152,7 @@ export default function ArsipPage() {
     }));
   };
 
-  // Export to Excel (CSV format for simplicity)
+  // Ekspor ke Excel (format CSV untuk kesederhanaan)
   const exportToExcel = () => {
     try {
       const data = prepareExportData();
@@ -175,12 +175,12 @@ export default function ArsipPage() {
         d.status,
       ]);
 
-      const csvContent = [
+      const csvKonten = [
         headers.join(","),
         ...rows.map((r) => r.map((cell) => `"${cell}"`).join(",")),
       ].join("\n");
 
-      const blob = new Blob([csvContent], {
+      const blob = new Blob([csvKonten], {
         type: "text/csv;charset=utf-8;",
       });
       const link = document.createElement("a");
@@ -203,7 +203,7 @@ export default function ArsipPage() {
     }
   };
 
-  // Export to PDF (simple print-based approach)
+  // Ekspor ke PDF (pendekatan sederhana berbasis print)
   const exportToPDF = () => {
     try {
       const data = prepareExportData();
@@ -291,7 +291,7 @@ export default function ArsipPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Header with Title and Export Buttons */}
+      {/* Header dengan Judul dan Tombol Ekspor */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Arsip Surat</h1>
@@ -300,7 +300,7 @@ export default function ArsipPage() {
           </p>
         </div>
 
-        {/* Export Buttons */}
+        {/* Tombol Ekspor */}
         <div className="flex gap-2">
           <Button
             onClick={exportToExcel}
@@ -321,17 +321,17 @@ export default function ArsipPage() {
         </div>
       </div>
 
-      {/* Filters and Table Card */}
+      {/* Filter dan Kartu Tabel */}
       <Card className="border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300 overflow-hidden bg-white rounded-3xl py-0 gap-0">
         <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
           <div className="flex flex-wrap gap-3 items-center">
-            {/* Search */}
+            {/* Pencarian */}
             <div className="relative flex-1 min-w-50">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Pencarian className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Cari nama/NIM..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setPencarianTerm(e.target.value)}
                 className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full"
               />
             </div>
@@ -344,16 +344,16 @@ export default function ArsipPage() {
                   <SelectValue placeholder="Jenis Surat" />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectKonten>
                 <SelectItem value="all">Semua Jenis</SelectItem>
                 <SelectItem value="internal">Beasiswa Internal</SelectItem>
                 <SelectItem value="eksternal">Beasiswa Eksternal</SelectItem>
                 <SelectItem value="akademik">Beasiswa Akademik</SelectItem>
                 <SelectItem value="keperluan_lain">Keperluan Lain</SelectItem>
-              </SelectContent>
+              </SelectKonten>
             </Select>
 
-            {/* Date Range Filter - Stylish Design */}
+            {/* Filter Rentang Tanggal - Desain Stylish */}
             <div className="flex items-center gap-2 bg-slate-50/50 rounded-lg p-2 border border-slate-100">
               <Calendar className="h-4 w-4 text-slate-400 ml-1" />
 
@@ -427,15 +427,15 @@ export default function ArsipPage() {
                   <SelectValue placeholder="Urutkan" />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectKonten>
                 <SelectItem value="desc">Terbaru</SelectItem>
                 <SelectItem value="asc">Terlama</SelectItem>
-              </SelectContent>
+              </SelectKonten>
             </Select>
           </div>
         </div>
 
-        {/* Table Section */}
+        {/* Bagian Tabel */}
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -563,8 +563,8 @@ export default function ArsipPage() {
           </table>
         </div>
 
-        {/* Standard Pagination */}
-        <StandardPagination
+        {/* Paginasi Standar */}
+        <StandardPaginasi
           currentPage={pagination.page}
           totalPages={pagination.totalPages}
           pageSize={pagination.limit}
@@ -577,3 +577,4 @@ export default function ArsipPage() {
     </div>
   );
 }
+

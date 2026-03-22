@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ChevronRight } from "lucide-react";
 import { LetterNumberingDashboard } from "@/components/features/surat-rekomendasi-beasiswa/management/LetterNumberingDashboard";
@@ -17,8 +17,9 @@ export default function LetterManagementPage() {
                 </p>
             </div>
 
-            {/* Content */}
+            {/* Konten */}
             <LetterNumberingDashboard />
         </div>
     );
 }
+

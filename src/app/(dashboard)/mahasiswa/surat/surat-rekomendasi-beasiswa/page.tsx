@@ -1,7 +1,7 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import {
     Card,
-    CardKonten,
+    CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
@@ -98,7 +98,7 @@ export default function SuratRekomendasiBeasiswaPage() {
                                         </CardTitle>
                                     </div>
                                 </CardHeader>
-                                <CardKonten className="space-y-3">
+                                <CardContent className="space-y-3">
                                     <CardDescription>
                                         {jenis.description}
                                     </CardDescription>
@@ -110,7 +110,7 @@ export default function SuratRekomendasiBeasiswaPage() {
                                             {jenis.example}
                                         </p>
                                     </div>
-                                </CardKonten>
+                                </CardContent>
                             </Card>
                         </Link>
                     );

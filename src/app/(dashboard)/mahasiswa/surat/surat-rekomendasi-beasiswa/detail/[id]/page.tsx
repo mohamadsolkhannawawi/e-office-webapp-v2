@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter, usePencarianParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -36,7 +36,7 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 export default function DetailPengajuanPage() {
   const params = useParams();
   const router = useRouter();
-  const searchParams = usePencarianParams();
+  const searchParams = useSearchParams();
   const id = params.id as string;
   const from = searchParams.get("from") || "proses"; // default to proses
 

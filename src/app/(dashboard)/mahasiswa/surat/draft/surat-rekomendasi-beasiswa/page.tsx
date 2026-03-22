@@ -1,14 +1,14 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useCallback, Suspense } from "react";
-import { usePencarianParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   ChevronRight,
   Filter,
   Trash2,
   Play,
   FileText,
-  Pencarian,
+  Search,
   AlertCircle,
   RefreshCw,
 } from "lucide-react";
@@ -19,14 +19,14 @@ import { getApplications, ApplicationSummary } from "@/lib/application-api";
 import { Card } from "@/components/ui/card";
 import { ButtonLoader } from "@/components/ui/loader";
 import { usePageLoading, useCustomLoading } from "@/contexts/LoadingContext";
-import { StandardPaginasi } from "@/components/ui/standard-pagination";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 import toast from "react-hot-toast";
 
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogKonten,
+  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
@@ -35,7 +35,7 @@ import {
 
 import {
   Select,
-  SelectKonten,
+  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -52,7 +52,7 @@ export default function SuratDraftPage() {
 }
 
 function SuratDraftKonten() {
-  const searchParams = usePencarianParams();
+  const searchParams = useSearchParams();
   const urlJenis = searchParams.get("jenis") || "ALL";
   const isKeperluanLain = urlJenis === "keperluan_lain";
 
@@ -220,7 +220,7 @@ function SuratDraftKonten() {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >
-        <AlertDialogKonten>
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg">
               Hapus Draft Surat
@@ -254,7 +254,7 @@ function SuratDraftKonten() {
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogKonten>
+        </AlertDialogContent>
       </AlertDialog>
 
       {/* Gabungan Filter dan Kartu Tabel */}
@@ -262,9 +262,9 @@ function SuratDraftKonten() {
         {/* Bagian Filter */}
         <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
           <div className="flex flex-wrap gap-3 items-center">
-            {/* Pencarian */}
+            {/* Search */}
             <div className="relative flex-1 min-w-50">
-              <Pencarian className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Cari draft..."
                 value={searchTerm}
@@ -273,7 +273,7 @@ function SuratDraftKonten() {
               />
             </div>
 
-            {/* Filter Jenis â€” only shown in beasiswa context */}
+            {/* Filter Jenis — only shown in beasiswa context */}
             {!isKeperluanLain && (
               <Select value={jenisFilter} onValueChange={setJenisFilter}>
                 <SelectTrigger
@@ -285,12 +285,12 @@ function SuratDraftKonten() {
                     <SelectValue placeholder="Jenis Beasiswa" />
                   </div>
                 </SelectTrigger>
-                <SelectKonten>
+                <SelectContent>
                   <SelectItem value="ALL">Semua Jenis</SelectItem>
                   <SelectItem value="internal">Internal</SelectItem>
                   <SelectItem value="eksternal">Eksternal</SelectItem>
                   <SelectItem value="akademik">Akademik</SelectItem>
-                </SelectKonten>
+                </SelectContent>
               </Select>
             )}
           </div>
@@ -456,7 +456,7 @@ function SuratDraftKonten() {
         </div>
 
         {/* Paginasi Standar */}
-        <StandardPaginasi
+        <StandardPagination
           currentPage={pagination.page}
           totalPages={pagination.totalPages}
           pageSize={pagination.limit}

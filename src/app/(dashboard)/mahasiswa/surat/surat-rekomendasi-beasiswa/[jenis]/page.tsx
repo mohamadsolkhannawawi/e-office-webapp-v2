@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
-import { useParams, usePencarianParams, useRouter } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { getApplicationByIdOrCreate } from "@/lib/application-api";
 
 import Link from "next/link";
@@ -20,7 +20,7 @@ import type { FormDataType } from "@/types/form";
 
 export default function PengajuanBaruPage() {
   const params = useParams();
-  const searchParams = usePencarianParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const jenis = params.jenis as string;
   const editId = searchParams.get("id");

@@ -37,8 +37,9 @@ export function Navbar({
 }: NavbarProps) {
   const { user, signOut } = useAuth();
   const pathname = usePathname();
+  const [profileName, setProfileName] = useState<string>("");
 
-  const userName = propUserName || user?.name || "User";
+  const userName = propUserName || profileName || user?.name || "User";
   // Always proxy through /api/me/photo and attach user-scoped query params
   // so browser cache never leaks photo across different authenticated accounts.
   // The endpoint returns 404 if no photo → AvatarFallback renders automatically.
@@ -75,6 +76,45 @@ export function Navbar({
     document.addEventListener("mousedown", handleOutside);
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
+
+  useEffect(() => {
+    if (!showProfile) return;
+
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const loadProfileName = async () => {
+      try {
+        const res = await fetch(`${BASE_PATH}/api/me`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        if (!res.ok) return;
+        const data = (await res.json()) as { name?: string };
+        if (isMounted) {
+          setProfileName(data.name?.trim() || "");
+        }
+      } catch {
+        // Ignore fetch errors and fallback to session user name.
+      }
+    };
+
+    const handleProfileUpdated = () => {
+      loadProfileName();
+    };
+
+    loadProfileName();
+    window.addEventListener("profile-updated", handleProfileUpdated);
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+      window.removeEventListener("profile-updated", handleProfileUpdated);
+    };
+  }, [pathname, showProfile]);
 
   const getProfileLink = () => {
     if (pathname.startsWith("/super-admin")) return "/super-admin/profil";
@@ -165,7 +205,7 @@ export function Navbar({
                 className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
                 aria-expanded={dropdownOpen}
               >
-                <span className="text-sm font-medium hidden sm:block max-w-35 truncate">
+                <span className="text-sm font-medium hidden sm:block whitespace-nowrap">
                   {userName}
                 </span>
                 <Avatar className="w-8 h-8 border-2 border-white/30">
@@ -186,7 +226,7 @@ export function Navbar({
                 <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-white shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                   {/* User info header */}
                   <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
-                    <p className="text-sm font-semibold text-slate-800 truncate">
+                    <p className="text-sm font-semibold text-slate-800 wrap-break-word">
                       {userName}
                     </p>
                     <p className="text-xs text-slate-500 truncate">

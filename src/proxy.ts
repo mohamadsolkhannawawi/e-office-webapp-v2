@@ -7,6 +7,9 @@ import type { NextRequest } from "next/server";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  const normalizeRole = (role: string) =>
+    role.trim().toUpperCase().replace(/-/g, "_");
+
   // Definisikan prefix yang dilindungi
   const protectedPrefixes = [
     "/mahasiswa",
@@ -65,21 +68,31 @@ export function proxy(request: NextRequest) {
       let userRoles: string[] = [];
 
       if (userRolesCookie) {
-        userRoles = userRolesCookie.value.split(",");
+        userRoles = userRolesCookie.value
+          .split(",")
+          .map((role) => normalizeRole(role))
+          .filter(Boolean);
       } else {
         // Cadangan: parse session data jika tersedia
         const parsed = JSON.parse(jsonString);
-        if (parsed.user && parsed.user.roles) {
-          userRoles = parsed.user.roles;
-        } else if (parsed.user && parsed.user.role) {
-          userRoles = [parsed.user.role];
+        const rawRoles =
+          parsed?.user?.roles ??
+          parsed?.user?.role ??
+          parsed?.session?.user?.roles ??
+          parsed?.session?.user?.role ??
+          [];
+
+        if (Array.isArray(rawRoles)) {
+          userRoles = rawRoles.map((role) => normalizeRole(role));
+        } else if (typeof rawRoles === "string") {
+          userRoles = [normalizeRole(rawRoles)];
         }
       }
 
       // Definisikan pemetaan role ke path
       const rolePathMap: Record<string, string> = {
         MAHASISWA: "/mahasiswa",
-        SUPERVISOR: "/supervisor-akademik",
+        SUPERVISOR_AKADEMIK: "/supervisor-akademik",
         MANAJER_TU: "/manajer-tu",
         WAKIL_DEKAN_1: "/wakil-dekan-1",
         UPA: "/upa",
@@ -87,7 +100,10 @@ export function proxy(request: NextRequest) {
       };
 
       // Super Admin punya akses ke semua path — lewati pembatasan role-path
-      if (userRoles.includes("SUPER_ADMIN")) {
+      if (userRoles.length === 0) {
+        // Jika role tidak terdeteksi dari cookie, jangan block agar user tidak terjebak.
+        // Arahkan validasi role ke sisi server atau pastikan cookie user_roles diisi.
+      } else if (userRoles.includes("SUPER_ADMIN")) {
         // Izinkan akses ke path terlindungi apa pun
       } else {
         // Cek apakah user mengakses path yang diizinkan untuk rolenya

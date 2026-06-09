@@ -35,7 +35,7 @@ export function Navbar({
   showProfile: propShowProfile = true,
   onMenuClick,
 }: NavbarProps) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, refreshSession } = useAuth();
   const pathname = usePathname();
   const [profileName, setProfileName] = useState<string>("");
 
@@ -104,6 +104,7 @@ export function Navbar({
 
     const handleProfileUpdated = () => {
       loadProfileName();
+      refreshSession();
     };
 
     loadProfileName();
@@ -114,7 +115,7 @@ export function Navbar({
       controller.abort();
       window.removeEventListener("profile-updated", handleProfileUpdated);
     };
-  }, [pathname, showProfile]);
+  }, [pathname, showProfile, refreshSession]);
 
   const getProfileLink = () => {
     if (pathname.startsWith("/super-admin")) return "/super-admin/profil";

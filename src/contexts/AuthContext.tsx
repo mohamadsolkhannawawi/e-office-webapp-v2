@@ -43,7 +43,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshSession = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await authClient.getSession();
+      const { data, error } = await authClient.getSession({
+        fetchOptions: {
+          cache: "no-store",
+          query: {
+            _t: Date.now().toString(),
+          },
+        },
+      });
 
       console.log(">>> AUTH CONTEXT RAW SESSION DATA:", data);
       if (data?.user) {

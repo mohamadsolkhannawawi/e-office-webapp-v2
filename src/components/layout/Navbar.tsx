@@ -38,6 +38,7 @@ export function Navbar({
   const { user, signOut, refreshSession } = useAuth();
   const pathname = usePathname();
   const [profileName, setProfileName] = useState<string>("");
+  const [imageVersion, setImageVersion] = useState<number>(0);
 
   const userName = propUserName || profileName || user?.name || "User";
   // Always proxy through /api/me/photo and attach user-scoped query params
@@ -46,7 +47,7 @@ export function Navbar({
   const userImage =
     propUserImage ||
     (user
-      ? `${BASE_PATH}/api/me/photo?uid=${encodeURIComponent(user.id)}&v=${encodeURIComponent(user.image || "none")}`
+      ? `${BASE_PATH}/api/me/photo?uid=${encodeURIComponent(user.id)}&v=${encodeURIComponent(user.image || "none")}${imageVersion ? `&t=${imageVersion}` : ""}`
       : "");
   const showProfile = propShowProfile && !!user;
 
@@ -105,6 +106,7 @@ export function Navbar({
     const handleProfileUpdated = () => {
       loadProfileName();
       refreshSession();
+      setImageVersion(Date.now());
     };
 
     loadProfileName();

@@ -138,6 +138,7 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [pendingPhotoBase64, setPendingPhotoBase64] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -199,26 +200,13 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
       // Convert to base64 for preview
       const base64 = await fileToBase64(file);
       setPreviewImage(base64);
-
-      // Upload photo
-      const result = await uploadProfilePhoto(base64);
-
-      if (result.success && result.imageUrl) {
-        // Update the profileData to reflect the new image
-        setProfileData((prev) =>
-          prev ? { ...prev, image: result.imageUrl } : null,
-        );
-        // Refresh session so Navbar picks up the new photo
-        await refreshSession();
-        toast.success("Foto profil berhasil diperbarui!");
-      } else {
-        toast.error(result.error || "Gagal mengupload foto profil");
-        setPreviewImage(null);
-      }
+      setPendingPhotoBase64(base64);
+      toast.success("Foto profil terpilih. Klik 'Simpan' untuk menerapkan perubahan.");
     } catch (error) {
       console.error("Photo upload error:", error);
-      toast.error("Terjadi kesalahan saat mengupload foto");
+      toast.error("Terjadi kesalahan saat memproses foto");
       setPreviewImage(null);
+      setPendingPhotoBase64(null);
     } finally {
       setIsUploadingPhoto(false);
     }
@@ -238,6 +226,17 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
     setIsSaving(true);
 
     try {
+      // 1. Jika ada foto baru yang tertunda, upload terlebih dahulu
+      if (pendingPhotoBase64) {
+        const uploadResult = await uploadProfilePhoto(pendingPhotoBase64);
+        if (!uploadResult.success || !uploadResult.imageUrl) {
+          toast.error(uploadResult.error || "Gagal mengupload foto profil");
+          setIsSaving(false);
+          return;
+        }
+      }
+
+      // 2. Simpan data profil lainnya
       const success = await updateProfile({
         name: formData.name,
         noHp: formData.noHp,

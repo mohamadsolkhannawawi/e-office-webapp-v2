@@ -29,6 +29,8 @@ import {
   DialogOverlay,
 } from "@/components/ui/dialog";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 // Format tanggal ke format Indonesia
 const formatDateToIndonesian = (dateString?: string): string => {
   if (!dateString) return "-";
@@ -89,6 +91,7 @@ const getRoleDisplayName = (roleName?: string): string | undefined => {
 };
 
 interface ProfileData {
+  id: string;
   name: string;
   email: string;
   image?: string;
@@ -139,6 +142,7 @@ const parseUserData = (user: UserProfile | null): ProfileData | null => {
   const noHp = isMahasiswa ? user.mahasiswa?.noHp : user.pegawai?.noHp;
 
   return {
+    id: user.id,
     name: user.name,
     email: user.email || "",
     image: user.image,
@@ -236,6 +240,10 @@ const ProfilePage = ({
       .slice(0, 2);
   };
 
+  const imageUrl = profileData.image
+    ? `${BASE_PATH}/api/me/photo?uid=${encodeURIComponent(profileData.id)}&v=${encodeURIComponent(profileData.image)}`
+    : undefined;
+
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
       {/* Header dengan Avatar dan Edit Button */}
@@ -247,12 +255,14 @@ const ProfilePage = ({
             title="Klik untuk melihat foto profil"
           >
             <Avatar className="h-24 w-24">
-              <AvatarImage src={profileData.image} alt={profileData.name} />
+              {imageUrl ? (
+                <AvatarImage src={imageUrl} alt={profileData.name} />
+              ) : null}
               <AvatarFallback className="bg-blue-600 text-white text-lg font-semibold">
                 {getInitials(profileData.name)}
               </AvatarFallback>
             </Avatar>
-            {profileData.image && (
+            {imageUrl && (
               <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 group-hover:bg-black/20 transition-colors">
                 <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-xs font-medium">
                   Lihat
@@ -303,10 +313,10 @@ const ProfilePage = ({
         <DialogPortal>
           <DialogOverlay className="bg-black/50" />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {profileData.image ? (
+            {imageUrl ? (
               <div className="relative max-h-[80vh] max-w-[90vw] md:max-w-2xl lg:max-w-3xl overflow-hidden rounded-lg">
                 <Image
-                  src={profileData.image}
+                  src={imageUrl}
                   alt={profileData.name}
                   width={800}
                   height={800}

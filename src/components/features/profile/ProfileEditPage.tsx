@@ -27,6 +27,8 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 const getRoleDisplayName = (roleName?: string): string | undefined => {
   if (!roleName) return undefined;
 
@@ -49,6 +51,7 @@ const getRoleDisplayName = (roleName?: string): string | undefined => {
 };
 
 interface ProfileData {
+  id: string;
   name: string;
   email: string;
   image?: string;
@@ -106,6 +109,7 @@ const parseUserData = (user: UserProfile | null): ProfileData | null => {
   const noHp = isMahasiswa ? user.mahasiswa?.noHp : user.pegawai?.noHp;
 
   return {
+    id: user.id,
     name: user.name,
     email: user.email || "",
     image: user.image,
@@ -321,7 +325,12 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
               <div className="relative">
                 <Avatar className="h-20 w-20">
                   <AvatarImage
-                    src={previewImage || profileData.image}
+                    src={
+                      previewImage ||
+                      (profileData.image
+                        ? `${BASE_PATH}/api/me/photo?uid=${encodeURIComponent(profileData.id)}&v=${encodeURIComponent(profileData.image)}`
+                        : "")
+                    }
                     alt={profileData.name}
                   />
                   <AvatarFallback className="bg-blue-600 text-white text-lg font-semibold">

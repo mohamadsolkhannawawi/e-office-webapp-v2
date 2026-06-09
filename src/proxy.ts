@@ -92,6 +92,7 @@ export function proxy(request: NextRequest) {
       // Definisikan pemetaan role ke path
       const rolePathMap: Record<string, string> = {
         MAHASISWA: "/mahasiswa",
+        SUPERVISOR: "/supervisor-akademik",
         SUPERVISOR_AKADEMIK: "/supervisor-akademik",
         MANAJER_TU: "/manajer-tu",
         WAKIL_DEKAN_1: "/wakil-dekan-1",

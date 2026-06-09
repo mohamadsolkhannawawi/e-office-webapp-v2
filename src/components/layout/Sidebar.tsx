@@ -39,7 +39,7 @@ interface MenuItem {
     label: string;
     href?: string;
     icon: React.ReactNode;
-    submenu?: { label: string; href: string }[];
+    submenu?: { label: string; href: string; exact?: boolean }[];
 }
 
 // TODO: Get role from auth context
@@ -83,10 +83,12 @@ const roleMenuConfig: Record<string, MenuItem[]> = {
                 {
                     label: "Surat Rekomendasi Beasiswa",
                     href: "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa",
+                    exact: true,
                 },
                 {
                     label: "Surat Rekomendasi Keperluan Lain",
                     href: "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa?jenis=keperluan_lain",
+                    exact: true,
                 },
             ],
         },
@@ -306,15 +308,26 @@ export function Sidebar({
     const role = useCurrentRole();
 
     // Helper: match a submenu href (may include query params) against the current URL
-    const isSubActive = (href: string) => {
+    const isSubActive = (sub: { href: string; exact?: boolean }) => {
+        const { href, exact = false } = sub;
         const qIdx = href.indexOf("?");
+        
         if (qIdx === -1) {
-            // href has no query params: only active when current URL also has no search params
-            return pathname === href && currentSearch === "";
+            // href has no query params
+            if (exact) {
+                return pathname === href && currentSearch === "";
+            }
+            return pathname === href || pathname.startsWith(href + "/");
         }
+        
+        // href has query params
         const hrefPath = href.slice(0, qIdx);
         const hrefSearch = href.slice(qIdx + 1);
-        return pathname === hrefPath && currentSearch === hrefSearch;
+        
+        if (exact) {
+            return pathname === hrefPath && currentSearch === hrefSearch;
+        }
+        return (pathname === hrefPath && currentSearch === hrefSearch) || pathname.startsWith(hrefPath + "/");
     };
     const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
     const [isCollapsed, setIsCollapsed] = useState(propIsCollapsed);
@@ -342,7 +355,7 @@ export function Sidebar({
         menuItems.forEach((item) => {
             if (item.submenu) {
                 const isActive = item.submenu.some((sub) =>
-                    isSubActive(sub.href),
+                    isSubActive(sub),
                 );
                 if (isActive) {
                     setExpandedMenu(item.label);
@@ -458,7 +471,7 @@ export function Sidebar({
                                                         }
                                                         className={`block px-3 py-2 text-sm rounded-2xl transition-colors ${
                                                             isSubActive(
-                                                                sub.href,
+                                                                sub,
                                                             )
                                                                 ? "text-white font-medium bg-undip-blue"
                                                                 : "text-slate-500 hover:text-slate-900 hover:bg-gray-50"

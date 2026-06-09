@@ -208,19 +208,25 @@ export function NotificationBell() {
         }
         break;
 
-      case "APPLICATION_REVISION":
-        // Revision request - go to revision detail page
-        path = `/mahasiswa/surat/proses/detail/${entityId}`;
-        break;
-
       case "APPLICATION_PUBLISHED":
         // Letter published - go to published letter detail
         path = `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
         break;
 
+      case "APPLICATION_REVISION":
       case "APPLICATION_REJECTED":
-        // Rejection - go to revision/process detail
-        path = `/mahasiswa/surat/proses/detail/${entityId}`;
+        // Revision or rejection - go to specific role page or mahasiswa process detail
+        if (isSupervisor) {
+          path = `/supervisor-akademik/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+        } else if (isManager) {
+          path = `/manajer-tu/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+        } else if (isWakilDekan) {
+          path = `/wakil-dekan-1/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+        } else if (isUpa) {
+          path = `/upa/surat/surat-rekomendasi-beasiswa/detail/${entityId}`;
+        } else {
+          path = `/mahasiswa/surat/proses/detail/${entityId}`;
+        }
         break;
 
       case "APPLICATION_APPROVED":

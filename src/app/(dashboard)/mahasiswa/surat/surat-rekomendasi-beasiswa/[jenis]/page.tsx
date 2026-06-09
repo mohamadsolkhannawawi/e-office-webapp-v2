@@ -132,36 +132,37 @@ export default function PengajuanBaruPage() {
                             // Perbarui hanya jika state saat ini belum memiliki field dasar tersebut
                             const updated = {
                                 ...prev,
-                                namaLengkap:
-                                    prev.namaLengkap ||
+                                 namaLengkap:
                                     user.name ||
                                     authUser.name ||
+                                    prev.namaLengkap ||
                                     "",
                                 email:
-                                    prev.email ||
                                     user.email ||
                                     authUser.email ||
+                                    prev.email ||
                                     "",
-                                nim: prev.nim || user.mahasiswa?.nim || "",
+                                nim: user.mahasiswa?.nim || prev.nim || "",
                                 departemen:
-                                    prev.departemen ||
                                     user.mahasiswa?.departemen?.name ||
+                                    prev.departemen ||
                                     "",
                                 programStudi:
-                                    prev.programStudi ||
                                     user.mahasiswa?.programStudi?.name ||
+                                    prev.programStudi ||
                                     "",
                                 tempatLahir:
-                                    prev.tempatLahir ||
                                     user.mahasiswa?.tempatLahir ||
+                                    prev.tempatLahir ||
                                     "",
                                 tanggalLahir:
-                                    prev.tanggalLahir ||
                                     (user.mahasiswa?.tanggalLahir
                                         ? new Date(user.mahasiswa.tanggalLahir)
                                               .toISOString()
                                               .split("T")[0]
-                                        : ""),
+                                        : "") ||
+                                    prev.tanggalLahir ||
+                                    "",
                                 role: "MAHASISWA" as const,
                             };
                             return updated;

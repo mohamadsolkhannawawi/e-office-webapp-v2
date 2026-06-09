@@ -143,7 +143,8 @@ export default function DetailPengajuanPage() {
   }));
 
   const canEdit =
-    (application.status as string) === "REVISION" ||
+    ((application.status as string) === "REVISION" &&
+      application.currentStep === 0) ||
     (application.status as string) === "DRAFT";
 
   // Mahasiswa dapat mengedit mandiri jika status PENDING di langkah 1 (Supervisor belum mengambil aksi)

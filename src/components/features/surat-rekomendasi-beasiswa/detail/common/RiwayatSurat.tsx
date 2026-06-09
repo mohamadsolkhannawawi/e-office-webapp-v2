@@ -123,7 +123,7 @@ function TimelineItem({
     let customDefaultDesc = config.defaultDesc;
     if (isInitialSubmission) {
         customDefaultDesc =
-            "Pengajuan surat telah berhasil dikirim ke Supervisor Akademik.";
+            "Pengajuan surat telah berhasil dikirim.";
     }
 
     return (

@@ -54,7 +54,11 @@ export default function PengajuanBaruPage() {
     if (!editId && typeof window !== "undefined") {
       try {
         const saved = localStorage.getItem(`srb_form_${jenis}`);
-        if (saved) return { ...base, ...JSON.parse(saved) };
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          delete parsed.letterInstanceId;
+          return { ...base, ...parsed };
+        }
       } catch {
         // abaikan parse error
       }

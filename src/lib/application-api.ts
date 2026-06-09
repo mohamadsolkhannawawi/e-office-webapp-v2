@@ -1228,6 +1228,7 @@ export async function getMe(): Promise<UserProfile | null> {
         const response = await fetch(`${BASE_PATH}/api/me`, {
             method: "GET",
             credentials: "include",
+            cache: "no-store",
         });
 
         if (!response.ok) return null;

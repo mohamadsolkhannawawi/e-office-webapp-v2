@@ -1026,19 +1026,30 @@ export async function getNotifications(options?: {
  * Get unread notification count
  */
 export async function getUnreadNotificationCount(): Promise<number> {
-    try {
-        const response = await fetch(`${BASE_PATH}/api/notifications/count`, {
-            method: "GET",
-            credentials: "include",
-        });
-
-        if (!response.ok) return 0;
-        const result = await response.json();
-        return result.data?.unread || 0;
-    } catch (error) {
-        console.error("Get unread count error:", error);
-        return 0;
-    }
+    return new Promise((resolve) => {
+        try {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", `${BASE_PATH}/api/notifications/count`, true);
+            xhr.withCredentials = true;
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const result = JSON.parse(xhr.responseText);
+                        resolve(result.data?.unread || 0);
+                    } catch {
+                        resolve(0);
+                    }
+                } else {
+                    resolve(0);
+                }
+            };
+            xhr.onerror = () => resolve(0);
+            xhr.send();
+        } catch (error) {
+            console.error("Get unread count error:", error);
+            resolve(0);
+        }
+    });
 }
 
 /**

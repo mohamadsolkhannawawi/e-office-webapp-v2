@@ -123,7 +123,7 @@ function TimelineItem({
     let customDefaultDesc = config.defaultDesc;
     if (isInitialSubmission) {
         customDefaultDesc =
-            "Pengajuan surat telah berhasil dikirim.";
+            "Pengajuan surat telah berhasil dikirim ke Supervisor Akademik.";
     }
 
     return (
@@ -169,7 +169,7 @@ function TimelineItem({
                 {hasCatatan ? (
                     <div className="p-3 bg-slate-50/80 backdrop-blur-sm rounded-xl border border-slate-100 shadow-inner">
                         <p className="text-xs text-slate-600 leading-relaxed italic">
-                            &quot;{catatan}&quot;
+                            &quot;{catatan ? catatan.replace(/\s*\[ke\s+[^\]]+\]/gi, "").trim() : ""}&quot;
                         </p>
                     </div>
                 ) : (

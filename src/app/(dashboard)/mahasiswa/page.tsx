@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,12 @@ import {
   CircleCheckBig,
   FilePen,
   FileClock,
+  XCircle,
+  RotateCw,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  FileEdit,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
@@ -190,14 +196,68 @@ export default function MahasiswaDashboardPage() {
     return "Beasiswa";
   };
 
-  const getStatusLabel = (status: ApplicationSummary["status"]) => {
-    if (status === "IN_PROGRESS" || status === "PENDING") {
-      return "Dalam Proses";
+  const getStatusInfo = (app: ApplicationSummary) => {
+    const roles = {
+      0: "Mahasiswa",
+      1: "Supervisor Akademik",
+      2: "Manajer TU",
+      3: "Wakil Dekan 1",
+      4: "UPA",
+    };
+    const getRoleName = (step: number) =>
+      roles[step as keyof typeof roles] || "Petugas";
+
+    if (app.status === "DRAFT") {
+      return {
+        label: "Draft",
+        color: "bg-slate-500 text-white",
+        icon: <FileEdit className="h-3.5 w-3.5" />,
+      };
     }
-    if (status === "COMPLETED") return "Selesai";
-    if (status === "REJECTED") return "Ditolak";
-    if (status === "REVISION") return "Revisi";
-    return "Draft";
+    if (app.status === "REJECTED") {
+      return {
+        label: `Ditolak oleh ${getRoleName(app.currentStep)}`,
+        color: "bg-red-500 text-white",
+        icon: <XCircle className="h-3.5 w-3.5" />,
+      };
+    }
+    if (app.status === "REVISION") {
+      if (app.currentStep === 0) {
+        const revisionFromRole =
+          app.lastRevisionFromRole || getRoleName(app.currentStep + 1);
+        return {
+          label: `Revisi dari ${revisionFromRole}`,
+          color: "bg-sky-500 text-white",
+          icon: <RotateCw className="h-3.5 w-3.5" />,
+        };
+      } else {
+        return {
+          label: `Sedang Diproses di ${getRoleName(app.currentStep)}`,
+          color: "bg-blue-500 text-white",
+          icon: <Clock className="h-3.5 w-3.5" />,
+        };
+      }
+    }
+    if (app.status === "PENDING" || app.status === "IN_PROGRESS") {
+      return {
+        label: `Menunggu Verifikasi ${getRoleName(app.currentStep)}`,
+        color: "bg-blue-500 text-white",
+        icon: <AlertCircle className="h-3.5 w-3.5" />,
+      };
+    }
+    if (app.status === "COMPLETED") {
+      return {
+        label: "Selesai",
+        color: "bg-emerald-500 text-white",
+        icon: <CheckCircle className="h-3.5 w-3.5" />,
+      };
+    }
+
+    return {
+      label: app.status,
+      color: "bg-slate-500 text-white",
+      icon: <Clock className="h-3.5 w-3.5" />,
+    };
   };
 
   return (
@@ -377,9 +437,17 @@ export default function MahasiswaDashboardPage() {
                         {getJenisLabel(app)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                          {getStatusLabel(app.status)}
-                        </span>
+                        {(() => {
+                          const statusInfo = getStatusInfo(app);
+                          return (
+                            <div
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${statusInfo.color}`}
+                            >
+                              {statusInfo.icon}
+                              {statusInfo.label}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-3 text-slate-600">
                         {new Date(

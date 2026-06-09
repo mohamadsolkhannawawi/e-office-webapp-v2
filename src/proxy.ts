@@ -31,7 +31,9 @@ export function proxy(request: NextRequest) {
   // Jika mencoba mengakses route terlindungi tanpa session, redirect ke login
   if (isProtectedPath && (!sessionToken || !sessionToken.value)) {
     console.log(`[Middleware] Blocking access to ${pathname} - No Session`);
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(
+      new URL(request.nextUrl.basePath + "/login", request.url),
+    );
   }
 
   // Role-Based Access Control (RBAC)
@@ -117,7 +119,9 @@ export function proxy(request: NextRequest) {
               // Redirect ke dashboard miliknya berdasarkan role pertama
               const userRole = userRoles[0];
               const targetPath = rolePathMap[userRole] || "/dashboard";
-              return NextResponse.redirect(new URL(targetPath, request.url));
+              return NextResponse.redirect(
+                new URL(request.nextUrl.basePath + targetPath, request.url),
+              );
             }
           }
         }

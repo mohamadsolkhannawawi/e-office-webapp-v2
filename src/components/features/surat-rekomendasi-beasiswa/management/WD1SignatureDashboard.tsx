@@ -209,7 +209,7 @@ export function WD1SignatureDashboard() {
           </div>
           <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto bg-undip-blue hover:bg-sky-700 rounded-3xl">
+              <Button className="w-full sm:w-auto bg-undip-blue hover:bg-sky-700 rounded-3xl min-h-[52px] sm:min-h-[44px]">
                 <Upload className="h-4 w-4 mr-2" />
                 Upload Template Baru
               </Button>
@@ -359,7 +359,7 @@ export function WD1SignatureDashboard() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleSetDefault(signature.id)}
-                        className="flex-1 bg-amber-400 hover:bg-amber-500 text-white hover:text-white rounded-3xl border-none"
+                        className="flex-1 bg-amber-400 hover:bg-amber-500 text-white hover:text-white rounded-3xl border-none min-h-[48px] sm:min-h-9 px-3"
                       >
                         <Star className="h-3.5 w-3.5 mr-1" />
                         Jadikan Default
@@ -369,7 +369,7 @@ export function WD1SignatureDashboard() {
                       size="sm"
                       variant="outline"
                       onClick={() => handleDelete(signature.id)}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white hover:text-white rounded-3xl border-none"
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white hover:text-white rounded-3xl border-none min-h-[48px] sm:min-h-9 px-3"
                     >
                       <Trash2 className="h-3.5 w-3.5 mr-1" />
                       Hapus

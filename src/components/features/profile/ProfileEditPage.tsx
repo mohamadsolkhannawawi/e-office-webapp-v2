@@ -502,14 +502,13 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
                 </div>
               )}
             </div>
-
             {/* Action Buttons */}
-            <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-6 border-t border-gray-200">
-              <Link href={backHref}>
+            <div className="flex flex-row gap-3 sm:justify-end pt-6 border-t border-gray-200">
+              <Link href={backHref} className="flex-1 sm:flex-none">
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-10 px-6 text-sm font-semibold w-full sm:w-auto"
+                  className="w-full min-h-[52px] sm:min-h-[44px] sm:w-auto sm:px-6 text-sm font-semibold"
                 >
                   Batal
                 </Button>
@@ -517,7 +516,7 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
               <Button
                 type="submit"
                 disabled={isSaving}
-                className="h-10 px-6 text-sm font-semibold gap-2 text-white w-full sm:w-auto"
+                className="flex-1 sm:flex-none min-h-[52px] sm:min-h-[44px] sm:px-6 text-sm font-semibold gap-2 text-white"
                 style={{ backgroundColor: "#0078bd" }}
               >
                 {isSaving ? (
@@ -527,8 +526,7 @@ const ProfileEditPage = ({ backHref }: { backHref: string }) => {
                 )}
                 {isSaving ? "Menyimpan..." : "Simpan"}
               </Button>
-            </div>
-          </form>
+            </div>          </form>
         </CardContent>
       </Card>
 

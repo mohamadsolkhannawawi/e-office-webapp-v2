@@ -249,14 +249,14 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              {/* <div className="flex justify-end">
                 <Link
                   href="#"
                   className="text-sm font-medium text-undip-blue hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
                 >
                   Lupa Kata Sandi?
                 </Link>
-              </div>
+              </div> */}
 
               <Button
                 type="submit"
@@ -300,14 +300,14 @@ export default function LoginPage() {
           © {new Date().getFullYear()} UP2TI FSM UNDIP. Seluruh Hak Cipta
           Dilindungi Undang-Undang.
         </p>
-        <div className="flex gap-4">
+        {/* <div className="flex gap-4">
           <Link
             href="#"
             className="transition-colors hover:text-gray-700 dark:hover:text-gray-300"
           >
             Bantuan
           </Link>
-        </div>
+        </div> */}
       </footer>
     </div>
   );

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -156,186 +156,189 @@ export default function CompleteProfileModal() {
   if (status !== "incomplete") return null;
 
   const currentYear = new Date().getFullYear();
-  const inputClassName =
-    "h-11 rounded-xl border-border/80 bg-background shadow-sm focus-visible:ring-primary/30 focus-visible:border-primary";
-  const selectClassName =
-    "flex h-11 w-full rounded-xl border border-border/80 bg-background px-3 py-2 text-sm shadow-sm ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50";
-  const labelClassName =
-    "text-[13px] font-semibold tracking-wide text-foreground/90";
+  const lbl = "text-xs font-semibold text-slate-700 uppercase tracking-wide";
+  const inp = "flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-[2px]">
-      <div className="w-full max-w-xl max-h-[90vh] overflow-hidden rounded-3xl border border-border/80 bg-card text-card-foreground shadow-2xl flex flex-col">
-        <div className="h-1.5 w-full bg-linear-to-r from-(--color-undip-blue) via-primary to-(--color-dark-navy)" />
+      <div className="w-full max-w-2xl max-h-[92dvh] overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-xl flex flex-col">
         {/* Header */}
-        <div className="px-8 pt-7 pb-5 border-b border-border/70 bg-linear-to-b from-muted/30 to-transparent">
-          <h2 className="text-xl font-semibold tracking-tight text-foreground">
-            Lengkapi Data Profil
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-            Lengkapi data berikut untuk menggunakan aplikasi. Semua field wajib
-            diisi.
-          </p>
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100 bg-white shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-50 rounded-xl">
+              <UserCircle className="h-5 w-5 text-indigo-600" />
+            </div>
+            <div className="text-left">
+              <h2 className="text-lg font-bold text-slate-800">
+                Lengkapi Data Profil
+              </h2>
+              <p className="text-slate-500 text-sm mt-0.5">
+                Lengkapi data berikut untuk menggunakan aplikasi. Semua field wajib diisi.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Body */}
         {isLoadingDepts ? (
           <div className="flex flex-1 items-center justify-center p-12">
-            <Loader2 className="h-8 w-8 animate-spin text-(--color-undip-blue)" />
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
           </div>
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="flex-1 space-y-5 overflow-y-auto bg-linear-to-b from-background to-muted/20 px-8 py-6"
+            className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 flex flex-col"
           >
-            {/* NIM — khusus mahasiswa */}
-            {data?.isMahasiswa && (
-              <div className="space-y-2">
-                <Label htmlFor="nim" className={labelClassName}>
-                  NIM <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="nim"
-                  placeholder="14 digit angka, contoh: 24060122140123"
-                  value={nim}
-                  onChange={(e) => setNim(e.target.value)}
-                  pattern="\d{14}"
-                  title="NIM harus tepat 14 digit angka"
-                  className={inputClassName}
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  Nomor Induk Mahasiswa 14 digit
-                </p>
+            <div className="space-y-4 flex-1">
+              {/* Row 1: NIM and No HP */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {data?.isMahasiswa && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="nim" className={lbl}>
+                      NIM <span className="text-red-500 normal-case">*</span>
+                    </Label>
+                    <Input
+                      id="nim"
+                      placeholder="Contoh: 24060122140123"
+                      value={nim}
+                      onChange={(e) => setNim(e.target.value)}
+                      pattern="\d{14}"
+                      title="NIM harus tepat 14 digit angka"
+                      className={inp}
+                      required
+                    />
+                  </div>
+                )}
+                <div className="space-y-1.5">
+                  <Label htmlFor="noHp" className={lbl}>
+                    Nomor HP <span className="text-red-500 normal-case">*</span>
+                  </Label>
+                  <Input
+                    id="noHp"
+                    type="tel"
+                    placeholder="Contoh: 08123456789"
+                    value={noHp}
+                    onChange={(e) => setNoHp(e.target.value)}
+                    pattern="^08[0-9]{8,13}$"
+                    title="Nomor HP harus diawali 08 dan 10–15 digit"
+                    className={inp}
+                    required
+                  />
+                </div>
               </div>
-            )}
 
-            {/* Nomor HP */}
-            <div className="space-y-2">
-              <Label htmlFor="noHp" className={labelClassName}>
-                Nomor HP <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="noHp"
-                type="tel"
-                placeholder="Contoh: 08123456789"
-                value={noHp}
-                onChange={(e) => setNoHp(e.target.value)}
-                pattern="^08[0-9]{8,13}$"
-                title="Nomor HP harus diawali 08 dan 10–15 digit"
-                className={inputClassName}
-                required
-              />
-            </div>
-
-            {/* Tahun Masuk — khusus mahasiswa */}
-            {data?.isMahasiswa && (
-              <div className="space-y-2">
-                <Label htmlFor="tahunMasuk" className={labelClassName}>
-                  Tahun Masuk <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="tahunMasuk"
-                  type="number"
-                  placeholder={`Contoh: ${currentYear - 1}`}
-                  value={tahunMasuk}
-                  onChange={(e) => setTahunMasuk(e.target.value)}
-                  min="1990"
-                  max={String(currentYear)}
-                  className={inputClassName}
-                  required
-                />
-              </div>
-            )}
-
-            {/* Tempat Lahir — khusus mahasiswa */}
-            {data?.isMahasiswa && (
-              <div className="space-y-2">
-                <Label htmlFor="tempatLahir" className={labelClassName}>
-                  Tempat Lahir <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="tempatLahir"
-                  placeholder="Contoh: Semarang"
-                  value={tempatLahir}
-                  onChange={(e) => setTempatLahir(e.target.value)}
-                  className={inputClassName}
-                  required
-                />
-              </div>
-            )}
-
-            {/* Tanggal Lahir — khusus mahasiswa */}
-            {data?.isMahasiswa && (
-              <div className="space-y-2">
-                <Label htmlFor="tanggalLahir" className={labelClassName}>
-                  Tanggal Lahir <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="tanggalLahir"
-                  type="date"
-                  value={tanggalLahir}
-                  onChange={(e) => setTanggalLahir(e.target.value)}
-                  max={`${currentYear - 15}-12-31`}
-                  className={inputClassName}
-                  required
-                />
-              </div>
-            )}
-
-            {/* Departemen */}
-            <div className="space-y-2">
-              <Label htmlFor="departemenId" className={labelClassName}>
-                Departemen <span className="text-destructive">*</span>
-              </Label>
-              <select
-                id="departemenId"
-                value={departemenId}
-                onChange={(e) => handleDeptChange(e.target.value)}
-                required
-                className={selectClassName}
-              >
-                <option value="">-- Pilih Departemen --</option>
-                {departments.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Program Studi — cascade */}
-            <div className="space-y-2">
-              <Label htmlFor="programStudiId" className={labelClassName}>
-                Program Studi <span className="text-destructive">*</span>
-              </Label>
-              <select
-                id="programStudiId"
-                value={programStudiId}
-                onChange={(e) => setProgramStudiId(e.target.value)}
-                required
-                disabled={!departemenId}
-                className={selectClassName}
-              >
-                <option value="">-- Pilih Program Studi --</option>
-                {availableProdi.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-              {!departemenId && (
-                <p className="text-xs text-muted-foreground">
-                  Pilih departemen terlebih dahulu
-                </p>
+              {/* Row 2: Tahun Masuk and Tempat Lahir */}
+              {data?.isMahasiswa && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tahunMasuk" className={lbl}>
+                      Tahun Masuk <span className="text-red-500 normal-case">*</span>
+                    </Label>
+                    <Input
+                      id="tahunMasuk"
+                      type="number"
+                      placeholder={`Contoh: ${currentYear - 1}`}
+                      value={tahunMasuk}
+                      onChange={(e) => setTahunMasuk(e.target.value)}
+                      min="1990"
+                      max={String(currentYear)}
+                      className={inp}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tempatLahir" className={lbl}>
+                      Tempat Lahir <span className="text-red-500 normal-case">*</span>
+                    </Label>
+                    <Input
+                      id="tempatLahir"
+                      placeholder="Contoh: Semarang"
+                      value={tempatLahir}
+                      onChange={(e) => setTempatLahir(e.target.value)}
+                      className={inp}
+                      required
+                    />
+                  </div>
+                </div>
               )}
+
+              {/* Row 3: Tanggal Lahir (and possibly empty slot if needed) */}
+              {data?.isMahasiswa && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tanggalLahir" className={lbl}>
+                      Tanggal Lahir <span className="text-red-500 normal-case">*</span>
+                    </Label>
+                    <Input
+                      id="tanggalLahir"
+                      type="date"
+                      value={tanggalLahir}
+                      onChange={(e) => setTanggalLahir(e.target.value)}
+                      max={`${currentYear - 15}-12-31`}
+                      className={inp}
+                      required
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Row 4: Departemen and Program Studi */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="departemenId" className={lbl}>
+                    Departemen <span className="text-red-500 normal-case">*</span>
+                  </Label>
+                  <select
+                    id="departemenId"
+                    value={departemenId}
+                    onChange={(e) => handleDeptChange(e.target.value)}
+                    required
+                    className={inp}
+                  >
+                    <option value="">-- Pilih Departemen --</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="programStudiId" className={lbl}>
+                    Program Studi <span className="text-red-500 normal-case">*</span>
+                  </Label>
+                  <select
+                    id="programStudiId"
+                    value={programStudiId}
+                    onChange={(e) => setProgramStudiId(e.target.value)}
+                    required
+                    disabled={!departemenId}
+                    className={inp}
+                  >
+                    <option value="">-- Pilih Program Studi --</option>
+                    {availableProdi.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                  {!departemenId && (
+                    <p className="text-xs text-slate-500 mt-1">
+                      Pilih departemen terlebih dahulu
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {/* Submit */}
-            <div className="pt-3">
+            {/* Footer with Submit Button */}
+            <div className="pt-6 mt-2 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-xs text-slate-500 flex-1 order-2 sm:order-1 text-center sm:text-left">
+                Data profil digunakan untuk validasi dan personalisasi layanan.
+              </p>
               <Button
                 type="submit"
-                className="h-11 w-full rounded-xl bg-primary text-primary-foreground shadow-sm transition hover:bg-primary/90"
+                className="w-full sm:w-auto rounded-xl px-8 h-10 bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition order-1 sm:order-2 shrink-0"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
@@ -344,12 +347,9 @@ export default function CompleteProfileModal() {
                     Menyimpan...
                   </>
                 ) : (
-                  "Simpan & Masuk ke Aplikasi"
+                  "Simpan Profil"
                 )}
               </Button>
-              <p className="mt-2 text-center text-xs text-muted-foreground">
-                Data profil digunakan untuk validasi dan personalisasi layanan.
-              </p>
             </div>
           </form>
         )}

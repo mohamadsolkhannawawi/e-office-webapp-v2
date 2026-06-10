@@ -348,7 +348,7 @@ export async function deleteDepartment(id: string) {
 
   if (!res.ok) {
     const error = await res.text();
-    throw new Error(`Failed to delete department: ${error}`);
+    throw new Error(`Gagal menghapus departemen: ${error}`);
   }
 
   return res.json();

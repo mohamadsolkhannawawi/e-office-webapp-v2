@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import {
@@ -196,19 +196,19 @@ export function StaffEditModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="w-[calc(100vw-1rem)] sm:w-full sm:max-w-4xl max-h-[92dvh] rounded-3xl p-0 overflow-hidden border-0 shadow-xl flex flex-col">
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-full sm:max-w-2xl max-h-[92dvh] rounded-3xl p-0 overflow-hidden border-0 shadow-xl flex flex-col bg-white">
         {/* Header */}
-        <div className="bg-indigo-600 px-6 py-5">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100 bg-white shrink-0">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-2xl">
-                <PencilLine className="h-5 w-5 text-white" />
+              <div className="p-2 bg-indigo-50 rounded-xl">
+                <PencilLine className="h-5 w-5 text-indigo-600" />
               </div>
-              <div>
-                <DialogTitle className="text-white font-bold text-lg">
+              <div className="text-left">
+                <DialogTitle className="text-lg font-bold text-slate-800">
                   Edit Data Surat
                 </DialogTitle>
-                <DialogDescription className="text-indigo-200 text-xs mt-0.5">
+                <DialogDescription className="text-slate-500 text-sm mt-0.5">
                   Perbarui informasi surat pengajuan sebagai {roleName}
                 </DialogDescription>
               </div>
@@ -219,7 +219,7 @@ export function StaffEditModal({
         {step === "form" && (
           <>
             <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-4">
-              {/* Nama Beasiswa â€” full width */}
+              {/* Nama Beasiswa — full width */}
               <div className="space-y-1.5">
                 <Label className={lbl}>Nama Beasiswa</Label>
                 <Input
@@ -230,8 +230,8 @@ export function StaffEditModal({
                 />
               </div>
 
-              {/* Row 2 – 3 col: identitas */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Row 2 – 2 col: identitas */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className={lbl}>Nama Lengkap</Label>
                   <Input
@@ -250,6 +250,10 @@ export function StaffEditModal({
                     className={inp}
                   />
                 </div>
+              </div>
+
+              {/* Row 3 – 2 col: kontak */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className={lbl}>No. HP</Label>
                   <Input
@@ -259,10 +263,6 @@ export function StaffEditModal({
                     className={inp}
                   />
                 </div>
-              </div>
-
-              {/* Row 3 – 3 col: kontak & akademik */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <Label className={lbl}>Email</Label>
                   <Input
@@ -273,6 +273,10 @@ export function StaffEditModal({
                     className={inp}
                   />
                 </div>
+              </div>
+
+              {/* Row 4 – 2 col: akademik */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className={lbl}>Departemen</Label>
                   <Input
@@ -293,9 +297,9 @@ export function StaffEditModal({
                 </div>
               </div>
 
-              {/* Row 4 – TTL + nilai akademik */}
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                <div className="space-y-1.5 col-span-2 sm:col-span-2">
+              {/* Row 5 – 2 col: TTL */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
                   <Label className={lbl}>Tempat Lahir</Label>
                   <Input
                     value={tempatLahir}
@@ -304,7 +308,7 @@ export function StaffEditModal({
                     className={inp}
                   />
                 </div>
-                <div className="space-y-1.5 col-span-2 sm:col-span-1">
+                <div className="space-y-1.5">
                   <Label className={lbl}>Tanggal Lahir</Label>
                   <Input
                     type="date"
@@ -313,6 +317,10 @@ export function StaffEditModal({
                     className={inp}
                   />
                 </div>
+              </div>
+
+              {/* Row 6 – 3 col: nilai */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <Label className={lbl}>Semester</Label>
                   <Input
@@ -321,7 +329,7 @@ export function StaffEditModal({
                     max={14}
                     value={semester}
                     onChange={(e) => setSemester(e.target.value)}
-                    placeholder="mis. 6"
+                    placeholder="Semester"
                     className={inp}
                   />
                 </div>
@@ -334,15 +342,11 @@ export function StaffEditModal({
                     max={4}
                     value={ipk}
                     onChange={(e) => setIpk(e.target.value)}
-                    placeholder="3.50"
+                    placeholder="IPK"
                     className={inp}
                   />
                 </div>
-              </div>
-
-              {/* Row 5 – IPS + Catatan */}
-              <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-                <div className="space-y-1.5 sm:col-span-1">
+                <div className="space-y-1.5">
                   <Label className={lbl}>IPS</Label>
                   <Input
                     type="number"
@@ -351,30 +355,32 @@ export function StaffEditModal({
                     max={4}
                     value={ips}
                     onChange={(e) => setIps(e.target.value)}
-                    placeholder="3.75"
+                    placeholder="IPS"
                     className={inp}
                   />
                 </div>
-                <div className="space-y-1.5 sm:col-span-4">
-                  <Label className={lbl}>
-                    Catatan Perubahan
-                    <span className="text-red-500 normal-case font-semibold">
-                      *
-                    </span>
-                  </Label>
-                  <Textarea
-                    value={catatan}
-                    onChange={(e) => setCatatan(e.target.value)}
-                    placeholder="Tuliskan alasan atau catatan perubahan..."
-                    rows={2}
-                    className="rounded-xl border-slate-200 focus:border-indigo-400 focus-visible:ring-indigo-300 text-sm resize-none"
-                  />
-                  {!isCatatanFilled && (
-                    <p className="text-xs text-red-500">
-                      Catatan perubahan wajib diisi sebelum melanjutkan.
-                    </p>
-                  )}
-                </div>
+              </div>
+
+              {/* Row 7 – Catatan */}
+              <div className="space-y-1.5 pt-2">
+                <Label className={lbl}>
+                  Catatan Perubahan{" "}
+                  <span className="text-red-500 normal-case font-semibold">
+                    *
+                  </span>
+                </Label>
+                <Textarea
+                  value={catatan}
+                  onChange={(e) => setCatatan(e.target.value)}
+                  placeholder="Tuliskan alasan atau catatan perubahan..."
+                  rows={2}
+                  className="rounded-xl border-slate-200 focus:border-indigo-400 focus-visible:ring-indigo-300 text-sm resize-none"
+                />
+                {!isCatatanFilled && (
+                  <p className="text-xs text-red-500">
+                    Catatan perubahan wajib diisi sebelum melanjutkan.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -382,14 +388,14 @@ export function StaffEditModal({
               <Button
                 variant="outline"
                 onClick={handleClose}
-                className="w-full sm:w-auto rounded-3xl px-6 border-slate-200 text-slate-600"
+                className="w-full sm:w-auto rounded-xl px-6 border-slate-200 text-slate-600"
               >
                 Batal
               </Button>
               <Button
                 onClick={() => setStep("confirm")}
                 disabled={!namaBeasiswa.trim() || !isCatatanFilled}
-                className="w-full sm:w-auto rounded-3xl px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                className="w-full sm:w-auto rounded-xl px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
               >
                 Lanjutkan
               </Button>
@@ -416,21 +422,21 @@ export function StaffEditModal({
                 </div>
               </div>
 
-              {/* Summary – 2-column, colon-aligned */}
-              <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 text-sm">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-0">
+              {/* Summary – 1-column on mobile, 2-column on desktop, colon-aligned */}
+              <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 sm:p-5 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 sm:gap-y-0">
                   {[
                     summaryRows.slice(0, Math.ceil(summaryRows.length / 2)),
                     summaryRows.slice(Math.ceil(summaryRows.length / 2)),
                   ].map((col, ci) => (
                     <div
                       key={ci}
-                      className="grid grid-cols-[max-content_auto_1fr] gap-x-2 gap-y-2"
+                      className="grid grid-cols-1 sm:grid-cols-[max-content_auto_1fr] gap-x-2 gap-y-1 sm:gap-y-2"
                     >
                       {col.map((r) => (
                         <React.Fragment key={r.label}>
-                          <span className="text-slate-500">{r.label}</span>
-                          <span className="text-slate-400">:</span>
+                          <span className="text-slate-500 sm:min-w-[100px]">{r.label}</span>
+                          <span className="hidden sm:inline text-slate-400">:</span>
                           <span className="font-medium text-slate-700 wrap-break-word min-w-0">
                             {r.val}
                           </span>
@@ -440,9 +446,9 @@ export function StaffEditModal({
                   ))}
                 </div>
                 {catatan.trim() && (
-                  <div className="pt-3 mt-3 border-t border-slate-200">
+                  <div className="pt-4 mt-4 border-t border-slate-200">
                     <p className="text-slate-500 mb-1">Catatan</p>
-                    <p className="italic text-slate-600">
+                    <p className="italic text-slate-700 font-medium bg-white p-3 rounded-xl border border-slate-100">
                       &ldquo;{catatan}&rdquo;
                     </p>
                   </div>
@@ -454,13 +460,13 @@ export function StaffEditModal({
               <Button
                 variant="outline"
                 onClick={() => setStep("form")}
-                className="w-full sm:w-auto rounded-3xl px-6 border-slate-200 text-slate-600"
+                className="w-full sm:w-auto rounded-xl px-6 border-slate-200 text-slate-600"
               >
                 Kembali
               </Button>
               <Button
                 onClick={handleSubmit}
-                className="w-full sm:w-auto rounded-3xl px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                className="w-full sm:w-auto rounded-xl px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
               >
                 Simpan Perubahan
               </Button>
@@ -469,7 +475,7 @@ export function StaffEditModal({
         )}
 
         {step === "loading" && (
-          <div className="px-6 py-12 flex flex-col items-center gap-4">
+          <div className="px-6 py-16 flex flex-col items-center justify-center gap-4">
             <Loader2 className="h-10 w-10 text-indigo-500 animate-spin" />
             <p className="text-slate-600 font-medium">Menyimpan perubahan...</p>
           </div>

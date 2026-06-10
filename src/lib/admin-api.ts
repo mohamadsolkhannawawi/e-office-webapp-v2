@@ -424,7 +424,7 @@ export async function deleteProdi(id: string) {
 
   if (!res.ok) {
     const error = await res.text();
-    throw new Error(`Failed to delete prodi: ${error}`);
+    throw new Error(`Gagal menghapus program studi: ${error}`);
   }
 
   return res.json();

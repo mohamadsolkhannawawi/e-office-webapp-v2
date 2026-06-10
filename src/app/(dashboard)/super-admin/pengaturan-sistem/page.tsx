@@ -30,6 +30,7 @@ const PEJABAT_LABELS: Record<string, string> = {
   SUPERVISOR: "Supervisor Akademik",
   MANAJER: "Manajer TU",
   UPA: "Unit Pelayanan Akademik",
+  KOP_SURAT_FSM: "Kop Surat FSM",
 };
 
 const KOP_FIELDS = [

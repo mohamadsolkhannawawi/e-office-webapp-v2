@@ -126,7 +126,11 @@ export async function createUser(data: CreateUserData) {
 
   if (!res.ok) {
     const error = await res.text();
-    throw new Error(`Failed to create user: ${error}`);
+    let errorMessage = error;
+    if (error.includes("Email is already registered")) {
+      errorMessage = "Email sudah terdaftar";
+    }
+    throw new Error(`Gagal membuat pengguna: ${errorMessage}`);
   }
 
   return res.json();

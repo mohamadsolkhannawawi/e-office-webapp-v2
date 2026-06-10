@@ -147,6 +147,16 @@ function KelolaPageKonten() {
     loadUsers();
   }, [loadUsers]);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const currentSearchParam = searchParams.get("search") || "";
+      if (search !== currentSearchParam) {
+        handlePencarian();
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search, searchParams]);
+
   const handlePencarian = () => {
     const params = new URLSearchParams(searchParams.toString());
     if (search) params.set("search", search);

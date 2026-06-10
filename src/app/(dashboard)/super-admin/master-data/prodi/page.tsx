@@ -99,7 +99,7 @@ export default function ProdiPage() {
     // Filter prodi berdasarkan query pencarian dan filter departemen
     let filtered = prodi;
 
-    if (filterDepartemenId) {
+    if (filterDepartemenId && filterDepartemenId !== "all") {
       filtered = filtered.filter((p) => p.departemenId === filterDepartemenId);
     }
 

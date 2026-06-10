@@ -235,14 +235,14 @@ function SuratDraftKonten() {
               <p className="text-sm text-red-700 font-medium">{deleteError}</p>
             </div>
           )}
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteLoading} className="rounded-3xl">
+          <AlertDialogFooter className="flex flex-row gap-3 w-full mt-4">
+            <AlertDialogCancel disabled={deleteLoading} className="flex-1 rounded-xl min-h-[52px] sm:min-h-[44px] mt-0">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteDraft}
               disabled={deleteLoading}
-              className="bg-red-600 hover:bg-red-700 text-white rounded-3xl"
+              className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white min-h-[52px] sm:min-h-[44px]"
             >
               {deleteLoading ? (
                 <>

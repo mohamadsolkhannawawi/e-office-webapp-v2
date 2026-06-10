@@ -191,7 +191,7 @@ export default function SelesaiPage() {
             </Select>
 
             {/* Date Range Filter */}
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center gap-2 bg-slate-50/50 rounded-lg p-2 border border-slate-100">
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center gap-2 bg-slate-50/50 rounded-3xl p-2 border border-slate-100">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-slate-400 ml-1" />
               </div>
@@ -200,33 +200,39 @@ export default function SelesaiPage() {
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Label
                     htmlFor="startDate"
-                    className="text-xs text-slate-500 whitespace-nowrap"
+                    className="text-xs font-medium text-slate-600 whitespace-nowrap"
                   >
                     Dari
                   </Label>
-                  <Input
-                    id="startDate"
-                    type="date"
-                    value={startDateInput}
-                    onChange={(e) => setStartDateInput(e.target.value)}
-                    className="h-8 text-xs border-slate-200 w-full sm:w-36"
-                  />
+                  <div className="relative flex-1 sm:flex-none">
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={startDateInput}
+                      onChange={(e) => setStartDateInput(e.target.value)}
+                      className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
+                    />
+                  </div>
                 </div>
+
+                <div className="hidden sm:block h-4 w-px bg-slate-200" />
 
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Label
                     htmlFor="endDate"
-                    className="text-xs text-slate-500 whitespace-nowrap"
+                    className="text-xs font-medium text-slate-600 whitespace-nowrap"
                   >
                     Sampai
                   </Label>
-                  <Input
-                    id="endDate"
-                    type="date"
-                    value={endDateInput}
-                    onChange={(e) => setEndDateInput(e.target.value)}
-                    className="h-8 text-xs border-slate-200 w-full sm:w-36"
-                  />
+                  <div className="relative flex-1 sm:flex-none">
+                    <Input
+                      id="endDate"
+                      type="date"
+                      value={endDateInput}
+                      onChange={(e) => setEndDateInput(e.target.value)}
+                      className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
+                    />
+                  </div>
                 </div>
               </div>
 

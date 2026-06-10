@@ -354,7 +354,7 @@ export default function ArsipPage() {
             </Select>
 
             {/* Filter Rentang Tanggal - Desain Stylish */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 bg-slate-50/50 rounded-lg p-2 border border-slate-100 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 bg-slate-50/50 rounded-3xl p-2 border border-slate-100 w-full sm:w-auto">
               <div className="hidden sm:block">
                 <Calendar className="h-4 w-4 text-slate-400 ml-1" />
               </div>
@@ -370,7 +370,7 @@ export default function ArsipPage() {
                   <Input
                     id="startDate"
                     type="date"
-                    className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
                     value={startDateInput}
                     onChange={(e) => setStartDateInput(e.target.value)}
                     max={endDateInput || undefined}
@@ -391,7 +391,7 @@ export default function ArsipPage() {
                   <Input
                     id="endDate"
                     type="date"
-                    className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
                     value={endDateInput}
                     onChange={(e) => setEndDateInput(e.target.value)}
                     min={startDateInput || undefined}

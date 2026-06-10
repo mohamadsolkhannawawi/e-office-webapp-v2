@@ -149,11 +149,11 @@ export default function UpaSettingsPage() {
                   required
                 />
               </div>
-              <div className="pt-2">
+              <div className="pt-2 flex justify-end">
                 <Button
                   type="submit"
                   disabled={saving}
-                  className="w-full rounded-3xl bg-undip-blue hover:bg-undip-blue/90 text-white"
+                  className="rounded-3xl bg-undip-blue hover:bg-undip-blue/90 text-white px-6"
                 >
                   {saving ? (
                     <>

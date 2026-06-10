@@ -313,7 +313,7 @@ export async function createDepartment(data: { name: string; code: string }) {
 
   if (!res.ok) {
     const error = await res.text();
-    throw new Error(`Failed to create department: ${error}`);
+    throw new Error(`Gagal membuat departemen: ${error}`);
   }
 
   return res.json();
@@ -385,7 +385,11 @@ export async function createProdi(data: {
 
   if (!res.ok) {
     const error = await res.text();
-    throw new Error(`Failed to create prodi: ${error}`);
+    let errorMessage = error;
+    if (error.includes("code already exists") || error.includes("Code already exists")) {
+      errorMessage = "Kode program studi sudah digunakan";
+    }
+    throw new Error(`Gagal membuat program studi: ${errorMessage}`);
   }
 
   return res.json();

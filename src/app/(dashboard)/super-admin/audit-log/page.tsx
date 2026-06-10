@@ -180,6 +180,8 @@ export default function AuditLogPage() {
       sign: "Ditandatangani",
       cancel: "Dibatalkan",
       revision: "Revisi",
+      student_revision: "Revisi Mahasiswa",
+      staff_revision: "Revisi Staf",
     };
     return actionMap[action.toLowerCase()] || action;
   };
@@ -406,16 +408,33 @@ export default function AuditLogPage() {
 
             <div className="space-y-2">
               <Label>Action</Label>
-              <Input
-                placeholder="Cari action..."
-                value={tempFilters.action}
-                onChange={(e) =>
+              <Select
+                value={tempFilters.action || "all"}
+                onValueChange={(value) =>
                   setTempFilters({
                     ...tempFilters,
-                    action: e.target.value,
+                    action: value === "all" ? "" : value,
                   })
                 }
-              />
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Semua Action" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Action</SelectItem>
+                  <SelectItem value="submit">Diajukan (Submit)</SelectItem>
+                  <SelectItem value="approve">Disetujui (Approve)</SelectItem>
+                  <SelectItem value="reject">Ditolak (Reject)</SelectItem>
+                  <SelectItem value="revision">Revisi (Revision)</SelectItem>
+                  <SelectItem value="student_revision">Revisi Mahasiswa (Student Revision)</SelectItem>
+                  <SelectItem value="staff_revision">Revisi Staf (Staff Revision)</SelectItem>
+                  <SelectItem value="create">Dibuat (Create)</SelectItem>
+                  <SelectItem value="update">Diperbarui (Update)</SelectItem>
+                  <SelectItem value="delete">Dihapus (Delete)</SelectItem>
+                  <SelectItem value="login">Masuk (Login)</SelectItem>
+                  <SelectItem value="logout">Keluar (Logout)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

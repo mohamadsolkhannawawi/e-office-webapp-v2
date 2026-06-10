@@ -302,21 +302,13 @@ export function AdminActionModals({
                 </div>
 
                 {/* Status Publikasi */}
-                <div className="bg-linear-to-br from-green-50 to-green-50/30 p-4 rounded-2xl border border-green-200/50">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-1"></div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-green-800">
-                        Dokumen akan dipublikasikan
-                      </p>
-                      <p className="text-xs text-green-700 mt-1 leading-relaxed">
-                        Setelah publikasi, mahasiswa akan dapat mengunduh surat
-                        ini dari portal akademik.
-                      </p>
-                    </div>
-                  </div>
+                <div className="pt-1">
+                  <p className="text-sm font-semibold text-slate-800">
+                    Dokumen akan dipublikasikan
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Setelah publikasi, mahasiswa akan dapat mengunduh surat ini dari portal akademik.
+                  </p>
                 </div>
               </div>
             )}

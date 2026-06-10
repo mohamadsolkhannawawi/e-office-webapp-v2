@@ -125,14 +125,14 @@ export function WD1SignatureModal({
                     <Button
                         variant="outline"
                         onClick={onClose}
-                        className="flex-1 h-12 rounded-3xl font-bold border-slate-300 text-slate-600 hover:bg-slate-50 mt-4"
+                        className="flex-1 min-h-[52px] sm:min-h-[48px] rounded-3xl font-bold border-slate-300 text-slate-600 hover:bg-slate-50 mt-4"
                     >
                         Batal
                     </Button>
                     <Button
                         onClick={handleSave}
                         disabled={!selectedSignature || isSaving}
-                        className="flex-1 h-12 rounded-3xl font-bold text-white bg-undip-blue hover:bg-sky-700 shadow-lg shadow-blue-100 transition-all active:scale-95 mt-4"
+                        className="flex-1 min-h-[52px] sm:min-h-[48px] rounded-3xl font-bold text-white bg-undip-blue hover:bg-sky-700 shadow-lg shadow-blue-100 transition-all active:scale-95 mt-4"
                     >
                         {isSaving ? (
                             <>

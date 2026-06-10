@@ -201,8 +201,8 @@ export function AdminActionModals({
                 {type === "revise" && <RotateCcw className="h-6 w-6" />}
                 {type === "reject" && <XCircle className="h-6 w-6" />}
               </div>
-              <div>
-                <DialogTitle className="text-2xl font-bold text-slate-800">
+              <div className="text-left text-sm sm:text-base">
+                <DialogTitle className="text-xl sm:text-2xl font-bold text-slate-800">
                   {type === "approve" && "Setujui Dokumen"}
                   {type === "publish" && "Publish Dokumen"}
                   {type === "revise" && "Minta Revisi"}
@@ -318,13 +318,13 @@ export function AdminActionModals({
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 h-12 rounded-3xl font-bold border-slate-300 text-slate-600 hover:bg-slate-50"
+              className="flex-1 min-h-[52px] sm:min-h-[48px] rounded-3xl font-bold border-slate-300 text-slate-600 hover:bg-slate-50"
             >
               Batal
             </Button>
             <Button
               onClick={handleConfirm}
-              className={`flex-1 h-12 rounded-3xl font-bold text-white shadow-lg transition-all active:scale-95 ${
+              className={`flex-1 min-h-[52px] sm:min-h-[48px] rounded-3xl font-bold text-white shadow-lg transition-all active:scale-95 ${
                 type === "approve" || type === "publish"
                   ? "bg-undip-blue hover:bg-sky-700 shadow-blue-100"
                   : type === "revise"

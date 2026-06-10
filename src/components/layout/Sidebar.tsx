@@ -570,14 +570,14 @@ export function Sidebar({
                             <div className="flex gap-3 w-full pt-1">
                                 <Button
                                     variant="outline"
-                                    className="flex-1 rounded-xl"
+                                    className="flex-1 rounded-xl min-h-[52px] sm:min-h-[44px]"
                                     onClick={handleLogoutCancel}
                                     disabled={isLoggingOut}
                                 >
                                     Batal
                                 </Button>
                                 <Button
-                                    className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white"
+                                    className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white min-h-[52px] sm:min-h-[44px]"
                                     onClick={handleLogoutConfirm}
                                     disabled={isLoggingOut}
                                 >

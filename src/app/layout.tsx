@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "E-Office SRB - FSM UNDIP",
-    description: "Sistem E-Office Surat Rekomendasi Beasiswa FSM UNDIP",
+    title: "E-Office SR - FSM UNDIP",
+    description: "Sistem E-Office Surat Rekomendasi FSM UNDIP",
 };
 
 export default function RootLayout({

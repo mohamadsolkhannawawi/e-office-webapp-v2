@@ -160,7 +160,7 @@ export default function ArsipPage() {
         "No",
         "Nama",
         "NIM",
-        "Beasiswa",
+        "Keperluan",
         "Nomor Surat",
         "Tanggal Terbit",
         "Status",
@@ -232,7 +232,7 @@ export default function ArsipPage() {
                 </style>
             </head>
             <body>
-                <h1>ARSIP SURAT REKOMENDASI BEASISWA</h1>
+                <h1>ARSIP SURAT REKOMENDASI</h1>
                 <h2>Fakultas Sains dan Matematika - Universitas Diponegoro</h2>
                 <p>Dicetak pada: ${new Date().toLocaleDateString("id-ID", {
                   weekday: "long",
@@ -246,7 +246,7 @@ export default function ArsipPage() {
                             <th>No</th>
                             <th>Nama</th>
                             <th>NIM</th>
-                            <th>Beasiswa</th>
+                            <th>Keperluan</th>
                             <th>Nomor Surat</th>
                             <th>Tanggal Terbit</th>
                             <th>Status</th>
@@ -354,21 +354,23 @@ export default function ArsipPage() {
             </Select>
 
             {/* Filter Rentang Tanggal - Desain Stylish */}
-            <div className="flex items-center gap-2 bg-slate-50/50 rounded-lg p-2 border border-slate-100">
-              <Calendar className="h-4 w-4 text-slate-400 ml-1" />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 bg-slate-50/50 rounded-lg p-2 border border-slate-100 w-full sm:w-auto">
+              <div className="hidden sm:block">
+                <Calendar className="h-4 w-4 text-slate-400 ml-1" />
+              </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Label
                   htmlFor="startDate"
-                  className="text-xs font-medium text-slate-600 whitespace-nowrap"
+                  className="text-xs font-medium text-slate-600 whitespace-nowrap min-w-[40px] sm:min-w-0"
                 >
                   Dari
                 </Label>
-                <div className="relative">
+                <div className="relative flex-1 sm:flex-none">
                   <Input
                     id="startDate"
                     type="date"
-                    className="h-9 w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                     value={startDateInput}
                     onChange={(e) => setStartDateInput(e.target.value)}
                     max={endDateInput || undefined}
@@ -376,20 +378,20 @@ export default function ArsipPage() {
                 </div>
               </div>
 
-              <div className="h-4 w-px bg-slate-200" />
+              <div className="hidden sm:block h-4 w-px bg-slate-200" />
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Label
                   htmlFor="endDate"
-                  className="text-xs font-medium text-slate-600 whitespace-nowrap"
+                  className="text-xs font-medium text-slate-600 whitespace-nowrap min-w-[40px] sm:min-w-0"
                 >
                   Sampai
                 </Label>
-                <div className="relative">
+                <div className="relative flex-1 sm:flex-none">
                   <Input
                     id="endDate"
                     type="date"
-                    className="h-9 w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                     value={endDateInput}
                     onChange={(e) => setEndDateInput(e.target.value)}
                     min={startDateInput || undefined}
@@ -398,12 +400,12 @@ export default function ArsipPage() {
               </div>
 
               {(startDateInput || endDateInput) && (
-                <>
-                  <div className="h-4 w-px bg-slate-200" />
+                <div className="flex items-center justify-end sm:block w-full sm:w-auto mt-1 sm:mt-0">
+                  <div className="hidden sm:block h-4 w-px bg-slate-200" />
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50"
+                    className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 sm:ml-2"
                     onClick={() => {
                       setStartDateInput("");
                       setEndDateInput("");
@@ -412,7 +414,7 @@ export default function ArsipPage() {
                   >
                     <X className="h-3.5 w-3.5" />
                   </Button>
-                </>
+                </div>
               )}
             </div>
 

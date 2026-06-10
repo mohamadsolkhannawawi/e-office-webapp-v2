@@ -384,18 +384,18 @@ export function StaffEditModal({
               </div>
             </div>
 
-            <DialogFooter className="shrink-0 px-4 sm:px-6 pb-4 sm:pb-5 pt-3 gap-2 border-t border-slate-100 bg-white">
+            <DialogFooter className="flex flex-row gap-3 w-full shrink-0 px-4 sm:px-6 pb-4 sm:pb-5 pt-3 border-t border-slate-100 bg-white">
               <Button
                 variant="outline"
                 onClick={handleClose}
-                className="w-full sm:w-auto rounded-xl px-6 border-slate-200 text-slate-600"
+                className="flex-1 rounded-xl min-h-[52px] sm:min-h-[44px] border-slate-200 text-slate-600"
               >
                 Batal
               </Button>
               <Button
                 onClick={() => setStep("confirm")}
                 disabled={!namaBeasiswa.trim() || !isCatatanFilled}
-                className="w-full sm:w-auto rounded-xl px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                className="flex-1 rounded-xl min-h-[52px] sm:min-h-[44px] bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
               >
                 Lanjutkan
               </Button>
@@ -456,17 +456,17 @@ export function StaffEditModal({
               </div>
             </div>
 
-            <DialogFooter className="shrink-0 px-4 sm:px-6 pb-4 sm:pb-5 pt-3 gap-2 border-t border-slate-100 bg-white">
+            <DialogFooter className="flex flex-row gap-3 w-full shrink-0 px-4 sm:px-6 pb-4 sm:pb-5 pt-3 border-t border-slate-100 bg-white">
               <Button
                 variant="outline"
                 onClick={() => setStep("form")}
-                className="w-full sm:w-auto rounded-xl px-6 border-slate-200 text-slate-600"
+                className="flex-1 rounded-xl min-h-[52px] sm:min-h-[44px] border-slate-200 text-slate-600"
               >
                 Kembali
               </Button>
               <Button
                 onClick={handleSubmit}
-                className="w-full sm:w-auto rounded-xl px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                className="flex-1 rounded-xl min-h-[52px] sm:min-h-[44px] bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
               >
                 Simpan Perubahan
               </Button>

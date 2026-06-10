@@ -183,8 +183,8 @@ export function AdminActionModals({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-125 rounded-3xl border-none shadow-2xl p-0 overflow-hidden">
-        <div className="p-8">
-          <DialogHeader className="mb-6">
+        <div className="p-6">
+          <DialogHeader className="mb-4">
             <div className="flex items-center gap-4">
               <div
                 ref={iconWrapperRef}
@@ -221,7 +221,7 @@ export function AdminActionModals({
             </div>
           </DialogHeader>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {type === "revise" && (
               <div className="space-y-3">
                 <Label className="text-sm font-bold text-slate-700 uppercase tracking-wider">
@@ -276,42 +276,42 @@ export function AdminActionModals({
             )}
 
             {type === "publish" && (
-              <div className="space-y-5">
+              <div className="space-y-3">
                 {/* Header - Nama Surat */}
-                <div className="border-l-4 border-undip-blue pl-4">
+                <div className="border-l-4 border-undip-blue pl-4 py-0.5">
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                     Dokumen yang Akan Diterbitkan
                   </p>
-                  <p className="text-lg font-bold text-slate-800 mt-1">
+                  <p className="text-base font-bold text-slate-800 mt-0.5">
                     Surat Rekomendasi Beasiswa
                   </p>
                 </div>
 
                 {/* Nomor Surat */}
-                <div className="bg-linear-to-br from-blue-50 to-blue-50/30 p-5 rounded-3xl border border-blue-200/50">
-                  <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-3">
+                <div className="bg-linear-to-br from-blue-50 to-blue-50/30 p-4 rounded-2xl border border-blue-200/50">
+                  <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1.5">
                     Nomor Surat
                   </p>
-                  <p className="text-2xl font-bold text-undip-blue font-mono">
+                  <p className="text-xl font-bold text-undip-blue font-mono">
                     {data?.nomorSurat || "---"}
                   </p>
-                  <p className="text-xs text-blue-600 mt-3 leading-relaxed">
+                  <p className="text-xs text-blue-600 mt-1.5 leading-relaxed">
                     Format: [Nomor]/UN7.F8.1/KM/[Bulan]/
                     {new Date().getFullYear()}
                   </p>
                 </div>
 
                 {/* Status Publikasi */}
-                <div className="bg-linear-to-br from-green-50 to-green-50/30 p-5 rounded-3xl border border-green-200/50">
+                <div className="bg-linear-to-br from-green-50 to-green-50/30 p-4 rounded-2xl border border-green-200/50">
                   <div className="flex items-start gap-3">
                     <div className="mt-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5"></div>
+                      <div className="w-2 h-2 bg-green-500 rounded-full mt-1"></div>
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-green-800">
                         Dokumen akan dipublikasikan
                       </p>
-                      <p className="text-xs text-green-700 mt-2 leading-relaxed">
+                      <p className="text-xs text-green-700 mt-1 leading-relaxed">
                         Setelah publikasi, mahasiswa akan dapat mengunduh surat
                         ini dari portal akademik.
                       </p>
@@ -322,7 +322,7 @@ export function AdminActionModals({
             )}
           </div>
 
-          <DialogFooter className="mt-8 gap-3">
+          <DialogFooter className="mt-6 gap-2">
             <Button
               variant="outline"
               onClick={onClose}

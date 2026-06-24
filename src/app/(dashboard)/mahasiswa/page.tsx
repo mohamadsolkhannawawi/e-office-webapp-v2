@@ -269,7 +269,7 @@ export default function MahasiswaDashboardPage() {
         Dashboard
       </h1>
       {user?.name && (
-        <p className="text-base text-slate-600 animate-in slide-in-from-bottom-3 duration-700 leading-relaxed">
+        <p className="text-sm sm:text-base text-slate-600 animate-in slide-in-from-bottom-3 duration-700 leading-relaxed">
           Selamat datang{" "}
           <span className="font-bold text-undip-blue">{user.name}</span>, disini
           Anda bisa mengelola pengajuan surat dan dokumen administratif dengan
@@ -277,7 +277,7 @@ export default function MahasiswaDashboardPage() {
         </p>
       )}
       {!user?.name && (
-        <p className="text-sm text-slate-500 animate-in slide-in-from-bottom-3 duration-700">
+        <p className="text-sm sm:text-base text-slate-500 animate-in slide-in-from-bottom-3 duration-700">
           Kelola pengajuan surat dan dokumen administratif Anda dengan mudah.
         </p>
       )}
@@ -290,23 +290,23 @@ export default function MahasiswaDashboardPage() {
             style={{ animationDelay: `${index * 100}ms` }}
           >
             {action.disabled ? (
-              <div className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm opacity-60 cursor-not-allowed transition-all duration-300 animate-in slide-in-from-bottom-4">
-                <div className="flex items-stretch gap-4">
+              <div className="group h-full rounded-2xl border border-gray-200 bg-white p-5 shadow-sm opacity-60 cursor-not-allowed transition-all duration-300 animate-in slide-in-from-bottom-4">
+                <div className="flex h-full items-stretch gap-4">
                   <div
                     className={`my-auto flex h-16 w-16 items-center justify-center rounded-2xl ${action.color} shrink-0`}
                   >
                     {action.icon}
                   </div>
-                  <div className="min-w-0 flex-1 py-1">
+                  <div className="min-w-0 flex flex-1 flex-col py-1">
                     <h3 className="text-base font-bold text-gray-400">
                       {action.title}
                     </h3>
-                    <p className="mt-2 text-sm text-slate-500">
+                    <p className="mt-2 text-sm text-slate-500 leading-relaxed">
                       {action.description}
                     </p>
                     <Button
                       disabled
-                      className="mt-5 h-10 w-full rounded-xl bg-gray-100 text-gray-400"
+                      className="mt-4 h-10 w-full rounded-xl bg-gray-100 text-gray-400"
                     >
                       Belum Tersedia
                     </Button>
@@ -314,23 +314,23 @@ export default function MahasiswaDashboardPage() {
                 </div>
               </div>
             ) : (
-              <div className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 hover:border-blue-100 hover:shadow-md animate-in slide-in-from-bottom-4">
-                <div className="flex items-stretch gap-4">
+              <div className="group h-full rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 hover:border-blue-100 hover:shadow-md animate-in slide-in-from-bottom-4">
+                <div className="flex h-full items-stretch gap-4">
                   <div
                     className={`my-auto flex h-16 w-16 items-center justify-center rounded-2xl ${action.color} shrink-0 transition-transform group-hover:scale-110`}
                   >
                     {action.icon}
                   </div>
-                  <div className="min-w-0 flex-1 py-1">
+                  <div className="min-w-0 flex flex-1 flex-col py-1">
                     <h3 className="text-base font-bold text-slate-800">
                       {action.title}
                     </h3>
-                    <p className="mt-2 text-sm text-slate-500">
+                    <p className="mt-2 text-sm text-slate-500 leading-relaxed">
                       {action.description}
                     </p>
                     <Link
                       href={action.href}
-                      className="mt-5 inline-block w-full"
+                      className="mt-4 inline-block w-full"
                     >
                       <Button className="h-10 w-full rounded-xl bg-undip-blue text-white hover:bg-sky-700">
                         Ajukan
@@ -347,7 +347,7 @@ export default function MahasiswaDashboardPage() {
       {/* Statistik */}
       <div className="space-y-3">
         <h2 className="text-lg font-bold text-slate-800">Statistik Surat</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {statCards.map((item) => (
             <Link key={item.title} href={item.href} className="block">
               <Card className="h-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:shadow-md hover:border-slate-300">
@@ -386,8 +386,78 @@ export default function MahasiswaDashboardPage() {
         </div>
 
         <Card className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm py-0">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-190 text-left text-sm border-collapse">
+          <div className="md:hidden border-t border-slate-100">
+            {latestApplications.length === 0 ? (
+              <div className="px-4 py-10 text-center text-slate-500">
+                {isLoadingStats
+                  ? "Memuat pengajuan terbaru..."
+                  : "Belum ada pengajuan surat."}
+              </div>
+            ) : (
+              latestApplications.map((app, index) => {
+                const statusInfo = getStatusInfo(app);
+
+                return (
+                  <div
+                    key={app.id}
+                    className="border-b border-slate-100 px-4 py-4 last:border-b-0"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+                            {index + 1}
+                          </span>
+                          <p className="truncate text-sm font-semibold text-slate-800">
+                            {app.scholarshipName || "Surat Rekomendasi"}
+                          </p>
+                        </div>
+
+                        <p className="text-xs text-slate-500">
+                          {getJenisLabel(app)} · {new Date(
+                            app.updatedAt || app.createdAt,
+                          ).toLocaleDateString("id-ID", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </p>
+
+                        <div
+                          className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[10px] font-semibold leading-none sm:text-xs ${statusInfo.color}`}
+                          title={statusInfo.label}
+                        >
+                          <span className="shrink-0 scale-90 sm:scale-100">
+                            {statusInfo.icon}
+                          </span>
+                          <span className="truncate">{statusInfo.label}</span>
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 self-center flex items-center justify-center">
+                        <Link href={getLatestHref(app)}>
+                          <Button className="h-8 rounded-full bg-undip-blue px-3 text-xs font-semibold text-white hover:bg-sky-700">
+                            Lihat
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full min-w-190 table-fixed text-left text-sm border-collapse">
+              <colgroup>
+                <col className="w-14" />
+                <col className="w-[28%]" />
+                <col className="w-[18%]" />
+                <col className="w-[24%]" />
+                <col className="w-[18%]" />
+                <col className="w-32" />
+              </colgroup>
               <thead className="bg-undip-blue">
                 <tr>
                   <th className="px-4 py-3 font-semibold text-white w-14">
@@ -424,32 +494,33 @@ export default function MahasiswaDashboardPage() {
                   </tr>
                 ) : (
                   latestApplications.map((app, index) => (
-                    <tr key={app.id} className="hover:bg-slate-50/60">
-                      <td className="px-4 py-3 text-slate-600 font-medium">
+                    <tr key={app.id} className="hover:bg-slate-50/60 align-middle">
+                      <td className="px-4 py-3 text-slate-600 font-medium whitespace-nowrap">
                         {index + 1}
                       </td>
                       <td className="px-4 py-3 text-slate-800 font-semibold">
-                        <div className="wrap-break-word md:line-clamp-1">
+                        <div className="truncate" title={app.scholarshipName || "Surat Rekomendasi"}>
                           {app.scholarshipName || "Surat Rekomendasi"}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">
+                      <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                         {getJenisLabel(app)}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 align-middle">
                         {(() => {
                           const statusInfo = getStatusInfo(app);
                           return (
                             <div
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${statusInfo.color}`}
+                              title={statusInfo.label}
+                              className={`inline-flex w-fit max-w-full items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${statusInfo.color}`}
                             >
                               {statusInfo.icon}
-                              {statusInfo.label}
+                              <span className="truncate">{statusInfo.label}</span>
                             </div>
                           );
                         })()}
                       </td>
-                      <td className="px-4 py-3 text-slate-600">
+                      <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                         {new Date(
                           app.updatedAt || app.createdAt,
                         ).toLocaleDateString("id-ID", {
@@ -458,7 +529,7 @@ export default function MahasiswaDashboardPage() {
                           year: "numeric",
                         })}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <Link href={getLatestHref(app)}>
                           <Button className="h-9 rounded-lg bg-undip-blue px-3 text-white hover:bg-sky-700">
                             Lihat

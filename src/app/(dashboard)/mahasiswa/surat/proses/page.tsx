@@ -250,9 +250,131 @@ function SuratDalamProsesKonten() {
           </div>
         </div>
 
-        {/* Bagian Tabel */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
+        {/* Bagian Daftar */}
+        <div className="md:hidden border-t border-slate-100">
+          {isLoading ? (
+            <div className="px-4 py-12 text-center text-slate-500">
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading data...
+              </div>
+            </div>
+          ) : applications.length === 0 ? (
+            <div className="px-4 py-12 text-center">
+              <div className="flex flex-col items-center justify-center gap-2">
+                <div className="text-slate-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-14 w-14 mx-auto mb-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <p className="font-medium text-slate-600">
+                  Tidak ada surat yang sedang diproses.
+                </p>
+                <p className="text-sm text-slate-400">
+                  Belum ada data surat yang tersedia saat ini.
+                </p>
+              </div>
+            </div>
+          ) : (
+            applications.map((app, index) => {
+              const statusInfo = getStatusInfo(app);
+              const target = getTargetInfo(app);
+              const hasEditButton = app.status === "PENDING" && app.currentStep === 1;
+
+              return (
+                <div
+                  key={app.id}
+                  className="border-b border-slate-100 px-4 py-4 last:border-b-0"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+                          {(pagination.page - 1) * pagination.limit + index + 1}
+                        </span>
+                        <p className="truncate text-sm font-semibold text-slate-800">
+                          {app.scholarshipName ||
+                            app.letterType?.name ||
+                            "Surat Rekomendasi Beasiswa"}
+                        </p>
+                      </div>
+
+                      <div
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${statusInfo.color}`}
+                      >
+                        {statusInfo.icon}
+                        <span className="truncate">{statusInfo.label}</span>
+                      </div>
+
+                      <p className="text-sm text-slate-600">
+                        <span className="font-medium text-slate-500">
+                          Target:
+                        </span>{" "}
+                        {target}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={`mt-4 grid gap-2 ${hasEditButton ? "grid-cols-2" : "grid-cols-1"}`}>
+                    <Link
+                      href={
+                        app.status === "REVISION"
+                          ? `/mahasiswa/surat/proses/detail/${app.id}`
+                          : `/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}?from=proses`
+                      }
+                    >
+                      <Button className="h-9 w-full gap-2 rounded-3xl bg-undip-blue text-xs font-medium text-white hover:bg-sky-700 hover:text-white">
+                        <Eye className="h-4 w-4" />
+                        Detail
+                      </Button>
+                    </Link>
+
+                    {app.status === "PENDING" && app.currentStep === 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 w-full gap-2 rounded-3xl bg-amber-500 text-xs font-medium text-white hover:bg-amber-600 hover:text-white"
+                        title="Edit Surat"
+                        onClick={() =>
+                          setEditModal({
+                            open: true,
+                            applicationId: app.id,
+                            jenis:
+                              ((
+                                app.formData as unknown as Record<
+                                  string,
+                                  unknown
+                                >
+                              )?.jenisBeasiswa as string) || "internal",
+                            scholarshipName: app.scholarshipName || "",
+                          })
+                        }
+                      >
+                        <PencilLine className="h-4 w-4" />
+                        Edit
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        <div className="hidden md:block">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
             <thead className="bg-undip-blue border-b border-slate-100">
               <tr>
                 <th className="px-6 py-4 font-semibold text-white w-12">No</th>
@@ -260,7 +382,7 @@ function SuratDalamProsesKonten() {
                   Subjek Surat
                 </th>
                 <th className="px-6 py-4 font-semibold text-white min-w-50">
-                  Status
+                  Target Selanjutnya
                 </th>
                 <th className="px-6 py-4 font-semibold text-white min-w-50">
                   Target Selanjutnya
@@ -395,7 +517,8 @@ function SuratDalamProsesKonten() {
                 })
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
 
         {/* Paginasi Standar */}

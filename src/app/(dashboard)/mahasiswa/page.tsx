@@ -386,7 +386,69 @@ export default function MahasiswaDashboardPage() {
         </div>
 
         <Card className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm py-0">
-          <div className="overflow-x-auto">
+          <div className="md:hidden border-t border-slate-100">
+            {latestApplications.length === 0 ? (
+              <div className="px-4 py-10 text-center text-slate-500">
+                {isLoadingStats
+                  ? "Memuat pengajuan terbaru..."
+                  : "Belum ada pengajuan surat."}
+              </div>
+            ) : (
+              latestApplications.map((app, index) => {
+                const statusInfo = getStatusInfo(app);
+
+                return (
+                  <div
+                    key={app.id}
+                    className="border-b border-slate-100 px-4 py-4 last:border-b-0"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+                            {index + 1}
+                          </span>
+                          <p className="truncate text-sm font-semibold text-slate-800">
+                            {app.scholarshipName || "Surat Rekomendasi"}
+                          </p>
+                        </div>
+
+                        <p className="text-xs text-slate-500">
+                          {getJenisLabel(app)} · {new Date(
+                            app.updatedAt || app.createdAt,
+                          ).toLocaleDateString("id-ID", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </p>
+
+                        <div
+                          className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[10px] font-semibold leading-none sm:text-xs ${statusInfo.color}`}
+                          title={statusInfo.label}
+                        >
+                          <span className="shrink-0 scale-90 sm:scale-100">
+                            {statusInfo.icon}
+                          </span>
+                          <span className="truncate">{statusInfo.label}</span>
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 self-center flex items-center justify-center">
+                        <Link href={getLatestHref(app)}>
+                          <Button className="h-8 rounded-full bg-undip-blue px-3 text-xs font-semibold text-white hover:bg-sky-700">
+                            Lihat
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-190 table-fixed text-left text-sm border-collapse">
               <colgroup>
                 <col className="w-14" />

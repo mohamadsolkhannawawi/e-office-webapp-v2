@@ -214,8 +214,126 @@ export default function SuratSelesaiPage() {
           </div>
         </div>
 
-        {/* Bagian Tabel */}
-        <div className="overflow-x-auto">
+        {/* Bagian Mobile Divider */}
+        <div className="md:hidden border-t border-slate-100">
+          {isLoading ? (
+            <div className="px-4 py-12 text-center text-slate-500">
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading data...
+              </div>
+            </div>
+          ) : applications.length === 0 ? (
+            <div className="px-4 py-12 text-center">
+              <div className="flex flex-col items-center justify-center gap-2">
+                <div className="text-slate-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-14 w-14 mx-auto mb-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <p className="font-medium text-slate-600">
+                  Tidak ada surat yang selesai.
+                </p>
+                <p className="text-sm text-slate-400">
+                  Belum ada surat yang telah diselesaikan.
+                </p>
+              </div>
+            </div>
+          ) : (
+            applications.map((app, index) => {
+              const status = getStatusInfo(app.status, app);
+
+              return (
+                <div
+                  key={app.id}
+                  className="border-b border-slate-100 px-4 py-4 last:border-b-0"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+                          {(pagination.page - 1) * pagination.limit + index + 1}
+                        </span>
+                        <p className="truncate text-sm font-semibold text-slate-800">
+                          {app.scholarshipName ||
+                            app.letterType?.name ||
+                            "Surat Rekomendasi Beasiswa"}
+                        </p>
+                      </div>
+
+                      <p className="text-xs text-slate-500">
+                        {new Date(app.createdAt).toLocaleDateString("id-ID", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+
+                      <div
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold w-fit ${status.color}`}
+                        title={status.label}
+                      >
+                        {status.icon}
+                        <span className="truncate">{status.label}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex gap-2 flex-wrap">
+                    <Link
+                      href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}?from=selesai`}
+                      className="flex-1 min-w-[120px]"
+                    >
+                      <Button className="h-9 w-full gap-2 rounded-3xl bg-undip-blue text-xs font-medium text-white hover:bg-sky-700 hover:text-white">
+                        <Eye className="h-4 w-4" />
+                        Detail
+                      </Button>
+                    </Link>
+
+                    {app.status === "COMPLETED" && (
+                      <Button
+                        size="sm"
+                        className="h-9 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 hover:text-white font-medium text-xs rounded-3xl flex-1 min-w-[110px]"
+                        title="Unduh PDF"
+                        onClick={() => {
+                          try {
+                            const link = document.createElement("a");
+                            link.href = `${BASE_PATH}/api/templates/letter/${app.id}/pdf`;
+                            link.download = `${app.scholarshipName || "Surat"}-${app.id}.pdf`;
+                            link.click();
+                            toast.success("PDF berhasil diunduh!");
+                          } catch (error) {
+                            console.error("Error downloading PDF:", error);
+                            toast.error(
+                              `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+                            );
+                          }
+                        }}
+                      >
+                        <Download className="h-4 w-4" />
+                        Unduh
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead className="bg-undip-blue border-b border-slate-100">
               <tr>

@@ -106,7 +106,6 @@ export function LetterList({
   // Auto-search effect with debounce
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Only push if the term is different from the current URL param
       if (searchTerm !== (searchParams.get("search") || "")) {
         startTransition(() => {
           router.push(
@@ -115,20 +114,19 @@ export function LetterList({
           );
         });
       }
-    }, 500); // 500ms delay
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [searchTerm, searchParams, pathname, router, createQueryString]);
 
-  // Sync searchTerm with URL when it changes externally (e.g. back button)
+  // Sync searchTerm with URL when it changes externally
   useEffect(() => {
     const urlSearch = searchParams.get("search") || "";
     if (urlSearch !== searchTerm) {
-      // Wrap in timeout to avoid 'synchronous' setState warning
       const t = setTimeout(() => setSearchTerm(urlSearch), 0);
       return () => clearTimeout(t);
     }
-  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
@@ -170,12 +168,9 @@ export function LetterList({
 
   const handleStartDateChange = (value: string) => {
     setStartDateInput(value);
-
-    // Auto-apply filter jika kedua tanggal sudah terisi
     if (value && endDateInput) {
       applyDateFilter(value, endDateInput);
     } else if (!value && !endDateInput) {
-      // Reset filter jika kedua kosong
       startTransition(() => {
         router.push(
           `${pathname}?${createQueryString({ startDate: null, endDate: null, page: 1 })}`,
@@ -187,12 +182,9 @@ export function LetterList({
 
   const handleEndDateChange = (value: string) => {
     setEndDateInput(value);
-
-    // Auto-apply filter jika kedua tanggal sudah terisi
     if (startDateInput && value) {
       applyDateFilter(startDateInput, value);
     } else if (!startDateInput && !value) {
-      // Reset filter jika kedua kosong
       startTransition(() => {
         router.push(
           `${pathname}?${createQueryString({ startDate: null, endDate: null, page: 1 })}`,
@@ -203,7 +195,6 @@ export function LetterList({
   };
 
   const applyDateFilter = (start: string, end: string) => {
-    // Konversi YYYY-MM-DD ke Date object dengan timezone lokal
     const startDate = new Date(start);
     startDate.setHours(0, 0, 0, 0);
 
@@ -260,7 +251,7 @@ export function LetterList({
               />
             </div>
 
-            {/* Date Range Filter - Responsive */}
+            {/* Date Range Filter */}
             <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center gap-2 bg-slate-50/50 rounded-3xl p-2 border border-slate-100">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-slate-400 ml-1" />
@@ -346,8 +337,102 @@ export function LetterList({
           </div>
         </div>
 
-        {/* Table Section */}
-        <div className="overflow-x-auto">
+        {/* 1. VIEW MOBILE (md:hidden) */}
+        <div className="md:hidden border-t border-slate-100">
+          {letters.length === 0 ? (
+            <div className="px-6 py-12 text-center">
+              <div className="flex flex-col items-center justify-center gap-2">
+                <div className="text-slate-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-12 w-12 mx-auto mb-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <p className="text-slate-600 font-medium">
+                  Tidak ada surat yang sedang diproses.
+                </p>
+              </div>
+            </div>
+          ) : (
+            letters.map((letter, index) => {
+              const currentNo = meta
+                ? (meta.page - 1) * meta.limit + index + 1
+                : index + 1;
+
+              return (
+                <div
+                  key={letter.id}
+                  className="border-b border-slate-100 px-4 py-4 last:border-b-0"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex items-start gap-2">
+                        <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700 mt-0.5">
+                          {currentNo}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-bold text-slate-700">
+                            {letter.applicant}
+                          </p>
+                          <p className="truncate text-xs text-slate-600 mt-0.5">
+                            {letter.subject}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-xs text-slate-500 pl-8 space-y-1">
+                        <p>
+                          Tujuan: <span className="font-bold text-undip-blue">{letter.target}</span>
+                        </p>
+                        <p className="text-[11px] text-slate-400">{letter.date}</p>
+                      </div>
+
+                      <div className="pl-8">
+                        <div
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold text-white shadow-sm border border-black/5 ${letter.statusColor}`}
+                        >
+                          {letter.statusIcon ? (
+                            <span className="flex items-center shrink-0 scale-90">
+                              {letter.statusIcon}
+                            </span>
+                          ) : (
+                            <span className="h-1.5 w-1.5 rounded-full bg-white/80 shrink-0" />
+                          )}
+                          <span className="uppercase leading-none truncate">
+                            {letter.status}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 self-center flex items-center justify-center">
+                      <Link
+                        href={`/${rolePath}/surat/${detailBasePath}/detail/${letter.id}${fromParam ? `?from=${fromParam}` : ""}`}
+                      >
+                        <Button className="h-8 rounded-full bg-undip-blue px-3 text-xs font-semibold text-white hover:bg-sky-700">
+                          Lihat
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* 2. VIEW DESKTOP (hidden md:block) */}
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-undip-blue border-b border-slate-100 text-[11px] uppercase text-white font-bold tracking-wider">

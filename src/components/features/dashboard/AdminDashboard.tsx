@@ -183,7 +183,7 @@ export function AdminDashboard({
                 <h1 className="text-3xl font-bold text-slate-800 mb-2">
                     {title}
                 </h1>
-                <p className="text-slate-500 text-lg leading-relaxed">
+                <p className="text-slate-500 text-sm md:text-lg leading-relaxed">
                     {user?.name ? (
                         <>
                             Selamat datang{" "}

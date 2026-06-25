@@ -44,15 +44,15 @@ export default function SuratRekomendasiBeasiswaPage() {
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Breadcrumb */}
-            <nav className="flex items-center text-sm font-medium text-slate-500 mb-4 animate-in slide-in-from-bottom-3 duration-700">
+            <nav className="flex items-center text-xs md:text-sm font-medium text-slate-500 mb-4 animate-in slide-in-from-bottom-3 duration-700">
                 <Link
                     href="/mahasiswa"
                     className="hover:text-undip-blue transition-colors"
                 >
                     Dashboard
                 </Link>
-                <ChevronRight className="mx-2 h-4 w-4" />
-                <span className="text-slate-800">
+                <ChevronRight className="mx-2 h-3 w-3 md:h-4 md:w-4 shrink-0" />
+                <span className="text-slate-800 truncate">
                     Surat Rekomendasi Beasiswa
                 </span>
             </nav>
@@ -71,9 +71,9 @@ export default function SuratRekomendasiBeasiswaPage() {
                     href="/mahasiswa"
                     className="order-1 sm:order-2 self-start sm:self-auto"
                 >
-                    <Button className="bg-red-600 text-white hover:bg-red-700 px-3 py-2 rounded-3xl inline-flex items-center gap-2">
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="text-sm font-semibold">Kembali</span>
+                    <Button className="bg-red-600 text-white hover:bg-red-700 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-3xl inline-flex items-center gap-1.5 sm:gap-2">
+                        <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        <span className="text-xs sm:text-sm font-semibold">Kembali</span>
                     </Button>
                 </Link>
             </div>

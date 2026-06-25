@@ -150,15 +150,18 @@ export default async function PerluTindakanPage(props: {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            <nav className="flex items-center text-sm font-medium text-slate-500">
+            {/* Breadcrumb */}
+            <nav className="flex items-center text-xs md:text-sm font-medium text-slate-500 overflow-x-auto whitespace-nowrap scrollbar-none">
                 <Link
                     href="/supervisor-akademik/surat/perlu-tindakan"
-                    className="hover:text-undip-blue transition-colors"
+                    className="whitespace-nowrap transition-colors hover:text-undip-blue"
                 >
                     Surat Masuk
                 </Link>
-                <ChevronRight className="mx-2 h-4 w-4" />
-                <span className="text-slate-800">Perlu Tindakan</span>
+                <ChevronRight className="mx-1 md:mx-2 h-3 w-3 md:h-4 md:w-4 shrink-0" />
+                <span className="whitespace-nowrap text-slate-800">
+                    Perlu Tindakan
+                </span>
             </nav>
 
             <LetterList

@@ -224,15 +224,15 @@ export default function DetailPengajuanPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-      {/* Breadcrumb - Dynamic based on from parameter */}
-      <nav className="mb-4 flex items-center overflow-x-auto whitespace-nowrap text-sm font-medium text-slate-500">
+      {/* Breadcrumb */}
+      <nav className="mb-4 flex items-center overflow-x-auto whitespace-nowrap text-xs md:text-sm font-medium text-slate-500 scrollbar-none">
         <Link
           href="/mahasiswa/surat/proses"
           className="whitespace-nowrap transition-colors hover:text-undip-blue"
         >
           Surat Saya
         </Link>
-        <ChevronRight className="mx-2 h-4 w-4" />
+        <ChevronRight className="mx-1 md:mx-2 h-3 w-3 md:h-4 md:w-4 shrink-0" />
         <Link
           href={
             from === "selesai"
@@ -243,7 +243,7 @@ export default function DetailPengajuanPage() {
         >
           {from === "selesai" ? "Surat Selesai" : "Surat Dalam Proses"}
         </Link>
-        <ChevronRight className="mx-2 h-4 w-4" />
+        <ChevronRight className="mx-1 md:mx-2 h-3 w-3 md:h-4 md:w-4 shrink-0" />
         <span className="whitespace-nowrap text-slate-800">
           Detail Pengajuan
         </span>
@@ -252,7 +252,7 @@ export default function DetailPengajuanPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="w-full">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 tracking-tight">
             {application.scholarshipName || "Surat Rekomendasi Beasiswa"}
           </h1>
           <p className="text-sm text-gray-600">Detail Pengajuan</p>

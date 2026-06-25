@@ -207,7 +207,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Contoh: mahasiswa@students.undip.ac.id"
-                    className="h-12 pl-10 rounded-3xl"
+                    className="h-12 pl-10 rounded-3xl placeholder:text-xs md:placeholder:text-sm"
                     disabled={isLoading}
                     required
                   />
@@ -230,7 +230,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Masukkan kata sandi"
-                    className="h-12 pl-10 pr-10 rounded-3xl"
+                    className="h-12 pl-10 pr-10 rounded-3xl placeholder:text-xs md:placeholder:text-sm"
                     disabled={isLoading}
                     required
                   />

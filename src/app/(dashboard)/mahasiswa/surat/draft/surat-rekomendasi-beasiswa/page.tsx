@@ -187,19 +187,19 @@ function SuratDraftKonten() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Breadcrumb */}
-      <nav className="flex items-center text-sm font-medium text-slate-500">
+      <nav className="flex items-center text-xs md:text-sm font-medium text-slate-500 overflow-x-auto whitespace-nowrap scrollbar-none">
         <Link
           href={
             isKeperluanLain
               ? "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa?jenis=keperluan_lain"
               : "/mahasiswa/surat/draft/surat-rekomendasi-beasiswa"
           }
-          className="hover:text-undip-blue transition-colors"
+          className="whitespace-nowrap transition-colors hover:text-undip-blue"
         >
           Draft Surat
         </Link>
-        <ChevronRight className="mx-2 h-4 w-4" />
-        <span className="text-slate-800">
+        <ChevronRight className="mx-1 md:mx-2 h-3 w-3 md:h-4 md:w-4 shrink-0" />
+        <span className="whitespace-nowrap text-slate-800">
           {isKeperluanLain
             ? "Surat Rekomendasi Keperluan Lain"
             : "Surat Rekomendasi Beasiswa"}

@@ -6,11 +6,13 @@ import {
   ChevronRight,
   Filter,
   Loader2,
-  Download,
-  Eye,
+  Search,
   CheckCircle,
   XCircle,
-  Search,
+  Eye,
+  Calendar,
+  X,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +21,7 @@ import { getApplications, ApplicationSummary } from "@/lib/application-api";
 import { generateAndDownloadDocument } from "@/lib/template-api";
 import { Card } from "@/components/ui/card";
 import { StandardPagination } from "@/components/ui/standard-pagination";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -35,6 +38,8 @@ export default function SuratSelesaiPage() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [searchTerm, setPencarianTerm] = useState("");
   const [jenisFilter, setJenisFilter] = useState<string>("ALL");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [pagination, setPaginasi] = useState({
     page: 1,
     limit: 10,
@@ -42,13 +47,23 @@ export default function SuratSelesaiPage() {
     totalPages: 1,
   });
 
+  // 1. Perbarui fungsi fetchApplications untuk menerima parameter tanggal
   const fetchApplications = useCallback(
-    async (page: number, search: string, jenis: string, limit: number) => {
+    async (
+      page: number,
+      search: string,
+      jenis: string,
+      limit: number,
+      startDt?: string,
+      endDt?: string
+    ) => {
       console.log("[DEBUG] fetchApplications called with:", {
         page,
         search,
         jenis,
         limit,
+        startDt,
+        endDt,
       });
       setIsLoading(true);
       try {
@@ -58,7 +73,10 @@ export default function SuratSelesaiPage() {
           limit,
           search: search || undefined,
           jenisBeasiswa: jenis === "ALL" ? undefined : jenis,
+          startDate: startDt || undefined, // Kirim ke API jika ada
+          endDate: endDt || undefined,     // Kirim ke API jika ada
         });
+        
         console.log("[DEBUG] API response received:", {
           dataLength: data.length,
           meta,
@@ -74,31 +92,26 @@ export default function SuratSelesaiPage() {
         console.error("[DEBUG] Failed to fetch applications:", error);
         toast.error("Gagal memuat surat selesai. Silakan coba lagi.");
       } finally {
-        console.log("[DEBUG] Finally block - setting isLoading to false");
         setIsLoading(false);
       }
     },
-    [],
+    []
   );
 
-  // Tangani proses unduhan dokumen template
   const handleDownloadTemplate = async (applicationId: string) => {
     setDownloadingId(applicationId);
     try {
-      // ID template untuk surat rekomendasi beasiswa - nanti bisa dibuat dinamis
-      const templateId = "cml1v2sev0010oau4yy2at0jh"; // Masih hard-coded untuk sementara
-
+      const templateId = "cml1v2sev0010oau4yy2at0jh"; 
       await generateAndDownloadDocument(
         templateId,
         applicationId,
-        `surat-rekomendasi-beasiswa-${applicationId}.docx`,
+        `surat-rekomendasi-beasiswa-${applicationId}.docx`
       );
-
       toast.success("Dokumen Word berhasil diunduh!");
     } catch (error) {
       console.error("Failed to download template:", error);
       toast.error(
-        `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+        `Gagal mengunduh dokumen: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`
       );
     } finally {
       setDownloadingId(null);
@@ -106,30 +119,29 @@ export default function SuratSelesaiPage() {
   };
 
   useEffect(() => {
-    // Ambil data saat komponen pertama kali dimuat
-    fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
+    fetchApplications(1, searchTerm, jenisFilter, pagination.limit, startDate, endDate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 2. Tambahkan startDate dan endDate ke dependency array agar memicu fetch ulang saat berubah
   useEffect(() => {
-    // Ambil ulang data saat pencarian atau filter berubah
     const delayPencarian = setTimeout(() => {
-      fetchApplications(1, searchTerm, jenisFilter, pagination.limit);
+      fetchApplications(1, searchTerm, jenisFilter, pagination.limit, startDate, endDate);
     }, 500);
 
     return () => clearTimeout(delayPencarian);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, jenisFilter]);
+  }, [searchTerm, jenisFilter, startDate, endDate]); 
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
-      fetchApplications(newPage, searchTerm, jenisFilter, pagination.limit);
+      fetchApplications(newPage, searchTerm, jenisFilter, pagination.limit, startDate, endDate);
     }
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPaginasi((prev) => ({ ...prev, limit: newPageSize, page: 1 }));
-    fetchApplications(1, searchTerm, jenisFilter, newPageSize);
+    fetchApplications(1, searchTerm, jenisFilter, newPageSize, startDate, endDate);
   };
 
   const getStatusInfo = (status: string, app?: ApplicationSummary) => {
@@ -159,15 +171,17 @@ export default function SuratSelesaiPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Breadcrumb */}
-      <nav className="flex items-center text-sm font-medium text-slate-500">
+      <nav className="flex items-center text-xs md:text-sm font-medium text-slate-500 overflow-x-auto whitespace-nowrap scrollbar-none">
         <Link
           href="/mahasiswa/surat/selesai"
-          className="hover:text-undip-blue transition-colors"
+          className="whitespace-nowrap transition-colors hover:text-undip-blue"
         >
           Surat Saya
         </Link>
-        <ChevronRight className="mx-2 h-4 w-4" />
-        <span className="text-slate-800">Surat Selesai</span>
+        <ChevronRight className="mx-1 md:mx-2 h-3 w-3 md:h-4 md:w-4 shrink-0" />
+        <span className="whitespace-nowrap text-slate-800">
+          Surat Selesai
+        </span>
       </nav>
 
       {/* Judul Halaman */}
@@ -182,20 +196,89 @@ export default function SuratSelesaiPage() {
         <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
           <div className="flex flex-wrap gap-3 items-center">
             {/* Search */}
-            <div className="relative flex-1 min-w-50">
+            <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
-                placeholder="Cari surat selesai..."
+                placeholder="Cari surat..."
                 value={searchTerm}
                 onChange={(e) => setPencarianTerm(e.target.value)}
                 className="pl-10 h-10 border-slate-100 bg-slate-50/50 w-full rounded-3xl"
               />
             </div>
 
+            {/* Filter Tanggal */}
+            <div className="w-full xl:w-auto flex flex-col sm:flex-row sm:items-center gap-2 bg-slate-50/50 rounded-3xl p-2 border border-slate-100">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-slate-400 ml-1" />
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Label
+                    htmlFor="startDate"
+                    className="text-xs font-medium text-slate-600 whitespace-nowrap"
+                  >
+                    Dari
+                  </Label>
+                  <div className="relative flex-1 sm:flex-none">
+                    <Input
+                      id="startDate"
+                      type="date"
+                      className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      max={endDate || undefined}
+                    />
+                  </div>
+                </div>
+
+                <div className="hidden sm:block h-4 w-px bg-slate-200" />
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Label
+                    htmlFor="endDate"
+                    className="text-xs font-medium text-slate-600 whitespace-nowrap"
+                  >
+                    Sampai
+                  </Label>
+                  <div className="relative flex-1 sm:flex-none">
+                    <Input
+                      id="endDate"
+                      type="date"
+                      className="h-9 w-full sm:w-35 text-sm border-slate-200 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-3xl"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      min={startDate || undefined}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Tombol Clear Filter Tanggal */}
+              {(startDate || endDate) && (
+                <>
+                  <div className="hidden sm:block h-4 w-px bg-slate-200" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 gap-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-full"
+                    onClick={() => {
+                      setStartDate("");
+                      setEndDate("");
+                    }}
+                    title="Hapus filter tanggal"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    <span className="text-xs font-medium">Hapus</span>
+                  </Button>
+                </>
+              )}
+            </div>
+
             {/* Filter Jenis */}
             <Select value={jenisFilter} onValueChange={setJenisFilter}>
               <SelectTrigger
-                className="w-full sm:w-50 h-10 border-slate-100 text-slate-600 rounded-3xl"
+                className="w-full sm:w-48 h-10 border-slate-100 text-slate-600 rounded-3xl"
                 suppressHydrationWarning
               >
                 <div className="flex items-center gap-2">
@@ -214,7 +297,7 @@ export default function SuratSelesaiPage() {
           </div>
         </div>
 
-        {/* Bagian Mobile Divider */}
+        {/* Bagian Mobile View */}
         <div className="md:hidden border-t border-slate-100">
           {isLoading ? (
             <div className="px-4 py-12 text-center text-slate-500">
@@ -295,7 +378,7 @@ export default function SuratSelesaiPage() {
                       href={`/mahasiswa/surat/surat-rekomendasi-beasiswa/detail/${app.id}?from=selesai`}
                       className="flex-1 min-w-[120px]"
                     >
-                      <Button className="h-9 w-full gap-2 rounded-3xl bg-undip-blue text-xs font-medium text-white hover:bg-sky-700 hover:text-white">
+                      <Button className="h-9 w-full gap-2 rounded-3xl bg-undip-blue text-xs font-medium text-white hover:bg-sky-700">
                         <Eye className="h-4 w-4" />
                         Detail
                       </Button>
@@ -304,8 +387,7 @@ export default function SuratSelesaiPage() {
                     {app.status === "COMPLETED" && (
                       <Button
                         size="sm"
-                        className="h-9 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 hover:text-white font-medium text-xs rounded-3xl flex-1 min-w-[110px]"
-                        title="Unduh PDF"
+                        className="h-9 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 font-medium text-xs rounded-3xl flex-1 min-w-[110px]"
                         onClick={() => {
                           try {
                             const link = document.createElement("a");
@@ -316,7 +398,7 @@ export default function SuratSelesaiPage() {
                           } catch (error) {
                             console.error("Error downloading PDF:", error);
                             toast.error(
-                              `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
+                              `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`
                             );
                           }
                         }}
@@ -332,7 +414,7 @@ export default function SuratSelesaiPage() {
           )}
         </div>
 
-        {/* Desktop Table */}
+        {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead className="bg-undip-blue border-b border-slate-100">
@@ -436,8 +518,7 @@ export default function SuratSelesaiPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-9 px-3 gap-2 text-white bg-undip-blue hover:bg-sky-700 hover:text-white font-medium text-xs rounded-3xl"
-                              title="Detail"
+                              className="h-9 px-3 gap-2 text-white bg-undip-blue hover:bg-sky-700 font-medium text-xs rounded-3xl"
                             >
                               <Eye className="h-4 w-4" />
                               Detail
@@ -445,34 +526,27 @@ export default function SuratSelesaiPage() {
                           </Link>
 
                           {app.status === "COMPLETED" && (
-                            <>
-                              {/* Unduh PDF */}
-                              <Button
-                                size="sm"
-                                className="h-9 px-3 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 hover:text-white font-medium text-xs rounded-3xl"
-                                title="Unduh PDF"
-                                onClick={() => {
-                                  try {
-                                    const link = document.createElement("a");
-                                    link.href = `${BASE_PATH}/api/templates/letter/${app.id}/pdf`;
-                                    link.download = `${app.scholarshipName || "Surat"}-${app.id}.pdf`;
-                                    link.click();
-                                    toast.success("PDF berhasil diunduh!");
-                                  } catch (error) {
-                                    console.error(
-                                      "Error downloading PDF:",
-                                      error,
-                                    );
-                                    toast.error(
-                                      `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`,
-                                    );
-                                  }
-                                }}
-                              >
-                                <Download className="h-4 w-4" />
-                                Unduh PDF
-                              </Button>
-                            </>
+                            <Button
+                              size="sm"
+                              className="h-9 px-3 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 font-medium text-xs rounded-3xl"
+                              onClick={() => {
+                                try {
+                                  const link = document.createElement("a");
+                                  link.href = `${BASE_PATH}/api/templates/letter/${app.id}/pdf`;
+                                  link.download = `${app.scholarshipName || "Surat"}-${app.id}.pdf`;
+                                  link.click();
+                                  toast.success("PDF berhasil diunduh!");
+                                } catch (error) {
+                                  console.error("Error downloading PDF:", error);
+                                  toast.error(
+                                    `Gagal mengunduh PDF: ${error instanceof Error ? error.message : "Terjadi kesalahan"}`
+                                  );
+                                }
+                              }}
+                            >
+                              <Download className="h-4 w-4" />
+                              Unduh PDF
+                            </Button>
                           )}
                         </div>
                       </td>
@@ -484,7 +558,7 @@ export default function SuratSelesaiPage() {
           </table>
         </div>
 
-        {/* Paginasi Standar */}
+        {/* Paginasi */}
         <StandardPagination
           currentPage={pagination.page}
           totalPages={pagination.totalPages}
